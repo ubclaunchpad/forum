@@ -1,16 +1,25 @@
 # Forum
-A dashboard to manage TA interactions
+A dashboard to manage and simplify TA interactions
 
-# Setup
-- Install Node.js and npm
-- Clone the repository
+<!-- GETTING STARTED -->
+## Getting Started
 
-## Backend - Node.js
-1. 'cd backend' to change directory to backend folder
-2. 'npm install' to install dependencies
-3. 'npm run dev' to run local development server
+To get a local copy up and running follow these simple steps.
 
-## Frontend - React
-1. 'cd frontend' to change directory to frontend folder
-2. 'npm install' to install dependencies
-3. 'npm run dev' to run local development server
+### Prerequisites
+
+* node
+* npm
+
+### Installation
+#### Express Backend
+
+1. `cd` into backend folder
+2. run `npm install` to install dependencies
+3. run `npm start`
+
+#### React Frontend
+
+1. `cd` into frontend folder
+2. run `npm install` to install dependencies
+3. run `npm start`
