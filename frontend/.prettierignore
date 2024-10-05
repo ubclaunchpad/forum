@@ -1,0 +1,7 @@
+build/
+dist/
+node_modules/
+.snapshots/
+*.min.js
+*.spec.js
+.vscode/
