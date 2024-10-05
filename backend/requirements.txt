@@ -8,8 +8,12 @@ annotated-types==0.7.0
     # via pydantic
 anyio==4.6.0
     # via starlette
+click==8.1.7
+    # via uvicorn
 fastapi==0.115.0
     # via -r requirements.in
+h11==0.14.0
+    # via uvicorn
 idna==3.10
     # via anyio
 pydantic==2.9.2
@@ -25,3 +29,5 @@ typing-extensions==4.12.2
     #   fastapi
     #   pydantic
     #   pydantic-core
+uvicorn==0.31.0
+    # via -r requirements.in
