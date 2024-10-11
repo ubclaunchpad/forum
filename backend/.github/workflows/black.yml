@@ -1,12 +1,6 @@
-name: Lint
+name: Black 
 
-on:
-  push:
-    paths:
-      - 'backend/**'
-  pull_request:
-    paths:
-      - 'backend/**'
+on: [push, pull_request]
 
 jobs:
   lint:
