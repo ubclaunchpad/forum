@@ -1,6 +1,13 @@
 name: Prettier Formatting
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'frontend/**'
+  pull_request:
+    paths:
+      - 'frontend/**'
+
 
 jobs:
   prettier:
