@@ -143,7 +143,15 @@ export default function ForumLandingPage() {
   );
 }
 
-function FeatureCard({ icon, title, description }) {
+function FeatureCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
   return (
     <div className="bg-gray-700 p-6 rounded-lg text-center">
       <div className="mb-4 flex justify-center">{icon}</div>
@@ -153,10 +161,10 @@ function FeatureCard({ icon, title, description }) {
   );
 }
 
-function TestimonialCard({ quote, author }) {
+function TestimonialCard({ quote, author }: { quote: string; author: string }) {
   return (
     <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-      <p className="mb-4 italic">"{quote}"</p>
+      <p className="mb-4 italic">&ldquo;{quote}&rdquo;</p>
       <p className="text-purple-400 font-semibold">- {author}</p>
     </div>
   );
