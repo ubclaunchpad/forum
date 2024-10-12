@@ -1,17 +1,20 @@
 # Forum
+
 A dashboard to manage and simplify TA interactions
 
 <!-- GETTING STARTED -->
+
 ## Getting Started
 
 To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-* node
-* npm
+- node
+- npm
 
 ### Installation
+
 #### Express Backend
 
 1. `cd` into backend folder
