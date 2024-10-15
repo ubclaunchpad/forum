@@ -29,5 +29,5 @@ typing-extensions==4.12.2
     #   fastapi
     #   pydantic
     #   pydantic-core
-uvicorn==0.31.0
+uvicorn==0.31.1
     # via -r requirements.in
