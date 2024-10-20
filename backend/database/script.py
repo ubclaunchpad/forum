@@ -5,7 +5,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
+key: str = os.environ.get("SUPABASE_KEY")  
+# use the service key rather than the public api key to bypass RLS
+
 supabase: Client = create_client(url, key)
 queries_path = "./migrations/"
 
@@ -25,9 +27,11 @@ def ensure_migration_log_table_exists():
     status BOOLEAN DEFAULT FALSE);
     """
     supabase.rpc("execute_sql", {"sql": query}).execute()
+    # execute_sql(sql TEXT) is a postgres function which executes the query parameter
+    # and returns true if the query was successfully ran, false otherwise
 
 
-def get_applied_migrations():
+def get_applied_migrations():  # returns a dict where the key is the name of the file and the value is the status (was the query successful)
     result = supabase.table("migrations_log").select("*").execute()
     m = {}
     for i in result.data:
@@ -50,13 +54,22 @@ def apply_migrations():
                         migration in applied_migrations
                         and not applied_migrations[migration]
                     ):
-                        supabase.table("migrations_log").update({"status": True}).eq(
-                            "migration_id", migration
-                        ).execute()
+
+                        (
+                            supabase.table("migrations_log")
+                            .update({"status": True})
+                            .eq("migration_id", migration)
+                            .execute()
+                        )
+
                     elif migration not in applied_migrations:
-                        supabase.table("migrations_log").insert(
-                            {"migration_id": migration, "status": True}
-                        ).execute()
+
+                        (
+                            supabase.table("migrations_log")
+                            .insert({"migration_id": migration, "status": True})
+                            .execute()
+                        )
+
                     print(f"Successfully applied {migration}")
 
                 else:
@@ -64,21 +77,33 @@ def apply_migrations():
                         migration in applied_migrations
                         and not applied_migrations[migration]
                     ):
-                        supabase.table("migrations_log").update({"status": False}).eq(
-                            "migration_id", migration
-                        ).execute()
+
+                        (
+                            supabase.table("migrations_log")
+                            .update({"status": False})
+                            .eq("migration_id", migration)
+                            .execute()
+                        )
+
                     elif migration not in applied_migrations:
-                        supabase.table("migrations_log").insert(
-                            {"migration_id": migration, "status": False}
-                        ).execute()
+
+                        (
+                            supabase.table("migrations_log")
+                            .insert({"migration_id": migration, "status": False})
+                            .execute()
+                        )
+
                     print(f"Error applying {migration}: Query error")
                     break
 
             except Exception as e:
                 if migration not in applied_migrations:
-                    supabase.table("migrations_log").insert(
-                        {"migration_id": migration, "status": False}
-                    ).execute()
+
+                    (
+                        supabase.table("migrations_log")
+                        .insert({"migration_id": migration, "status": False})
+                        .execute()
+                    )
 
                 print(f"Error applying {migration}: {e}")
                 break
