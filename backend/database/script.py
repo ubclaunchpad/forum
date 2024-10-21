@@ -40,7 +40,7 @@ def get_applied_migrations():  # returns a dict where the key is the name of the
 
 
 def apply_migrations():
-    migration_files = [f for f in os.listdir(queries_path)]
+    migration_files = sorted([f for f in os.listdir(queries_path)])
 
     applied_migrations = get_applied_migrations()
 
@@ -62,7 +62,7 @@ def apply_migrations():
                             .execute()
                         )
 
-                elif migration not in applied_migrations:
+                if migration not in applied_migrations:
 
                     (
                         supabase.table("migrations_log")
@@ -75,6 +75,7 @@ def apply_migrations():
                 else:
                     print(f"Error applying {migration}: Query error")
                     break
+
             except Exception as e:
                 if migration not in applied_migrations:
                     (
