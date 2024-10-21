@@ -57,48 +57,26 @@ def apply_migrations():
 
                         (
                             supabase.table("migrations_log")
-                            .update({"status": True})
+                            .update({"status": response.data})
                             .eq("migration_id", migration)
                             .execute()
                         )
 
-                    elif migration not in applied_migrations:
+                elif migration not in applied_migrations:
 
-                        (
-                            supabase.table("migrations_log")
-                            .insert({"migration_id": migration, "status": True})
-                            .execute()
-                        )
+                    (
+                        supabase.table("migrations_log")
+                        .insert({"migration_id": migration, "status": response.data})
+                        .execute()
+                    )
 
+                if response.data:
                     print(f"Successfully applied {migration}")
-
                 else:
-                    if (
-                        migration in applied_migrations
-                        and not applied_migrations[migration]
-                    ):
-
-                        (
-                            supabase.table("migrations_log")
-                            .update({"status": False})
-                            .eq("migration_id", migration)
-                            .execute()
-                        )
-
-                    elif migration not in applied_migrations:
-
-                        (
-                            supabase.table("migrations_log")
-                            .insert({"migration_id": migration, "status": False})
-                            .execute()
-                        )
-
                     print(f"Error applying {migration}: Query error")
                     break
-
             except Exception as e:
                 if migration not in applied_migrations:
-
                     (
                         supabase.table("migrations_log")
                         .insert({"migration_id": migration, "status": False})
