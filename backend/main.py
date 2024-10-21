@@ -10,11 +10,17 @@ supabase: Client = create_client(url, key)
 
 app = FastAPI()
 
+#
+
+
 @app.get("/")
 def root():
     return {"message": "Hello from the backend!"}
 
-app.include_router(auth_router, prefix="/auth", dependencies=[Depends(lambda: supabase)])
+
+app.include_router(
+    auth_router, prefix="/auth", dependencies=[Depends(lambda: supabase)]
+)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
