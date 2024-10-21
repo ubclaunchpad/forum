@@ -8,6 +8,18 @@ from middleware.auth import AuthMiddleware
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
+import os
+
+import uvicorn
+from dotenv import load_dotenv
+from fastapi import FastAPI
+from supabase import Client, create_client
+
+load_dotenv()
+
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_KEY")
+supabase: Client = create_client(url, key)
 
 app = FastAPI()
 
