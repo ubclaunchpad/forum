@@ -3,3 +3,6 @@
 # misc
 .DS_Store
 .env
+
+# cache
+__pycache__
