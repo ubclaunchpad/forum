@@ -10,6 +10,7 @@ url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
+
 class AuthMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, enabled: bool = True, public_paths: list = None):
         super().__init__(app)
@@ -17,17 +18,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
         self.public_paths = public_paths
 
     async def dispatch(self, request: Request, call_next):
-        # Check if the middleware is enabled
+        # check if the middleware is enabled
         if self.enabled:
-            # Skip authentication for public paths
             if request.url.path in self.public_paths:
                 return await call_next(request)
-            
-            # checks if user is authenticated / authorized
             user = supabase.auth.get_user()
             if not user:
                 return Response("Unauthorized", status_code=401)
 
-        # Proceed to the next middleware or endpoint
+        # proceed to the next middleware or endpoint
         response = await call_next(request)
         return response
