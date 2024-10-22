@@ -1,35 +1,38 @@
-'use client';
+"use client";
 
-import React, { useState, ChangeEvent, FormEvent, MouseEventHandler } from "react";
+import React, {
+  useState,
+  ChangeEvent,
+  FormEvent,
+  MouseEventHandler,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormData, signup, login } from "./actions";
 
-
 const SignInPage = () => {
   const [formData, setFormData] = useState<FormData>({
     email: "",
-    password: ""
+    password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSignup = async (e: React.MouseEvent<HTMLButtonElement>) => {
     setIsLoading(true);
-    
+
     try {
       console.log(`Attempting sign in with:`, formData);
       // Here you would call your specific endpoint
       await signup(formData);
       console.log(`sign in successful!`);
-      
     } catch (error) {
       console.error(`sign in failed:`, error);
     } finally {
@@ -39,11 +42,11 @@ const SignInPage = () => {
 
   const handleLogin = async (event: React.MouseEvent<HTMLButtonElement>) => {
     setIsLoading(true);
-    
+
     try {
       console.log("Attempt login for: " + formData);
       await login(formData);
-      console.log("Log in successful");      
+      console.log("Log in successful");
     } catch (error) {
       console.error(`log in failed:`, error);
     } finally {
@@ -66,7 +69,7 @@ const SignInPage = () => {
             required
           />
         </div>
-        
+
         <div className="flex flex-col gap-2">
           <p>Password</p>
           <Input
@@ -81,16 +84,16 @@ const SignInPage = () => {
         </div>
 
         <div className="flex gap-2">
-          <Button 
-            type='button'
+          <Button
+            type="button"
             onClick={handleSignup}
             className="bg-purple-600 hover:bg-purple-500 text-white flex-1"
             disabled={isLoading}
           >
             Sign In
           </Button>
-          <Button 
-            type='button'
+          <Button
+            type="button"
             onClick={handleLogin}
             className="bg-blue-600 hover:bg-blue-500 text-white flex-1"
             disabled={isLoading}
