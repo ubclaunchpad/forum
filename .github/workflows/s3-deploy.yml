@@ -5,6 +5,10 @@ on:
     branches:
       - dev
       - main
+  pull_request:
+    branches:
+      - dev
+      - main
 
 jobs:
   deploy:
@@ -20,12 +24,13 @@ jobs:
         working-directory: frontend/
       
       - name: Build
+        working-directory: frontend/
         run: npm run build
 
       - name: Deploy to S3
         uses: reggionick/s3-deploy@v4
         with:
-          folder: build
+          folder: frontend/build
           bucket: ${{ secrets.S3_BUCKET }}
           bucket-region: ${{ secrets.S3_BUCKET_REGION }}
           dist-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
