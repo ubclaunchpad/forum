@@ -30,7 +30,7 @@ jobs:
       - name: Deploy to S3
         uses: reggionick/s3-deploy@v4
         with:
-          folder: build
+          folder: frontend/build
           bucket: ${{ secrets.S3_BUCKET }}
           bucket-region: ${{ secrets.S3_BUCKET_REGION }}
           dist-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
