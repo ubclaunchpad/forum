@@ -12,7 +12,7 @@ export default function ForumLandingPage() {
   const signInRedirect = () => {
     console.log("redirect");
     router.push("/signin");
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
