@@ -3,19 +3,18 @@
 import React, {
   useState,
   ChangeEvent,
-  FormEvent,
-  MouseEventHandler,
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormData, signup, login } from "./actions";
+import { useRouter } from "next/navigation";
 
 const SignInPage = () => {
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -25,32 +24,21 @@ const SignInPage = () => {
     }));
   };
 
-  const handleSignup = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    setIsLoading(true);
-
+  const handleSignup = async () => {
     try {
-      console.log(`Attempting sign in with:`, formData);
-      // Here you would call your specific endpoint
       await signup(formData);
-      console.log(`sign in successful!`);
+      router.push("/private");
     } catch (error) {
       console.error(`sign in failed:`, error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleLogin = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    setIsLoading(true);
-
+  const handleLogin = async () => {
     try {
-      console.log("Attempt login for: " + formData);
       await login(formData);
-      console.log("Log in successful");
+      router.push("/private");
     } catch (error) {
       console.error(`log in failed:`, error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -88,15 +76,13 @@ const SignInPage = () => {
             type="button"
             onClick={handleSignup}
             className="bg-purple-600 hover:bg-purple-500 text-white flex-1"
-            disabled={isLoading}
           >
-            Sign In
+            Sign Up
           </Button>
           <Button
             type="button"
             onClick={handleLogin}
             className="bg-blue-600 hover:bg-blue-500 text-white flex-1"
-            disabled={isLoading}
           >
             Login
           </Button>

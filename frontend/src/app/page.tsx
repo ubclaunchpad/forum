@@ -1,9 +1,19 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, Users, Clock, BookOpen } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function ForumLandingPage() {
+  const router = useRouter();
+
+  const signInRedirect = () => {
+    console.log("redirect");
+    router.push("/signin");
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <header className="container mx-auto px-4 py-6">
@@ -27,6 +37,7 @@ export default function ForumLandingPage() {
             <Button
               variant="outline"
               className="bg-purple-700 text-white hover:bg-purple-600"
+              onClick={signInRedirect}
             >
               Sign In
             </Button>
