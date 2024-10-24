@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS test_table (
+    id TEXT PRIMARY KEY,
+    applied_at TIMESTAMPTZ DEFAULT NOW(),
+    status BOOLEAN DEFAULT FALSE);
