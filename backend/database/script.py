@@ -54,7 +54,6 @@ def apply_migrations():
                         migration in applied_migrations
                         and not applied_migrations[migration]
                     ):
-
                         (
                             supabase.table("migrations_log")
                             .update({"status": response.data})
@@ -63,7 +62,6 @@ def apply_migrations():
                         )
 
                 if migration not in applied_migrations:
-
                     (
                         supabase.table("migrations_log")
                         .insert({"migration_id": migration, "status": response.data})

@@ -4,3 +4,6 @@
 .DS_Store
 .env
 /venv
+
+# cache
+__pycache__
