@@ -2,14 +2,39 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 
 user_router = APIRouter()
 
-# Register New User
-@user_router.post("/users/register")
-async def register_user():
+# Get all users
+@user_router.get("/users")
+async def get_all_users():
     return None
 
-# User login
-@user_router.post("/users/login")
-async def login_user():
+# Get user by ID
+@user_router.get("/users/{user_id}}")
+async def get_user_by_id(user_id: int):
+    return None
+
+# Get user by email
+@user_router.get("/users/{email}}")
+async def get_user_by_email(email: str):
+    return None
+
+# Update user by id
+@user_router.put("/users/{user_id}}")
+async def update_user_by_id(user_id: int):
+    return None
+
+# Update user by email
+@user_router.put("/users/{email}}")
+async def update_user_by_id(email: str):
+    return None
+
+# Delete user by id
+@user_router.put("/users/{user_id}}")
+async def delete_user_by_id(user_id: int):
+    return None
+
+# Delete user by email
+@user_router.put("/users/{email}}")
+async def delete_user_by_email(email: str):
     return None
 
 # Retrieve current user's profile
@@ -25,9 +50,4 @@ async def update_profile():
 # Delete current user's profile
 @user_router.delete("/users/me")
 async def delete_profile():
-    return None
-
-# Get a specific user by ID
-@user_router.get("/users/{user_id}}")
-async def get_user_by_id(user_id: int):
     return None
