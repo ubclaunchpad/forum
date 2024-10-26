@@ -1,15 +1,29 @@
-#Creates user
-def create_user():
+from database.db import supabase
+
+#Creates user in supabase
+def create_user(user):
     return None
 
-#Gets user
-def get_user():
+#Get all users from supabase
+def get_all_users():
+    return []
+
+#Gets user by id from supabase
+def get_user_by_id(id: int):
     return None
 
-#Updates user
-def update_user():
+#Gets user by email from supabase
+def get_user_by_email(email: str):
     return None
 
-#Deletes user
-def delete_user():
+#Updates user in supabase
+def update_user(user_id: int, updated_fields):
     return None
+
+#Deletes user in supabase using their id
+def delete_user_by_id(id: int):
+    return False
+
+#Deletes user in supabase using their id
+def delete_user_by_email(email: str):
+    return False
