@@ -12,17 +12,21 @@ def get_all_users():
 def get_user_by_id(id: int):
     return None
 
-#Gets user by email from supabase
-def get_user_by_email(email: str):
-    return None
-
 #Updates user in supabase
-def update_user(user_id: int, updated_fields):
+def update_user_by_id(user_id: int, updated_fields):
     return None
 
 #Deletes user in supabase using their id
 def delete_user_by_id(id: int):
     return False
+
+#Gets user by email from supabase
+def get_user_by_email(email: str):
+    return None
+
+#Updates user in supabase
+def update_user_by_email(email: str, updated_fields):
+    return None
 
 #Deletes user in supabase using their id
 def delete_user_by_email(email: str):

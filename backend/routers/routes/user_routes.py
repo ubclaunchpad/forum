@@ -52,19 +52,9 @@ async def get_user_by_id(user_id: int):
     
     return user
 
-# Get user by email
-@user_router.get("/users/{email}}")
-async def get_user_by_email(email: str):
-    user = user_crud.get_user_by_email(email)
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found.")
-
-    return user
-
-# Update user 
+# Update user by ID
 @user_router.post("/users/{user_id}}")
-async def update_user(user_id: int, updated_fields):
+async def update_user_by_id(user_id: int, updated_fields):
     updated_user = user_crud.update_user(user_id, updated_fields)
 
     if not updated_user:
@@ -81,6 +71,26 @@ async def delete_user_by_id(user_id: int):
         raise HTTPException(status_code=400, detail="Failed to delete user.")
     
     return Response(status_code=204)
+
+# Get user by email
+@user_router.get("/users/{email}}")
+async def get_user_by_email(email: str):
+    user = user_crud.get_user_by_email(email)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    return user
+
+# Get user by email
+@user_router.post("/users/{email}}")
+async def update_user_by_email(email: str, updated_fields):
+    user = user_crud.update_user_by_email(email, updated_fields)
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Failed to update user.")
+
+    return user
 
 # Delete user by email
 @user_router.delete("/users/{email}}")
