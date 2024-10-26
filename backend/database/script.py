@@ -1,16 +1,7 @@
 import os
-from supabase import create_client, Client
-from dotenv import load_dotenv
+from .db import supabase
 
-load_dotenv()
-
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
-# use the service key rather than the public api key to bypass RLS
-
-supabase: Client = create_client(url, key)
 queries_path = "./migrations/"
-
 
 def read_file(name):
     f = open(os.path.join(queries_path, name), "r")

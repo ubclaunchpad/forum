@@ -1,15 +1,6 @@
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from dotenv import load_dotenv
-import os
-from supabase import create_client, Client
-
-load_dotenv()
-
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
-
+from database.db import supabase
 
 class AuthMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, enabled: bool = True, public_paths: list = None):
