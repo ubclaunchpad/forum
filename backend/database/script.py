@@ -3,6 +3,7 @@ from .db import supabase
 
 queries_path = "./migrations/"
 
+
 def read_file(name):
     f = open(os.path.join(queries_path, name), "r")
     query = f.read()
