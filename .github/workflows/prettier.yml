@@ -21,7 +21,7 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: yarn install
         working-directory: frontend/
 
       - name: Prettify code
