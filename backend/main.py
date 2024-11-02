@@ -1,9 +1,13 @@
-from fastapi import FastAPI, Depends
 import uvicorn
-from middleware.auth import AuthMiddleware
 from database.db import supabase
+from fastapi import Depends, FastAPI
+from middleware.auth import AuthMiddleware
+from routers.routes.courses import course_router
+from routers.routes.users import user_router
 
 app = FastAPI()
+app.include_router(user_router)
+app.include_router(course_router)
 
 # flag to enable auth middleware for ALL endpoints
 AUTH_MIDDLEWARE_ENABLED = True
@@ -11,9 +15,9 @@ AUTH_MIDDLEWARE_ENABLED = True
 PUBLIC_PATHS = ["/"]
 
 # middlewares
-app.add_middleware(
-    AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED, public_paths=PUBLIC_PATHS
-)
+# app.add_middleware(
+#     AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED, public_paths=PUBLIC_PATHS
+# )
 
 
 @app.get("/")
