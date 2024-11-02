@@ -2,6 +2,7 @@ version: 2
 
 permissions:
   contents: write
+  pull-requests: write
 
 updates:
   - package-ecosystem: "npm"
