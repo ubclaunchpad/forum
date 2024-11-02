@@ -1,4 +1,4 @@
-from database.db import supabase
+from ..database.db import supabase
 
 
 # Creates user in supabase

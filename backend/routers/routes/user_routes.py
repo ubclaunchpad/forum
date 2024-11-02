@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from crud import user_crud
+from backend.crud import user_crud
 
 user_router = APIRouter()
 
