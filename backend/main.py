@@ -10,14 +10,14 @@ app.include_router(user_router)
 app.include_router(course_router)
 
 # flag to enable auth middleware for ALL endpoints
-AUTH_MIDDLEWARE_ENABLED = True
+AUTH_MIDDLEWARE_ENABLED = False
 # endpoints that will be public (requires AUTH_MIDDLEWARE_ENABLE == True to work)
 PUBLIC_PATHS = ["/"]
 
 # middlewares
-# app.add_middleware(
-#     AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED, public_paths=PUBLIC_PATHS
-# )
+app.add_middleware(
+    AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED, public_paths=PUBLIC_PATHS
+)
 
 
 @app.get("/")
