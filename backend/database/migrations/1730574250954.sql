@@ -14,9 +14,10 @@ alter table public.profiles enable row level security;
 drop table if exists public.courses;
 create table public.courses (
   id uuid default uuid_generate_v4(),
-  c_group text,
-  c_code text,
-  term text,
+  c_group text not null,
+  c_code text not null,
+  term text not null,
+  name text not null,
   primary key (id),
   unique(c_group,c_code,term)
 );
