@@ -1,4 +1,4 @@
-import uuid
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
@@ -36,14 +36,14 @@ async def create_course(req: CreateCourseReq):
     return course
 
 @course_router.delete("/courses/delete")
-async def delete_course(c_id: uuid):
+async def delete_course(c_id: UUID):
     response = course_crud.delete_course(c_id)
     if not response:
         raise HTTPException(status_code=404, detail="Failed to create course.")
     return response
 
 @course_router.put("/courses/update")
-async def update_course(c_id: uuid, name: str):
+async def update_course(c_id: UUID, name: str):
     response = course_crud.update_course(c_id, name)
     if not response:
         raise HTTPException(status_code=404, detail="Failed to create course.")

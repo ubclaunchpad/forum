@@ -1,4 +1,4 @@
-import uuid
+from uuid import UUID
 
 from ..database.db import supabase
 from ..routers.req.create_course_req import CreateCourseReq
@@ -15,10 +15,10 @@ def register_course(user_id, c_id):
 def get_courses():
     return courses_table.select("*")
 
-def get_course_by_id(course_id: uuid):
+def get_course_by_id(course_id: UUID):
     return courses_table.select("*").eq('id', course_id).execute()
 
-def update_course(course_id: uuid, name: str = None):
+def update_course(course_id: UUID, name: str = None):
     update_data = {}
     if name is not None:
         update_data["name"] = name
@@ -29,7 +29,7 @@ def update_course(course_id: uuid, name: str = None):
     return response
 
 
-def delete_course(course_id: uuid):
+def delete_course(course_id: UUID):
     response = courses_table.delete().eq('id', course_id)
     return response
 
