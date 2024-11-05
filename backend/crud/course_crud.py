@@ -1,6 +1,7 @@
 import uuid
 
 from ..database.db import supabase
+from ..routers.req.create_course_req import CreateCourseReq
 
 courses_table = supabase.table('courses')
 
@@ -33,10 +34,10 @@ def delete_course(course_id: uuid):
     return response
 
 
-def create_course(c_group: str, c_code: str, term: str):
+def create_course(req: CreateCourseReq):
     response = courses_table.insert({
-        "c_group": c_group,
-        "c_code": c_code,
-        "term": term
+        "c_group": req.c_group,
+        "c_code": req.c_code,
+        "term": req.term
     }).execute()
     return response
