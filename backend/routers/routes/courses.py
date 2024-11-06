@@ -1,6 +1,5 @@
+from crud import user_crud
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-
-from backend.crud import user_crud
 
 course_router = APIRouter()
 

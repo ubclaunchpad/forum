@@ -9,10 +9,10 @@ app = FastAPI()
 app.include_router(user_router)
 app.include_router(course_router)
 
-# flag to enable auth middleware for ALL endpoints
-AUTH_MIDDLEWARE_ENABLED = True
-# endpoints that will be public (requires AUTH_MIDDLEWARE_ENABLE == True to work)
-PUBLIC_PATHS = ["/"]
+# # flag to enable auth middleware for ALL endpoints
+# AUTH_MIDDLEWARE_ENABLED = True
+# # endpoints that will be public (requires AUTH_MIDDLEWARE_ENABLE == True to work)
+# PUBLIC_PATHS = ["/"]
 
 # middlewares
 # app.add_middleware(

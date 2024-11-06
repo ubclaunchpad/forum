@@ -1,9 +1,26 @@
-from ..database.db import supabase
+import json
+
+from database.db import supabase
 
 
 # Creates user in supabase
 def create_user(user):
-    return None
+    response = supabase.auth.sign_up(
+        {
+            "email": user["email"],
+            "password": user["password"],
+            "options": {
+                "data": {
+                    "first_name": user["first_name"],
+                    "last_name": user["last_name"],
+                    "email": user["email"],
+                    "role": user["role"],
+                }
+            },
+        }
+    )
+
+    return response
 
 
 # Get all users from supabase

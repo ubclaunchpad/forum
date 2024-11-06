@@ -1,7 +1,21 @@
+from crud import user_crud
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from backend.crud import user_crud
 
 user_router = APIRouter()
+
+
+@user_router.put("/users/create-user")
+async def create_user():
+    user_info = {
+        "first_name": "testname",
+        "last_name": "testname",
+        "email": "testemail@gmail.com",
+        "password": "password123",
+        "role": 0,
+    }
+    profile = user_crud.create_user(user_info)
+
+    return profile
 
 
 # Retrieve current user's profile
