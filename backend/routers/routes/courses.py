@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from backend.crud import course_crud
 from backend.crud import user_crud
 from backend.database.db import supabase
-from backend.routers.req.create_course_req import CreateCourseReq
+from backend.routers.req.courses_req import CreateCourseReq
 
 course_router = APIRouter()
 

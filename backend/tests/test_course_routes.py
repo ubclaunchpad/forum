@@ -24,10 +24,14 @@ def test_insert_course():
     assert response.status_code == 200
 
 def test_insert_duplicate_course():
-    header = {}
-    response = client.post(INSERT_ENDPOINT)
+    test_course = {
+        "c_group": "test_group",
+        "c_code": "test_code",
+        "term": "test_term"
+    }
+    response = client.post(INSERT_ENDPOINT,json=test_course)
     assert response.status_code == 404
-    assert response.json() == {"detail": "Course not found."}
+    assert response.json() == {"detail":"Failed to create course."}
 
 def test_insert_course_invalid_creds():
     invalid_header = {}
