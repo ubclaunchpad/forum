@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 html {
   box-sizing: border-box;
   height: 100%;
@@ -11,7 +10,6 @@ html {
   padding: 0;
   overscroll-behavior: none;
 }
-
 
 @layer utilities {
   .text-balance {

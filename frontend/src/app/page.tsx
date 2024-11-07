@@ -21,7 +21,7 @@ export default function ForumLandingPage() {
         <p></p>
       </Navbar>
       {/* <header className="container mx-auto px-4 py-6"> */}
-        {/* <nav className="flex items-center justify-between">
+      {/* <nav className="flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-purple-400">
             Forum
           </Link>
@@ -48,8 +48,6 @@ export default function ForumLandingPage() {
           </div>
         </nav> */}
       {/* </header> */}
-
-
     </div>
   );
 }
