@@ -7,8 +7,6 @@ on:
   pull_request:
     paths:
       - 'backend/**'
-  merge_group:
-    types: [checks_requested]
 
 jobs:
   lint:
