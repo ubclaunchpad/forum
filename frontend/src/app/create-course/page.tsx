@@ -71,7 +71,7 @@ const Profile = ({ image_file, name, email, pronouns }: ProfileProps) => {
           onClick={handleUserType}
           className="bg-orange-400 hover:bg-blue-500 text-white flex-1"
         >
-            Instructor
+          Instructor
         </Button>
         <Button
           type="button"
@@ -79,7 +79,7 @@ const Profile = ({ image_file, name, email, pronouns }: ProfileProps) => {
           onClick={handleUserType}
           className="bg-transparent hover:bg-blue-500 text-white flex-1"
         >
-            <Pencil size={20} color="black"/>
+          <Pencil size={20} color="black" />
         </Button>
         <Button
           type="button"
@@ -87,7 +87,7 @@ const Profile = ({ image_file, name, email, pronouns }: ProfileProps) => {
           onClick={handleUserType}
           className="bg-transparent hover:bg-blue-500 text-white flex-1"
         >
-            <Trash2 size={20} color="black"/>
+          <Trash2 size={20} color="black" />
         </Button>
       </div>
     </div>
