@@ -3,17 +3,14 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
 from backend.crud import course_crud
-from backend.crud import user_crud
-from backend.database.db import supabase
-from backend.routers.req.courses_req import CreateCourseReq
+from backend.routers.req.courses_req import CreateCourseReq, RegisterUserReq, UpdateCourseReq
 
 course_router = APIRouter()
 
 
 @course_router.post("/courses/register")
-async def register_course(user_id, c_id):
-    profile = user_crud.register_course()
-
+async def register_course(req: RegisterUserReq):
+    profile = course_crud.register_course(req)
     if not profile:
         raise HTTPException(status_code=404, detail="Failed to create course.")
 
@@ -22,10 +19,8 @@ async def register_course(user_id, c_id):
 @course_router.get("/courses/page")
 async def get_courses():
     courses = course_crud.get_courses()
-
     if not courses:
         raise HTTPException(status_code=404, detail="Failed to create course.")
-
     return courses
 
 @course_router.post("/courses/create")
@@ -43,8 +38,8 @@ async def delete_course(c_id: UUID):
     return response
 
 @course_router.put("/courses/update")
-async def update_course(c_id: UUID, name: str):
-    response = course_crud.update_course(c_id, name)
+async def update_course(req: UpdateCourseReq):
+    response = course_crud.update_course(req)
     if not response:
         raise HTTPException(status_code=404, detail="Failed to create course.")
     return response

@@ -1,15 +1,15 @@
 from uuid import UUID
 
 from ..database.db import supabase
-from ..routers.req.courses_req import CreateCourseReq
+from ..routers.req.courses_req import CreateCourseReq, RegisterUserReq, UpdateCourseReq
 
 courses_table = supabase.table('courses')
 
-def register_course(user_id, c_id):
+def register_course(req: RegisterUserReq):
     try:
         user_courses_entry = {
-            'user_id': user_id,
-            'course_id': c_id
+            'user_id': req.u_id,
+            'course_id': req.c_id
         }
         return courses_table.insert(user_courses_entry).execute()
     except Exception as e:
@@ -27,15 +27,15 @@ def get_course_by_id(course_id: UUID):
     except Exception as e:
         return None
 
-def update_course(course_id: UUID, name: str = None):
+def update_course(req: UpdateCourseReq):
     try:
         update_data = {}
-        if name is not None:
-            update_data["name"] = name
+        if req.name is not None:
+            update_data["name"] = req.name
 
         if not update_data:  # no updates to do, can return early
             return
-        response = courses_table.update(update_data).eq('id', course_id)
+        response = courses_table.update(update_data).eq('id', req.c_id)
         return response
     except Exception as e:
         return None
