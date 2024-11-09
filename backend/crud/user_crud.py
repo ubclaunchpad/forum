@@ -1,5 +1,3 @@
-import json
-
 from database.db import supabase
 
 
@@ -7,14 +5,13 @@ from database.db import supabase
 def create_user(user):
     response = supabase.auth.sign_up(
         {
-            "email": user["email"],
-            "password": user["password"],
+            "email": user.email,
+            "password": user.password,
             "options": {
                 "data": {
-                    "first_name": user["first_name"],
-                    "last_name": user["last_name"],
-                    "email": user["email"],
-                    "role": user["role"],
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "role": user.role,
                 }
             },
         }
@@ -25,12 +22,16 @@ def create_user(user):
 
 # Get all users from supabase
 def get_all_users():
-    return []
+    # Requires valid RLS access to work
+    response = supabase.table("profiles").select("*").execute()
+    return response
 
 
 # Gets user by id from supabase
-def get_user_by_id(id: int):
-    return None
+def get_user_by_id(id: str):
+    # Requires valid RLS access to work
+    response = supabase.table("profiles").select("*").eq("id", id).execute()
+    return response.data
 
 
 # Updates user in supabase

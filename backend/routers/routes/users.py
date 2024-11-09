@@ -1,20 +1,21 @@
 from crud import user_crud
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from pydantic import BaseModel
 
 user_router = APIRouter()
 
 
-@user_router.put("/users/create-user")
-async def create_user():
-    user_info = {
-        "first_name": "testname",
-        "last_name": "testname",
-        "email": "testemail@gmail.com",
-        "password": "password123",
-        "role": 0,
-    }
-    profile = user_crud.create_user(user_info)
+class User(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    password: str
+    role: int
 
+
+@user_router.put("/users/create-user")
+async def create_user(user_info: User):
+    profile = user_crud.create_user(user_info)
     return profile
 
 
@@ -32,9 +33,9 @@ async def get_profile():
 
 # Update current user's profile
 @user_router.post("/users/me")
-async def update_profile(user):
+async def update_profile(user_info: User):
     middleware_user_id = 1
-    updated_profile = user_crud.update_user(middleware_user_id, user)
+    updated_profile = user_crud.update_user(middleware_user_id, user_info)
 
     if not updated_profile:
         raise HTTPException(status_code=400, detail="Failed to update profile.")
@@ -62,8 +63,8 @@ async def get_all_users():
 
 
 # Get user by ID
-@user_router.get("/users/{user_id}}")
-async def get_user_by_id(user_id: int):
+@user_router.get("/users/{user_id}")
+async def get_user_by_id(user_id: str):
     user = user_crud.get_user_by_id(user_id)
 
     if not user:
@@ -73,7 +74,7 @@ async def get_user_by_id(user_id: int):
 
 
 # Update user by ID
-@user_router.post("/users/{user_id}}")
+@user_router.post("/users/{user_id}")
 async def update_user_by_id(user_id: int, updated_fields):
     updated_user = user_crud.update_user(user_id, updated_fields)
 
@@ -84,7 +85,7 @@ async def update_user_by_id(user_id: int, updated_fields):
 
 
 # Delete user by id
-@user_router.delete("/users/{user_id}}")
+@user_router.delete("/users/{user_id}")
 async def delete_user_by_id(user_id: int):
     successful_delete = user_crud.delete_user_by_id(user_id)
 
@@ -95,7 +96,7 @@ async def delete_user_by_id(user_id: int):
 
 
 # Get user by email
-@user_router.get("/users/{email}}")
+@user_router.get("/users/email/{email}")
 async def get_user_by_email(email: str):
     user = user_crud.get_user_by_email(email)
 
@@ -106,7 +107,7 @@ async def get_user_by_email(email: str):
 
 
 # Get user by email
-@user_router.post("/users/{email}}")
+@user_router.post("/users/email/{email}}")
 async def update_user_by_email(email: str, updated_fields):
     user = user_crud.update_user_by_email(email, updated_fields)
 
@@ -117,7 +118,7 @@ async def update_user_by_email(email: str, updated_fields):
 
 
 # Delete user by email
-@user_router.delete("/users/{email}}")
+@user_router.delete("/users/email/{email}}")
 async def delete_user_by_email(email: str):
     successful_delete = user_crud.delete_user_by_email(email)
 
