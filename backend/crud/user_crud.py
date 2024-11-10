@@ -40,8 +40,12 @@ def update_user_by_id(user_id: int, updated_fields):
 
 
 # Deletes user in supabase using their id
-def delete_user_by_id(id: int):
-    return False
+def delete_user_by_id(user_id: str):
+    try:
+        supabase.auth.admin.delete_user(user_id)
+        return True
+    except:
+        return False
 
 
 # Gets user by email from supabase

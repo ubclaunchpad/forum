@@ -13,6 +13,10 @@ class User(BaseModel):
     role: int
 
 
+class UserID(BaseModel):
+    id: str
+
+
 @user_router.put("/users/create-user")
 async def create_user(user_info: User):
     profile = user_crud.create_user(user_info)
@@ -21,14 +25,25 @@ async def create_user(user_info: User):
 
 # Retrieve current user's profile
 @user_router.get("/users/me")
-async def get_profile():
-    middleware_user_id = 1
-    profile = user_crud.get_user_by_id(middleware_user_id)
+async def get_profile(user_id: UserID):
+    profile = user_crud.get_user_by_id(user_id)
 
     if not profile:
         raise HTTPException(status_code=404, detail="Failed to find profile.")
 
     return profile
+
+
+# Delete current user's profile
+@user_router.delete("/users/me")
+async def delete_profile(user_id: UserID):
+    # Requires service_role key to delete user (admin permissions)
+    successful_delete = user_crud.delete_user_by_id(user_id.id)
+
+    if not successful_delete:
+        raise HTTPException(status_code=400, detail="Failed to delete profile.")
+
+    return Response(status_code=204)
 
 
 # Update current user's profile
@@ -41,18 +56,6 @@ async def update_profile(user_info: User):
         raise HTTPException(status_code=400, detail="Failed to update profile.")
 
     return updated_profile
-
-
-# Delete current user's profile
-@user_router.delete("/users/me")
-async def delete_profile():
-    middleware_user_id = 1
-    successful_delete = user_crud.delete_user_by_id(middleware_user_id)
-
-    if not successful_delete:
-        raise HTTPException(status_code=400, detail="Failed to delete profile.")
-
-    return Response(status_code=204)
 
 
 # Get all users
