@@ -12,7 +12,7 @@ export default function ForumLandingPage() {
 
   const signInRedirect = () => {
     console.log("redirect");
-    router.push("/signin");
+    router.push("/auth/signin");
   };
 
   return (

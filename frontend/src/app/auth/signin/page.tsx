@@ -24,7 +24,7 @@ const SignInPage = () => {
   const handleSignup = async () => {
     try {
       await signup(formData);
-      router.push("/private");
+      router.push("/protected/private");
     } catch (error) {
       console.error(`sign in failed:`, error);
     }
@@ -33,7 +33,7 @@ const SignInPage = () => {
   const handleLogin = async () => {
     try {
       await login(formData);
-      router.push("/private");
+      router.push("/protected/private");
     } catch (error) {
       console.error(`log in failed:`, error);
     }
@@ -79,7 +79,7 @@ const SignInPage = () => {
           <Button
             type="button"
             onClick={handleLogin}
-            className="bg-blue-600 hover:bg-blue-500 text-white flex-1"
+            className="bg-blue hover:bg-blue-500 text-white flex-1"
           >
             Login
           </Button>
