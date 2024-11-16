@@ -137,7 +137,8 @@ html {
     @apply hover:text-neutral-11 underline;
   }
 
-  ul, ol {
+  ul,
+  ol {
     @apply list-inside;
   }
 
