@@ -32,7 +32,15 @@ export default function ProfileSettings() {
     const user = useContext(userContext);
     
     const form = useForm<UserFormValues>({
-        resolver: zodResolver(UserSchema)
+        resolver: zodResolver(UserSchema),
+        defaultValues: {
+                firstName: '',
+                lastName: '',
+                pronouns: '',
+                university: '',
+                email: '',
+                password: '',
+            }
     });
 
     useEffect(() => {
@@ -43,10 +51,9 @@ export default function ProfileSettings() {
                 lastName: 'Mackenzie',
                 pronouns: 'he/him',
                 university: 'UBC',
-                email: 'malcolm@website.com',
+                email: user?.email,
                 password: '12345678',
-            }); 
-            console.log(user.email)
+            });
         }, 500);
     }, []);
 
