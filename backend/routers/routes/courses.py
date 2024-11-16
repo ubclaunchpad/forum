@@ -13,7 +13,6 @@ async def register_course(req: RegisterUserReq):
     profile = course_crud.register_course(req)
     if not profile:
         raise HTTPException(status_code=404, detail="Failed to create course.")
-
     return profile
 
 @course_router.get("/courses/page")
@@ -30,8 +29,8 @@ async def create_course(req: CreateCourseReq):
         raise HTTPException(status_code=404, detail="Failed to create course.")
     return course
 
-@course_router.delete("/courses/delete")
-async def delete_course(c_id: UUID):
+@course_router.delete("/courses/delete/{c_id}")
+async def delete_course(c_id: int):
     response = course_crud.delete_course(c_id)
     if not response:
         raise HTTPException(status_code=404, detail="Failed to create course.")
