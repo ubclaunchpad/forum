@@ -24,8 +24,6 @@ certifi==2024.8.30
     #   httpx
 click==8.1.7
     # via uvicorn
-colorama==0.4.6
-    # via click
 deprecation==2.1.0
     # via postgrest
 fastapi==0.115.0
@@ -34,7 +32,7 @@ frozenlist==1.4.1
     # via
     #   aiohttp
     #   aiosignal
-gotrue==2.9.3
+gotrue==2.10.0
     # via supabase
 h11==0.14.0
     # via
@@ -60,13 +58,19 @@ idna==3.10
     #   anyio
     #   httpx
     #   yarl
+iniconfig==2.0.0
+    # via pytest
 multidict==6.1.0
     # via
     #   aiohttp
     #   yarl
 packaging==24.1
-    # via deprecation
-postgrest==0.17.2
+    # via
+    #   deprecation
+    #   pytest
+pluggy==1.5.0
+    # via pytest
+postgrest==0.18.0
     # via supabase
 propcache==0.2.0
     # via yarl
@@ -77,11 +81,14 @@ pydantic==2.9.2
     #   postgrest
 pydantic-core==2.23.4
     # via pydantic
+pytest==8.3.3
+    # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via
     #   realtime
     #   storage3
 python-dotenv==1.0.1
+    # via -r requirements.in
 realtime==2.0.6
     # via supabase
 six==1.16.0
@@ -92,17 +99,18 @@ sniffio==1.3.1
     #   httpx
 starlette==0.38.6
     # via fastapi
-storage3==0.8.2
+storage3==0.9.0
     # via supabase
-supabase==2.9.1
+supabase==2.10.0
     # via -r requirements.in
-supafunc==0.6.2
+supafunc==0.7.0
     # via supabase
 typing-extensions==4.12.2
     # via
     #   fastapi
     #   pydantic
     #   pydantic-core
+    #   realtime
 uvicorn==0.32.0
     # via -r requirements.in
 websockets==13.1
