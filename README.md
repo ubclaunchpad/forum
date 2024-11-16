@@ -18,8 +18,8 @@ To get a local copy up and running follow these simple steps.
 #### React Frontend
 
 1. `cd` into frontend folder
-2. run `npm install` to install dependencies
-3. run `npm start`
+2. run `yarn install` to install dependencies
+3. run `yarn start`
 
 #### Python Backend
 

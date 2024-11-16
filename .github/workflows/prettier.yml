@@ -2,13 +2,17 @@ name: Prettier Formatting
 
 on:
   push:
+    branches:
+      - main
+      - dev
     paths:
       - 'frontend/**'
   pull_request:
+    branches:
+      - main
+      - dev
     paths:
       - 'frontend/**'
-  merge_group:
-    types: [checks_requested]
 
 jobs:
   prettier:
