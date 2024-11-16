@@ -8,6 +8,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)"],
+      },
       colors: {
         background: "hsl(var(--neutral-1))",
         foreground: "hsl(var(--neutral-12))",
