@@ -1,9 +1,12 @@
 """ TextParser class module."""
+
 from typing import Dict
 import re
 
-class TextParser():
+
+class TextParser:
     """Strategy for parsing text documents."""
+
     def clean(self, content: str) -> str:
         return re.sub(r"\s+", " ", content).strip()
 
@@ -13,7 +16,7 @@ class TextParser():
     def process(self, content: str) -> Dict:
         return {
             "content": self.clean(content),
-            "metadata": self.create_metadata(content)
+            "metadata": self.create_metadata(content),
         }
 
     def parse(self, content: str) -> Dict:

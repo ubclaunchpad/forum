@@ -1,4 +1,5 @@
 """Module for parsing documents using different strategies."""
+
 import os
 
 from typing import Dict
@@ -17,6 +18,7 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 class DocumentParser:
     """Context class that manages parsing strategies."""
+
     def __init__(self):
         self.client = OpenAI(api_key=OPENAI_API_KEY)
         self.conn = psycopg2.connect(DATABASE_URL)

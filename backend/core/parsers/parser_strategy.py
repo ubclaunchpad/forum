@@ -1,9 +1,11 @@
 """Module for document parsing using Strategy pattern."""
+
 from typing import Dict, Protocol
+
 
 class ParsingStrategy(Protocol):
     """Protocol defining interface for parsing strategies."""
-    
+
     def parse(self, content: any) -> Dict:
         pass
 
