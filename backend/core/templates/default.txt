@@ -1,0 +1,9 @@
+Use these sources to answer the question below. Cite sources when used.
+
+SOURCES:
+{context}
+
+QUESTION:
+{question}
+
+Answer the question based on the sources provided. Include a "Sources Used:" section at the end listing which documents you referenced.

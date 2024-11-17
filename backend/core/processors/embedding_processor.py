@@ -46,10 +46,11 @@ class EmbeddingProcessor():
         )
         try:
             return resp.data[0].embedding
-        except Exception as e: 
+        except Exception as e:  # pylint: disable=broad-except 
+            # only print the error message and raise the exception
             print(f"Error: {e}")
-            return None
-        
+            raise e
+       
     def calculate_similarity_score(self, embedding1: list[float], embedding2: list[float]) -> float:
         """
         Calculate the similarity score between two embeddings.
