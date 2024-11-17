@@ -5,106 +5,220 @@
 #    pip-compile requirements.in
 #
 aiohappyeyeballs==2.4.3
-    # via aiohttp
-aiohttp==3.10.10
-    # via realtime
-aiosignal==1.3.1
-    # via aiohttp
-annotated-types==0.7.0
-    # via pydantic
-anyio==4.6.0
     # via
+    #   -r requirements.in
+    #   aiohttp
+aiohttp==3.10.10
+    # via
+    #   -r requirements.in
+    #   realtime
+aiosignal==1.3.1
+    # via
+    #   -r requirements.in
+    #   aiohttp
+annotated-types==0.7.0
+    # via
+    #   -r requirements.in
+    #   pydantic
+anyio==4.6.2.post1
+    # via
+    #   -r requirements.in
     #   httpx
+    #   openai
     #   starlette
 attrs==24.2.0
-    # via aiohttp
+    # via
+    #   -r requirements.in
+    #   aiohttp
+build==1.2.2.post1
+    # via
+    #   -r requirements.in
+    #   pip-tools
 certifi==2024.8.30
     # via
+    #   -r requirements.in
     #   httpcore
     #   httpx
 click==8.1.7
-    # via uvicorn
-colorama==0.4.6
-    # via click
-deprecation==2.1.0
-    # via postgrest
-fastapi==0.115.0
-    # via -r requirements.in
-frozenlist==1.4.1
     # via
+    #   -r requirements.in
+    #   pip-tools
+    #   uvicorn
+deprecation==2.1.0
+    # via
+    #   -r requirements.in
+    #   postgrest
+distro==1.9.0
+    # via
+    #   -r requirements.in
+    #   openai
+fastapi==0.115.5
+    # via -r requirements.in
+frozenlist==1.5.0
+    # via
+    #   -r requirements.in
     #   aiohttp
     #   aiosignal
-gotrue==2.9.3
-    # via supabase
+gotrue==2.10.0
+    # via
+    #   -r requirements.in
+    #   supabase
 h11==0.14.0
     # via
+    #   -r requirements.in
     #   httpcore
     #   uvicorn
 h2==4.1.0
-    # via httpx
+    # via
+    #   -r requirements.in
+    #   httpx
 hpack==4.0.0
-    # via h2
+    # via
+    #   -r requirements.in
+    #   h2
 httpcore==1.0.6
-    # via httpx
+    # via
+    #   -r requirements.in
+    #   httpx
 httpx[http2]==0.27.2
     # via
+    #   -r requirements.in
     #   gotrue
+    #   openai
     #   postgrest
     #   storage3
     #   supabase
     #   supafunc
 hyperframe==6.0.1
-    # via h2
+    # via
+    #   -r requirements.in
+    #   h2
 idna==3.10
     # via
+    #   -r requirements.in
     #   anyio
     #   httpx
     #   yarl
+iniconfig==2.0.0
+    # via
+    #   -r requirements.in
+    #   pytest
+jiter==0.7.1
+    # via
+    #   -r requirements.in
+    #   openai
 multidict==6.1.0
     # via
+    #   -r requirements.in
     #   aiohttp
     #   yarl
-packaging==24.1
-    # via deprecation
-postgrest==0.17.2
-    # via supabase
+numpy==2.1.3
+    # via -r requirements.in
+openai==1.54.4
+    # via -r requirements.in
+packaging==24.2
+    # via
+    #   -r requirements.in
+    #   build
+    #   deprecation
+    #   pipdeptree
+    #   pytest
+pip-tools==7.4.1
+    # via -r requirements.in
+pipdeptree==2.23.4
+    # via -r requirements.in
+pluggy==1.5.0
+    # via
+    #   -r requirements.in
+    #   pytest
+postgrest==0.18.0
+    # via
+    #   -r requirements.in
+    #   supabase
 propcache==0.2.0
-    # via yarl
+    # via
+    #   -r requirements.in
+    #   yarl
+psycopg2-binary==2.9.10
+    # via -r requirements.in
 pydantic==2.9.2
     # via
+    #   -r requirements.in
     #   fastapi
     #   gotrue
+    #   openai
     #   postgrest
 pydantic-core==2.23.4
-    # via pydantic
+    # via
+    #   -r requirements.in
+    #   pydantic
+pyproject-hooks==1.2.0
+    # via
+    #   -r requirements.in
+    #   build
+    #   pip-tools
+pytest==8.3.3
+    # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via
+    #   -r requirements.in
     #   realtime
     #   storage3
+python-dotenv==1.0.1
+    # via -r requirements.in
 realtime==2.0.6
-    # via supabase
+    # via
+    #   -r requirements.in
+    #   supabase
 six==1.16.0
-    # via python-dateutil
+    # via
+    #   -r requirements.in
+    #   python-dateutil
 sniffio==1.3.1
     # via
+    #   -r requirements.in
     #   anyio
     #   httpx
-starlette==0.38.6
-    # via fastapi
-storage3==0.8.2
-    # via supabase
-supabase==2.9.1
+    #   openai
+starlette==0.41.2
+    # via
+    #   -r requirements.in
+    #   fastapi
+storage3==0.9.0
+    # via
+    #   -r requirements.in
+    #   supabase
+supabase==2.10.0
     # via -r requirements.in
-supafunc==0.6.2
-    # via supabase
+supafunc==0.7.0
+    # via
+    #   -r requirements.in
+    #   supabase
+tqdm==4.67.0
+    # via
+    #   -r requirements.in
+    #   openai
 typing-extensions==4.12.2
     # via
+    #   -r requirements.in
     #   fastapi
+    #   openai
     #   pydantic
     #   pydantic-core
+    #   realtime
 uvicorn==0.32.0
     # via -r requirements.in
 websockets==13.1
-    # via realtime
-yarl==1.15.5
-    # via aiohttp
+    # via
+    #   -r requirements.in
+    #   realtime
+wheel==0.45.0
+    # via pip-tools
+yarl==1.17.1
+    # via
+    #   -r requirements.in
+    #   aiohttp
+
+# The following packages are considered to be unsafe in a requirements file:
+# pip
+# setuptools
