@@ -168,7 +168,15 @@ Files are named with timestamp prefix for ordering: `[YYYYMMDDHHmmss].sql`
 python -m database.script
 ```
 
-TODO: Add instructions for down migrations -> needs to be implemented
+### Formatting and Linting
+
+Note: make sure you have activated your virtual environment before running these commands as well as in the `backend` directory.
+
+- Check formatting: in your terminal run: `black --check ./`
+- Apply formatting: in your terminal run: `black ./`
+
+
+---
 
 ### Running the Example RAG
 
