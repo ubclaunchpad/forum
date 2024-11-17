@@ -1,5 +1,8 @@
 """Example script demonstrating RAG system workflow with biology content."""
 import time
+import os
+import json
+
 from datetime import datetime
 from pathlib import Path
 from typing import Dict
@@ -7,80 +10,14 @@ from typing import Dict
 from core.processors.document_processor import DocumentProcessor
 from core.pipelines.doc_query_engine import DocumentQueryEngine
 
-# Sample documents - University level biology content
-SAMPLE_DOCS = [
-    {
-        "title": "Cell Signaling Pathways",
-        "content": """Signal transduction pathways are essential cellular communication mechanisms. 
-        G protein-coupled receptors (GPCRs) represent the largest family of membrane receptors. When activated, 
-        GPCRs undergo conformational changes that trigger the exchange of GDP for GTP on the associated G protein's 
-        alpha subunit. This leads to its dissociation from the beta-gamma complex and subsequent activation of 
-        downstream effector proteins. The process is terminated when GTP is hydrolyzed back to GDP through the 
-        alpha subunit's intrinsic GTPase activity. Second messenger systems, particularly cyclic AMP and calcium 
-        signaling, play crucial roles in amplifying these initial signals.""",
-        "type": "text"
-    },
-    {
-        "title": "Oxidative Phosphorylation",
-        "content": """Oxidative phosphorylation occurs in the mitochondrial inner membrane through the electron 
-        transport chain (ETC). The ETC consists of four major protein complexes: NADH dehydrogenase (Complex I), 
-        succinate dehydrogenase (Complex II), cytochrome bc1 complex (Complex III), and cytochrome c oxidase 
-        (Complex IV). These complexes transfer electrons from NADH and FADH2 to oxygen while pumping protons into 
-        the intermembrane space. This creates a proton gradient that drives ATP synthesis through ATP synthase 
-        (Complex V). The P/O ratio indicates the efficiency of this process, with approximately 2.5 ATP molecules 
-        produced per oxygen atom reduced.""",
-        "type": "text"
-    },
-    {
-        "title": "Epigenetic Regulation",
-        "content": """Epigenetic modifications alter gene expression without changing DNA sequence. DNA methylation, 
-        occurring primarily at CpG islands, typically represses gene transcription when present in promoter regions. 
-        Histone modifications include acetylation, methylation, phosphorylation, and ubiquitination. Histone 
-        acetylation generally promotes gene expression by loosening chromatin structure, while methylation can 
-        either activate or repress genes depending on the specific residue modified and the degree of methylation. 
-        These modifications create a complex 'histone code' that regulates chromatin accessibility and transcription.""",
-        "type": "text"
-    },
-    {
-        "title": "Immune System Signaling",
-        "content": """T cell activation requires multiple signaling events. The first signal comes from T cell 
-        receptor (TCR) recognition of peptide-MHC complexes. The second signal involves costimulatory molecules, 
-        primarily CD28 binding to B7 proteins on antigen-presenting cells. These signals trigger a cascade involving 
-        protein tyrosine kinases, particularly ZAP-70, leading to activation of transcription factors like NFAT 
-        and NF-κB. This results in production of interleukin-2 and other cytokines. The immunological synapse 
-        forms at the T cell-APC interface, organizing receptors and signaling molecules into distinct supramolecular 
-        activation clusters.""",
-        "type": "text"
-    },
-    {
-        "title": "Neurotransmitter Release",
-        "content": """Synaptic vesicle exocytosis is a highly regulated process requiring multiple protein 
-        interactions. SNARE proteins, including synaptobrevin, SNAP-25, and syntaxin, form a complex that brings 
-        vesicles close to the presynaptic membrane. Calcium influx through voltage-gated channels triggers 
-        synaptotagmin to bind phospholipids and promote membrane fusion. The process is modulated by numerous 
-        proteins including Munc18, complexin, and Rab3. After release, vesicles are recycled through multiple 
-        pathways including clathrin-mediated endocytosis and kiss-and-run fusion.""",
-        "type": "text"
-    },
-    {
-        "title": "Plant Hormone Signaling",
-        "content": """Auxin signaling involves the TIR1/AFB family of F-box proteins acting as receptors. 
-        In the presence of auxin, these proteins target Aux/IAA transcriptional repressors for ubiquitin-mediated 
-        degradation, releasing ARF transcription factors to regulate gene expression. Gibberellin signaling operates 
-        through the GID1 receptor, which upon binding gibberellin, promotes degradation of DELLA proteins that 
-        normally repress growth. These pathways demonstrate how plant hormones often act by relieving 
-        transcriptional repression.""",
-        "type": "text"
-    }
-]
 
-# Test queries for biology content
-TEST_QUERIES = [
-    "How does oxidative phosphorylation generate ATP?",
-    "Explain the role of SNARE proteins in neurotransmitter release.",
-    "What are the main mechanisms of epigenetic regulation?",
-    "How do T cells become activated through signaling pathways?",
-]
+data_path = Path(__file__).parent / 'data.json'
+with open(data_path, 'r') as f:
+    example_data = json.load(f)
+
+SAMPLE_DOCS = example_data['docs']
+TEST_QUERIES = [q['question'] for q in example_data['queries']]
+
 
 class Timer:
     """Simple context manager for timing operations."""
@@ -96,18 +33,42 @@ class Timer:
         self.duration = self.end - self.start
         print(f"{self.description}: {self.duration:.2f} seconds")
 
-def save_output(content: str, filename: str, output_dir: str = "examples/outputs") -> None:
-    """Save content to a file in the outputs directory."""
-    output_path = Path(output_dir)
-    output_path.mkdir(parents=True, exist_ok=True)
+def save_output(content: str, filename: str) -> None:
+    """
+    Save content to a file in the outputs directory, creating directory if needed.
     
-    with open(output_path / filename, 'w', encoding='utf-8') as f:
+    Args:
+        content: Content to save
+        filename: Name of the file
+    """
+    # Get the absolute path to the example directory
+    example_dir = Path(__file__).parent
+    output_dir = example_dir / 'outputs'
+    
+    # Create outputs directory if it doesn't exist
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create full file path
+    file_path = output_dir / filename
+    
+    # Save the file
+    with open(file_path, 'w', encoding='utf-8') as f:
         f.write(content)
+    
+    print(f"Saved output to: {file_path}")
 
 def format_answer(query: str, result: Dict, duration: float) -> str:
     """Format query result for output file."""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
+    sources_text = ""
+    for source in result['sources']:
+        sources_text += f"""Document: {source['document_title']}
+Relevance: {source['similarity']:.3f}
+Content: {source['content']}
+
+"""
+
     return f"""Query Time: {timestamp}
 Query Duration: {duration:.2f} seconds
 
@@ -119,9 +80,7 @@ Answer:
 
 Sources Used:
 {'-' * 50}
-{chr(10).join(f'Document: {source["document_title"]}\nRelevance: {source["similarity"]:.3f}\nContent: {source["content"]}\n'
-              for source in result['sources'])}
-"""
+{sources_text}"""
 
 def main():
     """Run the RAG example workflow."""
@@ -168,22 +127,27 @@ def main():
         for i, query in enumerate(TEST_QUERIES, 1):
             print(f"\nProcessing query {i}: {query}")
             
-            with Timer(f"Query {i} processing") as t:
-                result = query_engine.query(query)
-            
-            query_times.append(t.duration)
-            
-            # Save output
-            output = format_answer(query, result, t.duration)
-            save_output(output, f"query_{i}_result.txt")
-            print(f"Saved result to examples/outputs/query_{i}_result.txt")
-        
-        # Print timing summary
-        print("\nTiming Summary:")
-        print("-" * 50)
-        print(f"Average query time: {sum(query_times) / len(query_times):.2f} seconds")
-        print(f"Fastest query: {min(query_times):.2f} seconds")
-        print(f"Slowest query: {max(query_times):.2f} seconds")
+            try:
+                with Timer(f"Query {i} processing") as t:
+                    result = query_engine.query(query)
+                query_times.append(t.duration)
+                
+                # Format and save output
+                output = format_answer(query, result, t.duration)
+                save_output(output, f"query_{i}_result.md")
+                
+            except Exception as e:
+                print(f"Error processing query {i}: {e}")
+                continue
+
+        # Only print summary if we have any successful queries
+        if query_times:
+            print("\nTiming Summary:")
+            print("-" * 50)
+            print(f"Average query time: {sum(query_times) / len(query_times):.2f} seconds")
+            print(f"Fastest query: {min(query_times):.2f} seconds")
+            print(f"Slowest query: {max(query_times):.2f} seconds")
+
         
     finally:
         # Cleanup - delete test documents

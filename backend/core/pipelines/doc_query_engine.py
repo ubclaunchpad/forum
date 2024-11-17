@@ -33,7 +33,7 @@ class DocumentQueryEngine:
     """
     
     def __init__(self, 
-                 model: str = "gpt-4", 
+                 model: str = "gpt-4o-mini",  # experiment with different models
                  embedding_model: str = "text-embedding-3-small", 
                  max_chunks: int = 5,
                  template_dir: Optional[Path] = None):
@@ -218,7 +218,7 @@ class DocumentQueryEngine:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "You are a helpful expert who always provides accurate information with source citations."},
+                    {"role": "system", "content": "You are a helpful expert who always provides accurate but concise information with source citations and focused on helping users learn."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.7

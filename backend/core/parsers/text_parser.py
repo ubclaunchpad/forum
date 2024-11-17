@@ -12,7 +12,7 @@ class TextParser():
 
     def process(self, content: str) -> Dict:
         return {
-            "text": self.clean(content),
+            "content": self.clean(content),
             "metadata": self.create_metadata(content)
         }
 

@@ -1,4 +1,4 @@
-Use these sources to answer the question below. Cite sources when used.
+Use these sources to answer the question below. Cite sources when used. Focus on resources given to you and if you use any other sources somehow indicate why you used them. Be concise, friendly and your goal is to educate. Format can be markdown. any markdown styles are allowed.
 
 SOURCES:
 {context}
