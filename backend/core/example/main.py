@@ -1,4 +1,4 @@
-"""Example script demonstrating RAG system workflow with biology content."""
+"""Example script demonstrating query system workflow with biology content."""
 import time
 import os
 import json
@@ -83,7 +83,7 @@ Sources Used:
 {sources_text}"""
 
 def main():
-    """Run the RAG example workflow."""
+    """Run the LLM query example workflow."""
     print("Starting RAG example workflow...")
     print("-" * 50)
     
