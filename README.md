@@ -32,41 +32,49 @@ To get a local copy up and running follow these simple steps.
 
 ### 2. Set up a Virtual Environment
 
-#### For macOS and Linux:
+#### For macOS and Linux
 
 1. Open a terminal
 2. Navigate to the project directory
 3. Create a virtual environment:
+
    ```
    python3 -m venv venv
    ```
+
 4. Activate the virtual environment:
+
    ```
    source venv/bin/activate
    ```
+
 5. Your terminal prompt should now show "(venv)" at the beginning, indicating that the virtual environment is active
 
 Note: To deactivate the virtual environment when you're done, simply run:
 
-#### For Windows:
+#### For Windows
 
 1. Open Command Prompt or PowerShell
 2. Navigate to the project directory
 3. Create a virtual environment:
+
    ```
    python -m venv venv
    ```
+
 4. Activate the virtual environment:
+
    ```
    .\venv\Scripts\activate
    ```
+
 5. Your command prompt should now show "(venv)" at the beginning, indicating that the virtual environment is active
 
 ### 3. Installing Packages
 
 To install new packages and automatically update the requirements files, please use the provided scripts:
 
-#### For macOS and Linux:
+#### For macOS and Linux
 
 1. Make sure you're in the project directory and your virtual environment is activated
 2. Run the `pip_install.sh` script with the package name:
@@ -82,7 +90,7 @@ To install new packages and automatically update the requirements files, please 
    - Add it to `requirements.in`
    - Compile `requirements.in` to `requirements.txt` (if pip-compile is available)
 
-#### For Windows:
+#### For Windows
 
 1. Ensure you're in the project directory and your virtual environment is activated
 2. Run the `pip_install.ps1` script with the package name:
@@ -99,3 +107,14 @@ To install new packages and automatically update the requirements files, please 
    - Compile `requirements.in` to `requirements.txt` (if pip-compile is available)
 
 Note: If pip-compile is not found, you'll need to install pip-tools to compile requirements.txt.
+
+### Experimenting with RAG
+
+- RAG files are under `core`
+- For sample testing, there is an examples folder with a `main.py` file which you can run `python -m core.example.main`
+  - This will go through `examples/data.json` which holds documents and queries
+  - It will process, tokenize/generate embeddings and store in supabase database
+  - It will then run the queries and generate the results in the `outputs` folder
+    - If you want to experiment with different output prompts, it uses `templates` folder.
+  - It will also include some time and duration information in the output
+  - Lastly it will delete the data from the database (Note: if you are running this multiple times, you may want to comment this out and only to store the data once)
