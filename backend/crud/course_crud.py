@@ -24,9 +24,9 @@ def get_courses():
     except Exception as e:
         return None
 
-def get_course_by_id(course_id: int):
+def get_course_by_id(c_id: int):
     try:
-        return courses_table.select("*").eq('id', course_id)
+        return courses_table.select("*").eq('id', c_id).execute()
     except Exception as e:
         return None
 

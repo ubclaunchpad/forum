@@ -26,7 +26,7 @@ def test_insert_duplicate_course():
         "id": course_id,
         "c_group": "test_group",
         "code": "test_code",
-        "term": "test_term"
+        "section": "test_term"
     }
     response = client.post(course_router_endpoint,json=test_course)
     assert response.status_code == 404
@@ -54,6 +54,10 @@ def test_insert_duplicate_course():
 
 def test_get_all_courses():
     response = client.get(course_router_endpoint)
+    data = response.json().get("data")
+    assert isinstance(data, list)
+    assert len(data) == 1
+    assert data[0].get("id") == course_id
     assert response.status_code == 200
 
 # def test_get_all_courses_invalid_cred():
@@ -63,9 +67,20 @@ def test_get_all_courses():
 #         "detail": "You do not have permission to perform this action."
 #     }
 
-# def test_get_course_by_id():
-#     response = client.get(f"/courses/{course_id}")
-#     assert response.status_code == 200
+def test_get_course_by_id():
+    response = client.get(course_router_endpoint + "/" + str(course_id))
+    data = response.json().get("data")
+    assert isinstance(data, list)
+    assert len(data) == 1
+    assert data[0].get("id") == course_id
+    assert response.status_code == 200
+
+def test_get_course_by_id_not_found():
+    response = client.get(course_router_endpoint + "/" + str(2))
+    data = response.json().get("data")
+    assert isinstance(data, list)
+    assert len(data) == 0
+    assert response.status_code == 200
 
 # def test_get_course_by_id_not_found():
 #     response = client.get(f"/courses/{course_id}")
