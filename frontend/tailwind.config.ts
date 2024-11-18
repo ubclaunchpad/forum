@@ -27,7 +27,7 @@ const config: Config = {
         "5xl": "var(--font-5xl)",
         "6xl": "var(--font-6xl)",
         "7xl": "var(--font-7xl)",
-        "8xl": "var(--font-8xl)"
+        "8xl": "var(--font-8xl)",
       },
       colors: {
         background: "hsl(var(--neutral-1))",

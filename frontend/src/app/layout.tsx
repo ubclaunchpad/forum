@@ -12,13 +12,10 @@ const quicksand = Quicksand({
   variable: "--font-quicksand",
 });
 
-
 export const metadata: Metadata = {
   title: "Forum",
   description: "Forum; Platform for sharing knowledge",
 };
-
-
 
 export default function RootLayout({
   children,
@@ -27,7 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${figtree.variable} ${quicksand.variable}  font-sans`}>{children}</body>
+      <body className={`${figtree.variable} ${quicksand.variable}  font-sans`}>
+        {children}
+      </body>
     </html>
   );
 }
