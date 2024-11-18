@@ -10,7 +10,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         solid: "bg-primary text-primary-foreground hover:bg-primary/90",
-        outline: "border-2 border-primary bg-white text-primary hover:bg-primary/10",
+        outline:
+          "border-2 border-primary bg-white text-primary hover:bg-primary/10",
         ghost: "text-neutral-11",
       },
       size: {
@@ -21,7 +22,7 @@ const buttonVariants = cva(
       icon: {
         visible: "flex-row",
         none: "",
-      }
+      },
     },
     defaultVariants: {
       variant: "solid",
@@ -47,7 +48,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 Button.displayName = "Button";
