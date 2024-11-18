@@ -9,7 +9,25 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)"],
+        sans: ["var(--font-quicksand)", "var(--font-figtree)", "sans-serif"],
+        title: ["var(--font-quicksand)"],
+        body: ["var(--font-figtree)"],
+        button: ["var(--font-figtree)"],
+      },
+      fontSize: {
+        xs: "var(--font-xs)",
+        sm: "var(--font-sm)",
+        base: "var(--font-base)",
+        md: "var(--font-md)",
+        lg: "var(--font-lg)",
+        xl: "var(--font-xl)",
+        "2xl": "var(--font-2xl)",
+        "3xl": "var(--font-3xl)",
+        "4xl": "var(--font-4xl)",
+        "5xl": "var(--font-5xl)",
+        "6xl": "var(--font-6xl)",
+        "7xl": "var(--font-7xl)",
+        "8xl": "var(--font-8xl)",
       },
       colors: {
         background: "hsl(var(--neutral-1))",
@@ -116,9 +134,11 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        btn: "var(--rounded-btn)",
       },
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   plugins: [require("tailwindcss-animate")],
 };
 
