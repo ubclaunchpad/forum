@@ -49,8 +49,8 @@ def delete_course(course_id: int):
 
 
 def create_course(req: CreateCourseReq):
-    params = jsonable_encoder(req.model_dump(exclude_none=True))
     try:
+        params = jsonable_encoder(req.model_dump(exclude_none=True))
         response = courses_table.insert(params).execute()
         return response
     except Exception as e:

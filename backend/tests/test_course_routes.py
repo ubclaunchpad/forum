@@ -4,13 +4,7 @@ from fastapi.testclient import TestClient
 
 from backend.main import app
 from backend.routers.req.courses_req import UpdateCourseReq, CreateCourseReq
-
-INSERT_ENDPOINT = "/courses/create"
-UPDATE_ENDPOINT = "/courses/update"
-GET_ENDPOINT = "/courses/page"
-GET_ID_ENDPOINT = "/courses"
-DELETE_ENDPOINT = "/courses/delete"
-REGISTER_ENDPOINT = "/courses/register"
+from backend.routers.routes.courses import course_router_endpoint
 
 client = TestClient(app)
 
@@ -19,22 +13,22 @@ course_id = 1
 
 def test_insert_course():
     test_course = {
-        "c_id": course_id,
+        "id": course_id,
         "c_group": "test_group",
-        "c_code": "test_code",
-        "term": "test_term"
+        "code": "test_code",
+        "section": "test_term"
     }
-    response = client.post(INSERT_ENDPOINT, json=test_course)
+    response = client.post(course_router_endpoint, json=test_course)
     assert response.status_code == 200
 
 def test_insert_duplicate_course():
     test_course = {
-        "c_id": course_id,
+        "id": course_id,
         "c_group": "test_group",
-        "c_code": "test_code",
+        "code": "test_code",
         "term": "test_term"
     }
-    response = client.post(INSERT_ENDPOINT,json=test_course)
+    response = client.post(course_router_endpoint,json=test_course)
     assert response.status_code == 404
     assert response.json() == {"detail":"Failed to create course."}
 
@@ -59,7 +53,7 @@ def test_insert_duplicate_course():
 #     }
 
 def test_get_all_courses():
-    response = client.get(GET_ENDPOINT)
+    response = client.get(course_router_endpoint)
     assert response.status_code == 200
 
 # def test_get_all_courses_invalid_cred():
@@ -88,9 +82,12 @@ def test_get_all_courses():
 def test_update_course_by_id():
     update_req = {
         "c_id": course_id,
-        "name": "Name update"
+        "name": "Applied Machine Learning",
+        "c_group" : "CPSC",
+        "code": "330",
+        "end_date": "2024-12-20"
     }
-    response = client.put(UPDATE_ENDPOINT,json=update_req)
+    response = client.put(course_router_endpoint,json=update_req)
     assert response.status_code == 200
 
 # def test_update_course_by_id_not_found():
@@ -111,7 +108,7 @@ def test_update_course_by_id():
 #     }
 
 def test_delete_course_by_id():
-    response = client.delete(DELETE_ENDPOINT + "/" + str(course_id))
+    response = client.delete(course_router_endpoint + "/" + str(course_id))
     assert response.status_code == 200
 
 # def test_delete_course_by_id_not_found():
