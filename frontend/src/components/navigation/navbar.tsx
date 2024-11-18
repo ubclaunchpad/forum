@@ -5,7 +5,7 @@ type NavbarProps = {
   variant: "default" | "compact";
 };
 
-const navClass = "flex items-center justify-between bg-[#2F43CB] h-[56px]";
+const navClass = "flex items-center justify-between bg-primary h-[42px]";
 
 export default function Navbar({ children, variant }: NavbarProps) {
   return <nav className={cn(navClass, variant)}>{children}</nav>;

@@ -92,19 +92,52 @@ html {
     --neutral-10: 60 2% 50%;
     --neutral-11: 60 1% 38%;
     --neutral-12: 60 3% 12%;
+
+    /* TODO: not confirmed on Figma */
+    /* Font Sizes */
+    --font-xs: 0.75rem; /* 12px */
+    --font-sm: 0.875rem; /* 14px */
+    --font-base: 1rem; /* 16px */
+    --font-md: var(--font-base); /* 16px */
+    --font-lg: 1.125rem; /* 18px */
+    --font-xl: 1.25rem; /* 20px */
+    --font-2xl: 1.5rem; /* 24px */
+    --font-3xl: 1.875rem; /* 30px */
+    --font-4xl: 2.25rem; /* 36px */
+    --font-5xl: 3rem; /* 48px */
+    --font-6xl: 3.75rem; /* 60px */
+    --font-7xl: 4.5rem; /* 72px */
+    --font-8xl: 6rem; /* 96px */
   }
 }
 
 @layer base {
-  * {
+  /* * {
     @apply border-border;
-  }
+  } */
   body {
     @apply bg-background text-foreground;
   }
 }
 
 @layer base {
+
+  * {
+    @apply font-body text-base;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-title;
+  }
+
+  h5, h6, p {
+    @apply font-body;
+  }
+
+  button {
+    @apply font-button;
+  }
+  
   h1 {
     @apply text-4xl font-bold leading-tight;
   }
@@ -126,7 +159,7 @@ html {
   }
 
   h6 {
-    @apply text-base font-semibold leading-relaxed;
+    @apply text-lg font-semibold leading-relaxed;
   }
 
   p {
@@ -134,12 +167,12 @@ html {
   }
 
   a {
-    @apply hover:text-neutral-11 underline;
+    @apply text-base hover:text-neutral-11 underline;
   }
 
   ul,
   ol {
-    @apply list-inside;
+    @apply list-inside text-base
   }
 
   li {
