@@ -59,9 +59,16 @@ The project uses a structured approach to manage dependencies using `manage_deps
 
 After activating your virtual environment:
 
+- sync dependencies:
+
 ```bash
-# Install all dependencies (both production and development)
-./setup_dev.sh
+python manage_deps.py sync
+```
+
+- install development dependencies:
+
+```bash
+pip install -r requirements-dev.txt
 ```
 
 #### Adding New Packages
@@ -145,6 +152,15 @@ SUPABASE_URL=your_supabase_url
 SUPABASE_KEY=your_supabase_key
 ```
 
+Where to find these?
+
+- Go on [Supabase](https://supabase.io/) and create a new project
+- Go to the project settings:
+  - In the API section, you will find the `SUPABASE_URL` and `SUPABASE_KEY`
+  - In the Database section, you will find the `DATABASE_URL` (you want a connection string)
+- Go on [OpenAI](https://platform.openai.com/) and create a new project (or use an existing one)
+  - You do not need this unless you use the OpenAI API
+
 ### Database Migrations
 
 #### What are Migrations?
@@ -162,6 +178,33 @@ Files are named with timestamp prefix for ordering: `[YYYYMMDDHHmmss].sql`
 
 #### Running Migrations
 
+Before your first run, you need to make a function on the supabase dashboard:
+
+1. Click on database then functions and then click on `Create new function`
+2. name it `execute_sql` and paste the following code:
+
+```
+BEGIN
+    -- Execute the dynamic SQL query
+    EXECUTE sql;
+    -- If no errors occurred, return true
+    return true;
+EXCEPTION
+    -- If an error occurs, return false
+    WHEN OTHERS THEN
+        return false;
+END;
+```
+
+- arguments: `sql` type `text`
+- return type: `boolean`
+
+3. scroll and click on `show advanced settings`
+
+- in the section 'Type of Security' select `SECURITY DEFINER`
+
+Then you can run the migrations:
+
 1. Run all pending migrations:
 
 ```bash
@@ -174,7 +217,6 @@ Note: make sure you have activated your virtual environment before running these
 
 - Check formatting: in your terminal run: `black --check ./`
 - Apply formatting: in your terminal run: `black ./`
-
 
 ---
 
