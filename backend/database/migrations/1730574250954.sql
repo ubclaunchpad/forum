@@ -1,5 +1,6 @@
--- Basic profiles, courses and mappings
+-- Basic profiles, courses for issue #79
 drop table if exists public.user_courses;
+drop table if exists public.posts;
 drop table if exists public.profiles;
 create table public.profiles (
   id uuid not null references auth.users on delete cascade,
@@ -11,24 +12,40 @@ create table public.profiles (
 );
 alter table public.profiles enable row level security;
 
+
 drop table if exists public.courses;
 create table public.courses (
   id serial,
   c_group text not null,
   c_code text not null,
-  term text not null,
+  section text not null,
   name text,
   primary key (id),
-  unique(c_group,c_code,term)
+  unique(c_group,c_code,section)
 );
 alter table public.courses enable row level security;
+
+
+drop table if exists public.course_role;
+create table public.course_role (
+  id serial,
+  name text,
+  primary key(id),
+  unique(name)
+);
+alter table public.course_role enable row level security;
+
+insert into public.course_role (name)
+values ('Maintainer'), ('Admin'), ('Member'), ('Guest');
+
 
 create table public.user_courses (
   user_id uuid not null references public.profiles on delete cascade,
   course_id serial not null references public.courses on delete cascade,
+  role_id serial not null references public.course_role on delete cascade,
   primary key (user_id,course_id)
 );
-alter table public.courses enable row level security;
+alter table public.user_courses enable row level security;
 
 
 

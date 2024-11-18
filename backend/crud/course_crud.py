@@ -49,15 +49,9 @@ def delete_course(course_id: int):
 
 
 def create_course(req: CreateCourseReq):
-    insert_req = {
-        "c_group": req.c_group,
-        "c_code": req.c_code,
-        "term": req.term
-    }
-    if req.c_id is not None:
-        insert_req['id'] = req.c_id
+    params = jsonable_encoder(req.model_dump(exclude_none=True))
     try:
-        response = courses_table.insert(insert_req).execute()
+        response = courses_table.insert(params).execute()
         return response
     except Exception as e:
         return None
