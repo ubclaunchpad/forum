@@ -16,7 +16,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             user = supabase.auth.get_user()
             if not user:
                 return Response("Unauthorized", status_code=401)
-
+            request.state.user = user
         # proceed to the next middleware or endpoint
         response = await call_next(request)
         return response
