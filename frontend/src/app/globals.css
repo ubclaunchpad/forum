@@ -23,6 +23,8 @@ html {
     --destructive-foreground: 0 0% 98%;
     --radius: 0.5rem;
 
+    --primary-foreground: 180 100% 13%;
+
     /* Primary Colors (Teal) */
     --primary-1: 180 100% 99%;
     --primary-2: 180 71% 97%;
@@ -108,6 +110,9 @@ html {
     --font-6xl: 3.75rem; /* 60px */
     --font-7xl: 4.5rem; /* 72px */
     --font-8xl: 6rem; /* 96px */
+
+
+    --rounded-btn: 41px;
   }
 }
 
