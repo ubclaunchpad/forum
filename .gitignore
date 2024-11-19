@@ -2,3 +2,6 @@
 .env.local
 .history
 .idea
+
+
+**/outputs/

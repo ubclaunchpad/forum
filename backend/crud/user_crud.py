@@ -1,19 +1,37 @@
-from ..database.db import supabase
+from database.db import supabase
 
 
 # Creates user in supabase
 def create_user(user):
-    return None
+    response = supabase.auth.sign_up(
+        {
+            "email": user.email,
+            "password": user.password,
+            "options": {
+                "data": {
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "role": user.role,
+                }
+            },
+        }
+    )
+
+    return response
 
 
 # Get all users from supabase
 def get_all_users():
-    return []
+    # Requires valid RLS access to work
+    response = supabase.table("profiles").select("*").execute()
+    return response
 
 
 # Gets user by id from supabase
-def get_user_by_id(id: int):
-    return None
+def get_user_by_id(id: str):
+    # Requires valid RLS access to work
+    response = supabase.table("profiles").select("*").eq("id", id).execute()
+    return response.data
 
 
 # Updates user in supabase
@@ -22,8 +40,12 @@ def update_user_by_id(user_id: int, updated_fields):
 
 
 # Deletes user in supabase using their id
-def delete_user_by_id(id: int):
-    return False
+def delete_user_by_id(user_id: str):
+    try:
+        supabase.auth.admin.delete_user(user_id)
+        return True
+    except:
+        return False
 
 
 # Gets user by email from supabase

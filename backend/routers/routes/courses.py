@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Request
 from backend.crud import course_crud
 from backend.crud.course_crud import UserNotEnrolledException, NoPermissionException
 from backend.routers.req.courses_req import CreateCourseReq, RegisterUserReq, UpdateCourseReq
+
 course_router = APIRouter()
 course_router_endpoint= "/courses"
 
