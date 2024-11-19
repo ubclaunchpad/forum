@@ -57,7 +57,10 @@ def test_insert_duplicate_course():
 #     }
 
 def test_get_all_courses():
-    response = client.get(course_router_endpoint)
+    headers = {
+        "X-User-ID": test_user_uuid
+    }
+    response = client.get(course_router_endpoint, headers=headers)
     data = response.json().get("data")
     assert isinstance(data, list)
     assert len(data) == 1
@@ -72,7 +75,10 @@ def test_get_all_courses():
 #     }
 
 def test_get_course_by_id():
-    response = client.get(course_router_endpoint + "/" + str(course_id))
+    headers = {
+        "X-User-ID": test_user_uuid
+    }
+    response = client.get(course_router_endpoint + "/" + str(course_id),headers=headers)
     data = response.json().get("data")
     assert isinstance(data, list)
     assert len(data) == 1
@@ -80,11 +86,14 @@ def test_get_course_by_id():
     assert response.status_code == 200
 
 def test_get_course_by_id_not_found():
-    response = client.get(course_router_endpoint + "/" + str(2))
-    data = response.json().get("data")
-    assert isinstance(data, list)
-    assert len(data) == 0
-    assert response.status_code == 200
+    headers = {
+        "X-User-ID": test_user_uuid
+    }
+    response = client.get(course_router_endpoint + "/" + str(2), headers=headers)
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail":"User is not enrolled in this course"
+    }
 
 # def test_get_course_by_id_not_found():
 #     response = client.get(f"/courses/{course_id}")
@@ -106,7 +115,10 @@ def test_update_course_by_id():
         "code": "330",
         "end_date": "2024-12-20"
     }
-    response = client.put(course_router_endpoint,json=update_req)
+    headers = {
+        "X-User-ID": test_user_uuid
+    }
+    response = client.put(course_router_endpoint,json=update_req, headers=headers)
     assert response.status_code == 200
 
 # def test_update_course_by_id_not_found():
@@ -127,7 +139,10 @@ def test_update_course_by_id():
 #     }
 
 def test_delete_course_by_id():
-    response = client.delete(course_router_endpoint + "/" + str(course_id))
+    headers = {
+        "X-User-ID": test_user_uuid
+    }
+    response = client.delete(course_router_endpoint + "/" + str(course_id), headers=headers)
     assert response.status_code == 200
 
 # def test_delete_course_by_id_not_found():
