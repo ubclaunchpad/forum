@@ -3,16 +3,15 @@ from backend.crud import course_crud
 from backend.crud.course_crud import UserNotEnrolledException, NoPermissionException
 from backend.routers.req.courses_req import (
     CreateCourseReq,
-    RegisterUserReq,
-    UpdateCourseReq,
+    UpdateCourseReq
 )
 
 course_router = APIRouter()
 course_router_endpoint = "/courses"
 
 # @course_router.post(course_router_endpoint)
-# async def register_course(createCourseReq: RegisterUserReq):
-#     profile = course_crud.register_course(createCourseReq)
+# async def register_course(create_course_req: RegisterUserReq):
+#     profile = course_crud.register_course(create_course_req)
 #     if not profile:
 #         raise HTTPException(status_code=404, detail="Failed to create course.")
 #     return profile
@@ -41,9 +40,9 @@ async def get_courses_by_id(c_id: int, request: Request):
 
 
 @course_router.post(course_router_endpoint)
-async def create_course(createCourseReq: CreateCourseReq, request: Request):
+async def create_course(create_course_req: CreateCourseReq, request: Request):
     user_id = request.headers.get("X-User-ID")
-    course = course_crud.create_course(createCourseReq)
+    course = course_crud.create_course(create_course_req)
     if not course:
         raise HTTPException(status_code=404, detail="Failed to create course.")
     # gets Admin Enum
@@ -83,8 +82,9 @@ async def delete_course(c_id: int, request: Request):
 
 
 @course_router.put(course_router_endpoint)
-async def update_course(req: UpdateCourseReq, request: Request):
+async def update_course(update_course_req: UpdateCourseReq, request: Request):
     try:
+        # Get admin and maintainer role values
         admin_enum = course_crud.get_role_key("Admin")
         maintainer_enum = course_crud.get_role_key("Maintainer")
         if not admin_enum or not maintainer_enum:
@@ -94,7 +94,7 @@ async def update_course(req: UpdateCourseReq, request: Request):
         admin_id = admin_enum.data[0]["id"]
         maintainer_id = maintainer_enum.data[0]["id"]
         response = course_crud.update_course(
-            req, request.headers.get("X-User-ID"), admin_id, maintainer_id
+            update_course_req, request.headers.get("X-User-ID"), admin_id, maintainer_id
         )
         if not response:
             raise HTTPException(status_code=404, detail="Failed to update course.")
