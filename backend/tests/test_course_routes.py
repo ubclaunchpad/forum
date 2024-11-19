@@ -10,15 +10,19 @@ client = TestClient(app)
 
 email = "test"
 course_id = 1
+test_user_uuid = "e2e422ed-e0b0-4d40-9c92-7d743b11fa83"
 
 def test_insert_course():
+    headers = {
+        "X-User-ID": test_user_uuid
+    }
     test_course = {
         "id": course_id,
         "c_group": "test_group",
         "code": "test_code",
         "section": "test_term"
     }
-    response = client.post(course_router_endpoint, json=test_course)
+    response = client.post(course_router_endpoint, json=test_course,headers=headers)
     assert response.status_code == 200
 
 def test_insert_duplicate_course():

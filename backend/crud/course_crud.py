@@ -10,7 +10,7 @@ courses_table = supabase.table('courses')
 def register_course(req: RegisterUserReq):
     try:
         user_courses_entry = {
-            'user_id': req.u_id,
+            'test_user_uuid': req.u_id,
             'course_id': req.c_id
         }
         return courses_table.insert(user_courses_entry).execute()
@@ -55,3 +55,18 @@ def create_course(req: CreateCourseReq):
         return response
     except Exception as e:
         return None
+
+def add_user_to_course(course_id: int, user_id: str, role: int):
+    try:
+        params = {
+            'user_id': user_id,
+            'course_id': course_id,
+            'role_id': role
+        }
+        response = supabase.table("user_courses").insert(params).execute()
+        return response
+    except Exception as e:
+        return None
+
+def get_role_key(name: str):
+    return supabase.table('course_role').select("id").eq("name", name).execute()
