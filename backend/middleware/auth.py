@@ -2,6 +2,7 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from backend.database.db import supabase
 
+
 class AuthMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, enabled: bool = True, public_paths: list = None):
         super().__init__(app)
