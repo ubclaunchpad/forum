@@ -1,4 +1,4 @@
--- Basic profiles, courses for issue #79
+-- Basic profiles, courses and mapping table
 drop table if exists public.user_courses;
 drop table if exists public.posts;
 
