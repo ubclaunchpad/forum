@@ -85,4 +85,3 @@ def test_delete_course_by_id():
         course_router_endpoint + "/" + str(course_id), headers=headers
     )
     assert response.status_code == 200
-
