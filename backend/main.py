@@ -3,8 +3,8 @@ from database.db import supabase
 from fastapi import Depends, FastAPI
 from middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
-from routers.routes.users import user_router
 from routers.routes.posts import post_router
+from routers.routes.users import user_router
 
 app = FastAPI()
 app.include_router(user_router)
