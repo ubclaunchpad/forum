@@ -1,5 +1,5 @@
 import os
-from db import supabase
+from .db import supabase
 
 queries_path = "./database/migrations/"
 

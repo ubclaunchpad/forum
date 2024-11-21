@@ -4,10 +4,18 @@ from fastapi import Depends, FastAPI
 from middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 from routers.routes.users import user_router
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 app.include_router(user_router)
 app.include_router(course_router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Allow your frontend origin
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 # flag to enable auth middleware for ALL endpoints
 AUTH_MIDDLEWARE_ENABLED = False
