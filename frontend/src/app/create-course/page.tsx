@@ -1,18 +1,22 @@
 "use client";
 
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, useEffect, ChangeEvent, useReducer } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/router";
+import { updateQueryParams } from "@/utils/url-query/updateQueryParams"; // Update path based on your setup
+import getQueryParams from "@/utils/url-query/getQueryParams";
 import { User, Pencil, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 type FormProps = {
   title: string;
   tagName: string;
   placeholder: string;
+  value?: string;
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
-const Form = ({ title, tagName, placeholder }: FormProps) => {
+const Form = ({ title, tagName, placeholder, value, onChange }: FormProps) => {
   return (
     <div className="flex flex-col items-start gap-[10px] flex-1">
       <p className="self-stretch">{title}</p>
@@ -22,6 +26,8 @@ const Form = ({ title, tagName, placeholder }: FormProps) => {
         placeholder={placeholder}
         className="bg-white text-white border-gray-600"
         required
+        value={value}
+        onChange={onChange}
       />
     </div>
   );
@@ -95,6 +101,17 @@ const Profile = ({ image_file, name, email, pronouns }: ProfileProps) => {
 };
 
 const CreateCoursePage = () => {
+  const router = useRouter();
+
+  const [courseName, setCourseName] = useState<string | undefined>("");
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.target.value;
+    setCourseName(newValue);
+
+    updateQueryParams(router, { courseName: newValue }, { replaceState: true });
+  };
+
   const handleInvite = async () => {
     // TODO: add invite functionality
   };
@@ -102,6 +119,9 @@ const CreateCoursePage = () => {
   const handlePublish = async () => {
     // TODO: add publish functionality
   };
+
+  // const queryParams = getQueryParams(["courseName"]);
+  // setCourseName(queryParams.courseName || "");
 
   return (
     <div className="w-screen h-screen flex justify-center items-center">
@@ -131,6 +151,8 @@ const CreateCoursePage = () => {
                 title="Course Name"
                 tagName="courseName"
                 placeholder="e.g. Computation, programs, and programming"
+                value={courseName}
+                onChange={handleInputChange}
               />
             </div>
             <div className="flex flex-col items-start gap-[30px] w-full">
