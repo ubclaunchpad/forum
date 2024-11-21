@@ -26,18 +26,18 @@ html {
     --primary-foreground: 180 100% 13%;
 
     /* Primary Colors (Teal) */
-    --primary-1: 180 100% 99%;
-    --primary-2: 180 71% 97%;
-    --primary-3: 180 83% 91%;
-    --primary-4: 180 72% 85%;
-    --primary-5: 180 63% 79%;
-    --primary-6: 180 55% 72%;
-    --primary-7: 180 47% 62%;
-    --primary-8: 180 100% 37%;
-    --primary-9: 180 57% 52%;
-    --primary-10: 180 59% 48%;
-    --primary-11: 180 100% 25%;
-    --primary-12: 180 100% 13%;
+    --primary-1: 200, 100%, 96%, 1;
+    --primary-2: 209, 100%, 92%;
+    --primary-3: 209, 100%, 92%;
+    --primary-4: 207, 100%, 85%;
+    --primary-5: 207 100% 63%;
+    --primary-6: 212 100% 54%;
+    --primary-7: 218 100% 50%;
+    --primary-8: 224 100% 50%;
+    --primary-9: 224 100% 38%;
+    --primary-10: 223 90% 33%;
+    --primary-11: 224 81% 21%;
+    --primary-12: 224 81% 21%;
 
     /* Secondary Colors (Blue) */
     --secondary-1: 220 33% 99%;

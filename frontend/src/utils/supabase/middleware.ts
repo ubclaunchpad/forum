@@ -37,6 +37,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (request.nextUrl.pathname.startsWith("/playground")) {
+    return supabaseResponse;
+  }
+
   if (
     !user &&
     !request.nextUrl.pathname.startsWith("/auth") &&
