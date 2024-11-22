@@ -20,7 +20,7 @@ def create_post(user_id, course_id, post_info):
     return response
 
 
-def get_posts(course_id):
+def get_posts(course_id, query):
     response = (
         supabase.table("posts")
         .select("*", count="exact")
@@ -30,17 +30,9 @@ def get_posts(course_id):
     return response
 
 
-def update_post(user_id, post_edit_info):
-    # Find the post
-    post = (
-        supabase.table("posts").select("*").eq("id", post_edit_info.post_id).execute()
-    )
+def update_post(user_id, post_id, post_edit_info):
+    post_info = find_post(post_id)
 
-    if not post.data:
-        raise HTTPException(status_code=404, detail="Failed to find post.")
-
-    # Edit the contents of the post
-    post_info = post.data[0]
     if post_info["status"] == "deleted":
         raise HTTPException(
             status_code=404, detail="This post is deleted and can no longer be edited."
@@ -57,7 +49,7 @@ def update_post(user_id, post_edit_info):
                 "content": post_edit_info.new_content,
             }
         )
-        .eq("id", post_edit_info.post_id)
+        .eq("id", post_id)
         .execute()
     )
 
@@ -66,22 +58,45 @@ def update_post(user_id, post_edit_info):
             status_code=400, detail="There was an error updating the post."
         )
 
-    add_post_edits = (
-        supabase.table("post_edits")
-        .insert(
-            {
-                "post_id": post_edit_info.post_id,
-                "edited_by": user_id,
-                "previous_content": old_content,
-                "new_content": post_edit_info.new_content,
-                "edit_reason": post_edit_info.edit_reason,
-            }
-        )
-        .execute()
-    )
+    supabase.table("post_edits").insert(
+        {
+            "post_id": post_id,
+            "edited_by": user_id,
+            "previous_content": old_content,
+            "new_content": post_edit_info.new_content,
+            "edit_reason": post_edit_info.edit_reason,
+        }
+    ).execute()
 
     return {"success": True}
 
 
-def delete_post():
-    return None
+def delete_post(user_id, post_id):
+    deleted_post = supabase.table("posts").delete().eq("id", post_id).execute()
+
+    if not deleted_post.data:
+        raise HTTPException(status_code=404, detail="Failed to find post.")
+
+    return {"success": True}
+
+
+def find_post(post_id):
+    post = (
+        supabase.table("posts").select("*", count="exact").eq("id", post_id).execute()
+    )
+
+    if not post.data:
+        raise HTTPException(status_code=404, detail="Failed to find post.")
+
+    return post.data[0]
+
+
+def get_edit_history(post_id):
+    edit_history = (
+        supabase.table("post_edits")
+        .select("*", count="exact")
+        .eq("id", post_id)
+        .execute()
+    )
+
+    return edit_history

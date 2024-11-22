@@ -20,7 +20,7 @@ alter table public.posts enable row level security;
 
 create table public.post_edits (
   id uuid default uuid_generate_v4(),
-  post_id uuid,
+  post_id uuid not null references public.posts on delete cascade,
   edited_by uuid,
   previous_content text,
   new_content text,
