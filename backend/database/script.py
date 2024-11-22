@@ -1,7 +1,7 @@
 import os
 from db import supabase
 
-queries_path = "./database/migrations/"
+queries_path = "./migrations/"
 
 
 def read_file(name):

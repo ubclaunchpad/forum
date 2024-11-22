@@ -3,7 +3,7 @@
 CREATE EXTENSION IF NOT EXISTS vector;
 
 
-CREATE TABLE documents ( 
+CREATE TABLE IF NOT EXISTS documents ( 
 id UUID PRIMARY KEY, 
 title VARCHAR(255) NOT NULL, 
 original_content TEXT NOT NULL, 
@@ -15,7 +15,7 @@ metadata JSONB
 );
 
 
-CREATE TABLE document_versions ( 
+CREATE TABLE IF NOT EXISTS document_versions ( 
 id UUID PRIMARY KEY,
 document_id UUID REFERENCES documents(id),
 version_number INTEGER NOT NULL,
@@ -27,7 +27,7 @@ UNIQUE(document_id, version_number)
 );
 
 
-CREATE TABLE chunks ( 
+CREATE TABLE IF NOT EXISTS chunks ( 
 id UUID PRIMARY KEY,
 document_id UUID REFERENCES documents(id),
 version_id UUID REFERENCES document_versions(id),
@@ -39,7 +39,7 @@ metadata JSONB,
 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP 
 );
 
-CREATE TABLE chunk_relations ( 
+CREATE TABLE IF NOT EXISTS chunk_relations ( 
 id UUID PRIMARY KEY,
 source_chunk_id UUID REFERENCES chunks(id), 
 target_chunk_id UUID REFERENCES chunks(id), 
