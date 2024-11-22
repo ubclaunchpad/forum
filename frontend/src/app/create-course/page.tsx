@@ -107,19 +107,27 @@ const CreateCoursePage = () => {
   const [courseName, setCourseName] = useState<string | undefined>("");
 
   // can refactor later to combine into one handler using a key-value pair
-  const handleCourseGroupInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleCourseGroupInputChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
     const newValue = event.target.value;
     setCourseGroup(newValue);
   };
-  const handleCourseCodeInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleCourseCodeInputChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
     const newValue = event.target.value;
     setCourseCode(newValue);
   };
-  const handleCourseSectionInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleCourseSectionInputChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
     const newValue = event.target.value;
     setCourseSection(newValue);
   };
-  const handleCourseNameInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleCourseNameInputChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
     const newValue = event.target.value;
     setCourseName(newValue);
   };
