@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 from database.db import database
 from fastapi import HTTPException, UploadFile
 
-from backend.core.util.file_storage import FileStorage
+from core.util.file_storage import FileStorage
 
 
 class DocumentError(Exception):

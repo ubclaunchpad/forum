@@ -8,7 +8,8 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
-from backend.crud import document_crud
+from crud import document_crud
+
 
 document_router = APIRouter()
 
