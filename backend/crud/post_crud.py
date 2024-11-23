@@ -3,6 +3,7 @@ from fastapi import HTTPException
 
 
 def create_post(user_id, course_id, post_info):
+    # Check for duplicate title
     response = (
         supabase.table("posts")
         .insert(
@@ -17,21 +18,45 @@ def create_post(user_id, course_id, post_info):
         )
         .execute()
     )
+
+    if not response.data:
+        raise HTTPException(status_code=400, detail="Unable to create post")
+
     return response
 
 
-def get_posts(course_id, query):
+def get_posts(course_id, params):
+    desc = False
+    if params["sort"] == "newest":
+        desc = True
+
+    print(params)
+
+    if "creator_id" not in params:
+        response = (
+            supabase.table("posts")
+            .select("*", count="exact")
+            .eq("course_id", course_id)
+            .order("applied_at", desc=desc)
+            .execute()
+        )
+
+        return response
+
     response = (
         supabase.table("posts")
         .select("*", count="exact")
         .eq("course_id", course_id)
+        .eq("created_by", params["creator_id"])
+        .order("applied_at", desc=desc)
         .execute()
     )
+
     return response
 
 
 def update_post(user_id, post_id, post_edit_info):
-    post_info = find_post(post_id)
+    post_info = get_post(post_id).data[0]
 
     if post_info["status"] == "deleted":
         raise HTTPException(
@@ -80,7 +105,7 @@ def delete_post(user_id, post_id):
     return {"success": True}
 
 
-def find_post(post_id):
+def get_post(post_id):
     post = (
         supabase.table("posts").select("*", count="exact").eq("id", post_id).execute()
     )
@@ -88,15 +113,4 @@ def find_post(post_id):
     if not post.data:
         raise HTTPException(status_code=404, detail="Failed to find post.")
 
-    return post.data[0]
-
-
-def get_edit_history(post_id):
-    edit_history = (
-        supabase.table("post_edits")
-        .select("*", count="exact")
-        .eq("id", post_id)
-        .execute()
-    )
-
-    return edit_history
+    return post

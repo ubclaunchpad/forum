@@ -50,7 +50,14 @@ def delete_user_by_id(user_id: str):
 
 # Gets user by email from supabase
 def get_user_by_email(email: str):
-    return None
+    user_res = (
+        supabase.table("profiles")
+        .select("*", count="exact")
+        .eq("email", email)
+        .execute()
+    )
+
+    return user_res
 
 
 # Updates user in supabase
