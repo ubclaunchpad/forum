@@ -1,7 +1,9 @@
 import uuid
 
 from fastapi.testclient import TestClient
+from fastapi.utils import generate_unique_id
 
+from database.db import test_user_uuid
 from main import app
 from routers.req.courses_req import UpdateCourseReq, CreateCourseReq
 from routers.routes.courses import course_router_endpoint
@@ -9,8 +11,8 @@ from routers.routes.courses import course_router_endpoint
 client = TestClient(app)
 
 email = "test"
-course_id = 1
-test_user_uuid = "e2e422ed-e0b0-4d40-9c92-7d743b11fa83"
+course_id = '5eed0a1e-c280-42c1-8251-dd72027d2ccc'
+test_user_uuid = test_user_uuid
 
 
 def test_insert_course():
@@ -61,7 +63,7 @@ def test_get_course_by_id():
 
 def test_get_course_by_id_not_found():
     headers = {"X-User-ID": test_user_uuid}
-    response = client.get(course_router_endpoint + "/" + str(2), headers=headers)
+    response = client.get(course_router_endpoint + "/" + str(uuid.uuid4()), headers=headers)
     assert response.status_code == 404
     assert response.json() == {"detail": "User is not enrolled in this course"}
 

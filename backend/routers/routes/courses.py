@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field, validator
 from typing import List, Optional
@@ -14,11 +16,11 @@ course_router_endpoint = "/courses"
 # Maximum number of chunks to retrieve from the document, hard-coded for now
 MAX_CHUNKS = 5
 
-# Initialize DocumentQueryEngine
-try:
-    query_engine = DocumentQueryEngine(max_chunks=MAX_CHUNKS)
-except Exception as e:
-    raise HTTPException(status_code=500, detail=f"Error initializing query engine: {e}")
+# # Initialize DocumentQueryEngine
+# try:
+#     query_engine = DocumentQueryEngine(max_chunks=MAX_CHUNKS)
+# except Exception as e:
+#     raise HTTPException(status_code=500, detail=f"Error initializing query engine: {e}")
 
 # @course_router.post(course_router_endpoint)
 # async def register_course(create_course_req: RegisterUserReq):
@@ -114,7 +116,7 @@ async def get_courses(request: Request):
 
 # get course by id
 @course_router.get(course_router_endpoint + "/{c_id}")
-async def get_courses_by_id(c_id: int, request: Request):
+async def get_courses_by_id(c_id: str, request: Request):
     try:
         courses = course_crud.get_course_by_id(c_id, request.headers.get("X-User-ID"))
         if not courses:
@@ -148,7 +150,7 @@ async def create_course(create_course_req: CreateCourseReq, request: Request):
 
 
 @course_router.delete(course_router_endpoint + "/{c_id}")
-async def delete_course(c_id: int, request: Request):
+async def delete_course(c_id: str, request: Request):
     try:
         admin_enum = course_crud.get_role_key("Admin")
         if not admin_enum:

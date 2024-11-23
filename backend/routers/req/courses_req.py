@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class CreateCourseReq(BaseModel):
-    id: int | None = None
+    id: UUID | None = None
     c_group: str
     code: str
     section: str
@@ -15,12 +15,12 @@ class CreateCourseReq(BaseModel):
 
 
 class RegisterUserReq(BaseModel):
-    c_id: int
+    c_id: UUID
     u_id: UUID
 
 
 class UpdateCourseReq(BaseModel):
-    c_id: int
+    c_id: UUID
     c_group: str | None = None
     code: str | None = None
     section: str | None = None
