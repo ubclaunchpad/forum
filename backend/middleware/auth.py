@@ -1,6 +1,6 @@
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from backend.database.db import supabase
+from database.db import supabase
 
 
 class AuthMiddleware(BaseHTTPMiddleware):

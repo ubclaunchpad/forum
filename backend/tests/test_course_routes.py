@@ -2,9 +2,9 @@ import uuid
 
 from fastapi.testclient import TestClient
 
-from backend.main import app
-from backend.routers.req.courses_req import UpdateCourseReq, CreateCourseReq
-from backend.routers.routes.courses import course_router_endpoint
+from main import app
+from routers.req.courses_req import UpdateCourseReq, CreateCourseReq
+from routers.routes.courses import course_router_endpoint
 
 client = TestClient(app)
 
