@@ -83,7 +83,6 @@ def update_course(
         return None
 
 
-
 def delete_course(course_id: str, user_id: str, admin_role: int):
     try:
         course_role_res = (

@@ -62,7 +62,9 @@ def test_get_course_by_id():
 
 def test_get_course_by_id_not_found():
     headers = {"X-User-ID": test_user_uuid}
-    response = client.get(course_router_endpoint + "/" + str(uuid.uuid4()), headers=headers)
+    response = client.get(
+        course_router_endpoint + "/" + str(uuid.uuid4()), headers=headers
+    )
     assert response.status_code == 404
     assert response.json() == {"detail": "User is not enrolled in this course"}
 
