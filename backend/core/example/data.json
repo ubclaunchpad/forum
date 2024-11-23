@@ -1,98 +1,98 @@
 {
-    "docs": [
-        {
-            "title": "Advanced Graph Theory",
-            "content": "Graph coloring problems represent a fundamental area of study in computational mathematics. The chromatic number χ(G) of a graph G is the minimum number of colors needed for a proper vertex coloring. The Four Color Theorem, proven in 1976, states that any planar graph can be colored with at most four colors. The proof was revolutionary as it was the first major mathematical proof to rely on computer verification. NP-completeness of graph coloring for general graphs has significant implications in complexity theory and algorithm design.",
-            "type": "text",
-            "subject": "mathematics"
-        },
-        {
-            "title": "Quantum Computing Fundamentals",
-            "content": "Quantum computation leverages quantum mechanical phenomena like superposition and entanglement. Unlike classical bits, qubits can exist in multiple states simultaneously due to superposition. The no-cloning theorem states that it's impossible to create an identical copy of an arbitrary unknown quantum state, which is fundamental to quantum cryptography. Quantum algorithms like Shor's algorithm for integer factorization and Grover's algorithm for unstructured search demonstrate quantum speedup over classical algorithms, with Shor's algorithm potentially threatening current cryptographic systems by solving the factoring problem in polynomial time.",
-            "type": "text",
-            "subject": "computer_science"
-        },
-        {
-            "title": "Advanced Molecular Biology",
-            "content": "CRISPR-Cas9 gene editing technology represents a breakthrough in molecular biology. The system consists of two key components: the Cas9 endonuclease and a guide RNA (gRNA). The gRNA directs Cas9 to specific DNA sequences, where it creates double-strand breaks. The cell's DNA repair mechanisms then activate, either through non-homologous end joining (NHEJ) or homology-directed repair (HDR). This system has revolutionized genetic engineering by providing precise, programmable genome editing capabilities.",
-            "type": "text",
-            "subject": "biology"
-        },
-        {
-            "title": "Complex Analysis",
-            "content": "The Residue theorem, a cornerstone of complex analysis, states that the contour integral of a holomorphic function around a simple closed contour equals 2πi times the sum of residues of the function at its singular points inside the contour. This powerful result connects topology with analysis, finding applications in physics and engineering. Related concepts like Laurent series expansions and the classification of singularities (removable, poles, and essential) provide tools for understanding complex function behavior near singular points.",
-            "type": "text",
-            "subject": "mathematics"
-        },
-        {
-            "title": "Distributed Systems Architecture",
-            "content": "The CAP theorem fundamentally states that a distributed data store cannot simultaneously provide more than two out of three guarantees: Consistency (all nodes see the same data), Availability (every request receives a response), and Partition tolerance (the system continues to operate despite network failures). Modern distributed systems often implement eventual consistency models as a compromise. The Paxos and Raft consensus algorithms provide theoretical frameworks for achieving agreement in distributed systems, with Raft designed for better understandability and implementation.",
-            "type": "text",
-            "subject": "computer_science"
-        },
-        {
-            "title": "Immunology and Disease",
-            "content": "The adaptive immune system's V(D)J recombination process generates antibody diversity through genetic recombination. B cells undergo somatic hypermutation during affinity maturation, introducing point mutations in immunoglobulin genes to produce antibodies with higher antigen affinity. Memory B cells, produced during the primary immune response, enable rapid antibody production during subsequent pathogen encounters. This process underlies both natural immunity and vaccination strategies.",
-            "type": "text",
-            "subject": "biology"
-        },
-        {
-            "title": "Neural Networks and Deep Learning",
-            "content": "Transformer architectures revolutionized natural language processing through their self-attention mechanism. Unlike traditional RNNs, transformers process entire sequences simultaneously, computing attention weights between all pairs of positions. The multi-head attention mechanism allows the model to attend to different aspects of the input simultaneously. Position encodings are crucial since the model lacks inherent sequential processing, typically implemented through sinusoidal functions or learned embeddings.",
-            "type": "text",
-            "subject": "computer_science"
-        },
-        {
-            "title": "Topology and Manifolds",
-            "content": "The classification of compact surfaces is a remarkable theorem in topology stating that every compact surface is homeomorphic to either a sphere, a connected sum of tori, or a connected sum of projective planes. The proof uses triangulation and fundamental polygon representation. The Euler characteristic χ = V - E + F is a topological invariant that aids in this classification. Related concepts include the fundamental group and covering spaces, which provide tools for understanding the global structure of topological spaces.",
-            "type": "text",
-            "subject": "mathematics"
-        },
-        {
-            "title": "Cellular Metabolism",
-            "content": "The pentose phosphate pathway, parallel to glycolysis, serves two major functions: NADPH generation and ribose-5-phosphate production. NADPH is crucial for reductive biosynthesis and handling oxidative stress. The pathway's regulation is primarily controlled by glucose-6-phosphate dehydrogenase, whose activity responds to the NADPH/NADP+ ratio. In cancer cells, this pathway is often upregulated to support rapid proliferation and manage increased oxidative stress levels.",
-            "type": "text",
-            "subject": "biology"
-        },
-        {
-            "title": "Algorithms and Complexity",
-            "content": "Approximation algorithms provide tractable solutions to NP-hard optimization problems. The traveling salesman problem (TSP), while NP-hard for exact solutions, has a 1.5-approximation algorithm for metric instances using Christofides algorithm. This combines minimum spanning tree construction with perfect matching on odd-degree vertices. The concept of polynomial-time approximation schemes (PTAS) and fully polynomial-time approximation schemes (FPTAS) formalizes the trade-off between solution quality and computational efficiency.",
-            "type": "text",
-            "subject": "computer_science"
-        }
-    ],
-    "queries": [
-        {
-            "question": "How does CRISPR-Cas9 work for gene editing?",
-            "subject": "biology"
-        },
-        {
-            "question": "What is the CAP theorem and why is it important in distributed systems?",
-            "subject": "computer_science"
-        },
-        {
-            "question": "Explain the significance of the Residue theorem in complex analysis.",
-            "subject": "mathematics"
-        },
-        {
-            "question": "How do transformer architectures handle attention in neural networks?",
-            "subject": "computer_science"
-        },
-        {
-            "question": "What is V(D)J recombination and how does it relate to immune system diversity?",
-            "subject": "biology"
-        },
-        {
-            "question": "How do approximation algorithms help with NP-hard problems?",
-            "subject": "computer_science"
-        },
-        {
-            "question": "What is the pentose phosphate pathway and its role in cellular metabolism?",
-            "subject": "biology"
-        },
-        {
-            "question": "Explain the classification of compact surfaces in topology.",
-            "subject": "mathematics"
-        }
-    ]
+  "docs": [
+    {
+      "title": "Advanced Graph Theory",
+      "content": "Graph coloring problems represent a fundamental area of study in computational mathematics. The chromatic number χ(G) of a graph G is the minimum number of colors needed for a proper vertex coloring. The Four Color Theorem, proven in 1976, states that any planar graph can be colored with at most four colors. The proof was revolutionary as it was the first major mathematical proof to rely on computer verification. NP-completeness of graph coloring for general graphs has significant implications in complexity theory and algorithm design.",
+      "type": "text",
+      "subject": "mathematics"
+    },
+    {
+      "title": "Quantum Computing Fundamentals",
+      "content": "Quantum computation leverages quantum mechanical phenomena like superposition and entanglement. Unlike classical bits, qubits can exist in multiple states simultaneously due to superposition. The no-cloning theorem states that it's impossible to create an identical copy of an arbitrary unknown quantum state, which is fundamental to quantum cryptography. Quantum algorithms like Shor's algorithm for integer factorization and Grover's algorithm for unstructured search demonstrate quantum speedup over classical algorithms, with Shor's algorithm potentially threatening current cryptographic systems by solving the factoring problem in polynomial time.",
+      "type": "text",
+      "subject": "computer_science"
+    },
+    {
+      "title": "Advanced Molecular Biology",
+      "content": "CRISPR-Cas9 gene editing technology represents a breakthrough in molecular biology. The system consists of two key components: the Cas9 endonuclease and a guide RNA (gRNA). The gRNA directs Cas9 to specific DNA sequences, where it creates double-strand breaks. The cell's DNA repair mechanisms then activate, either through non-homologous end joining (NHEJ) or homology-directed repair (HDR). This system has revolutionized genetic engineering by providing precise, programmable genome editing capabilities.",
+      "type": "text",
+      "subject": "biology"
+    },
+    {
+      "title": "Complex Analysis",
+      "content": "The Residue theorem, a cornerstone of complex analysis, states that the contour integral of a holomorphic function around a simple closed contour equals 2πi times the sum of residues of the function at its singular points inside the contour. This powerful result connects topology with analysis, finding applications in physics and engineering. Related concepts like Laurent series expansions and the classification of singularities (removable, poles, and essential) provide tools for understanding complex function behavior near singular points.",
+      "type": "text",
+      "subject": "mathematics"
+    },
+    {
+      "title": "Distributed Systems Architecture",
+      "content": "The CAP theorem fundamentally states that a distributed data store cannot simultaneously provide more than two out of three guarantees: Consistency (all nodes see the same data), Availability (every request receives a response), and Partition tolerance (the system continues to operate despite network failures). Modern distributed systems often implement eventual consistency models as a compromise. The Paxos and Raft consensus algorithms provide theoretical frameworks for achieving agreement in distributed systems, with Raft designed for better understandability and implementation.",
+      "type": "text",
+      "subject": "computer_science"
+    },
+    {
+      "title": "Immunology and Disease",
+      "content": "The adaptive immune system's V(D)J recombination process generates antibody diversity through genetic recombination. B cells undergo somatic hypermutation during affinity maturation, introducing point mutations in immunoglobulin genes to produce antibodies with higher antigen affinity. Memory B cells, produced during the primary immune response, enable rapid antibody production during subsequent pathogen encounters. This process underlies both natural immunity and vaccination strategies.",
+      "type": "text",
+      "subject": "biology"
+    },
+    {
+      "title": "Neural Networks and Deep Learning",
+      "content": "Transformer architectures revolutionized natural language processing through their self-attention mechanism. Unlike traditional RNNs, transformers process entire sequences simultaneously, computing attention weights between all pairs of positions. The multi-head attention mechanism allows the model to attend to different aspects of the input simultaneously. Position encodings are crucial since the model lacks inherent sequential processing, typically implemented through sinusoidal functions or learned embeddings.",
+      "type": "text",
+      "subject": "computer_science"
+    },
+    {
+      "title": "Topology and Manifolds",
+      "content": "The classification of compact surfaces is a remarkable theorem in topology stating that every compact surface is homeomorphic to either a sphere, a connected sum of tori, or a connected sum of projective planes. The proof uses triangulation and fundamental polygon representation. The Euler characteristic χ = V - E + F is a topological invariant that aids in this classification. Related concepts include the fundamental group and covering spaces, which provide tools for understanding the global structure of topological spaces.",
+      "type": "text",
+      "subject": "mathematics"
+    },
+    {
+      "title": "Cellular Metabolism",
+      "content": "The pentose phosphate pathway, parallel to glycolysis, serves two major functions: NADPH generation and ribose-5-phosphate production. NADPH is crucial for reductive biosynthesis and handling oxidative stress. The pathway's regulation is primarily controlled by glucose-6-phosphate dehydrogenase, whose activity responds to the NADPH/NADP+ ratio. In cancer cells, this pathway is often upregulated to support rapid proliferation and manage increased oxidative stress levels.",
+      "type": "text",
+      "subject": "biology"
+    },
+    {
+      "title": "Algorithms and Complexity",
+      "content": "Approximation algorithms provide tractable solutions to NP-hard optimization problems. The traveling salesman problem (TSP), while NP-hard for exact solutions, has a 1.5-approximation algorithm for metric instances using Christofides algorithm. This combines minimum spanning tree construction with perfect matching on odd-degree vertices. The concept of polynomial-time approximation schemes (PTAS) and fully polynomial-time approximation schemes (FPTAS) formalizes the trade-off between solution quality and computational efficiency.",
+      "type": "text",
+      "subject": "computer_science"
+    }
+  ],
+  "queries": [
+    {
+      "question": "How does CRISPR-Cas9 work for gene editing?",
+      "subject": "biology"
+    },
+    {
+      "question": "What is the CAP theorem and why is it important in distributed systems?",
+      "subject": "computer_science"
+    },
+    {
+      "question": "Explain the significance of the Residue theorem in complex analysis.",
+      "subject": "mathematics"
+    },
+    {
+      "question": "How do transformer architectures handle attention in neural networks?",
+      "subject": "computer_science"
+    },
+    {
+      "question": "What is V(D)J recombination and how does it relate to immune system diversity?",
+      "subject": "biology"
+    },
+    {
+      "question": "How do approximation algorithms help with NP-hard problems?",
+      "subject": "computer_science"
+    },
+    {
+      "question": "What is the pentose phosphate pathway and its role in cellular metabolism?",
+      "subject": "biology"
+    },
+    {
+      "question": "Explain the classification of compact surfaces in topology.",
+      "subject": "mathematics"
+    }
+  ]
 }

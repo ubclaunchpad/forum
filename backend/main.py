@@ -1,5 +1,8 @@
 """Main file for the API"""
 
+import os
+import sys
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,6 +24,9 @@ app.add_middleware(
 
 course_router.include_router(document_router, prefix="/{course_id}", tags=["documents"])  # type: ignore
 
+
+# Add the backend folder to Python's module search path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # flag to enable auth middleware for ALL endpoints
 AUTH_MIDDLEWARE_ENABLED = False

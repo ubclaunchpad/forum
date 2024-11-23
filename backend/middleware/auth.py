@@ -1,6 +1,6 @@
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from database.db import supabase
+from backend.database.db import supabase
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -17,7 +17,6 @@ class AuthMiddleware(BaseHTTPMiddleware):
             user = supabase.auth.get_user()
             if not user:
                 return Response("Unauthorized", status_code=401)
-
         # proceed to the next middleware or endpoint
         response = await call_next(request)
         return response
