@@ -1,10 +1,12 @@
+"""Main file for the API"""
+
 import uvicorn
-from database.db import supabase
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
+from routers.routes.documents import document_router
 from routers.routes.users import user_router
-from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 app.include_router(user_router)
@@ -16,6 +18,9 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
     allow_headers=["*"],  # Allow all headers
 )
+
+course_router.include_router(document_router, prefix="/{course_id}", tags=["documents"])  # type: ignore
+
 
 # flag to enable auth middleware for ALL endpoints
 AUTH_MIDDLEWARE_ENABLED = False
@@ -30,12 +35,13 @@ app.add_middleware(
 
 @app.get("/")
 def root():
+    """Root path"""
     return {"message": "Hello from the backend!"}
 
 
-@app.get("/protected")
-def filler_protected_path():  # NOTE: delete later, used for testing
-    return {"message": "Protect route!"}
+# @app.get("/protected")
+# def filler_protected_path():  # NOTE: delete later, used for testing
+#     return {"message": "Protect route!"}
 
 
 if __name__ == "__main__":
