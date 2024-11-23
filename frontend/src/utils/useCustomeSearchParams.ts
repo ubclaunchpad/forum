@@ -15,7 +15,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
  *   - `replaceState`: If true, replaces the URL without adding a new history entry. Defaults to `true`.
  */
 
-export function customUseSearchParams() {
+export function useCustomSearchParams() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
