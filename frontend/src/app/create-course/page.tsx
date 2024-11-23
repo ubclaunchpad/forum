@@ -3,16 +3,18 @@
 import React, { useState, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { User, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { User, Pencil, Trash2 } from "lucide-react";
 
 type FormProps = {
   title: string;
   tagName: string;
   placeholder: string;
+  value?: string;
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
-const Form = ({ title, tagName, placeholder }: FormProps) => {
+const Form = ({ title, tagName, placeholder, value, onChange }: FormProps) => {
   return (
     <div className="flex flex-col items-start gap-[10px] flex-1">
       <p className="self-stretch">{title}</p>
@@ -22,6 +24,8 @@ const Form = ({ title, tagName, placeholder }: FormProps) => {
         placeholder={placeholder}
         className="bg-white text-white border-gray-600"
         required
+        value={value}
+        onChange={onChange}
       />
     </div>
   );
@@ -67,7 +71,7 @@ const Profile = ({ image_file, name, email, pronouns }: ProfileProps) => {
       <div className="flex items-center gap-5">
         <Button
           type="button"
-          size="xs"
+          size="sm"
           onClick={handleUserType}
           className="bg-orange-400 hover:bg-blue-500 text-white flex-1"
         >
@@ -75,7 +79,7 @@ const Profile = ({ image_file, name, email, pronouns }: ProfileProps) => {
         </Button>
         <Button
           type="button"
-          size="icon_sm"
+          size="sm"
           onClick={handleUserType}
           className="bg-transparent hover:bg-blue-500 text-white flex-1"
         >
@@ -83,7 +87,7 @@ const Profile = ({ image_file, name, email, pronouns }: ProfileProps) => {
         </Button>
         <Button
           type="button"
-          size="icon_sm"
+          size="sm"
           onClick={handleUserType}
           className="bg-transparent hover:bg-blue-500 text-white flex-1"
         >
@@ -95,6 +99,39 @@ const Profile = ({ image_file, name, email, pronouns }: ProfileProps) => {
 };
 
 const CreateCoursePage = () => {
+  const router = useRouter();
+
+  const [courseGroup, setCourseGroup] = useState<string | undefined>("");
+  const [courseCode, setCourseCode] = useState<string | undefined>("");
+  const [courseSection, setCourseSection] = useState<string | undefined>("");
+  const [courseName, setCourseName] = useState<string | undefined>("");
+
+  // can refactor later to combine into one handler using a key-value pair
+  const handleCourseGroupInputChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const newValue = event.target.value;
+    setCourseGroup(newValue);
+  };
+  const handleCourseCodeInputChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const newValue = event.target.value;
+    setCourseCode(newValue);
+  };
+  const handleCourseSectionInputChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const newValue = event.target.value;
+    setCourseSection(newValue);
+  };
+  const handleCourseNameInputChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const newValue = event.target.value;
+    setCourseName(newValue);
+  };
+
   const handleInvite = async () => {
     // TODO: add invite functionality
   };
@@ -114,16 +151,19 @@ const CreateCoursePage = () => {
                 title="Course Group"
                 tagName="courseGroup"
                 placeholder="e.g. CPSC"
+                onChange={handleCourseGroupInputChange}
               />
               <Form
                 title="Course Code"
                 tagName="courseCode"
                 placeholder="e.g. 110"
+                onChange={handleCourseCodeInputChange}
               />
               <Form
                 title="Course Section (optional)"
                 tagName="courseSection"
                 placeholder="e.g. 101/103"
+                onChange={handleCourseSectionInputChange}
               />
             </div>
             <div className="w-1/2">
@@ -131,6 +171,7 @@ const CreateCoursePage = () => {
                 title="Course Name"
                 tagName="courseName"
                 placeholder="e.g. Computation, programs, and programming"
+                onChange={handleCourseNameInputChange}
               />
             </div>
             <div className="flex flex-col items-start gap-[30px] w-full">
