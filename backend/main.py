@@ -8,12 +8,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
-from routers.routes.documents import document_router
 from routers.routes.users import user_router
 
 app = FastAPI()
-app.include_router(user_router)
-app.include_router(course_router)
+app.include_router(user_router, tags=["Users"], prefix="/users")
+app.include_router(course_router, tags=["Courses"], prefix="/courses")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Allow your frontend origin
@@ -21,8 +20,6 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
     allow_headers=["*"],  # Allow all headers
 )
-
-course_router.include_router(document_router, prefix="/{course_id}", tags=["documents"])  # type: ignore
 
 
 # Add the backend folder to Python's module search path

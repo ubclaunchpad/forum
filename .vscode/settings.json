@@ -1,0 +1,26 @@
+{
+    "python.analysis.extraPaths": [
+        "./backend"
+    ],
+    "python.analysis.diagnosticMode": "workspace",
+    "python.defaultInterpreterPath": "./backend/venv/bin/python",
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.linting.pylintArgs": [
+        "--python-path",
+        "./backend"
+    ],
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.python",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/.pytest_cache": true,
+        "**/*.pyc": true
+    }
+}
