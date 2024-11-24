@@ -1,12 +1,11 @@
-from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel, Field, validator
 from typing import List, Optional
 
-from crud import course_crud
-from crud.course_crud import UserNotEnrolledException, NoPermissionException
-from routers.req.courses_req import CreateCourseReq, UpdateCourseReq
-
 from core.pipelines.doc_query_engine import DocumentQueryEngine
+from crud import course_crud
+from crud.course_crud import NoPermissionException, UserNotEnrolledException
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel, Field, validator
+from routers.req.courses_req import CreateCourseReq, UpdateCourseReq
 
 course_router = APIRouter()
 course_router_endpoint = "/courses"

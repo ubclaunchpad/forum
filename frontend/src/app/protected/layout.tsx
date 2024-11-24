@@ -19,7 +19,7 @@ export default async function RootLayout({
 
   return (
     <Suspense>
-      <UserContextProvider user={data.user}>{children}</UserContextProvider>\
+      <UserContextProvider user={data.user}>{children}</UserContextProvider>
     </Suspense>
   );
 }

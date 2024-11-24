@@ -72,14 +72,14 @@ const SignInPage = () => {
           <Button
             type="button"
             onClick={handleSignup}
-            className="bg-purple-600 hover:bg-purple-500 text-white flex-1"
+            className="bg-primary-8 hover:bg-primary-9 text-white flex-1"
           >
             Sign Up
           </Button>
           <Button
             type="button"
             onClick={handleLogin}
-            className="bg-blue hover:bg-blue-500 text-white flex-1"
+            className="bg-secondary-8 hover:bg-secondary-9 text-white flex-1"
           >
             Login
           </Button>
