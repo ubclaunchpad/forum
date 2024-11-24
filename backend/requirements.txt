@@ -126,6 +126,8 @@ python-dateutil==2.9.0.post0
     #   storage3
 python-dotenv==1.0.1
     # via -r requirements.in
+python-multipart==0.0.17
+    # via -r requirements.in
 realtime==2.0.6
     # via supabase
 six==1.16.0
