@@ -11,7 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 load_dotenv()
 
-environemt = os.getenv("ENV")
+environment = os.getenv("ENV")
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -46,7 +46,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         return False
 
     async def dispatch(self, request: Request, call_next):
-        if environemt == ENV.DEV.value:
+        if environment == ENV.DEV.value:
             email = os.getenv("DEV_USER_EMAIL")
             password = os.getenv("DEV_USER_PASSWORD")
             supabase.auth.sign_in_with_password({"email": email, "password": password})

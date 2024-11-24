@@ -4,6 +4,7 @@ import os
 import sys
 
 import uvicorn
+from core.util.env_util import ENV, parse_bool_env
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,31 +14,34 @@ from routers.routes.users import user_router
 
 load_dotenv()
 
-AUTH_MIDDLEWARE_ENABLED = (
-    True if os.getenv("AUTH_MIDDLEWARE_ENABLED") != "False" else False
-)  # if env is missing, default to True
+environment = os.getenv("ENV")
+
+AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=True)
+allowed_origins = ["http://localhost:3000"] if environment == ENV.DEV.value else []
 
 app = FastAPI()
 app.include_router(user_router, tags=["Users"], prefix="/users")
 app.include_router(course_router, tags=["Courses"], prefix="/courses")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Allow your frontend origin
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Add the backend folder to Python's module search path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-# middlewares
+
+
 app.add_middleware(AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED)
 
 
 @app.get("/")
 def root():
     """Root path"""
-    return {"message": "Hello from the backend!"}
+    return {"message": "ForumAI is running!"}
 
 
 if __name__ == "__main__":
