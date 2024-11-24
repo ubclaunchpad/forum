@@ -1,10 +1,23 @@
-from fastapi import APIRouter, HTTPException, Request
+from typing import List, Optional
+
+from core.pipelines.doc_query_engine import DocumentQueryEngine
 from crud import course_crud
-from crud.course_crud import UserNotEnrolledException, NoPermissionException
+from crud.course_crud import NoPermissionException, UserNotEnrolledException
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel, Field, validator
 from routers.req.courses_req import CreateCourseReq, UpdateCourseReq
 
 course_router = APIRouter()
 course_router_endpoint = "/courses"
+
+# Maximum number of chunks to retrieve from the document, hard-coded for now
+MAX_CHUNKS = 5
+
+# Initialize DocumentQueryEngine
+try:
+    query_engine = DocumentQueryEngine(max_chunks=MAX_CHUNKS)
+except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Error initializing query engine: {e}")
 
 # @course_router.post(course_router_endpoint)
 # async def register_course(create_course_req: RegisterUserReq):
@@ -12,6 +25,82 @@ course_router_endpoint = "/courses"
 #     if not profile:
 #         raise HTTPException(status_code=404, detail="Failed to create course.")
 #     return profile
+
+
+class CourseQueryRequest(BaseModel):
+    question: str = Field(..., min_length=5)
+    template_name: Optional[str] = None
+    max_chunks: Optional[int] = Field(default=5, ge=1)
+
+    @validator("question")
+    def question_length(cls, v):
+        if len(v.strip()) < 5:
+            raise ValueError("Question must be at least 5 characters long")
+        return v
+
+
+# Response model
+class Source(BaseModel):
+    document_title: str
+    content: str
+    similarity: float
+    metadata: dict
+
+
+class CourseQueryResponse(BaseModel):
+    answer: str
+    sources: List[Source]
+
+
+def user_has_access_to_course(user_id: Optional[str], course_id: str) -> bool:
+    # Implement your logic to check if the user has access to the course
+    # For example, check if user is enrolled in the course
+    # Return True if they have access, False otherwise
+    # For now, we'll assume all users have access (replace with real logic)
+    return True
+
+
+@course_router.post("/courses/{course_id}/query", response_model=CourseQueryResponse)
+async def query_course_content(
+    course_id: str, query_request: CourseQueryRequest, request: Request
+):
+    """
+    Endpoint for querying course content using RAG.
+    """
+    user_id = request.headers.get("X-User-ID")
+
+    if not user_has_access_to_course(user_id, course_id):
+        raise HTTPException(status_code=403, detail="Access denied to this course")
+
+    # Perform query
+    try:
+        result = query_engine.query(
+            question=query_request.question,
+            template_name=query_request.template_name,
+        )
+    except KeyError as e:
+        # Template not found
+        raise HTTPException(status_code=400, detail=f"Template not found: {e}")
+    except ValueError as e:
+        # Other validation errors
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        # General error handling
+        raise HTTPException(status_code=500, detail=f"Error during query: {e}")
+
+    # Return the response
+    return CourseQueryResponse(
+        answer=result["answer"],
+        sources=[
+            Source(
+                document_title=src["document_title"],
+                content=src["content"],
+                similarity=src["similarity"],
+                metadata=src["metadata"],
+            )
+            for src in result["sources"]
+        ],
+    )
 
 
 @course_router.get(course_router_endpoint)

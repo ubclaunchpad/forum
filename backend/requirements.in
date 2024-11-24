@@ -9,5 +9,4 @@ python-dotenv>=1.0.1
 supabase>=2.10.0
 uvicorn>=0.32.0
 python-multipart
-
-python-multipart
+black>=24.1.0
