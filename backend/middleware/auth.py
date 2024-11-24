@@ -15,6 +15,7 @@ environment = os.getenv("ENV")
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
+    """Middleware for authenticating requests."""
     def __init__(
         self, app, enabled: bool = True, protected_paths: Optional[List[str]] = None
     ):
@@ -62,5 +63,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         request.state.user = user.user
         request.state.user_id = user.user.id
         request.state.user_email = user.user.email
+
+        # for convenience, add the user_id to the request headers
+        request.headers["X-User-ID"] = user.user.id
+
         response = await call_next(request)
         return response
