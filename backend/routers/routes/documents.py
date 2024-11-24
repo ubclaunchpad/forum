@@ -12,10 +12,7 @@ document_router = APIRouter()
 
 @document_router.post("", response_model=DocumentResponse)
 async def create_document(
-    course_id: UUID,
-    file: UploadFile,
-    title: str = Form(...),
-    metadata: str = Form(...)
+    course_id: UUID, file: UploadFile, title: str = Form(...), metadata: str = Form(...)
 ) -> DocumentResponse:
     """
     Create a new document associated with a course.
@@ -24,25 +21,21 @@ async def create_document(
     try:
         validated_title = DocumentTitle(title=title)
     except ValidationError as e:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid title: {str(e)}"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid title: {str(e)}")
 
     # Parse and validate metadata
     try:
         metadata_obj = DocumentMetadata.model_validate_json(metadata)
     except ValidationError as e:
         raise HTTPException(
-            status_code=400,
-            detail=f"Invalid metadata format: {str(e)}"
+            status_code=400, detail=f"Invalid metadata format: {str(e)}"
         )
 
     # Validate file type
     if file.content_type != metadata_obj.document_type.value:
         raise HTTPException(
             status_code=400,
-            detail=f"File type {file.content_type} does not match specified document type {metadata_obj.document_type.value}"
+            detail=f"File type {file.content_type} does not match specified document type {metadata_obj.document_type.value}",
         )
 
     # Optional: Add file size validation
@@ -52,27 +45,25 @@ async def create_document(
             actual_size = len(content)
             if actual_size != metadata_obj.file_size:
                 metadata_obj.file_size = actual_size
-            await file.seek(0)  # Reset file pointer after reading
+            await file.seek(0)
         except Exception as e:
             raise HTTPException(
-                status_code=400,
-                detail=f"Error validating file size: {str(e)}"
+                status_code=400, detail=f"Error validating file size: {str(e)}"
             )
 
-    # Create document - Add await here
     try:
         response = await document_crud.create_document(  # Add await here
             file=file,
             metadata=metadata_obj,
             course_id=course_id,
-            title=validated_title.title
+            title=validated_title.title,
         )
-        return response  # This should now return a DocumentResponse object
+        return response
     except Exception as e:
         raise HTTPException(
-            status_code=500,
-            detail=f"Error creating document: {str(e)}"
+            status_code=500, detail=f"Error creating document: {str(e)}"
         )
+
 
 @document_router.get("")
 async def get_documents(course_id: UUID) -> list[DocumentResponse]:

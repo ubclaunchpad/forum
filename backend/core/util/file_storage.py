@@ -132,7 +132,6 @@ class FileStorage:
         timestamp = dt.now().strftime("%Y%m%d_%H%M%S")
         return f"{base_name}_{timestamp}{extension}"
 
-
     def store_file(self, file_content: bytes, filename: str) -> str:
         """
         Store file in Supabase storage.
@@ -152,7 +151,6 @@ class FileStorage:
 
         try:
             storage = self.supabase.storage.from_(self.bucket_name)
-            
 
             if self.conflict_resolution == ConflictResolution.APPEND_TIMESTAMP:
                 filename = self._handle_filename_conflict(storage, filename)
@@ -167,7 +165,7 @@ class FileStorage:
             response = storage.upload(
                 file=file_content,  # Pass bytes directly
                 path=file_path,
-                file_options={"content-type": content_type}
+                file_options={"content-type": content_type},
             )
             return response.path
 
@@ -176,8 +174,10 @@ class FileStorage:
             raise HTTPException(status_code=409, detail=str(e))
         except Exception as e:
             logger.error(f"Error storing file: {e}")
-            raise HTTPException(status_code=500, detail=f"Failed to store file: {str(e)}")
-        
+            raise HTTPException(
+                status_code=500, detail=f"Failed to store file: {str(e)}"
+            )
+
     def retrieve_file(self, file_path: str) -> Optional[bytes]:
         """
         Get file from storage.
@@ -252,7 +252,7 @@ class FileStorage:
         except Exception as e:
             logger.error(f"Error listing files: {e}")
             raise HTTPException(status_code=500, detail="Failed to list files")
-    
+
     def format_file_url(self, file_path: str) -> str:
         """
         Format the file path into a URL for public access.
@@ -263,6 +263,6 @@ class FileStorage:
         Returns:
             str: URL to access the file
         """
-        return f"{url}/storage/v1/object/public/{self.bucket_name}/documents/{file_path}"
-
-
+        return (
+            f"{url}/storage/v1/object/public/{self.bucket_name}/documents/{file_path}"
+        )

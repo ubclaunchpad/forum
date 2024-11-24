@@ -6,24 +6,24 @@ from uuid import UUID, uuid4
 from core.util.file_storage import FileStorage
 from database.db import database
 from fastapi import HTTPException, UploadFile
+
 # Import the models from your API
 from models.documents import DocumentMetadata, DocumentResponse, DocumentType
 from pydantic import BaseModel
 
 file_storage = FileStorage(bucket_name="course-files")
 
+
 class DocumentCreate(BaseModel):
     """Internal model for document creation"""
+
     title: str
     metadata: DocumentMetadata
     course_id: UUID
 
 
 async def create_document(
-    file: UploadFile,
-    metadata: DocumentMetadata,
-    course_id: UUID,
-    title: str
+    file: UploadFile, metadata: DocumentMetadata, course_id: UUID, title: str
 ) -> DocumentResponse:
     """Creates a new document and associates it with a course."""
     doc_id = uuid4()
@@ -31,9 +31,11 @@ async def create_document(
     try:
         # Read file content
         file_content = await file.read()
-        
+
         # Store file and get storage reference
-        file_id = file_storage.store_file(file_content, title)  # No await here since it's not async
+        file_id = file_storage.store_file(
+            file_content, title
+        )  # No await here since it's not async
 
         # Reset file pointer
         await file.seek(0)
@@ -50,19 +52,12 @@ async def create_document(
             "metadata": metadata_dict,
         }
 
-        doc_response = (
-            database.table("documents")
-            .insert(doc_data)
-            .execute()
-        )
+        doc_response = database.table("documents").insert(doc_data).execute()
 
         # Create course association
         course_doc_response = (
             database.table("course_documents")
-            .insert({
-                "course_id": str(course_id), 
-                "document_id": str(doc_id)
-            })
+            .insert({"course_id": str(course_id), "document_id": str(doc_id)})
             .execute()
         )
 
@@ -79,9 +74,9 @@ async def create_document(
     except Exception as e:
         logging.error("Failed to create document: %s", e)
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to create document: {str(e)}"
+            status_code=500, detail=f"Failed to create document: {str(e)}"
         )
+
 
 def get_documents(course_id: UUID) -> List[DocumentResponse]:
     """
@@ -106,15 +101,15 @@ def get_documents(course_id: UUID) -> List[DocumentResponse]:
             .eq("course_id", str(course_id))
             .execute()
         )
-        
+
         docs: List[Dict[str, Any]] = res.data
         # Fetch document records
         doc_ids = [doc["document_id"] for doc in docs]
         if not doc_ids:
             return []
-            
+
         documents = database.table("documents").select("*").in_("id", doc_ids).execute()
-        
+
         # Convert to DocumentResponse objects
         return [
             DocumentResponse(
@@ -128,7 +123,7 @@ def get_documents(course_id: UUID) -> List[DocumentResponse]:
                 other=doc.get("metadata", {}).get("other"),
                 created_at=doc["created_at"],
                 updated_at=doc.get("updated_at"),
-                file_url=f"/api/documents/{doc['id']}/file"
+                file_url=f"/api/documents/{doc['id']}/file",
             )
             for doc in documents.data
         ]
@@ -136,9 +131,9 @@ def get_documents(course_id: UUID) -> List[DocumentResponse]:
     except Exception as e:
         logging.error("Failed to get documents: %s", e)
         raise HTTPException(
-            status_code=500, 
-            detail=f"Failed to get documents: {str(e)}"
+            status_code=500, detail=f"Failed to get documents: {str(e)}"
         ) from e
+
 
 def get_document_by_id(document_id: UUID) -> DocumentResponse:
     """
@@ -158,17 +153,14 @@ def get_document_by_id(document_id: UUID) -> DocumentResponse:
     try:
         # Fetch document record
         result = (
-            database.table("documents")
-            .select("*")
-            .eq("id", str(document_id))
-            .execute()
+            database.table("documents").select("*").eq("id", str(document_id)).execute()
         )
 
         if not result.data:
             raise HTTPException(status_code=404, detail="Document not found")
 
         doc = result.data[0]
-        
+
         # Get course_id from association table
         course_result = (
             database.table("course_documents")
@@ -176,11 +168,10 @@ def get_document_by_id(document_id: UUID) -> DocumentResponse:
             .eq("document_id", str(document_id))
             .execute()
         )
-        
+
         if not course_result.data:
             raise HTTPException(
-                status_code=404, 
-                detail="Document not associated with any course"
+                status_code=404, detail="Document not associated with any course"
             )
 
         # Convert to DocumentResponse
@@ -195,7 +186,7 @@ def get_document_by_id(document_id: UUID) -> DocumentResponse:
             other=doc.get("metadata", {}).get("other"),
             created_at=doc["created_at"],
             updated_at=doc.get("updated_at"),
-            file_url=f"/api/documents/{doc['id']}/file"
+            file_url=f"/api/documents/{doc['id']}/file",
         )
 
     except HTTPException:
@@ -203,6 +194,5 @@ def get_document_by_id(document_id: UUID) -> DocumentResponse:
     except Exception as e:
         logging.error("Failed to get document: %s", e)
         raise HTTPException(
-            status_code=500, 
-            detail=f"Failed to get document: {str(e)}"
+            status_code=500, detail=f"Failed to get document: {str(e)}"
         ) from e
