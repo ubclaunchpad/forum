@@ -65,10 +65,10 @@ After activating your virtual environment:
 python manage_deps.py sync
 ```
 
-- install development dependencies:
+- install dependencies:
 
 ```bash
-pip install -r requirements-dev.txt
+pip install -r requirements.txt
 ```
 
 #### Adding New Packages
@@ -82,6 +82,8 @@ python manage_deps.py add package_name
 # Add a development dependency
 python manage_deps.py add package_name --dev
 ```
+
+(you might need to run `pip install -r requirements.txt` after adding new dependencies)
 
 Examples:
 
@@ -105,7 +107,7 @@ python manage_deps.py sync
 
 The project includes a RAG implementation with the following structure:
 
-#### Directory Structure
+#### Directory Structure (Partial)
 
 ```txt
   project_root/
@@ -150,6 +152,12 @@ OPENAI_API_KEY=your_key_here
 DATABASE_URL=your_database_url
 SUPABASE_URL=your_supabase_url
 SUPABASE_KEY=your_supabase_key
+
+AUTH_MIDDLEWARE_ENABLED=true # or false
+DEV_USER_EMAIL=your_email_here
+DEV_USER_PASSWORD=your_password_here
+
+ENV=development # or production
 ```
 
 Where to find these?
@@ -158,8 +166,15 @@ Where to find these?
 - Go to the project settings:
   - In the API section, you will find the `SUPABASE_URL` and `SUPABASE_KEY`
   - In the Database section, you will find the `DATABASE_URL` (you want a connection string)
+- For most cases you will need to have the `AUTH_MIDDLEWARE_ENABLED` set to `true` and the `DEV_USER_EMAIL` and `DEV_USER_PASSWORD` set to your email and password
+  - On your Supabase project, go to the `Auth` section and create a new user (you can manually set the email and password); then use these credentials in the `.env` file
+
+
+For the OpenAI API key:
+
 - Go on [OpenAI](https://platform.openai.com/) and create a new project (or use an existing one)
   - You do not need this unless you use the OpenAI API
+
 
 ### Database Migrations
 
@@ -217,6 +232,14 @@ Note: make sure you have activated your virtual environment before running these
 
 - Check formatting: in your terminal run: `black --check ./`
 - Apply formatting: in your terminal run: `black ./`
+
+### Running the API
+
+- With the virtual environment activated, run the following command:
+
+```bash
+   python -m main
+```
 
 ---
 
