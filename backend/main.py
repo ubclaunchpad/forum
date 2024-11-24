@@ -1,6 +1,7 @@
+import sys
+import os
 import uvicorn
-from database.db import supabase
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 from routers.routes.posts import post_router
@@ -10,6 +11,9 @@ app = FastAPI()
 app.include_router(user_router)
 app.include_router(course_router)
 app.include_router(post_router)
+
+# Add the backend folder to Python's module search path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # flag to enable auth middleware for ALL endpoints
 AUTH_MIDDLEWARE_ENABLED = False

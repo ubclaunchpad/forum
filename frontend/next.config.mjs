@@ -31,6 +31,7 @@ const nextConfig = {
         },
       );
   
+      config.resolve.alias.canvas = false;
       // Modify the file loader rule to ignore *.svg, since we have it handled now.
       fileLoaderRule.exclude = /\.svg$/i;
   
