@@ -4,11 +4,18 @@ import os
 import sys
 
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 from routers.routes.users import user_router
+
+load_dotenv()
+
+AUTH_MIDDLEWARE_ENABLED = (
+    True if os.getenv("AUTH_MIDDLEWARE_ENABLED") != "False" else False
+)  # if env is missing, default to True
 
 app = FastAPI()
 app.include_router(user_router, tags=["Users"], prefix="/users")
@@ -21,30 +28,16 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-
 # Add the backend folder to Python's module search path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-# flag to enable auth middleware for ALL endpoints
-AUTH_MIDDLEWARE_ENABLED = False
-# endpoints that will be public (requires AUTH_MIDDLEWARE_ENABLE == True to work)
-PUBLIC_PATHS = ["/"]
-
 # middlewares
-app.add_middleware(
-    AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED, public_paths=PUBLIC_PATHS
-)
+app.add_middleware(AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED)
 
 
 @app.get("/")
 def root():
     """Root path"""
     return {"message": "Hello from the backend!"}
-
-
-# @app.get("/protected")
-# def filler_protected_path():  # NOTE: delete later, used for testing
-#     return {"message": "Protect route!"}
 
 
 if __name__ == "__main__":
