@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import json
 from http.client import HTTPException
 from database.db import supabase
@@ -152,7 +153,8 @@ def update_user_course_role(course_id: int, req: AssignCourseUserRoleReq, author
     row = {
         "access_role": req.access_role,
         "semantic_role": req.semantic_role,
-        "assigned_by": author
+        "assigned_by": author,
+        "updated_at": datetime.now(timezone.utc).isoformat()
     }
     response = supabase.table("course_user_roles").update(row).eq("user_id", req.u_id).eq("course_id", course_id).execute()
     return response
