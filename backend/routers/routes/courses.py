@@ -139,7 +139,6 @@ async def assign_user_course_role(c_id: int, request: AssignCourseUserRoleReq):
         prev_user_course_role = None    
 
     assign_response = course_crud.assign_user_course_role(c_id, request)
-    print(assign_response)
     if not assign_response or not assign_response.data or len(assign_response.data) <= 0:
         raise HTTPException(status_code=404, detail="Failed to add course role to user")
 
@@ -151,14 +150,11 @@ async def assign_user_course_role(c_id: int, request: AssignCourseUserRoleReq):
     history_response = course_crud.create_user_course_role_history(updated_user_course_role, prev_user_course_role, request.reason)
     if not history_response:
         return HTTPException(status_code=404, detail="Failed to update course role history")
-    print(history_response)
 
     return assign_response
     
 @course_router.patch(course_user_role_endpoint)
 async def update_user_course_role(c_id: int, request: AssignCourseUserRoleReq):
-    print(c_id)
-    print(request)
 
     user = user_crud.get_user_by_id(request.u_id)
     if not user:
@@ -181,7 +177,6 @@ async def update_user_course_role(c_id: int, request: AssignCourseUserRoleReq):
         raise HTTPException(status_code=404, detail="Failed to process previous course role, did not update change role history")    
     
     update_response = course_crud.update_user_course_role(c_id, request)
-    print(update_response)
     if not update_response or not update_response.data or len(update_response.data) <= 0:
         raise HTTPException(status_code=404, detail="Failed to add course role to user")
     try:
@@ -192,5 +187,5 @@ async def update_user_course_role(c_id: int, request: AssignCourseUserRoleReq):
     history_response = course_crud.create_user_course_role_history(updated_user_course_role, prev_user_course_role, request.reason)
     if not history_response:
         return HTTPException(status_code=404, detail="Failed to update course role history")
-    print(history_response)
+
     return update_response

@@ -133,10 +133,8 @@ def get_users_with_course_roles(course_id: int):
                         "assigned_by," 
                         "assigned_by_name:profiles!course_user_roles_assigned_by_fkey(first_name, last_name)")
         response = supabase.table("course_user_roles").select(column_names).eq("course_id", course_id).execute()
-        print(response)
         return response
     except Exception as e:
-        print(str(e))
         return None
     
 def assign_user_course_role(course_id: int, req: AssignCourseUserRoleReq):
