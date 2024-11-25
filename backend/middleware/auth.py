@@ -16,6 +16,7 @@ environment = os.getenv("ENV")
 
 class AuthMiddleware(BaseHTTPMiddleware):
     """Middleware for authenticating requests."""
+
     def __init__(
         self, app, enabled: bool = True, protected_paths: Optional[List[str]] = None
     ):
@@ -24,26 +25,19 @@ class AuthMiddleware(BaseHTTPMiddleware):
         self.protected_paths = (
             ["courses", "users"] if protected_paths is None else protected_paths
         )
+        self.split_protected_paths = [path.split("/") for path in self.protected_paths]
 
     def is_path_protected(self, request_path: str) -> bool:
         """
         Check if the given path matches any protected path pattern.
         Handles exact matches and wildcard patterns (e.g., /course/*).
         """
-        request_path = request_path.rstrip("/")
-
-        for protected_path in self.protected_paths:
-            protected_path = protected_path.rstrip("/")
-
-            # Handle wildcard patterns
-            if protected_path.endswith("/*"):
-                base_path = protected_path[:-2]  # Remove /* from the end
-                if request_path.startswith(base_path):
-                    return True
-            # Handle exact matches
-            elif request_path == protected_path:
-                return True
-
+        request_path = request_path.split("/")
+        for protected_path in self.split_protected_paths:
+            for i, _ in enumerate(protected_path):
+                if protected_path[i] != request_path[i]:
+                    break
+            return True
         return False
 
     async def dispatch(self, request: Request, call_next):
@@ -55,17 +49,13 @@ class AuthMiddleware(BaseHTTPMiddleware):
         # check if the middleware is enabled
         if self.enabled:
             if not self.is_path_protected(request.url.path):
+                print("not protected")
                 return await call_next(request)
             user = supabase.auth.get_user()
             if not user:
                 return Response("Unauthorized", status_code=401)
-
         request.state.user = user.user
         request.state.user_id = user.user.id
         request.state.user_email = user.user.email
-
-        # for convenience, add the user_id to the request headers
-        request.headers["X-User-ID"] = user.user.id
-
         response = await call_next(request)
         return response

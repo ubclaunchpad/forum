@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
+from routers.routes.documents import document_router
 from routers.routes.users import user_router
 
 load_dotenv()
@@ -20,8 +21,15 @@ AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=True
 allowed_origins = ["http://localhost:3000"] if environment == ENV.DEV.value else []
 
 app = FastAPI()
+
+# Sub-routers
 app.include_router(user_router, tags=["Users"], prefix="/users")
 app.include_router(course_router, tags=["Courses"], prefix="/courses")
+
+# Nested routers
+course_router.include_router(
+    document_router, tags=["Documents"], prefix="/{course_id}/documents"
+)
 
 app.add_middleware(
     CORSMiddleware,
