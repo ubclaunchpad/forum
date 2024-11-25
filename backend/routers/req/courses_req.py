@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 from datetime import date
 from pydantic import BaseModel
@@ -28,3 +29,19 @@ class UpdateCourseReq(BaseModel):
     config: str | None = None
     start_date: date | None = None
     end_date: date | None = None
+
+class AssignCourseUserRoleReq(BaseModel):
+    u_id: UUID
+    access_role: int
+    semantic_role: str | None = None
+    reason: str | None = None
+
+class CourseUserRole(BaseModel):
+    id: UUID
+    course_id: int
+    user_id: UUID
+    access_role: int
+    semantic_role: str
+    assigned_by: UUID
+    created_at: datetime
+    updated_at: datetime

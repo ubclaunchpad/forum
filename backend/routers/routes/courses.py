@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException, Request
+from pydantic import ValidationError
 from crud import course_crud
+from crud import user_crud
 from crud.course_crud import UserNotEnrolledException, NoPermissionException
-from routers.req.courses_req import CreateCourseReq, UpdateCourseReq
+from routers.req.courses_req import CreateCourseReq, UpdateCourseReq, AssignCourseUserRoleReq, CourseUserRole
 
 course_router = APIRouter()
 course_router_endpoint = "/courses"
@@ -102,3 +104,58 @@ async def update_course(update_course_req: UpdateCourseReq, request: Request):
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+course_user_role_endpoint = course_router_endpoint + "/{c_id}/users/roles"
+
+@course_router.get(course_user_role_endpoint)
+async def get_users_with_course_roles(c_id: int, request: Request):
+    users = course_crud.get_users_with_course_roles(c_id)
+    if not users:
+        raise HTTPException(status_code=404, detail="Failed to fetch users")
+    return users
+
+@course_router.post(course_user_role_endpoint)
+async def assign_user_course_role(c_id: int, request: AssignCourseUserRoleReq):
+
+    print(request)
+    user = user_crud.get_user_by_id(request.u_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Failed to find user")
+    
+    try:
+       course = course_crud.get_course_by_id(c_id, request.u_id)
+    except UserNotEnrolledException as e:
+        raise HTTPException(status_code=404, detail="User not enrolled in course")
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail="Failed to find course")
+    
+    prev_user_course_role = course_crud.get_user_course_role_by_id(request.u_id)    
+
+    try:
+        if not prev_user_course_role or not prev_user_course_role.data or len(prev_user_course_role.data) <= 0:
+            prev_user_course_role = None
+        else:
+            prev_user_course_role = CourseUserRole.model_validate(prev_user_course_role.data[0])
+    except ValidationError as e:
+        prev_user_course_role = None    
+
+    assign_response = course_crud.assign_user_course_role(c_id, request)
+    print(assign_response)
+    if not assign_response or not assign_response.data or len(assign_response.data) <= 0:
+        raise HTTPException(status_code=404, detail="Failed to add course role to user")
+
+    try:
+        updated_user_course_role = CourseUserRole.model_validate(assign_response.data[0])
+    except ValidationError as e:
+        raise HTTPException(status_code=404, detail="Failed to process updated user, could not update role history")
+    
+    history_response = course_crud.update_user_course_role_history(updated_user_course_role, prev_user_course_role, request.reason)
+    if not history_response:
+        return HTTPException(status_code=404, detail="Failed to update course role history")
+    print(history_response)
+
+    return assign_response
+    
+
+
+# @course_router.patch(course_user_role_endpoint + "/{u_id}")
