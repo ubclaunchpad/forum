@@ -1,13 +1,13 @@
-from typing import Annotated, Literal
+from typing import Annotated
 
 from crud import post_crud, user_crud
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
-from models.post_models import FilterParams, Post, PostEdit
+from fastapi import APIRouter, HTTPException, Query, Request
+from models.post_models import FilterParams, Post, PostEdit, PostResponse
 
 post_router = APIRouter()
 
 
-@post_router.post("")
+@post_router.post("", response_model=PostResponse)
 async def create_post(course_id: str, post_info: Post, request: Request):
     user_id = request.state.user_id
     post = post_crud.create_post(user_id, course_id, post_info)
@@ -15,7 +15,7 @@ async def create_post(course_id: str, post_info: Post, request: Request):
     return post
 
 
-@post_router.get("")
+@post_router.get("", response_model=list[PostResponse])
 async def get_posts(course_id: str, query: Annotated[FilterParams, Query()]):
     params = {"sort": query.sort}
 
@@ -33,7 +33,7 @@ async def get_posts(course_id: str, query: Annotated[FilterParams, Query()]):
     return posts
 
 
-@post_router.get("/{post_id}")
+@post_router.get("/{post_id}", response_model=PostResponse)
 async def get_post(post_id: str):
     post = post_crud.get_post(post_id)
     return post

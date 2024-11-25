@@ -2,9 +2,10 @@ from database.db import supabase
 from fastapi import HTTPException
 
 
+# Create a post
 def create_post(user_id, course_id, post_info):
     try:
-        response = (
+        post = (
             supabase.table("posts")
             .insert(
                 {
@@ -18,43 +19,41 @@ def create_post(user_id, course_id, post_info):
             )
             .execute()
         )
-        return response
+        return post.data[0]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create post: {str(e)}")
+    
+# Get a post through post ID
+def get_post(post_id):
+    try:
+        post = find_post(post_id)
+        if not post.data:
+            raise HTTPException(status_code=404, detail="Failed to find post.")
+        return post.data[0]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"{str(e)}")
 
 
+# Get all posts in course with filter
 def get_posts(course_id, params):
     try:
         desc = True if params["sort"] == "newest" else False
+        
+        query = supabase.table("posts").select("*", count="exact").eq("course_id", course_id).order("applied_at", desc=desc)
 
-        if "creator_id" not in params:
-            response = (
-                supabase.table("posts")
-                .select("*", count="exact")
-                .eq("course_id", course_id)
-                .order("applied_at", desc=desc)
-                .execute()
-            )
+        if "creator_id" in params:
+            query = query.eq("created_by", params["creator_id"])
 
-            return response
+        posts = query.execute()
 
-        response = (
-            supabase.table("posts")
-            .select("*", count="exact")
-            .eq("course_id", course_id)
-            .eq("created_by", params["creator_id"])
-            .order("applied_at", desc=desc)
-            .execute()
-        )
-
-        return response
+        return posts.data
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get posts: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"{str(e)}")
 
-
+# Updates posts and uploads edit to post_edit table
 def update_post(user_id, post_id, post_edit_info):
     try:
-        post_info = get_post(post_id).data[0]
+        post_info = find_post(post_id).data[0]
 
         if post_info["status"] == "deleted":
             raise HTTPException(
@@ -94,9 +93,10 @@ def update_post(user_id, post_id, post_edit_info):
 
         return {"success": True}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to update post: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"{str(e)}")
 
 
+# Deletes post (Hard Deletion)
 def delete_post(user_id, post_id):
     try:
         deleted_post = supabase.table("posts").delete().eq("id", post_id).execute()
@@ -106,15 +106,11 @@ def delete_post(user_id, post_id):
 
         return {"success": True}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to delete post: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"{str(e)}")
 
+def find_post(post_id):
+     post = (
+            supabase.table("posts").select("*", count="exact").eq("id", post_id).execute()
+        )
+     return post
 
-def get_post(post_id):
-    post = (
-        supabase.table("posts").select("*", count="exact").eq("id", post_id).execute()
-    )
-
-    if not post.data:
-        raise HTTPException(status_code=404, detail="Failed to find post.")
-
-    return post
