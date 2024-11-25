@@ -19,7 +19,11 @@ load_dotenv()
 environment = os.getenv("ENV")
 
 AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=True)
-allowed_origins = ["http://localhost:3000", "http://0.0.0.0:8000"] if environment == ENV.DEV.value else []
+allowed_origins = (
+    ["http://localhost:3000", "http://0.0.0.0:8000"]
+    if environment == ENV.DEV.value
+    else []
+)
 
 app = FastAPI()
 
@@ -31,9 +35,7 @@ app.include_router(course_router, tags=["Courses"], prefix="/courses")
 course_router.include_router(
     document_router, tags=["Documents"], prefix="/{course_id}/documents"
 )
-course_router.include_router(
-    post_router, tags=["Posts"], prefix="/{course_id}/posts"
-)
+course_router.include_router(post_router, tags=["Posts"], prefix="/{course_id}/posts")
 
 app.add_middleware(
     CORSMiddleware,

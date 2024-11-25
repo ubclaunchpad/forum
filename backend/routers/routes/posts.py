@@ -40,7 +40,7 @@ async def get_post(post_id: str):
 
 
 @post_router.patch("/{post_id}")
-async def update_post(post_edit_info: PostEdit, post_id: str, request : Request):
+async def update_post(post_edit_info: PostEdit, post_id: str, request: Request):
     editor_user_id = request.state.user_id
     post = post_crud.update_post(editor_user_id, post_id, post_edit_info)
 
@@ -48,7 +48,7 @@ async def update_post(post_edit_info: PostEdit, post_id: str, request : Request)
 
 
 @post_router.delete("/{post_id}")
-async def delete_post(post_id: str, request : Request):
+async def delete_post(post_id: str, request: Request):
     deletion_user_id = request.state.user_id
     post = post_crud.delete_post(deletion_user_id, post_id)
 

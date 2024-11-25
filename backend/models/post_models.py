@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class Post(BaseModel):
     """Model for post metadata"""
+
     title: str
     content: str
     parent_id: str | None = None
@@ -13,8 +14,10 @@ class Post(BaseModel):
 
 class PostEdit(BaseModel):
     """Model for post edit requests"""
+
     new_content: str
     edit_reason: str | None = None
+
 
 class FilterParams(BaseModel):
     creator_email: str | None = None
