@@ -1,5 +1,4 @@
 from database.db import supabase
-from uuid import UUID
 
 # Creates user in supabase
 def create_user(user):
