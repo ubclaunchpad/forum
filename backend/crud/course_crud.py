@@ -119,6 +119,10 @@ def add_user_to_course(course_id: int, user_id: str, role: int):
 def get_role_key(name: str):
     return supabase.table("course_role").select("id").eq("name", name).execute()
 
+def get_user_course_role_by_id(user_id: str):
+    response = supabase.table("course_user_roles").select("*").eq("user_id", user_id).execute()
+    return response
+
 def get_users_with_course_roles(course_id: int):
     try:
         column_names = ("user_id,"  
@@ -146,12 +150,15 @@ def assign_user_course_role(course_id: int, req: AssignCourseUserRoleReq):
     response = supabase.table("course_user_roles").insert(row).execute()
     return response
 
-def get_user_course_role_by_id(user_id: str):
-    response = supabase.table("course_user_roles").select("*").eq("user_id", user_id).execute()
+def update_user_course_role(course_id: int, req: AssignCourseUserRoleReq):
+    row = {
+        "access_role": req.access_role,
+        "semantic_role": req.semantic_role
+    }
+    response = supabase.table("course_user_roles").update(row).eq("user_id", req.u_id).eq("course_id", course_id).execute()
     return response
 
-
-def update_user_course_role_history(new_user_course_role: CourseUserRole, prev_user_course_role: CourseUserRole | None, reason: str):
+def create_user_course_role_history(new_user_course_role: CourseUserRole, prev_user_course_role: CourseUserRole | None, reason: str):
     prev_user_course_role_access_role = prev_user_course_role.access_role if prev_user_course_role else 0
     prev_user_course_role_semantic_role = prev_user_course_role.semantic_role if prev_user_course_role else ""
 
