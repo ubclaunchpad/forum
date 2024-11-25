@@ -22,7 +22,8 @@ def create_post(user_id, course_id, post_info):
         return post.data[0]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create post: {str(e)}")
-    
+
+
 # Get a post through post ID
 def get_post(post_id):
     try:
@@ -38,8 +39,13 @@ def get_post(post_id):
 def get_posts(course_id, params):
     try:
         desc = True if params["sort"] == "newest" else False
-        
-        query = supabase.table("posts").select("*", count="exact").eq("course_id", course_id).order("applied_at", desc=desc)
+
+        query = (
+            supabase.table("posts")
+            .select("*", count="exact")
+            .eq("course_id", course_id)
+            .order("applied_at", desc=desc)
+        )
 
         if "creator_id" in params:
             query = query.eq("created_by", params["creator_id"])
@@ -49,6 +55,7 @@ def get_posts(course_id, params):
         return posts.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{str(e)}")
+
 
 # Updates posts and uploads edit to post_edit table
 def update_post(user_id, post_id, post_edit_info):
@@ -108,9 +115,9 @@ def delete_post(user_id, post_id):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{str(e)}")
 
-def find_post(post_id):
-     post = (
-            supabase.table("posts").select("*", count="exact").eq("id", post_id).execute()
-        )
-     return post
 
+def find_post(post_id):
+    post = (
+        supabase.table("posts").select("*", count="exact").eq("id", post_id).execute()
+    )
+    return post
