@@ -137,21 +137,22 @@ def get_users_with_course_roles(course_id: int):
     except Exception as e:
         return None
     
-def assign_user_course_role(course_id: int, req: AssignCourseUserRoleReq):
+def assign_user_course_role(course_id: int, req: AssignCourseUserRoleReq, author: str):
     row = {
         "course_id": course_id, 
         "user_id": str(req.u_id), 
         "access_role": req.access_role, 
         "semantic_role": req.semantic_role, 
-        "assigned_by": str(req.u_id) #need to change to whoever is making the request
+        "assigned_by": author
         }
     response = supabase.table("course_user_roles").insert(row).execute()
     return response
 
-def update_user_course_role(course_id: int, req: AssignCourseUserRoleReq):
+def update_user_course_role(course_id: int, req: AssignCourseUserRoleReq, author: str):
     row = {
         "access_role": req.access_role,
-        "semantic_role": req.semantic_role
+        "semantic_role": req.semantic_role,
+        "assigned_by": author
     }
     response = supabase.table("course_user_roles").update(row).eq("user_id", req.u_id).eq("course_id", course_id).execute()
     return response
@@ -166,7 +167,7 @@ def create_user_course_role_history(new_user_course_role: CourseUserRole, prev_u
         "new_access_role": new_user_course_role.access_role,
         "previous_semantic_role": prev_user_course_role_semantic_role,
         "new_semantic_role": new_user_course_role.semantic_role,
-        "changed_by": str(new_user_course_role.assigned_by), #need to change to whoever is making the request
+        "changed_by": str(new_user_course_role.assigned_by),
         "reason": reason
     }
     response = supabase.table("role_changes").insert(row).execute()
