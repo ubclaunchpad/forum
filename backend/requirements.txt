@@ -154,7 +154,7 @@ typing-extensions==4.12.2
     #   pydantic
     #   pydantic-core
     #   realtime
-uvicorn==0.32.0
+uvicorn==0.32.1
     # via -r requirements.in
 websockets==13.1
     # via realtime
