@@ -26,7 +26,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # we are using pnpm, but fine if developers want to use npm or yarn in local
-yarn.lock
+
 package-lock.json 
 bun.lock
 
