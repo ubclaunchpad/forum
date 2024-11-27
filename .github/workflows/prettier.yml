@@ -13,11 +13,14 @@ on:
       - dev
     paths:
       - 'frontend/**'
+    types:
+      - opened
+      - synchronize  # Triggered on updates from Dependabot PRs
 
 jobs:
   prettier:
     runs-on: ubuntu-latest
-
+    if: github.actor == 'dependabot[bot]' || github.event_name == 'push' || github.event_name == 'pull_request'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,10 +28,18 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: yarn install
         working-directory: frontend/
 
       - name: Prettify code
         uses: creyD/prettier_action@v4.3
         with:
           prettier_options: --write **/*.{js,ts,tsx,json,md,css}
+
+      - name: Commit and push Prettier fixes from Dependabot
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: Fix Prettier issues" || echo "No changes to commit"
+          git push

@@ -19,7 +19,6 @@ const acceptedMimeTypes: string[] = [
   "application/vnd.ms-powerpoint.presentation.macroEnabled.12",
   "application/vnd.ms-word.document.macroEnabled.12",
 ];
-const acceptedMimeTypesString = acceptedMimeTypes.join(",");
 
 export default function FileUpload() {
   const [file, setFile] = useState<File | null>(null);
@@ -48,7 +47,7 @@ export default function FileUpload() {
       if (file) {
         const link = `${process.env.NEXT_PUBLIC_BACKEND_URL}/courses/${1}/documents/upload/`;
         console.log(link);
-        var data = new FormData();
+        const data = new FormData();
         data.append("file", file);
 
         const response = await fetch(link, {

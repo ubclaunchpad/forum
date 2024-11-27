@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { customUseSearchParams } from "@/utils/customUseSearchParams";
+import { useCustomSearchParams } from "@/utils/useCustomSearchParams";
 import { Megaphone, MessagesSquare, FileText } from "lucide-react";
 
 export default function CourseNavbar() {
-  const searchParams = customUseSearchParams();
-  const tab = searchParams.get(["tab"])["tab"];
+  const searchParams = useCustomSearchParams();
+  const tab = searchParams.get(["tab"]).tab;
 
   const isSelected = (currentTab: string) => tab === currentTab;
 

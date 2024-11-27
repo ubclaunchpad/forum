@@ -1,9 +1,7 @@
 "use client";
 
 import ChatQ from "@/app/playground/search/chat";
-import { Document, Page } from "react-pdf";
-import { pdfjs } from "react-pdf";
-
+import { pdfjs, Document, Page } from "react-pdf/dist/esm/entry.webpack";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -12,20 +10,21 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { devNull } from "os";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
+  "pdfjs-dist/legacy/build/pdf.worker.min.js",
   import.meta.url,
 ).toString();
 
 export default function QueryPageTest() {
   const [docLink, setDocLink] = useState<{ page: number; file: string } | null>(
-    devNull,
+    null,
   );
 
   function updateDocLink(link: string, pageNumber: number) {
-    setDocLink({ page: pageNumber, file: link });
+    if (docLink) {
+      setDocLink({ page: pageNumber, file: docLink.file });
+    }
   }
 
   function updatePageNumber(pageNumber: number) {
