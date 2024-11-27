@@ -64,12 +64,12 @@ def root():
     """Root path"""
     return {"message": "ForumAI is running!"}
 
+
 @app.post("/login")
 def login(email: str, password: str):
-    response = supabase.auth.sign_in_with_password({
-        "email": email,
-        "password": password
-    })
+    response = supabase.auth.sign_in_with_password(
+        {"email": email, "password": password}
+    )
     return response
 
 
