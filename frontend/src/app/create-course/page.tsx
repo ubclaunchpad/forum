@@ -101,7 +101,6 @@ const Profile = ({ image_file, name, email, pronouns }: ProfileProps) => {
 };
 
 const CreateCoursePage = () => {
-
   const [courseGroup, setCourseGroup] = useState<string | undefined>("");
   const [courseCode, setCourseCode] = useState<string | undefined>("");
   const [courseSection, setCourseSection] = useState<string | undefined>("");
