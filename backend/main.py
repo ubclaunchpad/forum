@@ -36,12 +36,12 @@ def root():
 def filler_protected_path():  # NOTE: delete later, used for testing
     return {"message": "Protect route!"}
 
+
 @app.post("/login")
 def login(email: str, password: str):
-    response = supabase.auth.sign_in_with_password({
-        "email": email,
-        "password": password
-    })
+    response = supabase.auth.sign_in_with_password(
+        {"email": email, "password": password}
+    )
     return response
 
 
