@@ -14,7 +14,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if self.enabled:
             if request.url.path in self.public_paths:
                 return await call_next(request)
-            user = supabase.auth.get_user()
+            bearer_token = request.headers.get('Authorization').split('Bearer ')[1]
+            user = supabase.auth.get_user(bearer_token)
             if not user:
                 return Response("Unauthorized", status_code=401)
         # proceed to the next middleware or endpoint

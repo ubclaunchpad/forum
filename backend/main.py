@@ -2,9 +2,12 @@ import sys
 import os
 import uvicorn
 from fastapi import FastAPI
+
+from database.db import supabase
 from middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 from routers.routes.users import user_router
+
 
 app = FastAPI()
 app.include_router(user_router)
@@ -14,9 +17,9 @@ app.include_router(course_router)
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # flag to enable auth middleware for ALL endpoints
-AUTH_MIDDLEWARE_ENABLED = False
+AUTH_MIDDLEWARE_ENABLED = True
 # endpoints that will be public (requires AUTH_MIDDLEWARE_ENABLE == True to work)
-PUBLIC_PATHS = ["/"]
+PUBLIC_PATHS = ["/login"]
 
 # middlewares
 app.add_middleware(
@@ -32,6 +35,14 @@ def root():
 @app.get("/protected")
 def filler_protected_path():  # NOTE: delete later, used for testing
     return {"message": "Protect route!"}
+
+@app.post("/login")
+def login(email: str, password: str):
+    response = supabase.auth.sign_in_with_password({
+        "email": email,
+        "password": password
+    })
+    return response
 
 
 if __name__ == "__main__":

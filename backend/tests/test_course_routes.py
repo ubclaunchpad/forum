@@ -10,7 +10,7 @@ from routers.routes.courses import course_router_endpoint
 
 client = TestClient(app)
 
-email = "test"
+test_email = "test"
 course_id = "5eed0a1e-c280-42c1-8251-dd72027d2ccc"
 test_user_uuid = test_user_uuid
 
