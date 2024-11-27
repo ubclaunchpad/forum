@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, ChangeEvent } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
 import { User, Pencil, Trash2 } from "lucide-react";
 
 type FormProps = {
@@ -49,10 +49,12 @@ const Profile = ({ image_file, name, email, pronouns }: ProfileProps) => {
         {image_file ? (
           <>
             {/* TODO: image file upload */}
-            <img
+            <Image
               src={image_file}
               alt="profile"
-              className="h-14 w-14 rounded-full"
+              width={56}
+              height={56}
+              className="rounded-full"
             />
           </>
         ) : (
@@ -99,7 +101,6 @@ const Profile = ({ image_file, name, email, pronouns }: ProfileProps) => {
 };
 
 const CreateCoursePage = () => {
-  const router = useRouter();
 
   const [courseGroup, setCourseGroup] = useState<string | undefined>("");
   const [courseCode, setCourseCode] = useState<string | undefined>("");
@@ -151,18 +152,21 @@ const CreateCoursePage = () => {
                 title="Course Group"
                 tagName="courseGroup"
                 placeholder="e.g. CPSC"
+                value={courseGroup}
                 onChange={handleCourseGroupInputChange}
               />
               <Form
                 title="Course Code"
                 tagName="courseCode"
                 placeholder="e.g. 110"
+                value={courseCode}
                 onChange={handleCourseCodeInputChange}
               />
               <Form
                 title="Course Section (optional)"
                 tagName="courseSection"
                 placeholder="e.g. 101/103"
+                value={courseSection}
                 onChange={handleCourseSectionInputChange}
               />
             </div>
@@ -171,6 +175,7 @@ const CreateCoursePage = () => {
                 title="Course Name"
                 tagName="courseName"
                 placeholder="e.g. Computation, programs, and programming"
+                value={courseName}
                 onChange={handleCourseNameInputChange}
               />
             </div>
