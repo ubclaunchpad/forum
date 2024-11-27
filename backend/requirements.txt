@@ -94,7 +94,7 @@ pathspec==0.12.1
     # via black
 pip-tools==7.4.1
     # via -r requirements.in
-pipdeptree==2.23.4
+pipdeptree==2.24.0
     # via -r requirements.in
 platformdirs==4.3.6
     # via black
