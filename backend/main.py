@@ -7,6 +7,8 @@ import uvicorn
 from core.util.env_util import ENV, parse_bool_env
 from dotenv import load_dotenv
 from fastapi import FastAPI
+
+from database.db import supabase
 from fastapi.middleware.cors import CORSMiddleware
 from middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
@@ -24,6 +26,7 @@ allowed_origins = (
     if environment == ENV.DEV.value
     else []
 )
+
 
 app = FastAPI()
 
@@ -48,6 +51,10 @@ app.add_middleware(
 # Add the backend folder to Python's module search path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+# flag to enable auth middleware for ALL endpoints
+AUTH_MIDDLEWARE_ENABLED = True
+# endpoints that will be public (requires AUTH_MIDDLEWARE_ENABLE == True to work)
+PUBLIC_PATHS = ["/login"]
 
 app.add_middleware(AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED)
 
@@ -56,6 +63,14 @@ app.add_middleware(AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED)
 def root():
     """Root path"""
     return {"message": "ForumAI is running!"}
+
+@app.post("/login")
+def login(email: str, password: str):
+    response = supabase.auth.sign_in_with_password({
+        "email": email,
+        "password": password
+    })
+    return response
 
 
 if __name__ == "__main__":

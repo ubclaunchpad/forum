@@ -51,7 +51,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
             if not self.is_path_protected(request.url.path):
                 print("not protected")
                 return await call_next(request)
-            user = supabase.auth.get_user()
+            bearer_token = request.headers.get('Authorization').split('Bearer ')[1]
+            user = supabase.auth.get_user(bearer_token)
             if not user:
                 return Response("Unauthorized", status_code=401)
         request.state.user = user.user
