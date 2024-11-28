@@ -4,6 +4,7 @@ from crud import course_crud
 from crud import user_crud
 from crud.course_crud import UserNotEnrolledException, NoPermissionException
 from routers.req.courses_req import CreateCourseReq, UpdateCourseReq, AssignCourseUserRoleReq, CourseUserRole
+from routers.res.courses_res import AssignedBy, GetCourseUserRoleRes
 
 course_router = APIRouter()
 course_router_endpoint = "/courses"
@@ -112,7 +113,22 @@ async def get_users_with_course_roles(c_id: int, request: Request):
     users = course_crud.get_users_with_course_roles(c_id)
     if not users:
         raise HTTPException(status_code=404, detail="Failed to fetch users")
-    return users
+    
+    response = []
+    #map to response model
+    for user in users.data:
+        assigned_by_name = user["assigned_by_name"]["first_name"] + " " + user["assigned_by_name"]["last_name"]
+        assignedBy = AssignedBy(id=user["assigned_by"], name=assigned_by_name)
+        user_name = user["user_name"]["first_name"] + " " + user["user_name"]["last_name"]
+        response.append(GetCourseUserRoleRes(
+            user_id=user["user_id"],
+            name=user_name,
+            access_role=user["access_role"],
+            semantic_role=user["semantic_role"],
+            assigned_at=user["updated_at"],
+            assigned_by=assignedBy
+        ))
+    return response
 
 @course_router.post(course_user_role_endpoint)
 async def assign_user_course_role(c_id: int, curRequest: AssignCourseUserRoleReq, request: Request):
