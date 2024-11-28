@@ -10,6 +10,7 @@ from routers.req.courses_req import CreateCourseReq, UpdateCourseReq
 course_router = APIRouter()
 # Maximum number of chunks to retrieve from the document, hard-coded for now
 MAX_CHUNKS = 5
+ADMIN_REQUEST = False
 
 # Initialize DocumentQueryEngine
 try:
@@ -76,15 +77,15 @@ async def query_course_content(
             question=query_request.question,
             template_name=query_request.template_name,
         )
-    except KeyError as e:
+    except KeyError as error:
         # Template not found
-        raise HTTPException(status_code=400, detail=f"Template not found: {e}")
-    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Template not found: {error}")
+    except ValueError as error:
         # Other validation errors
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(error))
+    except Exception as error:
         # General error handling
-        raise HTTPException(status_code=500, detail=f"Error during query: {e}")
+        raise HTTPException(status_code=500, detail=f"Error during query: {error}")
 
     # Return the response
     return CourseQueryResponse(
@@ -112,14 +113,14 @@ async def get_courses(request: Request):
 
 # get course by id
 @course_router.get("/{c_id}")
-async def get_courses_by_id(c_id: int, request: Request):
+async def get_courses_by_id(c_id: str, request: Request):
     try:
         user_id = request.state.user_id
         courses = course_crud.get_course_by_id(c_id, user_id)
         if not courses:
             raise HTTPException(status_code=404, detail="Failed to fetch course.")
         return courses
-    except UserNotEnrolledException as e:
+    except UserNotEnrolledException:
         raise HTTPException(
             status_code=404, detail="User is not enrolled in this course"
         )
@@ -135,8 +136,11 @@ async def create_course(create_course_req: CreateCourseReq, request: Request):
     admin_enum = course_crud.get_role_key("Admin")
     if not admin_enum:
         raise HTTPException(status_code=404, detail="Failed to find Admin role")
-    course_id = course.data[0]["id"]
-    admin_id = admin_enum.data[0]["id"]
+    try:
+        course_id = course.data[0]["id"]
+        admin_id = admin_enum.data[0]["id"]
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Value Error")
     # Adds user as admin to the added course
     add_user = course_crud.add_user_to_course(course_id, user_id, admin_id)
     if not add_user:
@@ -147,7 +151,7 @@ async def create_course(create_course_req: CreateCourseReq, request: Request):
 
 
 @course_router.delete("/{c_id}")
-async def delete_course(c_id: int, request: Request):
+async def delete_course(c_id: str, request: Request):
     try:
         user_id = request.state.user_id
         admin_enum = course_crud.get_role_key("Admin")
@@ -158,11 +162,11 @@ async def delete_course(c_id: int, request: Request):
         if not response:
             raise HTTPException(status_code=404, detail="Failed to delete course.")
         return response
-    except NoPermissionException as e:
+    except NoPermissionException:
         raise HTTPException(
             status_code=404, detail="User has no permission to delete role"
         )
-    except ValueError as e:
+    except ValueError:
         raise HTTPException(status_code=404, detail=str(e))
 
 
@@ -185,9 +189,9 @@ async def update_course(update_course_req: UpdateCourseReq, request: Request):
         if not response:
             raise HTTPException(status_code=404, detail="Failed to update course.")
         return response
-    except NoPermissionException as e:
+    except NoPermissionException:
         raise HTTPException(
             status_code=404, detail="User has no permission to update role"
         )
-    except ValueError as e:
+    except ValueError:
         raise HTTPException(status_code=404, detail=str(e))

@@ -4,25 +4,22 @@ from fastapi.testclient import TestClient
 
 from database.db import test_user_uuid
 from main import app
-from routers.req.courses_req import UpdateCourseReq, CreateCourseReq
 
 
 client = TestClient(app)
 course_router_endpoint = "courses"
 email = "test"
-course_id = 1
-test_user_uuid = "e2e422ed-e0b0-4d40-9c92-7d743b11fa83"
+course_id = "daeed462-ed57-48f7-91d8-d669c406b606"
 
 
 def test_insert_course():
-    headers = {"X-User-ID": test_user_uuid}
     test_course = {
         "id": course_id,
         "c_group": "test_group",
         "code": "test_code",
         "section": "test_term",
     }
-    response = client.post(course_router_endpoint, json=test_course, headers=headers)
+    response = client.post(course_router_endpoint, json=test_course)
     assert response.status_code == 200
 
 
@@ -39,8 +36,7 @@ def test_insert_duplicate_course():
 
 
 def test_get_all_courses():
-    headers = {"X-User-ID": test_user_uuid}
-    response = client.get(course_router_endpoint, headers=headers)
+    response = client.get(course_router_endpoint)
     data = response.json().get("data")
     assert isinstance(data, list)
     assert len(data) == 1
@@ -49,9 +45,8 @@ def test_get_all_courses():
 
 
 def test_get_course_by_id():
-    headers = {"X-User-ID": test_user_uuid}
     response = client.get(
-        course_router_endpoint + "/" + str(course_id), headers=headers
+        course_router_endpoint + "/" + str(course_id)
     )
     data = response.json().get("data")
     assert isinstance(data, list)
@@ -83,8 +78,7 @@ def test_update_course_by_id():
 
 
 def test_delete_course_by_id():
-    headers = {"X-User-ID": test_user_uuid}
     response = client.delete(
-        course_router_endpoint + "/" + str(course_id), headers=headers
+        course_router_endpoint + "/" + str(course_id),
     )
     assert response.status_code == 200

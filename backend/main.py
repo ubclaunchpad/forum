@@ -7,9 +7,9 @@ import uvicorn
 from core.util.env_util import ENV, parse_bool_env
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from database.db import supabase
-from fastapi.middleware.cors import CORSMiddleware
 from middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 from routers.routes.documents import document_router
@@ -20,13 +20,12 @@ load_dotenv()
 
 environment = os.getenv("ENV")
 
-AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=True)
+AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=False)
 allowed_origins = (
     ["http://localhost:3000", "http://0.0.0.0:8000"]
     if environment == ENV.DEV.value
     else []
 )
-
 
 app = FastAPI()
 
@@ -51,20 +50,11 @@ app.add_middleware(
 # Add the backend folder to Python's module search path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# flag to enable auth middleware for ALL endpoints
-AUTH_MIDDLEWARE_ENABLED = True
-# endpoints that will be public (requires AUTH_MIDDLEWARE_ENABLE == True to work)
-PUBLIC_PATHS = ["/login"]
 
 app.add_middleware(AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED)
 
 
-@app.get("/")
-def root():
-    """Root path"""
-    return {"message": "ForumAI is running!"}
-
-
+# For use on Postman to login for a specific user, postman will save token as auth bearer token for requests
 @app.post("/login")
 def login(email: str, password: str):
     response = supabase.auth.sign_in_with_password(

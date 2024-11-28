@@ -1,7 +1,3 @@
-import json
-from http.client import HTTPException
-from uuid import UUID
-
 from postgrest import APIError
 
 from database.db import supabase
@@ -27,34 +23,31 @@ def register_course(req: RegisterUserReq):
         return None
 
 
-def get_courses(user_id: str):
+def get_courses(user_id: str = None):
     try:
-        user_course_ids_res = (
-            supabase.table("user_courses")
-            .select("course_id")
-            .eq("user_id", user_id)
-            .execute()
+        base_query = (
+            supabase.table("courses_query")
+            .select("id", "c_group", "code", "section", "start_date", "name")
         )
-        user_courses_dict = user_course_ids_res.data
-        user_courses_list = list(map(lambda n: n["course_id"], user_courses_dict))
-        response = courses_table.select("*").in_("id", user_courses_list).execute()
+        if user_id:
+            base_query = base_query.eq("user_id", user_id)
+        response = base_query.execute()
         return response
     except (ValueError, APIError) as e:
         return None
 
 
-def get_course_by_id(c_id: str, user_id: str):
+def get_course_by_id(c_id: str, user_id: str = None):
     try:
-        user_course = (
-            supabase.from_("user_courses")
+        base_query = (
+            supabase.table("courses_query")
             .select("*")
-            .eq("course_id", c_id)
-            .eq("user_id", user_id)
-            .execute()
+            .eq("id", c_id)
         )
-        if len(user_course.data) > 0:
-            return courses_table.select("*").eq("id", c_id).execute()
-        raise UserNotEnrolledException
+        if user_id is not None:
+            base_query = base_query.eq("user_id", user_id)
+        response = base_query.execute()
+        return response
     except (ValueError, APIError) as e:
         return None
 
@@ -121,4 +114,10 @@ def add_user_to_course(course_id: str, user_id: str, role: int):
 
 
 def get_role_key(name: str):
-    return supabase.table("course_role").select("id").eq("name", name).execute()
+    try:
+        insert = supabase.table("course_role").insert({"name": name}).execute()
+        query = supabase.from_("course_role").select("*").eq("name", name)
+        response, error = query.execute()
+        return response
+    except APIError as e:
+        return e

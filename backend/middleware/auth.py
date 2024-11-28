@@ -41,10 +41,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
         return False
 
     async def dispatch(self, request: Request, call_next):
+        user = None
         if environment == ENV.DEV.value:
             email = os.getenv("DEV_USER_EMAIL")
             password = os.getenv("DEV_USER_PASSWORD")
-            supabase.auth.sign_in_with_password({"email": email, "password": password})
+            user = supabase.auth.sign_in_with_password({"email": email, "password": password})
 
         # check if the middleware is enabled
         if self.enabled:
