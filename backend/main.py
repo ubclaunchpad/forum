@@ -20,7 +20,7 @@ load_dotenv()
 
 environment = os.getenv("ENV")
 
-AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=False)
+AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=True)
 allowed_origins = (
     ["http://localhost:3000", "http://0.0.0.0:8000"]
     if environment == ENV.DEV.value
