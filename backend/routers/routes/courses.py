@@ -253,7 +253,9 @@ def validate_cur_request(
 
 
 def update_cur_history(
-    prev_cur: CourseUserRole | None, updated_course_user_role: CourseUserRole, reason: str
+    prev_cur: CourseUserRole | None,
+    updated_course_user_role: CourseUserRole,
+    reason: str,
 ):
     """
     Helper function for updating the course user role history.
