@@ -121,7 +121,7 @@ def get_role_key(name: str):
     return supabase.table("course_role").select("id").eq("name", name).execute()
 
 def get_user_course_role_by_id(u_id: str, c_id: int):
-    return supabase.table("course_user_roles").select("access_role").eq("user_id", u_id).select("course_id", c_id).execute()
+    return supabase.table("course_user_roles").select("*").eq("user_id", u_id).eq("course_id", c_id).execute()
 
 def get_users_with_course_roles(course_id: int):
     try:
@@ -181,7 +181,7 @@ def user_has_course_permissions(u_id: str, c_id: int, minimum_role: str):
         return False
 
     user_access_role = response.data[0]["access_role"]
-    min_required_access_role = get_role_key(minimum_role)[0]["id"]
+    min_required_access_role = get_role_key(minimum_role).data[0]["id"]
 
     # permissions hierarchy ([1, admin], [2, maintainer], [3, member], [4, guest], [5, none])
     # user access role must be below the minimum required access role

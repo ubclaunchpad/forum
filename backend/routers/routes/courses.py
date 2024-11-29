@@ -132,22 +132,31 @@ async def get_users_with_course_roles(c_id: int, request: Request):
 @course_router.post(course_user_role_endpoint)
 async def assign_user_course_role(c_id: int, curRequest: AssignCourseUserRoleReq, request: Request):
     user = validate_cur_request(c_id, curRequest, request)
-    assign_response = course_crud.assign_user_course_role(c_id, curRequest, user)
+    assign_response = course_crud.assign_user_course_role(c_id, curRequest, str(user["id"]))
     if not assign_response or not assign_response.data or len(assign_response.data) <= 0:
         raise HTTPException(status_code=500, detail="Failed to add course role to user")
-
+    
+    prev_cur = course_crud.get_user_course_role_by_id(curRequest.u_id, c_id)
+    if not prev_cur or not prev_cur.data or len(prev_cur.data) <= 0:
+        raise HTTPException(status_code=403, detail="User does not have a course role")
+    
     try:
         updated_cur = CourseUserRole.model_validate(assign_response.data[0])
     except ValidationError as e:
         raise HTTPException(status_code=500, detail="Failed to process updated user, could not update role history")
     
-    update_cur_history(c_id, curRequest, updated_cur)
+    update_cur_history(prev_cur.data[0], updated_cur, curRequest.reason)
     return assign_response
     
 @course_router.patch(course_user_role_endpoint)
 async def update_user_course_role(c_id: int, curRequest: AssignCourseUserRoleReq, request: Request):
     user = validate_cur_request(c_id, curRequest, request)  
-    update_response = course_crud.update_user_course_role(c_id, curRequest, user)
+
+    prev_cur = course_crud.get_user_course_role_by_id(curRequest.u_id, c_id)
+    if not prev_cur or not prev_cur.data or len(prev_cur.data) <= 0:
+        raise HTTPException(status_code=403, detail="User does not have a course role")
+    
+    update_response = course_crud.update_user_course_role(c_id, curRequest, str(user["id"]))
     if not update_response or not update_response.data or len(update_response.data) <= 0:
         raise HTTPException(status_code=500, detail="Failed to add course role to user")
     try:
@@ -155,7 +164,7 @@ async def update_user_course_role(c_id: int, curRequest: AssignCourseUserRoleReq
     except ValidationError as e:
         raise HTTPException(status_code=500, detail="Failed to process updated user for response")
 
-    update_cur_history(c_id, curRequest, updated_cur)
+    update_cur_history(prev_cur.data[0], updated_cur, curRequest.reason)
     return update_response
 
 def validate_cur_request(c_id: int, curRequest: AssignCourseUserRoleReq, request: Request):
@@ -176,14 +185,14 @@ def validate_cur_request(c_id: int, curRequest: AssignCourseUserRoleReq, request
         raise HTTPException(status_code=401, detail="Missing user header")
     
     user = user_crud.get_user_by_id(user_id)
-    if not user or len(user.data) <= 0:
+    if not user or len(user) <= 0:
         raise HTTPException(status_code=404, detail="Failed to find user")
 
     min_required_role = "Maintainer"
     has_permission = course_crud.user_has_course_permissions(user_id, c_id, min_required_role)
 
     if not has_permission:
-        raise HTTPException(status_code=403, details="User has insufficient permissions")
+        raise HTTPException(status_code=403, detail="User has insufficient permissions")
     
     requested_user = user_crud.get_user_by_id(curRequest.u_id)
     if not requested_user:
@@ -196,9 +205,9 @@ def validate_cur_request(c_id: int, curRequest: AssignCourseUserRoleReq, request
     except ValueError as e:
         raise HTTPException(status_code=404, detail="Failed to find course")
     
-    return user
+    return user[0]
 
-def update_cur_history(c_id: int, curRequest: AssignCourseUserRoleReq, updated_course_user_role: CourseUserRole):
+def update_cur_history(prev_cur: CourseUserRole, updated_course_user_role: CourseUserRole, reason: str):
     """
     Helper function for updating the course user role history.
     If it fails, it will raise the appropriate HTTP exception.
@@ -210,14 +219,12 @@ def update_cur_history(c_id: int, curRequest: AssignCourseUserRoleReq, updated_c
     Returns:
         Nothing
     """
-    prev_cur = course_crud.get_user_course_role_by_id(curRequest.u_id, c_id)
-    if not prev_cur or not prev_cur.data or len(prev_cur.data) <= 0:
-        raise HTTPException(status_code=403, detail="User does not have a course role")
     try:
-       prev_cur = CourseUserRole.model_validate(prev_cur.data[0])
+       print(prev_cur)
+       prev_cur = CourseUserRole.model_validate(prev_cur)
     except ValidationError as e:
         raise HTTPException(status_code=500, detail="Failed to process previous course role, did not update change role history")  
     
-    history_response = course_crud.create_user_course_role_history(updated_course_user_role, prev_cur, curRequest.reason)
+    history_response = course_crud.create_user_course_role_history(updated_course_user_role, prev_cur, reason)
     if not history_response:
         raise HTTPException(status_code=500, detail="Failed to update course role history")
