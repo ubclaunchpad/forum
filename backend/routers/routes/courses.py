@@ -115,37 +115,36 @@ async def get_users_with_course_roles(c_id: int, request: Request):
         raise HTTPException(status_code=404, detail="Failed to fetch users")
     
     response = []
-    #map to response model
     for user in users.data:
         assigned_by_name = user["assigned_by_name"]["first_name"] + " " + user["assigned_by_name"]["last_name"]
         assignedBy = AssignedBy(id=user["assigned_by"], name=assigned_by_name)
         user_name = user["user_name"]["first_name"] + " " + user["user_name"]["last_name"]
         response.append(GetCourseUserRoleRes(
-            user_id=user["user_id"],
-            name=user_name,
-            access_role=user["access_role"],
-            semantic_role=user["semantic_role"],
-            assigned_at=user["updated_at"],
-            assigned_by=assignedBy
+            user_id = user["user_id"],
+            name = user_name,
+            access_role = user["access_role"],
+            semantic_role = user["semantic_role"],
+            assigned_at = user["updated_at"],
+            assigned_by = assignedBy
         ))
     return response
 
 @course_router.post(course_user_role_endpoint)
 async def assign_user_course_role(c_id: int, curRequest: AssignCourseUserRoleReq, request: Request):
-    author = request.headers.get("X-User-ID")
-    if not author:
-        raise HTTPException(status_code=401, detail="Missing X-User-ID header")
+    user_id = request.headers.get("X-User-ID")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Missing user header")
     
-    author_user = user_crud.get_user_by_id(author)
-    if not author_user:
-        raise HTTPException(status_code=404, detail="Failed to find author")
-    
-    user = user_crud.get_user_by_id(curRequest.u_id)
+    user = user_crud.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Failed to find user")
     
+    requested_user = user_crud.get_user_by_id(curRequest.u_id)
+    if not requested_user:
+        raise HTTPException(status_code=404, detail="Failed to find requested user")
+    
     try:
-       course = course_crud.get_course_by_id(c_id, curRequest.u_id)
+       course_crud.get_course_by_id(c_id, curRequest.u_id)
     except UserNotEnrolledException as e:
         raise HTTPException(status_code=403, detail="User not enrolled in course")
     except ValueError as e:
@@ -161,7 +160,7 @@ async def assign_user_course_role(c_id: int, curRequest: AssignCourseUserRoleReq
     except ValidationError as e:
         prev_user_course_role = None    
 
-    assign_response = course_crud.assign_user_course_role(c_id, curRequest, author)
+    assign_response = course_crud.assign_user_course_role(c_id, curRequest, user)
     if not assign_response or not assign_response.data or len(assign_response.data) <= 0:
         raise HTTPException(status_code=500, detail="Failed to add course role to user")
 
@@ -178,16 +177,16 @@ async def assign_user_course_role(c_id: int, curRequest: AssignCourseUserRoleReq
     
 @course_router.patch(course_user_role_endpoint)
 async def update_user_course_role(c_id: int, curRequest: AssignCourseUserRoleReq, request: Request):
-    author = request.headers.get("X-User-ID")
-    if not author:
-        raise HTTPException(status_code=401, detail="Missing X-User-ID header")
+    user_id = request.headers.get("X-User-ID")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Missing user header")
     
-    author_user = user_crud.get_user_by_id(author)
-    if not author_user:
-        raise HTTPException(status_code=404, detail="Failed to find author")
-    
-    user = user_crud.get_user_by_id(curRequest.u_id)
+    user = user_crud.get_user_by_id(user_id)
     if not user:
+        raise HTTPException(status_code=404, detail="Failed to find user")
+    
+    requested_user = user_crud.get_user_by_id(curRequest.u_id)
+    if not requested_user:
         raise HTTPException(status_code=404, detail="Failed to find user")
     
     try:
@@ -206,7 +205,7 @@ async def update_user_course_role(c_id: int, curRequest: AssignCourseUserRoleReq
     except ValidationError as e:
         raise HTTPException(status_code=500, detail="Failed to process previous course role, did not update change role history")    
     
-    update_response = course_crud.update_user_course_role(c_id, curRequest, author)
+    update_response = course_crud.update_user_course_role(c_id, curRequest, user)
     if not update_response or not update_response.data or len(update_response.data) <= 0:
         raise HTTPException(status_code=500, detail="Failed to add course role to user")
     try:
