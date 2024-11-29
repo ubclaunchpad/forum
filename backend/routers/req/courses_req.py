@@ -29,11 +29,13 @@ class UpdateCourseReq(BaseModel):
     start_date: date | None = None
     end_date: date | None = None
 
+
 class AssignCourseUserRoleReq(BaseModel):
     u_id: UUID
     access_role: int
     semantic_role: str | None = None
     reason: str | None = None
+
 
 class CourseUserRole(BaseModel):
     id: UUID

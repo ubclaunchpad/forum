@@ -1,5 +1,6 @@
 from database.db import supabase
 
+
 # Creates user in supabase
 def create_user(user):
     response = supabase.auth.sign_up(

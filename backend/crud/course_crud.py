@@ -2,7 +2,13 @@ from datetime import datetime, timezone
 import json
 from http.client import HTTPException
 from database.db import supabase
-from routers.req.courses_req import AssignCourseUserRoleReq, CourseUserRole, CreateCourseReq, RegisterUserReq, UpdateCourseReq
+from routers.req.courses_req import (
+    AssignCourseUserRoleReq,
+    CourseUserRole,
+    CreateCourseReq,
+    RegisterUserReq,
+    UpdateCourseReq,
+)
 from fastapi.encoders import jsonable_encoder
 
 courses_table = supabase.table("courses")
@@ -120,47 +126,79 @@ def add_user_to_course(course_id: int, user_id: str, role: int):
 def get_role_key(name: str):
     return supabase.table("course_role").select("id").eq("name", name).execute()
 
+
 def get_user_course_role_by_id(u_id: str, c_id: int):
-    return supabase.table("course_user_roles").select("*").eq("user_id", u_id).eq("course_id", c_id).execute()
+    return (
+        supabase.table("course_user_roles")
+        .select("*")
+        .eq("user_id", u_id)
+        .eq("course_id", c_id)
+        .execute()
+    )
+
 
 def get_users_with_course_roles(course_id: int):
     try:
-        column_names = ("user_id,"  
-                        "user_name:profiles!course_user_roles_user_id_fkey(first_name, last_name)," 
-                        "access_role," 
-                        "semantic_role,"
-                        "updated_at," 
-                        "assigned_by," 
-                        "assigned_by_name:profiles!course_user_roles_assigned_by_fkey(first_name, last_name)")
-        response = supabase.table("course_user_roles").select(column_names).eq("course_id", course_id).execute()
+        column_names = (
+            "user_id,"
+            "user_name:profiles!course_user_roles_user_id_fkey(first_name, last_name),"
+            "access_role,"
+            "semantic_role,"
+            "updated_at,"
+            "assigned_by,"
+            "assigned_by_name:profiles!course_user_roles_assigned_by_fkey(first_name, last_name)"
+        )
+        response = (
+            supabase.table("course_user_roles")
+            .select(column_names)
+            .eq("course_id", course_id)
+            .execute()
+        )
         return response
     except Exception as e:
         return None
-    
+
+
 def assign_user_course_role(course_id: int, req: AssignCourseUserRoleReq, author: str):
     row = {
-        "course_id": course_id, 
-        "user_id": str(req.u_id), 
-        "access_role": req.access_role, 
-        "semantic_role": req.semantic_role, 
-        "assigned_by": author
-        }
+        "course_id": course_id,
+        "user_id": str(req.u_id),
+        "access_role": req.access_role,
+        "semantic_role": req.semantic_role,
+        "assigned_by": author,
+    }
     response = supabase.table("course_user_roles").insert(row).execute()
     return response
+
 
 def update_user_course_role(course_id: int, req: AssignCourseUserRoleReq, author: str):
     row = {
         "access_role": req.access_role,
         "semantic_role": req.semantic_role,
         "assigned_by": author,
-        "updated_at": datetime.now(timezone.utc).isoformat()
+        "updated_at": datetime.now(timezone.utc).isoformat(),
     }
-    response = supabase.table("course_user_roles").update(row).eq("user_id", req.u_id).eq("course_id", course_id).execute()
+    response = (
+        supabase.table("course_user_roles")
+        .update(row)
+        .eq("user_id", req.u_id)
+        .eq("course_id", course_id)
+        .execute()
+    )
     return response
 
-def create_user_course_role_history(new_user_course_role: CourseUserRole, prev_user_course_role: CourseUserRole | None, reason: str):
-    prev_user_course_role_access_role = prev_user_course_role.access_role if prev_user_course_role else 0
-    prev_user_course_role_semantic_role = prev_user_course_role.semantic_role if prev_user_course_role else ""
+
+def create_user_course_role_history(
+    new_user_course_role: CourseUserRole,
+    prev_user_course_role: CourseUserRole | None,
+    reason: str,
+):
+    prev_user_course_role_access_role = (
+        prev_user_course_role.access_role if prev_user_course_role else 0
+    )
+    prev_user_course_role_semantic_role = (
+        prev_user_course_role.semantic_role if prev_user_course_role else ""
+    )
 
     row = {
         "course_user_role_id": str(new_user_course_role.id),
@@ -169,10 +207,11 @@ def create_user_course_role_history(new_user_course_role: CourseUserRole, prev_u
         "previous_semantic_role": prev_user_course_role_semantic_role,
         "new_semantic_role": new_user_course_role.semantic_role,
         "changed_by": str(new_user_course_role.assigned_by),
-        "reason": reason
+        "reason": reason,
     }
     response = supabase.table("role_changes").insert(row).execute()
     return response
+
 
 def user_has_course_permissions(u_id: str, c_id: int, minimum_role: str):
     response = get_user_course_role_by_id(u_id, c_id)
