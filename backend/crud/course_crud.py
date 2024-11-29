@@ -174,17 +174,15 @@ def create_user_course_role_history(new_user_course_role: CourseUserRole, prev_u
     response = supabase.table("role_changes").insert(row).execute()
     return response
 
-def user_has_course_permissions(u_id: str, c_id: int):
+def user_has_course_permissions(u_id: str, c_id: int, minimum_role: str):
     response = get_user_course_role_by_id(u_id, c_id)
 
     if not response or not response.data or len(response.data) <= 0:
         return False
 
-    access_role = response.data[0]["access_role"]
-    maintainer_enum_id = get_role_key("Maintainer")[0]["id"]
+    user_access_role = response.data[0]["access_role"]
+    min_required_access_role = get_role_key(minimum_role)[0]["id"]
 
-    # permissions hiearchy ([1, admin], [2, maintainer], [3, member], [4, guest], [5, none])
-    if access_role > maintainer_enum_id:
-        return False
-    
-    return True
+    # permissions hierarchy ([1, admin], [2, maintainer], [3, member], [4, guest], [5, none])
+    # user access role must be below the minimum required access role
+    return user_access_role <= min_required_access_role

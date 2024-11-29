@@ -179,10 +179,11 @@ def validate_cur_request(c_id: int, curRequest: AssignCourseUserRoleReq, request
     if not user or len(user.data) <= 0:
         raise HTTPException(status_code=404, detail="Failed to find user")
 
-    has_permission = course_crud.user_has_course_permissions(user_id, c_id)
+    min_required_role = "Maintainer"
+    has_permission = course_crud.user_has_course_permissions(user_id, c_id, min_required_role)
 
     if not has_permission:
-        raise HTTPException(status_code=403, details="User must be an Admin or Maintainer to assign roles")
+        raise HTTPException(status_code=403, details="User has insufficient permissions")
     
     requested_user = user_crud.get_user_by_id(curRequest.u_id)
     if not requested_user:
