@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS public.course_user_roles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (course_id, user_id)
 );
-alter table public.course_user_roles enable row level security;
+ALTER TABLE public.course_user_roles ENABLE ROW LEVEL SECURITY;
 
 
 CREATE TABLE IF NOT EXISTS public.role_changes (
@@ -24,8 +24,17 @@ CREATE TABLE IF NOT EXISTS public.role_changes (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-alter table public.role_changes enable row level security;
+ALTER TABLE public.course_user_roles ENABLE ROW LEVEL SECURITY;
 
-insert into public.course_role (name)
-values ('None');
 
+ALTER TABLE public.course_role DROP CONSTRAINT course_role_name_key;
+INSERT INTO public.course_role (id, name)
+VALUES (5, 'None');
+
+UPDATE public.course_role
+SET name = CASE
+    WHEN id = 1 THEN 'Admin'
+    WHEN id = 2 THEN 'Maintainer'
+END
+WHERE id IN (1, 2);
+ALTER TABLE public.course_role ADD CONSTRAINT course_role_name_key UNIQUE (name);
