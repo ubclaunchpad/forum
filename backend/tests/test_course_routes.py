@@ -45,9 +45,7 @@ def test_get_all_courses():
 
 
 def test_get_course_by_id():
-    response = client.get(
-        course_router_endpoint + "/" + str(course_id)
-    )
+    response = client.get(course_router_endpoint + "/" + str(course_id))
     data = response.json().get("data")
     assert isinstance(data, list)
     assert len(data) == 1
@@ -72,8 +70,7 @@ def test_update_course_by_id():
         "code": "330",
         "end_date": "2024-12-20",
     }
-    headers = {"X-User-ID": test_user_uuid}
-    response = client.put(course_router_endpoint, json=update_req, headers=headers)
+    response = client.put(course_router_endpoint, json=update_req)
     assert response.status_code == 200
 
 

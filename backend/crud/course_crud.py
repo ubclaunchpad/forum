@@ -25,9 +25,9 @@ def register_course(req: RegisterUserReq):
 
 def get_courses(user_id: str = None):
     try:
-        base_query = (
-            supabase.table("courses_query")
-            .select("id", "c_group", "code", "section", "start_date", "name")
+        table_name = "courses" if user_id is None else "courses_query"
+        base_query = supabase.table(table_name).select(
+            "id", "c_group", "code", "section", "start_date", "name"
         )
         if user_id:
             base_query = base_query.eq("user_id", user_id)
@@ -39,9 +39,10 @@ def get_courses(user_id: str = None):
 
 def get_course_by_id(c_id: str, user_id: str = None):
     try:
+        table_name = "courses" if user_id is None else "courses_query"
         base_query = (
-            supabase.table("courses_query")
-            .select("*")
+            supabase.table(table_name)
+            .select("id", "c_group", "code", "section", "start_date", "name")
             .eq("id", c_id)
         )
         if user_id is not None:
@@ -115,9 +116,8 @@ def add_user_to_course(course_id: str, user_id: str, role: int):
 
 def get_role_key(name: str):
     try:
-        insert = supabase.table("course_role").insert({"name": name}).execute()
-        query = supabase.from_("course_role").select("*").eq("name", name)
-        response, error = query.execute()
+        query = supabase.table("course_role").select("id").eq("name", name)
+        response = query.execute()
         return response
     except APIError as e:
         return e

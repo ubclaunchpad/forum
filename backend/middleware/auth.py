@@ -45,7 +45,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if environment == ENV.DEV.value:
             email = os.getenv("DEV_USER_EMAIL")
             password = os.getenv("DEV_USER_PASSWORD")
-            user = supabase.auth.sign_in_with_password({"email": email, "password": password})
+            user = supabase.auth.sign_in_with_password(
+                {"email": email, "password": password}
+            )
 
         # check if the middleware is enabled
         if self.enabled:
@@ -59,5 +61,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         request.state.user = user.user
         request.state.user_id = user.user.id
         request.state.user_email = user.user.email
+        # Sign out to get through row level security
+        supabase.auth.sign_out()
         response = await call_next(request)
         return response

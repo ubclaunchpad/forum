@@ -10,7 +10,7 @@ from routers.req.courses_req import CreateCourseReq, UpdateCourseReq
 course_router = APIRouter()
 # Maximum number of chunks to retrieve from the document, hard-coded for now
 MAX_CHUNKS = 5
-ADMIN_REQUEST = False
+ADMIN_REQUEST = True
 
 # Initialize DocumentQueryEngine
 try:
@@ -104,7 +104,9 @@ async def query_course_content(
 
 @course_router.get("")
 async def get_courses(request: Request):
-    user_id = request.state.user_id
+    user_id = None
+    if not ADMIN_REQUEST:
+        user_id = request.state.user_id
     courses = course_crud.get_courses(user_id)
     if not courses:
         raise HTTPException(status_code=404, detail="Failed to fetch courses.")
@@ -115,7 +117,9 @@ async def get_courses(request: Request):
 @course_router.get("/{c_id}")
 async def get_courses_by_id(c_id: str, request: Request):
     try:
-        user_id = request.state.user_id
+        user_id = None
+        if not ADMIN_REQUEST:
+            user_id = request.state.user_id
         courses = course_crud.get_course_by_id(c_id, user_id)
         if not courses:
             raise HTTPException(status_code=404, detail="Failed to fetch course.")
@@ -170,7 +174,7 @@ async def delete_course(c_id: str, request: Request):
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@course_router.put("/{c_id}")
+@course_router.put("")
 async def update_course(update_course_req: UpdateCourseReq, request: Request):
     try:
         user_id = request.state.user_id

@@ -1,5 +1,5 @@
-drop table if exists public.user_courses;
-drop table if exists public.courses;
+drop table if exists public.user_courses cascade;
+drop table if exists public.courses cascade;
 
 create table public.courses (
   id uuid default uuid_generate_v4(),
