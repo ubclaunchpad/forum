@@ -120,9 +120,8 @@ def add_user_to_course(course_id: int, user_id: str, role: int):
 def get_role_key(name: str):
     return supabase.table("course_role").select("id").eq("name", name).execute()
 
-def get_user_course_role_by_id(user_id: str):
-    response = supabase.table("course_user_roles").select("*").eq("user_id", user_id).execute()
-    return response
+def get_user_course_role_by_id(u_id: str, c_id: int):
+    return supabase.table("course_user_roles").select("access_role").eq("user_id", u_id).select("course_id", c_id).execute()
 
 def get_users_with_course_roles(course_id: int):
     try:
@@ -174,3 +173,18 @@ def create_user_course_role_history(new_user_course_role: CourseUserRole, prev_u
     }
     response = supabase.table("role_changes").insert(row).execute()
     return response
+
+def user_has_course_permissions(u_id: str, c_id: int):
+    response = get_user_course_role_by_id(u_id, c_id)
+
+    if not response or not response.data or len(response.data) <= 0:
+        return False
+
+    access_role = response.data[0]["access_role"]
+    maintainer_enum_id = get_role_key("Maintainer")[0]["id"]
+
+    # permissions hiearchy ([1, admin], [2, maintainer], [3, member], [4, guest], [5, none])
+    if access_role > maintainer_enum_id:
+        return False
+    
+    return True

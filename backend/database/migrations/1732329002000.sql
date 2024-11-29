@@ -26,6 +26,6 @@ CREATE TABLE IF NOT EXISTS public.role_changes (
 );
 alter table public.role_changes enable row level security;
 
-insert into public.course_role (id, name)
-values (0, 'None');
+insert into public.course_role (name)
+values ('None');
 
