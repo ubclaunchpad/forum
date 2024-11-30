@@ -19,10 +19,8 @@ const tabs = [
     name: "resources",
     icon: FileText,
     label: "Resources",
-  }
-]
-
-
+  },
+];
 
 export default function CourseNavbar() {
   const searchParams = useCustomSearchParams();
@@ -49,7 +47,6 @@ export default function CourseNavbar() {
             {tab.label}
           </Button>
         ))}
-        
       </div>
     </div>
   );

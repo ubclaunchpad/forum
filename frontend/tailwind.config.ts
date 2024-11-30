@@ -1,6 +1,5 @@
 import type { Config } from "tailwindcss";
 
-
 const colourPalette = {
   neutral: {
     50: "#FAFAFA",
@@ -13,7 +12,7 @@ const colourPalette = {
     700: "#404040",
     800: "#262626",
     900: "#171717",
-    950: "#0A0A0A"
+    950: "#0A0A0A",
   },
   jade: {
     50: "#F4F9F8",
@@ -26,10 +25,9 @@ const colourPalette = {
     700: "#2B5A58",
     800: "#264948",
     900: "#233E3D",
-    950: "#102223"
-  }
-}
-
+    950: "#102223",
+  },
+};
 
 const config: Config = {
   content: [
@@ -69,7 +67,7 @@ const config: Config = {
         primary: {
           DEFAULT: colourPalette.jade[600],
           foreground: colourPalette.neutral[50],
-          ...colourPalette.jade
+          ...colourPalette.jade,
         },
         muted: {
           DEFAULT: "hsl(var(--neutral-3))",

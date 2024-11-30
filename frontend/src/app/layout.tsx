@@ -24,7 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${SourceSans.variable} ${quicksand.variable}  font-sans`}>
+      <body
+        className={`${SourceSans.variable} ${quicksand.variable}  font-sans`}
+      >
         {children}
       </body>
     </html>
