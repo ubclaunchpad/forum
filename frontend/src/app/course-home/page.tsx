@@ -1,6 +1,6 @@
 "use client";
 
-import CourseNavbar from "./courseNavbar";
+import CourseNavbar from "@/components/course/courseNavbar";
 import Sidebar from "@/components/navigation/sidebar";
 import { Suspense } from "react";
 
