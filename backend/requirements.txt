@@ -19,6 +19,8 @@ anyio==4.6.2.post1
     #   starlette
 attrs==24.2.0
     # via aiohttp
+black==24.10.0
+    # via -r requirements.in
 build==1.2.2.post1
     # via pip-tools
 certifi==2024.8.30
@@ -27,6 +29,7 @@ certifi==2024.8.30
     #   httpx
 click==8.1.7
     # via
+    #   black
     #   pip-tools
     #   uvicorn
 deprecation==2.1.0
@@ -74,20 +77,27 @@ multidict==6.1.0
     # via
     #   aiohttp
     #   yarl
+mypy-extensions==1.0.0
+    # via black
 numpy==2.1.3
     # via -r requirements.in
-openai==1.54.4
+openai==1.55.1
     # via -r requirements.in
 packaging==24.2
     # via
+    #   black
     #   build
     #   deprecation
     #   pipdeptree
     #   pytest
+pathspec==0.12.1
+    # via black
 pip-tools==7.4.1
     # via -r requirements.in
 pipdeptree==2.23.4
     # via -r requirements.in
+platformdirs==4.3.6
+    # via black
 pluggy==1.5.0
     # via pytest
 postgrest==0.18.0
@@ -116,6 +126,8 @@ python-dateutil==2.9.0.post0
     #   storage3
 python-dotenv==1.0.1
     # via -r requirements.in
+python-multipart==0.0.17
+    # via -r requirements.in
 realtime==2.0.6
     # via supabase
 six==1.16.0
@@ -142,7 +154,7 @@ typing-extensions==4.12.2
     #   pydantic
     #   pydantic-core
     #   realtime
-uvicorn==0.32.0
+uvicorn==0.32.1
     # via -r requirements.in
 websockets==13.1
     # via realtime

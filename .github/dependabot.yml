@@ -1,8 +1,5 @@
 version: 2
 
-permissions:
-  contents: write
-
 updates:
   - package-ecosystem: "npm"
     directory: "/frontend"
