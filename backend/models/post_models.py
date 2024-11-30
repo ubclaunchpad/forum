@@ -62,3 +62,10 @@ class PostResponse(BaseModel):
     created_by: UUID
     status: str
     applied_at: datetime
+
+
+class PostMetadata(BaseModel):
+    """Modle for getting post metadata"""
+
+    post_id: UUID
+    like_count: int
