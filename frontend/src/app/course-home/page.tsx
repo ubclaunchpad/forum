@@ -10,7 +10,7 @@ export default function CourseHomePage() {
       <Suspense>
         <CourseNavbar />
       </Suspense>
-      <Sidebar/>
+      <Sidebar />
     </div>
   );
 }
