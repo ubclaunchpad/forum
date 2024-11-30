@@ -1,5 +1,34 @@
 import type { Config } from "tailwindcss";
 
+const colourPalette = {
+  neutral: {
+    50: "#FAFAFA",
+    100: "#F5f5f5",
+    200: "#E5E5E5",
+    300: "#D4D4D4",
+    400: "#A3A3A3",
+    500: "#737373",
+    600: "#525252",
+    700: "#404040",
+    800: "#262626",
+    900: "#171717",
+    950: "#0A0A0A",
+  },
+  jade: {
+    50: "#F4F9F8",
+    100: "#D9EEEB",
+    200: "#B3DCD6",
+    300: "#85C3BD",
+    400: "#5BA6A0",
+    500: "#418B86",
+    600: "#347370",
+    700: "#2B5A58",
+    800: "#264948",
+    900: "#233E3D",
+    950: "#102223",
+  },
+};
+
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -11,27 +40,22 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-quicksand)", "var(--font-figtree)", "sans-serif"],
         title: ["var(--font-quicksand)"],
-        body: ["var(--font-figtree)"],
-        button: ["var(--font-figtree)"],
+        body: ["var(--font-source-sans)"],
       },
       fontSize: {
-        xs: "var(--font-xs)",
-        sm: "var(--font-sm)",
-        base: "var(--font-base)",
-        md: "var(--font-md)",
-        lg: "var(--font-lg)",
-        xl: "var(--font-xl)",
-        "2xl": "var(--font-2xl)",
-        "3xl": "var(--font-3xl)",
-        "4xl": "var(--font-4xl)",
-        "5xl": "var(--font-5xl)",
-        "6xl": "var(--font-6xl)",
-        "7xl": "var(--font-7xl)",
-        "8xl": "var(--font-8xl)",
+        xs: "10px", // 10 not used
+        sm: "12px", // 12 p(small)
+        base: "14px", // 14 p(default) h5
+        md: "16px", // 16  p(large)
+        lg: "18px", // 18 h4
+        xl: "22px", // 22 h3
+        "2xl": "26px", // 26 h2
+        "3xl": "30px", // 30 h1
+        // add more sizes for landing page
       },
       colors: {
-        background: "hsl(var(--neutral-1))",
-        foreground: "hsl(var(--neutral-12))",
+        background: colourPalette.neutral[50],
+        foreground: colourPalette.neutral[900],
         card: {
           DEFAULT: "hsl(var(--neutral-1))",
           foreground: "hsl(var(--neutral-12))",
@@ -41,94 +65,22 @@ const config: Config = {
           foreground: "hsl(var(--neutral-12))",
         },
         primary: {
-          DEFAULT: "hsl(var(--primary-9))",
-          foreground: "hsl(var(--neutral-1))",
-          1: "hsl(var(--primary-1))",
-          2: "hsl(var(--primary-2))",
-          3: "hsl(var(--primary-3))",
-          4: "hsl(var(--primary-4))",
-          5: "hsl(var(--primary-5))",
-          6: "hsl(var(--primary-6))",
-          7: "hsl(var(--primary-7))",
-          8: "hsl(var(--primary-8))",
-          9: "hsl(var(--primary-9))",
-          10: "hsl(var(--primary-10))",
-          11: "hsl(var(--primary-11))",
-          12: "hsl(var(--primary-12))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary-9))",
-          foreground: "hsl(var(--neutral-12))",
-          1: "hsl(var(--secondary-1))",
-          2: "hsl(var(--secondary-2))",
-          3: "hsl(var(--secondary-3))",
-          4: "hsl(var(--secondary-4))",
-          5: "hsl(var(--secondary-5))",
-          6: "hsl(var(--secondary-6))",
-          7: "hsl(var(--secondary-7))",
-          8: "hsl(var(--secondary-8))",
-          9: "hsl(var(--secondary-9))",
-          10: "hsl(var(--secondary-10))",
-          11: "hsl(var(--secondary-11))",
-          12: "hsl(var(--secondary-12))",
+          DEFAULT: colourPalette.jade[600],
+          foreground: colourPalette.neutral[50],
+          ...colourPalette.jade,
         },
         muted: {
           DEFAULT: "hsl(var(--neutral-3))",
           foreground: "hsl(var(--neutral-8))",
         },
-        accent: {
-          DEFAULT: "hsl(var(--accent-primary-9))",
-          foreground: "hsl(var(--neutral-12))",
-          primary: {
-            1: "hsl(var(--accent-primary-1))",
-            2: "hsl(var(--accent-primary-2))",
-            3: "hsl(var(--accent-primary-3))",
-            4: "hsl(var(--accent-primary-4))",
-            5: "hsl(var(--accent-primary-5))",
-            6: "hsl(var(--accent-primary-6))",
-            7: "hsl(var(--accent-primary-7))",
-            8: "hsl(var(--accent-primary-8))",
-            9: "hsl(var(--accent-primary-9))",
-            10: "hsl(var(--accent-primary-10))",
-            11: "hsl(var(--accent-primary-11))",
-            12: "hsl(var(--accent-primary-12))",
-          },
-          secondary: {
-            1: "hsl(var(--accent-secondary-1))",
-            2: "hsl(var(--accent-secondary-2))",
-            3: "hsl(var(--accent-secondary-3))",
-            4: "hsl(var(--accent-secondary-4))",
-            5: "hsl(var(--accent-secondary-5))",
-            6: "hsl(var(--accent-secondary-6))",
-            7: "hsl(var(--accent-secondary-7))",
-            8: "hsl(var(--accent-secondary-8))",
-            9: "hsl(var(--accent-secondary-9))",
-            10: "hsl(var(--accent-secondary-10))",
-            11: "hsl(var(--accent-secondary-11))",
-            12: "hsl(var(--accent-secondary-12))",
-          },
-        },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        ...colourPalette,
         border: "hsl(var(--neutral-6))",
         input: "hsl(var(--neutral-6))",
         ring: "hsl(var(--primary-9))",
-        neutral: {
-          1: "hsl(var(--neutral-1))",
-          2: "hsl(var(--neutral-2))",
-          3: "hsl(var(--neutral-3))",
-          4: "hsl(var(--neutral-4))",
-          5: "hsl(var(--neutral-5))",
-          6: "hsl(var(--neutral-6))",
-          7: "hsl(var(--neutral-7))",
-          8: "hsl(var(--neutral-8))",
-          9: "hsl(var(--neutral-9))",
-          10: "hsl(var(--neutral-10))",
-          11: "hsl(var(--neutral-11))",
-          12: "hsl(var(--neutral-12))",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",

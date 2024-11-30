@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Figtree, Quicksand } from "next/font/google";
+import { Quicksand, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 
-const figtree = Figtree({
+const SourceSans = Source_Sans_3({
   subsets: ["latin"],
-  variable: "--font-figtree",
+  variable: "--font-source-sans",
 });
 
 const quicksand = Quicksand({
@@ -24,7 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${figtree.variable} ${quicksand.variable}  font-sans`}>
+      <body
+        className={`${SourceSans.variable} ${quicksand.variable}  font-sans`}
+      >
         {children}
       </body>
     </html>
