@@ -1,7 +1,7 @@
 from typing import List, Optional
-
+from database.db import supabase
 from core.pipelines.doc_query_engine import DocumentQueryEngine
-from crud import course_crud
+from crud import course_crud, tags_crud, course_crud, docs_crud
 from crud.course_crud import NoPermissionException, UserNotEnrolledException
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field, validator
@@ -12,6 +12,7 @@ course_router = APIRouter()
 MAX_CHUNKS = 5
 
 # Initialize DocumentQueryEngine
+
 try:
     query_engine = DocumentQueryEngine(max_chunks=MAX_CHUNKS)
 except Exception as e:
@@ -194,6 +195,7 @@ async def update_course(update_course_req: UpdateCourseReq, request: Request):
 
     return profile
 
+
 @course_router.post("/courses/{course_id}/tags")
 async def create_tag(course_id: str, request: Request):
     req = await request.json()
@@ -201,8 +203,9 @@ async def create_tag(course_id: str, request: Request):
 
     if not res:
         raise HTTPException(status_code=404, detail="Failed to create tag.")
-    
+
     return res
+
 
 @course_router.get("/courses/{course_id}/tags")
 async def get_tags(course_id: str):
@@ -211,6 +214,7 @@ async def get_tags(course_id: str):
         raise HTTPException(status_code=404, detail="Failed to get tags.")
     return res
 
+
 @course_router.patch("/courses/{course_id}/tags/{tag_id}")
 async def update_tag(tag_id: str, request: Request):
     req = await request.json()
@@ -218,8 +222,9 @@ async def update_tag(tag_id: str, request: Request):
 
     if not res:
         raise HTTPException(status_code=404, detail="Failed to update tag.")
-    
+
     return res
+
 
 @course_router.delete("/courses/{course_id}/tags/{tag_id}")
 async def delete_tag(tag_id: str):
@@ -228,12 +233,14 @@ async def delete_tag(tag_id: str):
         raise HTTPException(status_code=404, detail="Failed to delete tag.")
     return res
 
+
 @course_router.get("/courses/{course_id}/tags/{tag_id}/content")
 async def get_content(course_id: str, tag_id: str):
     res = tags_crud.get_content(course_id, tag_id)
     if not res:
         raise HTTPException(status_code=404, detail="Failed to get content.")
     return res
+
 
 @course_router.post("/courses/{course_id}/documents/{doc_id}/tags")
 async def add_tag(course_id: str, doc_id: str, request: Request):
@@ -243,6 +250,7 @@ async def add_tag(course_id: str, doc_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Failed to add tag.")
     return res
 
+
 @course_router.get("/courses/{course_id}/documents/{doc_id}/tags")
 async def get_tags(doc_id: str):
     res = docs_crud.get_tags(doc_id)
@@ -250,16 +258,18 @@ async def get_tags(doc_id: str):
         raise HTTPException(status_code=404, detail="Failed to add tag.")
     return res
 
+
 @course_router.delete("/courses/{course_id}/documents/{doc_id}/tags")
-async def delete_tag(doc_id: str, request : Request):
+async def delete_tag(doc_id: str, request: Request):
     req = await request.json()
     res = docs_crud.delete_tag(doc_id, req["tag_id"])
     if not res:
         raise HTTPException(status_code=404, detail="Failed to add tag.")
     return res
 
+
 @course_router.put("/courses/{course_id}/documents/{doc_id}/tags")
-async def update_tag(doc_id: str, request : Request):
+async def update_tag(doc_id: str, request: Request):
     req = await request.json()
     res = docs_crud.update_tag(doc_id, req["tag_ids"])
     if not res:

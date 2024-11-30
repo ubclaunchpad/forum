@@ -1,6 +1,7 @@
 import fitz  # PyMuPDF library for PDF parsing
 import os
 
+
 def parse_pdf_to_text(file_path):
     """Extracts text from a PDF file and returns it as a string."""
     text = ""
@@ -13,6 +14,7 @@ def parse_pdf_to_text(file_path):
         print(f"Error reading {file_path}: {e}")
     return text
 
+
 def read_and_parse_pdfs(folder_path="Files"):
     """Reads all PDFs in a specified folder and parses each to text."""
     all_texts = {}
@@ -24,6 +26,7 @@ def read_and_parse_pdfs(folder_path="Files"):
             all_texts[filename] = pdf_text
     return all_texts
 
+
 if __name__ == "__main__":
     # Parse all PDFs in the Files folder and store their texts in a dictionary
     pdf_texts = read_and_parse_pdfs()
@@ -32,4 +35,4 @@ if __name__ == "__main__":
     for filename, text in pdf_texts.items():
         print(f"\n--- Content of {filename} ---\n")
         sentences = text.split("\n")
-        print(sentences) 
+        print(sentences)
