@@ -54,17 +54,20 @@ async def delete_post(post_id: str, request: Request):
 
     return post
 
+
 @post_router.put("/{post_id}/view")
 async def view_post(post_id: str, request: Request):
     user_id = request.state.user_id
     post = post_crud.view_post(user_id, post_id)
     return post
 
+
 @post_router.post("/{post_id}/like")
 async def like_post(post_id: str, request: Request):
     user_id = request.state.user_id
     post = post_crud.like_post(user_id, post_id)
     return post
+
 
 @post_router.get("/{post_id}/metadata", response_model=PostMetadata)
 async def get_post_metadata(post_id: str):

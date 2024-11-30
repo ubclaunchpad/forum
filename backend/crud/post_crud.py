@@ -107,77 +107,93 @@ def delete_post(user_id, post_id):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{str(e)}")
 
+
 def view_post(user_id, post_id):
     try:
         if postEventExists(user_id, post_id):
             return {"success": True}
-        
+
         view_res = (
-            supabase.table("user_post_events").insert(
-                {
-                    "user_id" : user_id,
-                    "post_id" : post_id,
-                    "viewed" : True,
-                    "liked" : False
-                }
-            ).execute()
+            supabase.table("user_post_events")
+            .insert(
+                {"user_id": user_id, "post_id": post_id, "viewed": True, "liked": False}
+            )
+            .execute()
         )
 
         if not view_res.data:
-            raise HTTPException(status_code=404, detail="Failed to update information on post")
+            raise HTTPException(
+                status_code=404, detail="Failed to update information on post"
+            )
 
         return {"success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{str(e)}")
+
 
 def like_post(user_id, post_id):
     try:
         # If the post doesn't exist, view it first
         if not postEventExists(user_id, post_id):
             view_post(user_id, post_id)
-        
-        event = supabase.table("user_post_events").select("*", count="exact").eq("post_id", post_id).eq("user_id", user_id).execute()
-        liked_status = event.data[0]['liked']
-        
+
+        event = (
+            supabase.table("user_post_events")
+            .select("*", count="exact")
+            .eq("post_id", post_id)
+            .eq("user_id", user_id)
+            .execute()
+        )
+        liked_status = event.data[0]["liked"]
+
         like_res = (
-            supabase.table("user_post_events").update(
-                {
-                    "liked" : not liked_status
-                }
-            )
+            supabase.table("user_post_events")
+            .update({"liked": not liked_status})
             .eq("post_id", post_id)
             .eq("user_id", user_id)
             .execute()
         )
         if not like_res.data:
-            raise HTTPException(status_code=404, detail="Failed to update likes on post.")
+            raise HTTPException(
+                status_code=404, detail="Failed to update likes on post."
+            )
 
         return {"success": True}
-        
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"{str(e)}") 
+        raise HTTPException(status_code=500, detail=f"{str(e)}")
 
 
 def get_post_metadata(post_id):
     try:
-        response = supabase.table("post_impressions").select("*").eq("post_id", post_id).execute()
+        response = (
+            supabase.table("post_impressions")
+            .select("*")
+            .eq("post_id", post_id)
+            .execute()
+        )
         if not response.data:
-            raise HTTPException(status_code=404, detail="Failed to retrieve metadata post.")
+            raise HTTPException(
+                status_code=404, detail="Failed to retrieve metadata post."
+            )
         return response.data[0]
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"{str(e)}")  
+        raise HTTPException(status_code=500, detail=f"{str(e)}")
+
 
 # Find post through id
 def find_valid_post(post_id):
     # Checks if post exists
     if not postExists(post_id):
         raise HTTPException(status_code=404, detail="Failed to find post")
-    
+
     # If post exists, return data
-    post = supabase.table("posts").select("*", count="exact").eq("id", post_id).execute()
+    post = (
+        supabase.table("posts").select("*", count="exact").eq("id", post_id).execute()
+    )
     if not post.data:
         raise HTTPException(status_code=404, detail="Failed to find post")
-    
+
     post_info = post.data[0]
 
     # Checks for deleted status
@@ -186,13 +202,21 @@ def find_valid_post(post_id):
             status_code=404,
             detail="This post is deleted and can no longer be edited",
         )
-    
+
     return post
+
 
 def postExists(post_id):
     post = supabase.table("posts").select("*", head=True).eq("id", post_id).execute()
     return post
 
+
 def postEventExists(user_id, post_id):
-    event = supabase.table("user_post_events").select("*", head=True).eq("id", post_id).eq("user_id", user_id).execute()
+    event = (
+        supabase.table("user_post_events")
+        .select("*", head=True)
+        .eq("id", post_id)
+        .eq("user_id", user_id)
+        .execute()
+    )
     return event
