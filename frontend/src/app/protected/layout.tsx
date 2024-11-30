@@ -5,7 +5,6 @@ import { Suspense } from "react";
 
 export default async function RootLayout({
   children,
-  params,
 }: Readonly<{
   children: React.ReactNode;
   params: { segment: string[] };
@@ -19,7 +18,7 @@ export default async function RootLayout({
 
   return (
     <Suspense>
-      <UserContextProvider user={data.user}>{children}</UserContextProvider>\
+      <UserContextProvider user={data.user}>{children}</UserContextProvider>
     </Suspense>
   );
 }
