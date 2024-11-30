@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException, Request
-from backend.crud import course_crud
-from backend.crud.course_crud import UserNotEnrolledException, NoPermissionException
-from backend.routers.req.courses_req import CreateCourseReq, UpdateCourseReq
+from crud.course_crud import UserNotEnrolledException, NoPermissionException
+from routers.req.courses_req import CreateCourseReq, UpdateCourseReq
 from crud import user_crud
 from crud import tags_crud
+from crud import course_crud
+from crud import docs_crud
 from database.db import supabase
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -151,3 +151,33 @@ async def get_content(course_id: str, tag_id: str):
         raise HTTPException(status_code=404, detail="Failed to get content.")
     return res
 
+@course_router.post("/courses/{course_id}/documents/{doc_id}/tags")
+async def add_tag(course_id: str, doc_id: str, request: Request):
+    req = await request.json()
+    res = docs_crud.add_tag(doc_id, req["tag_ids"])
+    if not res:
+        raise HTTPException(status_code=404, detail="Failed to add tag.")
+    return res
+
+@course_router.get("/courses/{course_id}/documents/{doc_id}/tags")
+async def get_tags(doc_id: str):
+    res = docs_crud.get_tags(doc_id)
+    if not res:
+        raise HTTPException(status_code=404, detail="Failed to add tag.")
+    return res
+
+@course_router.delete("/courses/{course_id}/documents/{doc_id}/tags")
+async def delete_tag(doc_id: str, request : Request):
+    req = await request.json()
+    res = docs_crud.delete_tag(doc_id, req["tag_id"])
+    if not res:
+        raise HTTPException(status_code=404, detail="Failed to add tag.")
+    return res
+
+@course_router.put("/courses/{course_id}/documents/{doc_id}/tags")
+async def update_tag(doc_id: str, request : Request):
+    req = await request.json()
+    res = docs_crud.update_tag(doc_id, req["tag_ids"])
+    if not res:
+        raise HTTPException(status_code=404, detail="Failed to add tag.")
+    return res

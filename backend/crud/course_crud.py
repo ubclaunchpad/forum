@@ -2,8 +2,8 @@ import json
 from http.client import HTTPException
 from uuid import UUID
 
-from ..database.db import supabase
-from ..routers.req.courses_req import CreateCourseReq, RegisterUserReq, UpdateCourseReq
+from database.db import supabase
+from routers.req.courses_req import CreateCourseReq, RegisterUserReq, UpdateCourseReq
 from fastapi.encoders import jsonable_encoder
 
 courses_table = supabase.table("courses")
