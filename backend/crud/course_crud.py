@@ -119,5 +119,5 @@ def get_role_key(name: str):
         query = supabase.table("course_role").select("id").eq("name", name)
         response = query.execute()
         return response
-    except APIError as e:
+    except (ValueError, APIError) as e:
         return e

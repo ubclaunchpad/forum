@@ -2,6 +2,15 @@ from uuid import UUID
 from datetime import date
 from pydantic import BaseModel
 
+class Course(BaseModel):
+    id: UUID
+    c_group: str
+    code: str
+    section: str
+    name: str | None = None
+    config: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
 
 class CreateCourseReq(BaseModel):
     id: UUID | None = None
