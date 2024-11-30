@@ -22,96 +22,6 @@ html {
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --radius: 0.5rem;
-
-    --primary-foreground: 180 100% 13%;
-
-    /* Primary Colors (Teal) */
-    --primary-1: 200, 100%, 96%, 1;
-    --primary-2: 209, 100%, 92%;
-    --primary-3: 209, 100%, 92%;
-    --primary-4: 207, 100%, 85%;
-    --primary-5: 207 100% 63%;
-    --primary-6: 212 100% 54%;
-    --primary-7: 218 100% 50%;
-    --primary-8: 224 100% 50%;
-    --primary-9: 224 100% 38%;
-    --primary-10: 223 90% 33%;
-    --primary-11: 224 81% 21%;
-    --primary-12: 224 81% 21%;
-
-    /* Secondary Colors (Blue) */
-    --secondary-1: 220 33% 99%;
-    --secondary-2: 223 90% 98%;
-    --secondary-3: 224 89% 96%;
-    --secondary-4: 224 100% 93%;
-    --secondary-5: 224 100% 90%;
-    --secondary-6: 224 100% 87%;
-    --secondary-7: 224 94% 81%;
-    --secondary-8: 223 89% 74%;
-    --secondary-9: 231 74% 42%;
-    --secondary-10: 230 67% 48%;
-    --secondary-11: 227 61% 51%;
-    --secondary-12: 222 55% 25%;
-
-    /* Primary Accent Colors (Yellow) */
-    --accent-primary-1: 69 33% 97%;
-    --accent-primary-2: 65 83% 94%;
-    --accent-primary-3: 63 89% 82%;
-    --accent-primary-4: 59 67% 73%;
-    --accent-primary-5: 59 78% 62%;
-    --accent-primary-6: 59 64% 58%;
-    --accent-primary-7: 59 44% 55%;
-    --accent-primary-8: 60 100% 36%;
-    --accent-primary-9: 60 100% 47%;
-    --accent-primary-10: 61 100% 45%;
-    --accent-primary-11: 60 100% 24%;
-    --accent-primary-12: 60 41% 17%;
-
-    /* Secondary Accent Colors (Green) */
-    --accent-secondary-1: 75 33% 98%;
-    --accent-secondary-2: 73 40% 96%;
-    --accent-secondary-3: 83 51% 89%;
-    --accent-secondary-4: 83 47% 83%;
-    --accent-secondary-5: 83 42% 76%;
-    --accent-secondary-6: 83 35% 69%;
-    --accent-secondary-7: 83 28% 61%;
-    --accent-secondary-8: 83 39% 49%;
-    --accent-secondary-9: 77 71% 63%;
-    --accent-secondary-10: 77 65% 56%;
-    --accent-secondary-11: 77 51% 30%;
-    --accent-secondary-12: 77 36% 18%;
-
-    /* Neutral Colors */
-    --neutral-1: 60 33% 99%;
-    --neutral-2: 60 11% 98%;
-    --neutral-3: 60 4% 94%;
-    --neutral-4: 60 3% 91%;
-    --neutral-5: 60 2% 88%;
-    --neutral-6: 60 2% 85%;
-    --neutral-7: 60 2% 81%;
-    --neutral-8: 0 0% 73%;
-    --neutral-9: 60 2% 55%;
-    --neutral-10: 60 2% 50%;
-    --neutral-11: 60 1% 38%;
-    --neutral-12: 60 3% 12%;
-
-    /* TODO: not confirmed on Figma */
-    /* Font Sizes */
-    --font-xs: 0.75rem; /* 12px */
-    --font-sm: 0.875rem; /* 14px */
-    --font-base: 1rem; /* 16px */
-    --font-md: var(--font-base); /* 16px */
-    --font-lg: 1.125rem; /* 18px */
-    --font-xl: 1.25rem; /* 20px */
-    --font-2xl: 1.5rem; /* 24px */
-    --font-3xl: 1.875rem; /* 30px */
-    --font-4xl: 2.25rem; /* 36px */
-    --font-5xl: 3rem; /* 48px */
-    --font-6xl: 3.75rem; /* 60px */
-    --font-7xl: 4.5rem; /* 72px */
-    --font-8xl: 6rem; /* 96px */
-
-    --rounded-btn: 41px;
   }
 }
 
@@ -132,22 +42,18 @@ html {
   h1,
   h2,
   h3,
-  h4 {
+  h4, h5, h6 {
     @apply font-title;
   }
 
-  h5,
-  h6,
-  p {
+  
+  button, p {
     @apply font-body;
   }
 
-  button {
-    @apply font-button;
-  }
 
   h1 {
-    @apply text-4xl font-bold leading-tight;
+    @apply text-4xl font-semibold leading-tight;
   }
 
   h2 {
@@ -155,15 +61,15 @@ html {
   }
 
   h3 {
-    @apply text-2xl font-medium leading-snug;
+    @apply text-2xl font-semibold leading-snug;
   }
 
   h4 {
-    @apply text-xl font-medium leading-relaxed;
+    @apply text-xl font-semibold leading-relaxed;
   }
 
   h5 {
-    @apply text-lg font-medium leading-relaxed;
+    @apply text-lg font-semibold leading-relaxed;
   }
 
   h6 {
@@ -175,7 +81,7 @@ html {
   }
 
   a {
-    @apply text-base hover:text-neutral-11 underline;
+    @apply text-base  underline;
   }
 
   ul,
@@ -183,7 +89,4 @@ html {
     @apply list-inside text-base;
   }
 
-  li {
-    @apply mb-2;
-  }
 }
