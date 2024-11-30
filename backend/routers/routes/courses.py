@@ -6,8 +6,13 @@ from crud.course_crud import NoPermissionException, UserNotEnrolledException
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field, validator
 from routers.req.courses_req import CreateCourseReq, UpdateCourseReq, Course
-from routers.res.courses_res import GetCoursesResponse, GetCourseByIdResponse, CreateCourseResponse, \
-    UpdateCourseResponse, DeleteCourseResponse
+from routers.res.courses_res import (
+    GetCoursesResponse,
+    GetCourseByIdResponse,
+    CreateCourseResponse,
+    UpdateCourseResponse,
+    DeleteCourseResponse,
+)
 
 course_router = APIRouter()
 # Maximum number of chunks to retrieve from the document, hard-coded for now
