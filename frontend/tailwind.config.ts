@@ -70,8 +70,8 @@ const config: Config = {
           ...colourPalette.jade,
         },
         muted: {
-          DEFAULT: "hsl(var(--neutral-3))",
-          foreground: "hsl(var(--neutral-8))",
+          DEFAULT: colourPalette.neutral[200],
+          foreground: colourPalette.neutral[700],
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
