@@ -2,7 +2,7 @@ from typing import Annotated
 
 from crud import post_crud, user_crud
 from fastapi import APIRouter, HTTPException, Query, Request
-from models.post_models import FilterParams, Post, PostEdit, PostResponse
+from models.post_models import FilterParams, Post, PostEdit, PostMetadata, PostResponse
 
 post_router = APIRouter()
 
@@ -52,4 +52,21 @@ async def delete_post(post_id: str, request: Request):
     deletion_user_id = request.state.user_id
     post = post_crud.delete_post(deletion_user_id, post_id)
 
+    return post
+
+@post_router.put("/{post_id}/view")
+async def view_post(post_id: str, request: Request):
+    user_id = request.state.user_id
+    post = post_crud.view_post(user_id, post_id)
+    return post
+
+@post_router.post("/{post_id}/like")
+async def like_post(post_id: str, request: Request):
+    user_id = request.state.user_id
+    post = post_crud.like_post(user_id, post_id)
+    return post
+
+@post_router.get("/{post_id}/metadata", response_model=PostMetadata)
+async def get_post_metadata(post_id: str):
+    post = post_crud.get_post_metadata(post_id)
     return post
