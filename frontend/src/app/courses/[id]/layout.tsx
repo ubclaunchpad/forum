@@ -47,29 +47,25 @@ function ContentLayout() {
       <LeftPane />
       <MainPane />
     </div>
-  )
+  );
 }
 
 type LeftPaneProps = {
   children?: React.ReactNode;
-}
+};
 
 function LeftPane({ children }: LeftPaneProps) {
   return (
-    <div className="w-[400px] h-full bg-background rounded-md">
-      {children}
-    </div>
-  )
+    <div className="w-[400px] h-full bg-background rounded-md">{children}</div>
+  );
 }
 
 type MainPainProps = {
   children?: React.ReactNode;
-}
+};
 
 function MainPane({ children }: MainPainProps) {
   return (
-    <div className="flex-1 h-full bg-background rounded-md">
-      {children}
-    </div>
-  )
+    <div className="flex-1 h-full bg-background rounded-md">{children}</div>
+  );
 }
