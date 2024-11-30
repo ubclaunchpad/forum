@@ -21,7 +21,7 @@ export default function Sidebar({
       <div
         className={`fixed top-0 ${
           isRight ? "right-0" : "left-0"
-        } h-full bg-neutral-5 text-white transition-transform duration-300 ${
+        } h-full bg-muted text-white transition-transform duration-300 ${
           isRight
             ? isOpen
               ? "translate-x-0"
@@ -39,12 +39,12 @@ export default function Sidebar({
         className={`fixed top-0 transition-transform duration-300 ${
           isRight
             ? isOpen
-              ? "translate-x-[-288px] right-0"
+              ? "translate-x-[-256px] right-0"
               : "translate-x-0 right-0"
             : isOpen
-              ? "translate-x-[288px] left-0"
+              ? "translate-x-[256px] left-0"
               : "translate-x-0 left-0"
-        } m-4 p-2 bg-primary-7 text-white rounded-lg`}
+        } m-4 p-2 bg-primary text-white rounded-lg`}
       >
         <PanelRight />
       </button>
