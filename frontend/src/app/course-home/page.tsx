@@ -1,6 +1,7 @@
 "use client";
 
-import CourseNavbar from "./course-navbar";
+import CourseNavbar from "./courseNavbar";
+import Sidebar from "@/components/navigation/sidebar";
 import { Suspense } from "react";
 
 export default function CourseHomePage() {
@@ -9,6 +10,7 @@ export default function CourseHomePage() {
       <Suspense>
         <CourseNavbar />
       </Suspense>
+      <Sidebar/>
     </div>
   );
 }
