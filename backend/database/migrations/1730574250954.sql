@@ -16,7 +16,7 @@ alter table public.profiles enable row level security;
 
 drop table if exists public.courses;
 create table public.courses (
-  id serial,
+  id uuid,
   c_group text not null,
   code text not null,
   section text not null,

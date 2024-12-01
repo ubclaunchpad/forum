@@ -2,16 +2,22 @@
 
 import CourseNavbar from "@/components/course/courseNavbar";
 import { SearchIcon } from "lucide-react";
+import { useCustomSearchParams } from "@/utils/useCustomSearchParams";
+import ResourcesTab from "./resources/resourcesTab";
 
 export default function CoursePage({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const searchParams = useCustomSearchParams();
+  const tab = searchParams.get(["tab"])["tab"];
+
   return (
     <div className="flex flex-col h-dvh w-dvw">
       <CourseTopbar />
       <CourseNavbar />
+      {tab === "resources" && <ResourcesTab />}
       {children}
     </div>
   );
