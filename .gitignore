@@ -2,6 +2,5 @@
 .env.local
 .history
 .idea
-node_modules/
 
 **/outputs/
