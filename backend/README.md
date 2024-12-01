@@ -156,6 +156,7 @@ SUPABASE_KEY=your_supabase_key
 AUTH_MIDDLEWARE_ENABLED=true # or false
 DEV_USER_EMAIL=your_email_here
 DEV_USER_PASSWORD=your_password_here
+DEV_LOGIN=true # or false
 
 ENV=development # or production
 ```
