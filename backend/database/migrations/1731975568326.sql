@@ -6,8 +6,8 @@ create type post_status as enum (
   'deleted'
 );
 
-drop table if exists public.posts;
-drop table if exists public.post_edits;
+drop table if exists public.posts cascade;
+drop table if exists public.post_edits cascade;
 create table public.posts (
   id uuid default uuid_generate_v4(),
   course_id uuid,
