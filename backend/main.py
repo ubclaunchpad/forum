@@ -54,6 +54,12 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 app.add_middleware(AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED)
 
 
+@app.get("/")
+def root():
+    """Root path"""
+    return {"message": "ForumAI is running!"}
+
+
 # For use on Postman to login for a specific user, postman will save token as auth bearer token for requests
 @app.post("/login")
 def login(email: str, password: str):
