@@ -69,7 +69,7 @@ const SignInPage = () => {
         </div>
 
         <div className="flex gap-2">
-        <Button
+          <Button
             type="button"
             onClick={handleLogin}
             className="bg-primary hover:bg-secondary-9 text-white flex-1"
