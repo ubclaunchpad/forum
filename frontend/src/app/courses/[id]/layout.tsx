@@ -4,6 +4,7 @@ import CourseNavbar from "@/components/course/courseNavbar";
 import { SearchIcon } from "lucide-react";
 import { useCustomSearchParams } from "@/utils/useCustomSearchParams";
 import ResourcesTab from "./resources/resourcesTab";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function CoursePage({
   children,
@@ -19,6 +20,7 @@ export default function CoursePage({
       <CourseNavbar />
       {tab === "resources" && <ResourcesTab />}
       {children}
+      <Toaster />
     </div>
   );
 }

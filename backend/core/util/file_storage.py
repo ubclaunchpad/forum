@@ -266,3 +266,31 @@ class FileStorage:
         return (
             f"{url}/storage/v1/object/public/{self.bucket_name}/documents/{file_path}"
         )
+
+    def get_file_signed_url(self, file_path: str) -> str:
+        """
+        Generate a signed URL for a file in Supabase storage.
+
+        This method creates a temporary, authenticated URL for accessing a specific file
+        in the configured Supabase storage bucket. The URL is valid for a limited time.
+
+        Args:
+            file_path (str): The path to the file within the storage bucket.
+
+        Returns:
+            str: A signed URL that provides temporary access to the file.
+
+        Raises:
+            HTTPException if request fails
+        """
+        try:
+            signed_url = self.supabase.storage.from_(self.bucket_name).create_signed_url(file_path, 3600)
+            if not signed_url:
+                raise HTTPException(status_code=500, detail=f"Failed to generate signed URL for file: {file_path}")
+
+            return signed_url
+
+        except Exception as e:
+            # Catch and log any unexpected errors
+            logger.error(f"Unexpected error generating signed URL for {file_path}: {e}")
+            raise HTTPException(status_code=500, detail=f"Could not generate signed URL: {e}")

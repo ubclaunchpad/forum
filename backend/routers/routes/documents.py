@@ -4,7 +4,7 @@ from uuid import UUID
 
 from crud import document_crud
 from fastapi import APIRouter, Form, HTTPException, Request, UploadFile
-from models.documents import DocumentMetadata, DocumentResponse, DocumentTitle
+from models.documents import DocumentMetadata, DocumentResponse, DocumentTitle, ViewDocumentResponse
 from pydantic import ValidationError
 
 document_router = APIRouter()
@@ -141,3 +141,22 @@ async def get_document(
     """
     document = document_crud.get_document_by_id(document_id)
     return document
+
+@document_router.get("/{document_id}/signed-url", response_model=ViewDocumentResponse)
+async def get_document_view(course_id: UUID, document_id: UUID, file_path: str):
+    """
+    Generate a temporary signed URL for document access.
+
+    Args:
+        course_id (UUID): Course identifier to validate document context
+        document_id (UUID): Document unique identifier
+        file_path (str): Path to the document file in storage
+
+    Returns:
+        ViewDocumentResponse: Signed URL for document viewing
+
+    Raises:
+        HTTPException (500): If internal error occurs
+    """
+    signed_url = document_crud.get_signed_document_url(file_path)
+    return signed_url 

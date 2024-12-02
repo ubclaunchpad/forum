@@ -45,7 +45,7 @@ values ('Maintainer'), ('Admin'), ('Member'), ('Guest');
 
 create table public.user_courses (
   user_id uuid not null references auth.users on delete cascade,
-  course_id serial not null references public.courses on delete cascade,
+  course_id uuid not null references public.courses on delete cascade,
   role_id serial not null references public.course_role on delete cascade,
   primary key (user_id,course_id)
 );
