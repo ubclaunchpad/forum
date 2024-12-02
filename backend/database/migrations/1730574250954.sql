@@ -1,8 +1,8 @@
 -- Basic profiles, courses and mapping table
-drop table if exists public.user_courses;
-drop table if exists public.posts;
+drop table if exists public.user_courses cascade;
+drop table if exists public.posts cascade;
 
-drop table if exists public.profiles;
+drop table if exists public.profiles cascade;
 create table public.profiles (
   id uuid not null references auth.users on delete cascade,
   first_name text,
@@ -14,7 +14,7 @@ create table public.profiles (
 alter table public.profiles enable row level security;
 
 
-drop table if exists public.courses;
+drop table if exists public.courses cascade;
 create table public.courses (
   id serial,
   c_group text not null,
@@ -30,7 +30,7 @@ create table public.courses (
 alter table public.courses enable row level security;
 
 
-drop table if exists public.course_role;
+drop table if exists public.course_role cascade;
 create table public.course_role (
   id serial,
   name text,
@@ -45,7 +45,7 @@ values ('Maintainer'), ('Admin'), ('Member'), ('Guest');
 
 create table public.user_courses (
   user_id uuid not null references auth.users on delete cascade,
-  course_id serial not null references public.courses on delete cascade,
+  course_id uuid not null references public.courses on delete cascade,
   role_id serial not null references public.course_role on delete cascade,
   primary key (user_id,course_id)
 );

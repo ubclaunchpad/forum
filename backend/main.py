@@ -8,6 +8,8 @@ from core.util.env_util import ENV, parse_bool_env
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from database.db import supabase
 from middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 from routers.routes.documents import document_router
@@ -56,6 +58,15 @@ app.add_middleware(AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED)
 def root():
     """Root path"""
     return {"message": "ForumAI is running!"}
+
+
+# For use on Postman to login for a specific user, postman will save token as auth bearer token for requests
+@app.post("/login")
+def login(email: str, password: str):
+    response = supabase.auth.sign_in_with_password(
+        {"email": email, "password": password}
+    )
+    return response
 
 
 if __name__ == "__main__":
