@@ -20,7 +20,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.447.0",
     "next": "latest",
-    "pdfjs-dist": "^4.8.69",
+    "pdfjs-dist": "^4.9.124",
     "punycode": "^2.3.1",
     "react": "^18",
     "react-dom": "^18",
@@ -45,6 +45,6 @@
     "typescript": "^5"
   },
   "resolutions": {
-    "pdfjs-dist": "2.15.349"
+    "pdfjs-dist": "4.9.124"
   }
 }
