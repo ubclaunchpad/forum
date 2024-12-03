@@ -2,18 +2,27 @@
 
 import CourseNavbar from "@/components/course/courseNavbar";
 import { SearchIcon } from "lucide-react";
+import { useCustomSearchParams } from "@/utils/useCustomSearchParams";
+import ResourcesTab from "./resources/resourcesTab";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function CoursePage({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const searchParams = useCustomSearchParams();
+  const tab = searchParams.get(["tab"])["tab"];
+
   return (
     <div className="flex flex-col h-dvh w-dvw">
       <CourseTopbar />
       <CourseNavbar />
-      <ContentLayout />
+      {tab === "resources" && <ResourcesTab />}
+
+<!--       <ContentLayout /> -->
       {children}
+      <Toaster />
     </div>
   );
 }
