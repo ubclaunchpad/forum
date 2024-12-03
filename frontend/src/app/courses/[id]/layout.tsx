@@ -1,9 +1,6 @@
-"use client";
 
 import CourseNavbar from "@/components/course/courseNavbar";
 import { SearchIcon } from "lucide-react";
-import { useCustomSearchParams } from "@/utils/useCustomSearchParams";
-import ResourcesTab from "./resources/resourcesTab";
 import { Toaster } from "@/components/ui/toaster";
 
 export default function CoursePage({
@@ -11,16 +8,10 @@ export default function CoursePage({
 }: {
   children: React.ReactNode;
 }) {
-  const searchParams = useCustomSearchParams();
-  const tab = searchParams.get(["tab"])["tab"];
-
   return (
     <div className="flex flex-col h-dvh w-dvw">
       <CourseTopbar />
       <CourseNavbar />
-      {tab === "resources" && <ResourcesTab />}
-
-<!--       <ContentLayout /> -->
       {children}
       <Toaster />
     </div>
@@ -50,31 +41,31 @@ function Searchbar() {
   );
 }
 
-function ContentLayout() {
-  return (
-    <div className="flex flex-1 w-full h-full bg-muted gap-4 px-2 py-4">
-      <LeftPane />
-      <MainPane />
-    </div>
-  );
-}
+// function ContentLayout() {
+//   return (
+//     <div className="flex flex-1 w-full h-full bg-muted gap-4 px-2 py-4">
+//       <LeftPane />
+//       <MainPane />
+//     </div>
+//   );
+// }
 
-type LeftPaneProps = {
-  children?: React.ReactNode;
-};
+// type LeftPaneProps = {
+//   children?: React.ReactNode;
+// };
 
-function LeftPane({ children }: LeftPaneProps) {
-  return (
-    <div className="w-[400px] h-full bg-background rounded-md">{children}</div>
-  );
-}
+// function LeftPane({ children }: LeftPaneProps) {
+//   return (
+//     <div className="w-[400px] h-full bg-background rounded-md">{children}</div>
+//   );
+// }
 
-type MainPainProps = {
-  children?: React.ReactNode;
-};
+// type MainPainProps = {
+//   children?: React.ReactNode;
+// };
 
-function MainPane({ children }: MainPainProps) {
-  return (
-    <div className="flex-1 h-full bg-background rounded-md">{children}</div>
-  );
-}
+// function MainPane({ children }: MainPainProps) {
+//   return (
+//     <div className="flex-1 h-full bg-background rounded-md">{children}</div>
+//   );
+// }

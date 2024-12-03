@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react"
 import FileUpload from '@/components/course/fileUpload'
 import Document, { DocumentInterface } from './document'
