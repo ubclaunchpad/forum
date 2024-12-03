@@ -15,12 +15,12 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.2",
     "@supabase/ssr": "^0.5.1",
-    "@supabase/supabase-js": "^2.45.6",
+    "@supabase/supabase-js": "^2.46.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.447.0",
+    "lucide-react": "^0.462.0",
     "next": "latest",
-    "pdfjs-dist": "^2.15.0",
+    "pdfjs-dist": "^4.9.124",
     "punycode": "^2.3.1",
     "react": "^18",
     "react-dom": "^18",
@@ -40,11 +40,11 @@
     "eslint": "^8.0.0",
     "eslint-config-next": "^14.2.15",
     "postcss": "^8",
-    "prettier": "3.3.3",
+    "prettier": "3.4.1",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   },
   "resolutions": {
-    "pdfjs-dist": "2.15.349"
+    "pdfjs-dist": "4.9.124"
   }
 }

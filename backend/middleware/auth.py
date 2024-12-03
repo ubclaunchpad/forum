@@ -3,7 +3,7 @@
 import os
 from typing import List, Optional
 
-from core.util.env_util import ENV
+from core.util.env_util import ENV, parse_bool_env
 from database.db import supabase
 from dotenv import load_dotenv
 from fastapi import Request, Response
@@ -12,6 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 load_dotenv()
 
 environment = os.getenv("ENV")
+login_required = parse_bool_env("DEV_LOGIN", default=True)
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -41,21 +42,27 @@ class AuthMiddleware(BaseHTTPMiddleware):
         return False
 
     async def dispatch(self, request: Request, call_next):
+        user = None
         if environment == ENV.DEV.value:
             email = os.getenv("DEV_USER_EMAIL")
             password = os.getenv("DEV_USER_PASSWORD")
-            supabase.auth.sign_in_with_password({"email": email, "password": password})
-
+            user = supabase.auth.sign_in_with_password(
+                {"email": email, "password": password}
+            )
         # check if the middleware is enabled
         if self.enabled:
             if not self.is_path_protected(request.url.path):
                 print("not protected")
                 return await call_next(request)
-            user = supabase.auth.get_user()
-            if not user:
-                return Response("Unauthorized", status_code=401)
+            if login_required:
+                bearer_token = request.headers.get("Authorization").split("Bearer ")[1]
+                user = supabase.auth.get_user(bearer_token)
+                if not user:
+                    return Response("Unauthorized", status_code=401)
         request.state.user = user.user
         request.state.user_id = user.user.id
         request.state.user_email = user.user.email
+        # Sign out so service key can get past Row Level Security
+        supabase.auth.sign_out()
         response = await call_next(request)
         return response

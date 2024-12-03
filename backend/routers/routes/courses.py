@@ -5,11 +5,19 @@ from crud import course_crud
 from crud.course_crud import NoPermissionException, UserNotEnrolledException
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field, validator
-from routers.req.courses_req import CreateCourseReq, UpdateCourseReq
+from routers.req.courses_req import CreateCourseReq, UpdateCourseReq, Course
+from routers.res.courses_res import (
+    GetCoursesResponse,
+    GetCourseByIdResponse,
+    CreateCourseResponse,
+    UpdateCourseResponse,
+    DeleteCourseResponse,
+)
 
 course_router = APIRouter()
 # Maximum number of chunks to retrieve from the document, hard-coded for now
 MAX_CHUNKS = 5
+ADMIN_REQUEST = True
 
 # Initialize DocumentQueryEngine
 try:
@@ -76,15 +84,15 @@ async def query_course_content(
             question=query_request.question,
             template_name=query_request.template_name,
         )
-    except KeyError as e:
+    except KeyError as error:
         # Template not found
-        raise HTTPException(status_code=400, detail=f"Template not found: {e}")
-    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Template not found: {error}")
+    except ValueError as error:
         # Other validation errors
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(error))
+    except Exception as error:
         # General error handling
-        raise HTTPException(status_code=500, detail=f"Error during query: {e}")
+        raise HTTPException(status_code=500, detail=f"Error during query: {error}")
 
     # Return the response
     return CourseQueryResponse(
@@ -101,31 +109,38 @@ async def query_course_content(
     )
 
 
-@course_router.get("")
+@course_router.get("", response_model=GetCoursesResponse)
 async def get_courses(request: Request):
-    user_id = request.state.user_id
+    user_id = None
+    if not ADMIN_REQUEST:
+        user_id = request.state.user_id
     courses = course_crud.get_courses(user_id)
     if not courses:
         raise HTTPException(status_code=404, detail="Failed to fetch courses.")
-    return courses
+    return GetCoursesResponse(courses=courses.data)
 
 
 # get course by id
-@course_router.get("/{c_id}")
-async def get_courses_by_id(c_id: int, request: Request):
+@course_router.get("/{c_id}", response_model=GetCoursesResponse)
+async def get_courses_by_id(c_id: str, request: Request):
     try:
-        user_id = request.state.user_id
-        courses = course_crud.get_course_by_id(c_id, user_id)
-        if not courses:
+        user_id = None
+        if not ADMIN_REQUEST:
+            user_id = request.state.user_id
+        response = course_crud.get_course_by_id(c_id, user_id)
+        if not response:
             raise HTTPException(status_code=404, detail="Failed to fetch course.")
-        return courses
-    except UserNotEnrolledException as e:
+        courses = response.data
+        return GetCoursesResponse(courses=courses)
+    except UserNotEnrolledException:
         raise HTTPException(
             status_code=404, detail="User is not enrolled in this course"
         )
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail="error in finding")
 
 
-@course_router.post("")
+@course_router.post("", response_model=CreateCourseResponse)
 async def create_course(create_course_req: CreateCourseReq, request: Request):
     user_id = request.state.user_id
     course = course_crud.create_course(create_course_req)
@@ -135,19 +150,22 @@ async def create_course(create_course_req: CreateCourseReq, request: Request):
     admin_enum = course_crud.get_role_key("Admin")
     if not admin_enum:
         raise HTTPException(status_code=404, detail="Failed to find Admin role")
-    course_id = course.data[0]["id"]
-    admin_id = admin_enum.data[0]["id"]
+    try:
+        course_id = course.data[0]["id"]
+        admin_id = admin_enum.data[0]["id"]
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Value Error")
     # Adds user as admin to the added course
     add_user = course_crud.add_user_to_course(course_id, user_id, admin_id)
     if not add_user:
         raise HTTPException(
             status_code=404, detail="Failed to add user as admin to course."
         )
-    return course
+    return CreateCourseResponse(course_id=course_id, msg="success")
 
 
-@course_router.delete("/{c_id}")
-async def delete_course(c_id: int, request: Request):
+@course_router.delete("/{c_id}", response_model=DeleteCourseResponse)
+async def delete_course(c_id: str, request: Request):
     try:
         user_id = request.state.user_id
         admin_enum = course_crud.get_role_key("Admin")
@@ -155,18 +173,19 @@ async def delete_course(c_id: int, request: Request):
             raise HTTPException(status_code=404, detail="Failed to find Admin role")
         admin_id = admin_enum.data[0]["id"]
         response = course_crud.delete_course(c_id, user_id, admin_id)
+        course = Course.model_validate(response.data[0])
         if not response:
             raise HTTPException(status_code=404, detail="Failed to delete course.")
-        return response
-    except NoPermissionException as e:
+        return DeleteCourseResponse(deleted=course.id, msg="success")
+    except NoPermissionException:
         raise HTTPException(
             status_code=404, detail="User has no permission to delete role"
         )
-    except ValueError as e:
+    except ValueError:
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@course_router.put("/{c_id}")
+@course_router.put("", response_model=UpdateCourseResponse)
 async def update_course(update_course_req: UpdateCourseReq, request: Request):
     try:
         user_id = request.state.user_id
@@ -184,10 +203,11 @@ async def update_course(update_course_req: UpdateCourseReq, request: Request):
         )
         if not response:
             raise HTTPException(status_code=404, detail="Failed to update course.")
-        return response
-    except NoPermissionException as e:
+        course = Course.model_validate(response.data[0])
+        return UpdateCourseResponse(updated=course, msg="success")
+    except NoPermissionException:
         raise HTTPException(
             status_code=404, detail="User has no permission to update role"
         )
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as error:
+        raise HTTPException(status_code=404, detail=str(error))

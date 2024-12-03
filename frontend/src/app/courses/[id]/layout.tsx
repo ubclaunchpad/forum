@@ -12,6 +12,7 @@ export default function CoursePage({
     <div className="flex flex-col h-dvh w-dvw">
       <CourseTopbar />
       <CourseNavbar />
+      <ContentLayout />
       {children}
     </div>
   );
@@ -37,5 +38,34 @@ function Searchbar() {
         <SearchIcon />
       </button>
     </div>
+  );
+}
+
+function ContentLayout() {
+  return (
+    <div className="flex flex-1 w-full h-full bg-muted gap-4 px-2 py-4">
+      <LeftPane />
+      <MainPane />
+    </div>
+  );
+}
+
+type LeftPaneProps = {
+  children?: React.ReactNode;
+};
+
+function LeftPane({ children }: LeftPaneProps) {
+  return (
+    <div className="w-[400px] h-full bg-background rounded-md">{children}</div>
+  );
+}
+
+type MainPainProps = {
+  children?: React.ReactNode;
+};
+
+function MainPane({ children }: MainPainProps) {
+  return (
+    <div className="flex-1 h-full bg-background rounded-md">{children}</div>
   );
 }
