@@ -1,5 +1,5 @@
 from crud import user_crud
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel
 
 user_router = APIRouter()

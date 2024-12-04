@@ -1,15 +1,10 @@
 import uuid
 
 from fastapi.testclient import TestClient
-
-from database.db import test_user_uuid
 from main import app
-from routers.res.courses_res import (
-    DeleteCourseResponse,
-    CreateCourseResponse,
-    UpdateCourseResponse,
-    GetCoursesResponse,
-)
+from routers.res.courses_res import (CreateCourseResponse,
+                                     DeleteCourseResponse, GetCoursesResponse,
+                                     UpdateCourseResponse)
 
 client = TestClient(app)
 course_router_endpoint = "courses"

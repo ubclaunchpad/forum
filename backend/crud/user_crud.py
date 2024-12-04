@@ -44,7 +44,7 @@ def delete_user_by_id(user_id: str):
     try:
         supabase.auth.admin.delete_user(user_id)
         return True
-    except:
+    except Exception as _:
         return False
 
 

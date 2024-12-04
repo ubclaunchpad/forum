@@ -5,14 +5,10 @@ from crud import course_crud
 from crud.course_crud import NoPermissionException, UserNotEnrolledException
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field, validator
-from routers.req.courses_req import CreateCourseReq, UpdateCourseReq, Course
-from routers.res.courses_res import (
-    GetCoursesResponse,
-    GetCourseByIdResponse,
-    CreateCourseResponse,
-    UpdateCourseResponse,
-    DeleteCourseResponse,
-)
+from routers.req.courses_req import Course, CreateCourseReq, UpdateCourseReq
+from routers.res.courses_res import (  # GetCourseByIdResponse,
+    CreateCourseResponse, DeleteCourseResponse, GetCoursesResponse,
+    UpdateCourseResponse)
 
 course_router = APIRouter()
 # Maximum number of chunks to retrieve from the document, hard-coded for now
@@ -136,7 +132,7 @@ async def get_courses_by_id(c_id: str, request: Request):
         raise HTTPException(
             status_code=404, detail="User is not enrolled in this course"
         )
-    except ValueError as error:
+    except ValueError as _:
         raise HTTPException(status_code=400, detail="error in finding")
 
 
@@ -181,7 +177,7 @@ async def delete_course(c_id: str, request: Request):
         raise HTTPException(
             status_code=404, detail="User has no permission to delete role"
         )
-    except ValueError:
+    except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
 

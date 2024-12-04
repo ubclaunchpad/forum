@@ -1,8 +1,8 @@
-from postgrest import APIError
-
 from database.db import supabase
-from routers.req.courses_req import CreateCourseReq, RegisterUserReq, UpdateCourseReq
 from fastapi.encoders import jsonable_encoder
+from postgrest import APIError
+from routers.req.courses_req import (CreateCourseReq, RegisterUserReq,
+                                     UpdateCourseReq)
 
 courses_table = supabase.table("courses")
 
@@ -19,7 +19,7 @@ def register_course(req: RegisterUserReq):
     try:
         user_courses_entry = {"test_user_uuid": req.u_id, "course_id": req.c_id}
         return courses_table.insert(user_courses_entry).execute()
-    except (ValueError, APIError) as e:
+    except (ValueError, APIError) as _:
         return None
 
 
@@ -33,7 +33,7 @@ def get_courses(user_id: str = None):
             base_query = base_query.eq("user_id", user_id)
         response = base_query.execute()
         return response
-    except (ValueError, APIError) as e:
+    except (ValueError, APIError) as _:
         return None
 
 
@@ -49,7 +49,7 @@ def get_course_by_id(c_id: str, user_id: str = None):
             base_query = base_query.eq("user_id", user_id)
         response = base_query.execute()
         return response
-    except (ValueError, APIError) as e:
+    except (ValueError, APIError) as _:
         return None
 
 
@@ -73,7 +73,7 @@ def update_course(
                 response = courses_table.update(params).eq("id", req.c_id).execute()
                 return response
         raise NoPermissionException
-    except (ValueError, APIError) as e:
+    except (ValueError, APIError) as _:
         return None
 
 
@@ -92,7 +92,7 @@ def delete_course(course_id: str, user_id: str, admin_role: int):
                 response = courses_table.delete().eq("id", course_id).execute()
                 return response
         raise NoPermissionException
-    except (ValueError, APIError) as e:
+    except (ValueError, APIError) as _:
         return None
 
 
@@ -101,7 +101,7 @@ def create_course(req: CreateCourseReq):
         params = jsonable_encoder(req.model_dump(exclude_none=True))
         response = courses_table.insert(params).execute()
         return response
-    except (ValueError, APIError) as e:
+    except (ValueError, APIError) as _:
         return None
 
 
@@ -110,7 +110,7 @@ def add_user_to_course(course_id: str, user_id: str, role: int):
         params = {"user_id": user_id, "course_id": course_id, "role_id": role}
         response = supabase.table("user_courses").insert(params).execute()
         return response
-    except (ValueError, APIError) as e:
+    except (ValueError, APIError) as _:
         return None
 
 
@@ -120,4 +120,4 @@ def get_role_key(name: str):
         response = query.execute()
         return response
     except (ValueError, APIError) as e:
-        return e
+        raise e

@@ -1,20 +1,14 @@
 import logging
 import urllib.parse
-from datetime import datetime
 from typing import Any, Dict, List
 from uuid import UUID, uuid4
 
 from core.util.file_storage import FileStorage
 from database.db import database
 from fastapi import HTTPException, UploadFile
-
 # Import the models from your API
-from models.documents import (
-    DocumentMetadata,
-    DocumentResponse,
-    DocumentType,
-    ViewDocumentResponse,
-)
+from models.documents import (DocumentMetadata, DocumentResponse, DocumentType,
+                              ViewDocumentResponse)
 from pydantic import BaseModel
 
 file_storage = FileStorage(bucket_name="course-files")
@@ -58,10 +52,10 @@ async def create_document(
             "metadata": metadata_dict,
         }
 
-        doc_response = database.table("documents").insert(doc_data).execute()
+        database.table("documents").insert(doc_data).execute()
 
         # Create course association
-        course_doc_response = (
+        (
             database.table("course_documents")
             .insert({"course_id": str(course_id), "document_id": str(doc_id)})
             .execute()

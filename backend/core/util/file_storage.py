@@ -5,7 +5,7 @@ import os
 from datetime import datetime as dt
 from enum import Enum
 from logging import getLogger
-from typing import BinaryIO, List, Optional
+from typing import List, Optional
 
 from dotenv import load_dotenv
 from fastapi import HTTPException

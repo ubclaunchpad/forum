@@ -1,5 +1,4 @@
 from fastapi.testclient import TestClient
-
 from routers.routes.users import user_router
 
 client = TestClient(user_router)
@@ -9,21 +8,21 @@ user_id = "test"
 
 
 def test_get_profile():
-    response = client.get(f"/users/me")
+    response = client.get("/users/me")
     print(response)
     assert response.status_code == 200
 
 
 def test_get_profile_not_found():
-    header = {}
-    response = client.get(f"/users/me")
+    # header = {}
+    response = client.get("/users/me")
     assert response.status_code == 404
     assert response.json() == {"detail": "User not found."}
 
 
 def test_get_profile_invalid_creds():
-    invalid_header = {}
-    response = client.get(f"/users/me")
+    # invalid_header = {}
+    response = client.get("/users/me")
     assert response.status_code == 403
     assert response.json() == {
         "detail": "You do not have permission to access this profile."
@@ -31,20 +30,20 @@ def test_get_profile_invalid_creds():
 
 
 def test_update_profile():
-    response = client.post(f"/users/me")
+    response = client.post("/users/me")
     assert response.status_code == 200
 
 
 def test_update_profile_not_found():
-    header = {}
-    response = client.post(f"/users/me")
+    # header = {}
+    response = client.post("/users/me")
     assert response.status_code == 404
     assert response.json() == {"detail": "User not found."}
 
 
 def test_update_profile_invalid_creds():
-    invalid_header = {}
-    response = client.post(f"/users/me")
+    # invalid_header = {}
+    response = client.post("/users/me")
     assert response.status_code == 403
     assert response.json() == {
         "detail": "You do not have permission to access this profile."
@@ -52,20 +51,20 @@ def test_update_profile_invalid_creds():
 
 
 def test_delete_profile():
-    response = client.delete(f"/users/me")
+    response = client.delete("/users/me")
     assert response.status_code == 200
 
 
 def test_delete_profile_not_found():
-    header = {}
-    response = client.delete(f"/users/me")
+    # header = {}
+    response = client.delete("/users/me")
     assert response.status_code == 404
     assert response.json() == {"detail": "User not found."}
 
 
 def test_delete_profile_invalid_creds():
-    invalid_header = {}
-    response = client.delete(f"/users/me")
+    # invalid_header = {}
+    response = client.delete("/users/me")
     assert response.status_code == 403
     assert response.json() == {
         "detail": "You do not have permission to access this profile."
@@ -142,7 +141,7 @@ def test_delete_user_by_id_invalid_creds():
     }
 
 
-def test_delete_user_by_id_not_found():
+def test_delete_user_by_id_no_permission():
     response = client.delete(f"/users/{user_id}")
     assert response.status_code == 403
     assert response.json() == {

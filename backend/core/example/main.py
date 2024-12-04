@@ -1,7 +1,6 @@
 """Example script demonstrating query system workflow with biology content."""
 
 import time
-import os
 import json
 
 from datetime import datetime

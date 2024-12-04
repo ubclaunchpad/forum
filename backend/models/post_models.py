@@ -17,14 +17,14 @@ class Post(BaseModel):
     @classmethod
     def validate_title(cls, v: str):
         if len(v) < 5:
-            raise ValueError(f"Title must be at least 5 characters long")
+            raise ValueError("Title must be at least 5 characters long")
         return v
 
     @field_validator("content")
     @classmethod
     def validate_content(cls, v: str):
         if len(v) < 1:
-            raise ValueError(f"Post must contain content")
+            raise ValueError("Post must contain content")
         return v
 
     @field_validator("tags")
