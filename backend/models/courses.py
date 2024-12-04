@@ -1,5 +1,6 @@
-from uuid import UUID
 from datetime import date
+from uuid import UUID
+
 from pydantic import BaseModel
 
 
@@ -39,3 +40,26 @@ class UpdateCourseReq(BaseModel):
     config: str | None = None
     start_date: date | None = None
     end_date: date | None = None
+
+
+class CreateCourseResponse(BaseModel):
+    course_id: UUID
+    msg: str
+
+
+class GetCoursesResponse(BaseModel):
+    courses: list[Course]
+
+
+class GetCourseByIdResponse(BaseModel):
+    course: Course | None = None
+
+
+class UpdateCourseResponse(BaseModel):
+    updated: Course
+    msg: str
+
+
+class DeleteCourseResponse(BaseModel):
+    deleted: UUID
+    msg: str

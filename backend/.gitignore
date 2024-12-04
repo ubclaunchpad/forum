@@ -5,7 +5,8 @@
 .env
 /venv
 .venv
-
+.rufus_cache/
 
 # cache
 __pycache__
+

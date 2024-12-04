@@ -7,8 +7,11 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field, validator
 from routers.req.courses_req import Course, CreateCourseReq, UpdateCourseReq
 from routers.res.courses_res import (  # GetCourseByIdResponse,
-    CreateCourseResponse, DeleteCourseResponse, GetCoursesResponse,
-    UpdateCourseResponse)
+    CreateCourseResponse,
+    DeleteCourseResponse,
+    GetCoursesResponse,
+    UpdateCourseResponse,
+)
 
 course_router = APIRouter()
 # Maximum number of chunks to retrieve from the document, hard-coded for now

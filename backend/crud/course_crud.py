@@ -1,8 +1,7 @@
 from database.db import supabase
 from fastapi.encoders import jsonable_encoder
 from postgrest import APIError
-from routers.req.courses_req import (CreateCourseReq, RegisterUserReq,
-                                     UpdateCourseReq)
+from routers.req.courses_req import CreateCourseReq, RegisterUserReq, UpdateCourseReq
 
 courses_table = supabase.table("courses")
 

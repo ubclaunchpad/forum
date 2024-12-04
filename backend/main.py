@@ -1,16 +1,13 @@
-"""Main file for the API"""
-
 import os
 import sys
 
 import uvicorn
 from core.util.env_util import ENV, parse_bool_env
+from database.db import supabase
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from database.db import supabase
-from middleware.auth import AuthMiddleware
+from routers.middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 from routers.routes.documents import document_router
 from routers.routes.posts import post_router

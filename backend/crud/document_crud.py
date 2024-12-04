@@ -6,9 +6,14 @@ from uuid import UUID, uuid4
 from core.util.file_storage import FileStorage
 from database.db import database
 from fastapi import HTTPException, UploadFile
+
 # Import the models from your API
-from models.documents import (DocumentMetadata, DocumentResponse, DocumentType,
-                              ViewDocumentResponse)
+from models.documents import (
+    DocumentMetadata,
+    DocumentResponse,
+    DocumentType,
+    ViewDocumentResponse,
+)
 from pydantic import BaseModel
 
 file_storage = FileStorage(bucket_name="course-files")
