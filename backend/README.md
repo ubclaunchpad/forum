@@ -1,5 +1,7 @@
 # Python Backend
 
+NOTE: This readmen is outdated and will be updated soon.
+
 ## Setup Instructions
 
 ### 1. Install Python
