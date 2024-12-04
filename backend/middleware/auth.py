@@ -1,4 +1,4 @@
-""" Middleware for authenticating requests. """
+"""Middleware for authenticating requests."""
 
 import os
 from typing import List, Optional

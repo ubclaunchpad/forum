@@ -1,4 +1,4 @@
-""" Database connection module """
+"""Database connection module"""
 
 import os
 from supabase import create_client, Client

@@ -284,13 +284,20 @@ class FileStorage:
             HTTPException if request fails
         """
         try:
-            signed_url = self.supabase.storage.from_(self.bucket_name).create_signed_url(file_path, 3600)
+            signed_url = self.supabase.storage.from_(
+                self.bucket_name
+            ).create_signed_url(file_path, 3600)
             if not signed_url:
-                raise HTTPException(status_code=500, detail=f"Failed to generate signed URL for file: {file_path}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to generate signed URL for file: {file_path}",
+                )
 
             return signed_url
 
         except Exception as e:
             # Catch and log any unexpected errors
             logger.error(f"Unexpected error generating signed URL for {file_path}: {e}")
-            raise HTTPException(status_code=500, detail=f"Could not generate signed URL: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Could not generate signed URL: {e}"
+            )

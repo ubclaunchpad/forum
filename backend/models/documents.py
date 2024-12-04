@@ -1,4 +1,4 @@
-""" Pydantic models for document handling """
+"""Pydantic models for document handling"""
 
 from datetime import datetime
 from enum import Enum
@@ -110,8 +110,10 @@ class DocumentResponse(BaseModel):
         }
     }
 
+
 class ViewDocumentResponse(BaseModel):
     """Model for response from supabase storage, providing signed url"""
+
     signed_url: str
 
     model_config = {

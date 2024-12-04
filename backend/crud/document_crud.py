@@ -9,7 +9,12 @@ from database.db import database
 from fastapi import HTTPException, UploadFile
 
 # Import the models from your API
-from models.documents import DocumentMetadata, DocumentResponse, DocumentType, ViewDocumentResponse
+from models.documents import (
+    DocumentMetadata,
+    DocumentResponse,
+    DocumentType,
+    ViewDocumentResponse,
+)
 from pydantic import BaseModel
 
 file_storage = FileStorage(bucket_name="course-files")
@@ -213,14 +218,12 @@ def get_signed_document_url(file_path: str) -> ViewDocumentResponse:
         HTTPException:
             - 500: Database operation failure
     """
-    try: 
+    try:
         result = file_storage.get_file_signed_url(file_path)
 
-        signed_url = result.get('signedURL')
-        encoded_url = urllib.parse.quote(signed_url, safe=':/?=&.')
-        return ViewDocumentResponse(
-            signed_url=encoded_url
-        )
+        signed_url = result.get("signedURL")
+        encoded_url = urllib.parse.quote(signed_url, safe=":/?=&.")
+        return ViewDocumentResponse(signed_url=encoded_url)
 
     except HTTPException:
         raise
