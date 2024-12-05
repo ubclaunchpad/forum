@@ -96,9 +96,6 @@ Where to find these?
   - In the Database section, you will find the `DATABASE_URL` (you want a connection string)
 - For most cases you will need to have the `AUTH_MIDDLEWARE_ENABLED` set to `true` and the `DEV_USER_EMAIL` and `DEV_USER_PASSWORD` set to your email and password
   - On your Supabase project, go to the `Auth` section and create a new user (you can manually set the email and password); then use these credentials in the `.env` file
-
-For the OpenAI API key:
-
 - Go on [OpenAI](https://platform.openai.com/) and create a new project (or use an existing one)
   - You do not need this unless you use the OpenAI API
 
@@ -120,8 +117,6 @@ We use SqlAlchemy and Alembic for database migrations. The database is hosted on
 ```bash
 uv run alembic upgrade head
 ```
-
-More information on Alembic can be found [here](https://alembic.sqlalchemy.org/en/latest/tutorial.html)
 
 ## Resources
 
