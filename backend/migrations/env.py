@@ -1,12 +1,8 @@
+import os
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
-
-
-import os
+from sqlalchemy import engine_from_config, pool
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -80,9 +76,7 @@ def run_migrations_online() -> None:
 
     """
     config_var = config.get_section(config.config_ini_section)
-    config_var["sqlalchemy.url"] = (
-        "postgresql://postgres.ejemblzcjdswipxsfire:Armin1378!!@aws-0-us-west-1.pooler.supabase.com:6543/postgres"
-    )
+    config_var["sqlalchemy.url"] = DATABASE_URL
     connectable = engine_from_config(
         config_var,
         prefix="sqlalchemy.",
