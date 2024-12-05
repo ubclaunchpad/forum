@@ -30,6 +30,7 @@ SessionLocal = sessionmaker(
 
 supabase: Client = create_client(url, key)
 
+
 @contextmanager
 def get_db():
     db = SessionLocal()

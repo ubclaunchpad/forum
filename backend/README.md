@@ -118,6 +118,11 @@ We use SqlAlchemy and Alembic for database migrations. The database is hosted on
 uv run --env-file .env alembic upgrade head
 ```
 
+## Using the API (Endpoints)
+
+- FastAPI provides a Swagger UI for the API
+- Go to `{base_url}/docs#/` to see the API documentation
+
 ## Resources
 
 - [FastAPI](https://fastapi.tiangolo.com/)

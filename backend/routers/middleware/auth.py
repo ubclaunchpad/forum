@@ -11,6 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 environment = os.getenv("ENV")
 login_required = parse_bool_env("DEV_LOGIN", default=True)
 
+
 class AuthMiddleware(BaseHTTPMiddleware):
     """Middleware for authenticating requests."""
 
@@ -40,10 +41,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         if not self.enabled:
             return await call_next(request)
-        
+
         user = None
         # The following block is for development purposes only in pure backend mode
-        if environment == ENV.DEV.value and not request.headers.get("Authorization") is None and self.enabled:
+        if (
+            environment == ENV.DEV.value
+            and not request.headers.get("Authorization") is None
+            and self.enabled
+        ):
             email = os.getenv("DEV_USER_EMAIL")
             password = os.getenv("DEV_USER_PASSWORD")
             if not email or not password:
@@ -69,11 +74,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         if not user or not user.user:
             return Response("Unauthorized", status_code=401)
-        
+
         request.state.user = user.user
         request.state.user_id = user.user.id
         request.state.user_email = user.user.email
-        
+
         # Sign out so service key can get past Row Level Security
         supabase.auth.sign_out()
         response = await call_next(request)

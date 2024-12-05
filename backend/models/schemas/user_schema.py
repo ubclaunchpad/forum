@@ -15,11 +15,11 @@ class GetUsersResponse(BaseModel):
     users: List[UserBase]
 
 
-
 class CreateUserBaseRequest(BaseModel):
     email: str
     password: str
-    
+
+
 class CreateUserResponse(BaseModel):
     id: UUID
     email: str

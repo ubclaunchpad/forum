@@ -1,6 +1,10 @@
 from controllers import user_controller
 from fastapi import APIRouter, HTTPException, Request, Response
-from models.schemas.user_schema import CreateUserBaseRequest, CreateUserResponse, GetUsersResponse
+from models.schemas.user_schema import (
+    CreateUserBaseRequest,
+    CreateUserResponse,
+    GetUsersResponse,
+)
 
 user_router = APIRouter()
 
@@ -63,4 +67,3 @@ async def create_user(create_user_request: CreateUserBaseRequest):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=400, detail="Failed to create user.")
-
