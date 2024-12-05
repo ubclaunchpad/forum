@@ -1,4 +1,3 @@
-
 from models.all import Profile
 from models.db import get_db
 from sqlalchemy.orm import joinedload

@@ -21,14 +21,15 @@ async def get_user_by_id(user_id: str):
 
     return user
 
+
 @user_router.get("/me")
 async def get_profile(request: Request):
     user_id = request.state.user_id
     profile = user_controller.get_user_by_id(user_id)
-    
+
     if not profile:
         raise HTTPException(status_code=404, detail="Failed to find profile.")
-    
+
     return profile
 
 
@@ -53,7 +54,6 @@ async def update_user_by_id(user_id: str, updated_fields):
     # return updated_user
 
 
-
 @user_router.post("")
 async def create_user():
     raise HTTPException(status_code=400, detail="Not implemented.")
@@ -63,7 +63,3 @@ async def create_user():
     #     raise HTTPException(status_code=400, detail="Failed to create user.")
 
     # return user
-
-
-
-

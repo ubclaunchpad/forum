@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from models.db import get_db
+
 # from routers.middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 from routers.routes.posts import post_router
@@ -50,7 +51,6 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 def root():
     """Root path"""
     return {"message": "ForumAI is running!"}
-
 
 
 if __name__ == "__main__":
