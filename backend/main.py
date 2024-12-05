@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from models.db import get_db
+
 # from routers.middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 

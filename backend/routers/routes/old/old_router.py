@@ -2,7 +2,10 @@ from typing import List, Optional
 
 from core.pipelines.doc_query_engine import DocumentQueryEngine
 from controllers import course_controller
-from controllers.course_controller import NoPermissionException, UserNotEnrolledException
+from controllers.course_controller import (
+    NoPermissionException,
+    UserNotEnrolledException,
+)
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field, validator
 from routers.req.courses_req import Course, CreateCourseReq, UpdateCourseReq

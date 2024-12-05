@@ -16,16 +16,14 @@ engine = create_engine(
     poolclass=QueuePool,
     pool_size=5,
     max_overflow=10,
-    pool_timeout=30, 
-    pool_pre_ping=True
+    pool_timeout=30,
+    pool_pre_ping=True,
 )
 
 SessionLocal = sessionmaker(
-    bind=engine,
-    autocommit=False,
-    autoflush=False,
-    expire_on_commit=False
+    bind=engine, autocommit=False, autoflush=False, expire_on_commit=False
 )
+
 
 @contextmanager
 def get_db():
@@ -38,4 +36,3 @@ def get_db():
         raise
     finally:
         db.close()
-

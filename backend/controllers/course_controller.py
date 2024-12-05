@@ -19,35 +19,40 @@ def create_course(create_course_req: CreateCourseReq) -> CreateCourseResponse:
             name=create_course_req.name,
             config=jsonable_encoder(create_course_req.config),
             start_date=create_course_req.start_date,
-            end_date=create_course_req.end_date
+            end_date=create_course_req.end_date,
         )
         try:
             db.add(course)
             db.flush()
             course_id = UUID(str(course.id))
-            return CreateCourseResponse(course_id=course_id, msg="Course created successfully")
+            return CreateCourseResponse(
+                course_id=course_id, msg="Course created successfully"
+            )
         except Exception as e:
             raise e
+
 
 def get_courses() -> List[CourseResponse]:
     try:
         with get_db() as db:
             courses = db.query(Course).all()
             pydantic_courses = []
-            
+
             for course in courses:
-                try:                    
+                try:
                     validated_course = CourseResponse.model_validate(course)
                     pydantic_courses.append(validated_course)
                 except ValidationError as ve:
                     raise ve
-            
+
             return pydantic_courses
     except Exception as e:
         print(f"Error in get_courses: {type(e).__name__}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to fetch courses: {str(e)}")
-    
-    
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch courses: {str(e)}"
+        )
+
+
 def get_course(c_id: Optional[str], name: Optional[str]) -> CourseResponse:
     if c_id:
         with get_db() as db:
@@ -55,15 +60,16 @@ def get_course(c_id: Optional[str], name: Optional[str]) -> CourseResponse:
             if not course:
                 raise HTTPException(status_code=404, detail="Course not found")
             return CourseResponse.model_validate(course)
-    
+
     if name:
         with get_db() as db:
             course = db.query(Course).filter(Course.name == name).first()
             if not course:
                 raise HTTPException(status_code=404, detail="Course not found")
             return CourseResponse.model_validate(course)
-    
+
     raise Exception("Either c_id or name must be provided")
+
 
 def delete_course(c_id: str) -> CourseResponse:
     with get_db() as db:
@@ -73,8 +79,8 @@ def delete_course(c_id: str) -> CourseResponse:
         db.delete(course)
         db.flush()
         return CourseResponse.model_validate(course)
-    
-    
+
+
 def add_user_to_course(c_id: str, u_id: str) -> bool:
     with get_db() as db:
         c_uuid = UUID(c_id)
@@ -83,40 +89,45 @@ def add_user_to_course(c_id: str, u_id: str) -> bool:
         course = db.query(Course).filter(Course.id == c_uuid).first()
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
-        
+
         user = db.query(Profile).filter(Profile.id == u_uuid).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
         if user in course.users:
-            raise HTTPException(status_code=400, detail="User already registered in course")
+            raise HTTPException(
+                status_code=400, detail="User already registered in course"
+            )
 
         course.users.append(user)
         db.flush()
         return True
 
-    
+
 def remove_user_from_course(c_id: str, u_id: str) -> CourseResponse:
-   with get_db() as db:
-       c_uuid = UUID(c_id)
-       u_uuid = UUID(u_id)
+    with get_db() as db:
+        c_uuid = UUID(c_id)
+        u_uuid = UUID(u_id)
 
-       course = db.query(Course).filter(Course.id == c_uuid).first()
-       if not course:
-           raise HTTPException(status_code=404, detail="Course not found")
-       
-       user = db.query(Profile).filter(Profile.id == u_uuid).first()
-       if not user:
-           raise HTTPException(status_code=404, detail="User not found")
+        course = db.query(Course).filter(Course.id == c_uuid).first()
+        if not course:
+            raise HTTPException(status_code=404, detail="Course not found")
 
-       if user not in course.users:
-           raise HTTPException(status_code=404, detail="User not registered in this course")
+        user = db.query(Profile).filter(Profile.id == u_uuid).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
 
-       course.users.remove(user)
-       db.flush()
-       
-       return CourseResponse.model_validate(course)
-   
+        if user not in course.users:
+            raise HTTPException(
+                status_code=404, detail="User not registered in this course"
+            )
+
+        course.users.remove(user)
+        db.flush()
+
+        return CourseResponse.model_validate(course)
+
+
 def get_course_members(c_id: str) -> List[Dict[str, str]]:
     with get_db() as db:
         c_uuid = UUID(c_id)
@@ -126,5 +137,7 @@ def get_course_members(c_id: str) -> List[Dict[str, str]]:
         members = []
         users: List[Profile] = course.users
         for user in course.users:
-            members.append({"id": str(user.id), "name": user.first_name + " " + user.last_name})
+            members.append(
+                {"id": str(user.id), "name": user.first_name + " " + user.last_name}
+            )
         return members

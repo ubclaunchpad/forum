@@ -25,6 +25,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from models.all import Base
+
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -35,16 +36,17 @@ target_metadata = Base.metadata
 
 def include_object(object, name, type_, reflected, compare_to):
     # Check if the object has a schema attribute
-    if hasattr(object, 'schema'):
+    if hasattr(object, "schema"):
         # Only include objects in the public schema
-        return object.schema == 'public'
-    
+        return object.schema == "public"
+
     # For objects without schema, check their parent
-    if hasattr(object, 'table') and hasattr(object.table, 'schema'):
-        return object.table.schema == 'public'
-    
+    if hasattr(object, "table") and hasattr(object.table, "schema"):
+        return object.table.schema == "public"
+
     # Default to True for objects where we can't determine schema
     return True
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -78,7 +80,9 @@ def run_migrations_online() -> None:
 
     """
     config_var = config.get_section(config.config_ini_section)
-    config_var["sqlalchemy.url"] = "postgresql://postgres.ejemblzcjdswipxsfire:Armin1378!!@aws-0-us-west-1.pooler.supabase.com:6543/postgres"
+    config_var["sqlalchemy.url"] = (
+        "postgresql://postgres.ejemblzcjdswipxsfire:Armin1378!!@aws-0-us-west-1.pooler.supabase.com:6543/postgres"
+    )
     connectable = engine_from_config(
         config_var,
         prefix="sqlalchemy.",
@@ -92,7 +96,7 @@ def run_migrations_online() -> None:
             # Add the migration-specific parameters here instead
             include_object=include_object,
             include_schemas=True,
-            version_table_schema="public"
+            version_table_schema="public",
         )
 
         with context.begin_transaction():
