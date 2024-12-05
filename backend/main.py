@@ -10,6 +10,7 @@ from models.db import get_db
 
 # from routers.middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
+from routers.routes.posts import post_router
 
 # from routers.routes.documents import document_router
 # from routers.routes.posts import post_router
@@ -31,12 +32,13 @@ app = FastAPI(dependencies=[Depends(get_db)])
 # Sub-routers
 # app.include_router(user_router, tags=["Users"], prefix="/users")
 app.include_router(course_router, tags=["Courses"], prefix="/courses")
+course_router.include_router(post_router, tags=["Posts"], prefix="/{c_id}/posts")
+
 
 # Nested routers
 # course_router.include_router(
 #     document_router, tags=["Documents"], prefix="/{course_id}/documents"
 # )
-# course_router.include_router(post_router, tags=["Posts"], prefix="/{course_id}/posts")
 
 app.add_middleware(
     CORSMiddleware,

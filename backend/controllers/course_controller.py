@@ -4,9 +4,12 @@ from uuid import UUID
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from models.all import Course, Profile
-from models.courses import CreateCourseResponse
 from models.db import get_db
-from models.schemas.course_schema import CourseResponse, CreateCourseReq
+from models.schemas.course_schema import (
+    CourseResponse,
+    CreateCourseReq,
+    CreateCourseResponse,
+)
 from pydantic import ValidationError
 
 
@@ -25,9 +28,7 @@ def create_course(create_course_req: CreateCourseReq) -> CreateCourseResponse:
             db.add(course)
             db.flush()
             course_id = UUID(str(course.id))
-            return CreateCourseResponse(
-                course_id=course_id, msg="Course created successfully"
-            )
+            return CreateCourseResponse(id=course_id)
         except Exception as e:
             raise e
 

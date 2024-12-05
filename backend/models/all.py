@@ -3,6 +3,7 @@ from datetime import date, datetime
 from typing import List, Optional
 from uuid import UUID
 
+from httpx import post
 from sqlalchemy import (
     DDL,
     Boolean,
@@ -106,6 +107,10 @@ class Profile(Base):
 
     # Relationships
     courses = relationship("Course", secondary=user_courses, back_populates="users")
+    posts = relationship(
+        "Post", back_populates="creator", foreign_keys="[Post.created_by]"
+    )
+    post_edits = relationship("PostEdit", back_populates="editor")
 
 
 class Course(Base):
@@ -128,70 +133,55 @@ class Course(Base):
     )
 
 
-# import enum
-# from datetime import date, datetime
-# from typing import List, Optional
-# from uuid import UUID
+class Post(Base):
+    __tablename__ = "posts"
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    course_id = Column(PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"))
+    title = Column(Text)
+    content = Column(Text)
+    parent_id = Column(PUUID)
+    applied_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
 
-# from sqlalchemy import (DDL, Boolean, CheckConstraint, Column, Date, DateTime,
-#                         Enum, ForeignKey, ForeignKeyConstraint, Index, Integer,
-#                         String, Table, Text, UniqueConstraint, event, text)
-# from sqlalchemy.dialects.postgresql import JSONB
-# from sqlalchemy.dialects.postgresql import UUID as PUUID
-# from sqlalchemy.orm import (backref, declarative_base, declared_attr,
-#                             relationship)
-# from sqlalchemy.sql import func
-# from sqlalchemy.types import VARCHAR, TypeDecorator
+    creator = relationship("Profile", back_populates="posts", foreign_keys=[created_by])
+    edits = relationship(
+        "PostEdit", back_populates="post", cascade="all, delete-orphan"
+    )
+    events = relationship("UserPostEvent", back_populates="post")
 
 
-# # Define base class with schema setting
-# class CustomBase:
-#     @declared_attr
-#     def __tablename__(cls):
-#         return cls.__name__.lower()
+class PostEdit(Base):
+    __tablename__ = "post_edits"
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    post_id = Column(
+        PUUID, ForeignKey("public.posts.id", ondelete="CASCADE"), nullable=False
+    )
+    edited_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
+    previous_content = Column(Text)
+    new_content = Column(Text)
+    edit_reason = Column(Text)
+    applied_at = Column(DateTime(timezone=True), server_default=func.now())
 
-#     @declared_attr
-#     def __table_args__(cls):
-#         return {'schema': 'public'}
+    # Relationships
+    post = relationship("Post", back_populates="edits")
+    editor = relationship("Profile", back_populates="post_edits")
 
-# Base = declarative_base(cls=CustomBase)
 
-# # Setup extensions
-# event.listen(
-#     Base.metadata,
-#     'before_create',
-#     DDL('CREATE EXTENSION IF NOT EXISTS uuid-ossp')  # Added this extension
-# )
+class UserPostEvent(Base):
+    __tablename__ = "user_post_events"
+    id = Column(
+        PUUID, server_default=text("gen_random_uuid()"), primary_key=True
+    )  # Changed to gen_random_uuid()
+    viewed = Column(Boolean)
+    liked = Column(Boolean)
+    user_id = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
+    post_id = Column(
+        PUUID, ForeignKey("public.posts.id", ondelete="CASCADE"), nullable=False
+    )
 
-# event.listen(
-#     Base.metadata,
-#     'before_create',
-#     DDL('CREATE EXTENSION IF NOT EXISTS vector')
-# )
+    # Relationships
+    post = relationship("Post", back_populates="events")
 
-# event.listen(
-#     Base.metadata,
-#     'before_create',
-#     DDL('CREATE EXTENSION IF NOT EXISTS pg_cron')
-# )
-
-# # Create VECTOR type
-# class VECTOR(TypeDecorator):
-#     impl = VARCHAR
-#     cache_ok = True
-
-#     def __init__(self, dim):
-#         super().__init__()
-#         self.dim = dim
-
-# # Create auth.users table reference
-# users = Table(
-#     'users',
-#     Base.metadata,
-#     Column('id', PUUID, primary_key=True),
-#     schema='auth',
-#     keep_existing=True
-# )
 
 # # Define association tables first
 # course_documents = Table(
@@ -277,44 +267,3 @@ class Course(Base):
 # #         Index('documents_status_idx', 'status'),
 # #         {'schema': 'public'}
 # #     )
-
-# class Post(Base):
-#     __tablename__ = "posts"
-#     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)  # Changed to gen_random_uuid()
-#     course_id = Column(PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"))
-#     title = Column(Text)
-#     content = Column(Text)
-#     parent_id = Column(PUUID)
-#     status = Column(Enum(PostStatus))
-#     applied_at = Column(DateTime(timezone=True), server_default=func.now())
-#     created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
-
-#     # Relationships
-#     creator = relationship("Profile", back_populates="posts", foreign_keys=[created_by])
-#     edits = relationship("PostEdit", back_populates="post", cascade="all, delete-orphan")
-#     events = relationship("UserPostEvent", back_populates="post")
-
-# class PostEdit(Base):
-#     __tablename__ = "post_edits"
-#     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)  # Changed to gen_random_uuid()
-#     post_id = Column(PUUID, ForeignKey("public.posts.id", ondelete="CASCADE"), nullable=False)
-#     edited_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
-#     previous_content = Column(Text)
-#     new_content = Column(Text)
-#     edit_reason = Column(Text)
-#     applied_at = Column(DateTime(timezone=True), server_default=func.now())
-
-#     # Relationships
-#     post = relationship("Post", back_populates="edits")
-#     editor = relationship("Profile", back_populates="post_edits")
-
-# class UserPostEvent(Base):
-#     __tablename__ = "user_post_events"
-#     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)  # Changed to gen_random_uuid()
-#     viewed = Column(Boolean)
-#     liked = Column(Boolean)
-#     user_id = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
-#     post_id = Column(PUUID, ForeignKey("public.posts.id", ondelete="CASCADE"), nullable=False)
-
-#     # Relationships
-#     post = relationship("Post", back_populates="events")
