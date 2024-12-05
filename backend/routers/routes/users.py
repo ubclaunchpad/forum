@@ -1,6 +1,6 @@
 from controllers import user_controller
 from fastapi import APIRouter, HTTPException, Request, Response
-from models.schemas.user_schema import GetUsersResponse
+from models.schemas.user_schema import CreateUserBaseRequest, CreateUserResponse, GetUsersResponse
 
 user_router = APIRouter()
 
@@ -54,12 +54,13 @@ async def update_user_by_id(user_id: str, updated_fields):
     # return updated_user
 
 
-@user_router.post("")
-async def create_user():
-    raise HTTPException(status_code=400, detail="Not implemented.")
-    # user = user_controller.create_user()
+@user_router.post("", response_model=CreateUserResponse)
+async def create_user(create_user_request: CreateUserBaseRequest):
+    try:
+        user = user_controller.create_user(create_user_request)
+        return user
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Failed to create user.")
 
-    # if not user:
-    #     raise HTTPException(status_code=400, detail="Failed to create user.")
-
-    # return user

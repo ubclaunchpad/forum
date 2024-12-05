@@ -1,5 +1,10 @@
+from uuid import UUID
+
+import supabase
 from models.all import Profile
-from models.db import get_db
+from models.db import get_db, supabase
+from models.schemas.user_schema import (CreateUserBaseRequest,
+                                        CreateUserResponse)
 from sqlalchemy.orm import joinedload
 
 
@@ -35,3 +40,16 @@ def delete_user_by_id(user_id):
         db.delete(user)
         db.flush()
         return True
+
+
+def create_user(create_user_request: CreateUserBaseRequest) -> CreateUserResponse:
+    with get_db() as db:
+        if db.query(Profile).filter(Profile.email == create_user_request.email).first():
+            raise ValueError("User already exists.")
+        auth_response = supabase.auth.sign_up({"email": create_user_request.email, "password": create_user_request.password})
+        if not auth_response.user:
+            raise ValueError("Failed to create user.")
+        user = Profile(id=auth_response.user.id, email=create_user_request.email)
+        db.add(user)
+        db.flush()
+        return CreateUserResponse(id=UUID(auth_response.user.id), email=create_user_request.email)

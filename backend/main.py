@@ -7,12 +7,10 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from models.db import get_db
-
-# from routers.middleware.auth import AuthMiddleware
+from routers.middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 from routers.routes.posts import post_router
 from routers.routes.users import user_router
-
 
 load_dotenv()
 
@@ -43,8 +41,7 @@ app.add_middleware(
 # Add the backend folder to Python's module search path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-
-# app.add_middleware(AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED)
+app.add_middleware(AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED)
 
 
 @app.get("/")

@@ -5,9 +5,13 @@ from typing import ContextManager, Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import QueuePool
+from supabase import Client, create_client
 
 # Get database URL from environment variable
 DATABASE_URL = os.getenv("DATABASE_URL")
+url: str = os.getenv("SUPABASE_URL") or ""
+key: str = os.getenv("SUPABASE_KEY") or ""
+
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set")
 
@@ -24,6 +28,7 @@ SessionLocal = sessionmaker(
     bind=engine, autocommit=False, autoflush=False, expire_on_commit=False
 )
 
+supabase: Client = create_client(url, key)
 
 @contextmanager
 def get_db():

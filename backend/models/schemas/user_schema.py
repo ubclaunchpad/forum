@@ -1,5 +1,6 @@
 from typing import List
 from uuid import UUID
+
 from pydantic import BaseModel
 
 
@@ -12,3 +13,13 @@ class UserBase(BaseModel):
 
 class GetUsersResponse(BaseModel):
     users: List[UserBase]
+
+
+
+class CreateUserBaseRequest(BaseModel):
+    email: str
+    password: str
+    
+class CreateUserResponse(BaseModel):
+    id: UUID
+    email: str
