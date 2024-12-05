@@ -7,14 +7,11 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from models.db import get_db
-
 # from routers.middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 from routers.routes.posts import post_router
+from routers.routes.users import user_router
 
-# from routers.routes.documents import document_router
-# from routers.routes.posts import post_router
-# from routers.routes.users import user_router
 
 load_dotenv()
 
@@ -29,16 +26,10 @@ allowed_origins = (
 
 app = FastAPI(dependencies=[Depends(get_db)])
 
-# Sub-routers
-# app.include_router(user_router, tags=["Users"], prefix="/users")
 app.include_router(course_router, tags=["Courses"], prefix="/courses")
+app.include_router(user_router, tags=["Users"], prefix="/users")
 course_router.include_router(post_router, tags=["Posts"], prefix="/{c_id}/posts")
 
-
-# Nested routers
-# course_router.include_router(
-#     document_router, tags=["Documents"], prefix="/{course_id}/documents"
-# )
 
 app.add_middleware(
     CORSMiddleware,
@@ -60,14 +51,6 @@ def root():
     """Root path"""
     return {"message": "ForumAI is running!"}
 
-
-# For use on Postman to login for a specific user, postman will save token as auth bearer token for requests
-# @app.post("/login")
-# def login(email: str, password: str):
-#     response = supabase.auth.sign_in_with_password(
-#         {"email": email, "password": password}
-#     )
-#     return response
 
 
 if __name__ == "__main__":

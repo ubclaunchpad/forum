@@ -23,7 +23,7 @@ uv sync
 - Run the following command to create the database tables:
 
 ```bash
-uv run alembic upgrade head
+uv run --env-file .env alembic upgrade head
 ```
 
 ### Environment Variables
@@ -115,7 +115,7 @@ We use SqlAlchemy and Alembic for database migrations. The database is hosted on
 3. Run the following command to apply the migration:
 
 ```bash
-uv run alembic upgrade head
+uv run --env-file .env alembic upgrade head
 ```
 
 ## Resources
