@@ -63,3 +63,9 @@ dependencies = [
     "wheel==0.45.0",
     "yarl==1.17.1",
 ]
+
+
+[dependency-groups]
+dev = [
+    "alembic>=1.14.0",
+]
