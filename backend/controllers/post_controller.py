@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -28,8 +28,6 @@ def get_posts(c_id: str) -> List[Post]:
     try:
         with get_db() as db:
             posts = db.query(Post).filter(Post.course_id == c_id).all()
-            print(posts)
-            print(type(posts))
             return posts
     except Exception as e:
         print(f"Error in get_posts: {type(e).__name__}: {str(e)}")

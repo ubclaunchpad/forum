@@ -11,10 +11,9 @@ post_router = APIRouter()
 
 
 @post_router.post("", response_model=GeneralResponse)
-async def create_post(c_id: str, post_info: CreatePostRequest):
-    # user_id = request.state.user_id
-    user_id = "266b184b-5c55-4a3e-a510-7d0dc5dd00d3"
-    post = post_controller.create_post(user_id, c_id, post_info)
+async def create_post(c_id: str, post_info: CreatePostRequest, request: Request):
+    user_id = request.state.user_id
+    post_controller.create_post(user_id, c_id, post_info)
 
     return {"msg": "Post created successfully"}
 

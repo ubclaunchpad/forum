@@ -1,5 +1,6 @@
 """Middleware for authenticating requests."""
 
+import logging
 import os
 from typing import List, Optional
 
@@ -7,6 +8,9 @@ from core.util.env_util import ENV, parse_bool_env
 from fastapi import Request, Response
 from models.db import supabase
 from starlette.middleware.base import BaseHTTPMiddleware
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 environment = os.getenv("ENV")
 login_required = parse_bool_env("DEV_LOGIN", default=True)
@@ -46,9 +50,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
         # The following block is for development purposes only in pure backend mode
         if (
             environment == ENV.DEV.value
-            and not request.headers.get("Authorization") is None
-            and self.enabled
+            and request.headers.get("Authorization") is None
         ):
+            logger.warning(
+                msg="DEV_LOGIN is enabled. Using DEV_USER_EMAIL and DEV_USER_PASSWORD for authentication."
+            )
             email = os.getenv("DEV_USER_EMAIL")
             password = os.getenv("DEV_USER_PASSWORD")
             if not email or not password:
@@ -59,7 +65,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             if not user:
                 user = supabase.auth.sign_up({"email": email, "password": password})
 
-        if self.enabled:
+        if not user:
             if not self.is_path_protected(request.url.path):
                 print("not protected")
                 return await call_next(request)

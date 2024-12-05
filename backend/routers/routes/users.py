@@ -16,8 +16,8 @@ async def get_all_users():
 
 
 @user_router.get("/{user_id}")
-async def get_user_by_id(user_id: str):
-    user_id = "266b184b-5c55-4a3e-a510-7d0dc5dd00d3"
+async def get_user_by_id(user_id: str, req: Request):
+    user_id = req.state.user_id
     user = user_controller.get_user_by_id(user_id)
 
     if not user:
