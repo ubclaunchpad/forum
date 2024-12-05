@@ -50,12 +50,6 @@ async def delete_user_by_id(user_id: str):
 @user_router.patch("/{user_id}")
 async def update_user_by_id(user_id: str, updated_fields):
     raise HTTPException(status_code=400, detail="Not implemented.")
-    # updated_user = user_controller.update_user(user_id, updated_fields)
-
-    # if not updated_user:
-    #     raise HTTPException(status_code=400, detail="Failed to update user.")
-
-    # return updated_user
 
 
 @user_router.post("", response_model=CreateUserResponse)

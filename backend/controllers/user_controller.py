@@ -53,7 +53,12 @@ def create_user(create_user_request: CreateUserBaseRequest) -> CreateUserRespons
         )
         if not auth_response.user:
             raise ValueError("Failed to create user.")
-        user = Profile(id=auth_response.user.id, email=create_user_request.email)
+        user = Profile(
+            id=auth_response.user.id,
+            email=create_user_request.email,
+            first_name=create_user_request.first_name,
+            last_name=create_user_request.last_name,
+        )
         db.add(user)
         db.flush()
         return CreateUserResponse(

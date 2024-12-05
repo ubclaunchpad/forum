@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -6,8 +6,8 @@ from pydantic import BaseModel
 
 class UserBase(BaseModel):
     id: UUID
-    first_name: str
-    last_name: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     email: str
 
 
@@ -16,6 +16,8 @@ class GetUsersResponse(BaseModel):
 
 
 class CreateUserBaseRequest(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     email: str
     password: str
 
