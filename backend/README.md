@@ -18,6 +18,14 @@
 uv sync
 ```
 
+### 4. Syncing the Database
+
+- Run the following command to create the database tables:
+
+```bash
+uv run alembic upgrade head
+```
+
 ### Environment Variables
 
 Create a `.env` file with:
