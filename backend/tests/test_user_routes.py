@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from routers.routes.users import user_router
+from routers.routes.old.users import user_router
 
 client = TestClient(user_router)
 

@@ -1,7 +1,8 @@
 from typing import Annotated
 
-from crud import post_crud, user_crud
+from controllers.old import user_crud
 from fastapi import APIRouter, HTTPException, Query, Request
+from controllers.old import post_crud
 from models.post_models import FilterParams, Post, PostEdit, PostMetadata, PostResponse
 
 post_router = APIRouter()

@@ -8,7 +8,7 @@ from database.db import database
 from fastapi import HTTPException, UploadFile
 
 # Import the models from your API
-from models.documents import (
+from models.old.documents import (
     DocumentMetadata,
     DocumentResponse,
     DocumentType,

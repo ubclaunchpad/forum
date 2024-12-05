@@ -1,4 +1,4 @@
-from crud import user_crud
+from controllers.old import user_crud
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel
 

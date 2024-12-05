@@ -2,9 +2,9 @@
 
 from uuid import UUID
 
-from crud import document_crud
+from controllers.old import document_crud
 from fastapi import APIRouter, Form, HTTPException, Request, UploadFile
-from models.documents import (
+from models.old.documents import (
     DocumentMetadata,
     DocumentResponse,
     DocumentTitle,
