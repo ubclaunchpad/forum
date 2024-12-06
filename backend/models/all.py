@@ -4,7 +4,9 @@ from typing import List, Optional
 from uuid import UUID
 
 from httpx import post
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
+    ARRAY,
     DDL,
     Boolean,
     CheckConstraint,
@@ -12,6 +14,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     Enum,
+    Float,
     ForeignKey,
     ForeignKeyConstraint,
     Index,
@@ -34,9 +37,9 @@ from sqlalchemy.types import VARCHAR, TypeDecorator
 class CustomBase:
     @declared_attr
     def __tablename__(cls):
-        return cls.__name__.lower()
+        return cls.__name__.lower()  # type: ignore
 
-    @declared_attr
+    @declared_attr  # type: ignore
     def __table_args__(cls):
         return {"schema": "public"}
 
@@ -183,87 +186,140 @@ class UserPostEvent(Base):
     post = relationship("Post", back_populates="events")
 
 
-# # Define association tables first
-# course_documents = Table(
-#     'course_documents',
-#     Base.metadata,
-#     Column('course_id', PUUID, ForeignKey('public.courses.id', ondelete="CASCADE"), primary_key=True),
-#     Column('document_id', PUUID, ForeignKey('public.documents.id', ondelete="CASCADE"), primary_key=True),
-#     schema='public'
-# )
-
-# class Profile(Base):
-#     __tablename__ = "profiles"
-#     id = Column(PUUID, ForeignKey("auth.users.id", ondelete="CASCADE"), primary_key=True)
-#     first_name = Column(Text)
-#     last_name = Column(Text)
-#     email = Column(Text)
-
-#     # Relationships
-#     posts = relationship("Post", back_populates="creator", foreign_keys="[Post.created_by]")
-#     post_edits = relationship("PostEdit", back_populates="editor")
-#     user_courses = relationship("UserCourse", back_populates="user")
-#     # Convenience relationship
-#     courses = relationship("Course", secondary="public.user_courses", viewonly=True)
-
-# class UserCourse(Base):
-#     __tablename__ = "user_courses"
-#     user_id = Column(PUUID, ForeignKey("public.profiles.id", ondelete="CASCADE"), primary_key=True)
-#     course_id = Column(PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"), primary_key=True)
-#     joined_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"))
-
-#     # Relationships
-#     user = relationship("Profile", back_populates="user_courses")
-#     course = relationship("Course", back_populates="user_courses")
-
-# class Course(Base):
-#     __tablename__ = "courses"
-#     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-#     c_group = Column(Text, nullable=False)
-#     code = Column(Text, nullable=False)
-#     section = Column(Text, nullable=False)
-#     name = Column(Text)
-#     config = Column(JSONB)
-#     start_date = Column(Date, server_default=text("CURRENT_DATE"))
-#     end_date = Column(Date)
-
-#     # Relationships
-#     documents = relationship("Document",
-#                            secondary="public.course_documents",
-#                            back_populates="courses")
-#     user_courses = relationship("UserCourse", back_populates="course")
-#     # Convenience relationship
-#     users = relationship("Profile", secondary="public.user_courses", viewonly=True)
-
-#     __table_args__ = (
-#         UniqueConstraint('c_group', 'code', 'section'),
-#         {'schema': 'public'}
-#     )
+course_documents = Table(
+    "course_documents",
+    Base.metadata,
+    Column(
+        "course_id",
+        PUUID,
+        ForeignKey("public.courses.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "document_id",
+        PUUID,
+        ForeignKey("public.documents.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    schema="public",
+)
 
 
-# # class Document(Base):
-# #     __tablename__ = "documents"
-# #     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)  # Changed to gen_random_uuid()
-# #     title = Column(String(255), nullable=False)
-# #     created_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False)
-# #     updated_at = Column(DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False)
-# #     status = Column(String(50), server_default="active", nullable=False)
-# #     document_type = Column(String(50), nullable=False)
-# #     doc_metadata = Column(JSONB)
+class Document(Base):
+    __tablename__ = "documents"
+    id = Column(
+        PUUID, server_default=text("gen_random_uuid()"), primary_key=True
+    )  # Changed to gen_random_uuid()
+    title = Column(String(255), nullable=False)
+    created_at = Column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
+    )
+    updated_at = Column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
+    )
+    document_type = Column(String(50), nullable=False)
+    doc_metadata = Column(JSONB)
 
-# #     # Relationships
-# #     courses = relationship("Course", secondary=course_documents, back_populates="documents")
+    courses = relationship(
+        "Course", secondary=course_documents, back_populates="documents"
+    )
 
-# #     __table_args__ = (
-# #         CheckConstraint(
-# #             "document_type IN ('application/pdf', 'text/plain', 'text/markdown', 'image/png', 'image/jpeg')",
-# #             name="valid_document_type"
-# #         ),
-# #         CheckConstraint(
-# #             "jsonb_typeof(doc_metadata) = 'object'",
-# #             name="valid_metadata"
-# #         ),
-# #         Index('idx_documents_updated_at', 'updated_at'),
-# #         Index('documents_status_idx', 'status'),
-# #         {'schema': 'public'}
-# #     )
+    __table_args__ = (
+        CheckConstraint(
+            "document_type IN ('application/pdf', 'text/plain', 'text/markdown', 'image/png', 'image/jpeg')",
+            name="valid_document_type",
+        ),
+        CheckConstraint("jsonb_typeof(doc_metadata) = 'object'", name="valid_metadata"),
+        {"schema": "public"},
+    )
+
+
+class Chunk(Base):
+    __tablename__ = "chunks"
+
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    document_id = Column(
+        PUUID, ForeignKey("public.documents.id", ondelete="CASCADE"), nullable=False
+    )
+    content = Column(String, nullable=False)
+    chunk_index = Column(Integer, nullable=False)
+    chunk_type = Column(String(50), nullable=True)
+    chunk_metadata = Column(JSONB)
+    embedding = Column(Vector(1536), nullable=True)
+    parent_chunk_id = Column(
+        PUUID, ForeignKey("public.chunks.id", ondelete="CASCADE"), nullable=True
+    )
+    created_at = Column(
+        DateTime, server_default=func.current_timestamp(), nullable=False
+    )
+
+    # Relationships
+    document = relationship("Document", back_populates="chunks")
+    child_chunks = relationship(
+        "Chunk",
+        backref=backref("parent_chunk", remote_side=[id]),
+        cascade="all, delete-orphan",
+    )
+    outgoing_relations = relationship(
+        "ChunkRelation",
+        foreign_keys="ChunkRelation.source_chunk_id",
+        back_populates="source_chunk",
+        cascade="all, delete-orphan",
+    )
+    incoming_relations = relationship(
+        "ChunkRelation",
+        foreign_keys="ChunkRelation.target_chunk_id",
+        back_populates="target_chunk",
+        cascade="all, delete-orphan",
+    )
+
+    __table_args__ = (
+        Index(
+            "chunks_embedding_idx",
+            embedding,
+            postgresql_using="ivfflat",
+            postgresql_with={"lists": 100},
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+        ),
+        CheckConstraint(
+            "chunk_type IN ('text', 'image', 'code')", name="valid_chunk_type"
+        ),
+        CheckConstraint(
+            "jsonb_typeof(chunk_metadata) = 'object'", name="valid_metadata"
+        ),
+        {"schema": "public"},
+    )
+
+
+class ChunkRelation(Base):
+    __tablename__ = "chunk_relations"
+
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    source_chunk_id = Column(
+        PUUID, ForeignKey("public.chunks.id", ondelete="CASCADE"), nullable=False
+    )
+    target_chunk_id = Column(
+        PUUID, ForeignKey("public.chunks.id", ondelete="CASCADE"), nullable=False
+    )
+    relation_type = Column(String(50), nullable=False)
+    properties = Column(JSONB)
+    created_at = Column(
+        DateTime, server_default=func.current_timestamp(), nullable=False
+    )
+
+    # Relationships
+    source_chunk = relationship(
+        "Chunk", foreign_keys=[source_chunk_id], back_populates="outgoing_relations"
+    )
+    target_chunk = relationship(
+        "Chunk", foreign_keys=[target_chunk_id], back_populates="incoming_relations"
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "relation_type IN ('contains', 'references', 'similar_to', 'continuation_of')",
+            name="valid_relation_type",
+        ),
+        CheckConstraint("jsonb_typeof(properties) = 'object'", name="valid_metadata"),
+        {"schema": "public"},
+    )

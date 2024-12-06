@@ -63,6 +63,7 @@ dependencies = [
     "wheel==0.45.0",
     "yarl==1.17.1",
     "sqlalchemy>=2.0.36",
+    "pgvector>=0.3.6",
 ]
 
 

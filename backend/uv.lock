@@ -255,6 +255,7 @@ dependencies = [
     { name = "openai" },
     { name = "packaging" },
     { name = "pathspec" },
+    { name = "pgvector" },
     { name = "pip-tools" },
     { name = "pipdeptree" },
     { name = "platformdirs" },
@@ -322,6 +323,7 @@ requires-dist = [
     { name = "openai", specifier = "==1.56.0" },
     { name = "packaging", specifier = "==24.2" },
     { name = "pathspec", specifier = "==0.12.1" },
+    { name = "pgvector", specifier = ">=0.3.6" },
     { name = "pip-tools", specifier = "==7.4.1" },
     { name = "pipdeptree", specifier = "==2.23.4" },
     { name = "platformdirs", specifier = "==4.3.6" },
@@ -735,6 +737,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ca/bc/f35b8446f4531a7cb215605d100cd88b7ac6f44ab3fc94870c120ab3adbf/pathspec-0.12.1.tar.gz", hash = "sha256:a482d51503a1ab33b1c67a6c3813a26953dbdc71c31dacaef9a838c4e29f5712", size = 51043 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cc/20/ff623b09d963f88bfde16306a54e12ee5ea43e9b597108672ff3a408aad6/pathspec-0.12.1-py3-none-any.whl", hash = "sha256:a0d503e138a4c123b27490a4f7beda6a01c6f288df0e4a8b79c7eb0dc7b4cc08", size = 31191 },
+]
+
+[[package]]
+name = "pgvector"
+version = "0.3.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7d/d8/fd6009cee3e03214667df488cdcf9609461d729968da94e4f95d6359d304/pgvector-0.3.6.tar.gz", hash = "sha256:31d01690e6ea26cea8a633cde5f0f55f5b246d9c8292d68efdef8c22ec994ade", size = 25421 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fb/81/f457d6d361e04d061bef413749a6e1ab04d98cfeec6d8abcfe40184750f3/pgvector-0.3.6-py3-none-any.whl", hash = "sha256:f6c269b3c110ccb7496bac87202148ed18f34b390a0189c783e351062400a75a", size = 24880 },
 ]
 
 [[package]]
