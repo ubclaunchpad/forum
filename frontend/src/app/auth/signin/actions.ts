@@ -1,13 +1,25 @@
 "use server";
 
-import { getApiUrl } from "@/utils/helpers";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+import { createClient } from "@/utils/supabase/server";
+
 
 export async function signin(data: Record<string, unknown>) {
-  return await fetch(`${getApiUrl()}/users/signin`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+  const supabase = createClient();
+
+  const {email, password} = data as {email: string, password: string};
+  const { error } = await supabase.auth.signInWithPassword({email, password});
+
+  console.log(error);
+
+  if (error) {
+    redirect("/auth/signin?error=unable-to-sign-in");
+    return;
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/");
 }
+

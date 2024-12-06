@@ -16,9 +16,15 @@ export default async function RootLayout({
     redirect("/auth/signin");
   }
 
+  const token = (await supabase.auth.getSession()).data.session?.access_token
+
+  if (!token) {
+    redirect("/auth/signin");
+  }
+
   return (
     <Suspense>
-      <UserContextProvider user={data.user}>{children}</UserContextProvider>
+      <UserContextProvider token={token} user={data.user}>{children}</UserContextProvider>
     </Suspense>
   );
 }

@@ -85,7 +85,7 @@ export default function SignIn() {
       </form>
       <div className="w-full pl-2 flex-1 h-full   items-end flex pt-4 text-sm text-muted-foreground">
         {"Don't have an account? "}
-        <Link className="underline" href="/signup">
+        <Link className="underline" href="/auth/signup">
           Sign up
         </Link>
       </div>
