@@ -21,6 +21,5 @@
   "python.analysis.typeCheckingMode": "standard",
   "python.terminal.activateEnvironment": true,
   "python.analysis.autoImportCompletions": true,
-  "python.analysis.supportRestructuredText": false,
-
+  "python.analysis.supportRestructuredText": false
 }
