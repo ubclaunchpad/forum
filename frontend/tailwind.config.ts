@@ -79,7 +79,7 @@ const config: Config = {
         },
         ...colourPalette,
         border: {
-          DEFAULT: colourPalette.jade[600]
+          DEFAULT: colourPalette.jade[600],
         },
         input: "hsl(var(--neutral-6))",
         ring: "hsl(var(--primary-9))",

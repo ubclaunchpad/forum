@@ -16,7 +16,7 @@ export default async function RootLayout({
     redirect("/auth/signin");
   }
 
-  const token = (await supabase.auth.getSession()).data.session?.access_token
+  const token = (await supabase.auth.getSession()).data.session?.access_token;
 
   if (!token) {
     redirect("/auth/signin");
@@ -24,7 +24,9 @@ export default async function RootLayout({
 
   return (
     <Suspense>
-      <UserContextProvider token={token} user={data.user}>{children}</UserContextProvider>
+      <UserContextProvider token={token} user={data.user}>
+        {children}
+      </UserContextProvider>
     </Suspense>
   );
 }

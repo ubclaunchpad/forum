@@ -3,7 +3,6 @@
 import { getApiUrl } from "@/utils/helpers";
 
 export async function signup(data: Record<string, unknown>) {
-
   const res = await fetch(`${getApiUrl()}/users`, {
     method: "POST",
     headers: {
@@ -17,5 +16,4 @@ export async function signup(data: Record<string, unknown>) {
   }
 
   return { ok: true };
-
 }

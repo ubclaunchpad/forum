@@ -12,8 +12,14 @@ export function CourseTopbar() {
 
   return (
     <div className="flex relative justify-between  w-full items-center py-4 px-4 ">
-      <Button variant="outline" size="md" className="border-neutral-200 border h-12 px-4 text-neutral-600">
-        <Link  href="/forum/courses" className="no-underline font-semibold">{courseName}</Link>
+      <Button
+        variant="outline"
+        size="md"
+        className="border-neutral-200 border h-12 px-4 text-neutral-600"
+      >
+        <Link href="/forum/courses" className="no-underline font-semibold">
+          {courseName}
+        </Link>
       </Button>
       <Searchbar />
       <ProfileButton />

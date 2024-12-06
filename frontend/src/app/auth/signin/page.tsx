@@ -12,7 +12,6 @@ import { signin } from "./actions";
 import { convertObjectToSnakeCase } from "@/utils/helpers";
 import { signInSchema, SignInFormValues } from "@/lib/schemas/auth";
 
-
 const signinInputStyle =
   "rounded-full w-full px-3 py-4 h-12 border border-neutral-200 focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
 
@@ -69,7 +68,9 @@ export default function SignIn() {
             />
             <div className="h-6 pl-2 w-full">
               {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.password.message}
+                </p>
               )}
             </div>
           </div>
