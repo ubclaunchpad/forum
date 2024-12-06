@@ -64,6 +64,7 @@ dependencies = [
     "yarl==1.17.1",
     "sqlalchemy>=2.0.36",
     "pgvector>=0.3.6",
+    "python-magic>=0.4.27",
 ]
 
 

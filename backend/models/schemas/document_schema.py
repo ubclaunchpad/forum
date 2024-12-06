@@ -1,0 +1,30 @@
+from datetime import datetime
+from typing import Annotated, Optional
+from uuid import UUID
+
+from fastapi import File, UploadFile
+from pydantic import BaseModel, Field
+
+
+class CreateDocumentRequest(BaseModel):
+    title: str
+    course_id: UUID
+    created_by: UUID
+    file: UploadFile
+    document_type: str
+
+
+class DocumentFileUpload(BaseModel):
+    title: str
+    course_id: UUID
+    created_by: UUID
+    file: bytes
+    document_type: str
+
+
+class GetCourseDocumentsResponse(BaseModel):
+    documents: list[str]
+
+
+class GetCourseDocumentsRequest(BaseModel):
+    pass
