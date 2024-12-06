@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { DialogFooter } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
@@ -18,14 +17,13 @@ export function UploadDocumentForm({
   onSubmit,
 }: UploadDocumentFormProps) {
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (file && title) {
-      onSubmit(file, title, description);
+      onSubmit(file, title);
     }
   };
 
@@ -63,27 +61,16 @@ export function UploadDocumentForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Enter document title"
+            className="rounded-full w-full px-3 py-4 h-12 border border-neutral-200   focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
             required
           />
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="description">Description (Optional)</Label>
-          <Textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Enter document description"
-            className="resize-none"
-          />
-        </div>
-
         <div
           className={cn(
-            "border-2 border-dashed rounded-lg p-12 text-center cursor-pointer",
+            "border rounded-2xl  bg-neutral-100 flex flex-col items-center justify-center p-12 text-center cursor-pointer min-h-80 min-w-xl duration-300",
             isDragging
               ? "border-primary bg-accent"
-              : "border-muted-foreground/25",
+              : "border-neutral-200 border-dashed hover:border-primary hover:bg-primary-600 hover:bg-opacity-10",
           )}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -97,11 +84,11 @@ export function UploadDocumentForm({
             onChange={handleFileChange}
           />
           {file ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               Selected file: {file.name}
             </p>
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               Click here to select a file
             </p>
           )}
