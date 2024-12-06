@@ -12,7 +12,7 @@ alter table public.user_post_events enable row level security;
 CREATE MATERIALIZED VIEW post_impressions AS
 SELECT
     post_id,
-    COUNT(CASE WHEN liked THEN 1 END) AS like_count
+    COUNT(CASE WHEN liked THEN 1 END) AS like_count,
     COUNT(CASE WHEN viewed THEN 1 END) AS view_count
 FROM
     public.user_post_events

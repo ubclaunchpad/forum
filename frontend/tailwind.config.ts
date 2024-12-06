@@ -78,7 +78,9 @@ const config: Config = {
           foreground: "hsl(var(--destructive-foreground))",
         },
         ...colourPalette,
-        border: "hsl(var(--neutral-6))",
+        border: {
+          DEFAULT: colourPalette.jade[600]
+        },
         input: "hsl(var(--neutral-6))",
         ring: "hsl(var(--primary-9))",
       },
