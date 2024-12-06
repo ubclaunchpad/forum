@@ -11,6 +11,7 @@ from routers.middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 from routers.routes.posts import post_router
 from routers.routes.users import user_router
+from routers.routes.documents import document_router
 
 load_dotenv()
 
@@ -28,6 +29,9 @@ app = FastAPI(dependencies=[Depends(get_db)])
 app.include_router(course_router, tags=["Courses"], prefix="/courses")
 app.include_router(user_router, tags=["Users"], prefix="/users")
 course_router.include_router(post_router, tags=["Posts"], prefix="/{c_id}/posts")
+course_router.include_router(
+    document_router, tags=["Documents"], prefix="/{c_id}/documents"
+)
 
 
 app.add_middleware(

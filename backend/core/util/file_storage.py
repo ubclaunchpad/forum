@@ -7,11 +7,10 @@ from enum import Enum
 from logging import getLogger
 from typing import List, Optional
 
+import magic
 from dotenv import load_dotenv
 from fastapi import HTTPException, UploadFile
-import magic
 from supabase import Client, create_client
-
 
 url: str = os.getenv("SUPABASE_URL") or ""
 key: str = os.getenv("SUPABASE_KEY") or ""
@@ -98,7 +97,7 @@ class FileStorage:
                 path=file_path,
                 file_options={"content-type": content_type},
             )
-            return response.full_path  # type: ignore
+            return response.path  # type: ignore
 
         except FileExistsError as e:
             # logger.error(f"File exists error: {e}")
@@ -153,7 +152,7 @@ class FileStorage:
             f"{url}/storage/v1/object/public/{self.bucket_name}/documents/{file_path}"
         )
 
-    def get_file_signed_url(self, file_path: str) -> str:
+    def get_file_signed_url(self, file_path: str) -> dict[str, str]:
         try:
             signed_url = self.supabase.storage.from_(
                 self.bucket_name
@@ -163,8 +162,7 @@ class FileStorage:
                     status_code=500,
                     detail=f"Failed to generate signed URL for file: {file_path}",
                 )
-
-            return signed_url  # type: ignore
+            return signed_url
 
         except Exception as e:
             # Catch and log any unexpected errors

@@ -1,61 +1,51 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import FileUpload from "@/components/course/fileUpload";
 import Document, { DocumentInterface } from "./document";
 import FileViewer from "@/components/file/fileViewer";
 import { ScrollArea, ScrollBar } from "@/components/ui/scrollArea";
+import { courseContext } from "@/contexts/courseContext";
+import { getApiUrl } from "@/utils/helpers";
 
 export default function ResourcesTab() {
   const [files, setFiles] = useState<DocumentInterface[]>([]);
   const [viewFile, setViewFile] = useState<DocumentInterface>();
+  const course = useContext(courseContext);
 
-  const getFiles = async () => {
-    // hardcoded course id for now, course needs to be added to courses table for query to work
-    const link = `${process.env.NEXT_PUBLIC_BACKEND_URL}/courses/1ef384fe-040c-4ba9-813e-dfeb282402bf/documents`;
+  const getFiles = useCallback(async () => {
+    const link = `${getApiUrl()}/courses/${course.info.id}/documents`;
 
     const response = await fetch(link, {
       method: "GET",
     });
     const result = await response.json();
     setFiles(result);
-  };
+  }, [course.info.id]);
 
   useEffect(() => {
     getFiles();
-  }, []);
+  }, [getFiles]);
 
   const handleDocClick = (doc: DocumentInterface) => {
     setViewFile(doc);
   };
 
   return (
-    <>
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto py-6">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-[450px_1fr]">
-            {/* File List */}
-            <div className="space-y-2 pl-6">
-              <ScrollArea className="h-4/5">
-                {files.map((doc) => (
-                  <Document
-                    key={doc.id}
-                    document={doc}
-                    onClick={handleDocClick}
-                  />
-                ))}
-                <ScrollBar orientation="vertical" />
-              </ScrollArea>
-              <FileUpload onUploadSuccess={getFiles} />
-            </div>
-
-            {/* Empty State */}
-            <div className="flex h-[500px] items-center justify-center rounded-lg border">
-              <FileViewer document={viewFile} />
-            </div>
-          </div>
-        </div>
+    <div className="flex flex-row gap-2 w-full px-2 flex-1 py-4">
+      <div className="space-y-2 max-w-lg border rounded-lg p-2 flex flex-col flex-1  items-center">
+        <ScrollArea className="flex-1 w-full">
+          {files.map((doc) => (
+            <Document key={doc.id} document={doc} onClick={handleDocClick} />
+          ))}
+          <ScrollBar orientation="vertical" />
+        </ScrollArea>
+        <FileUpload onUploadSuccess={getFiles} />
       </div>
-    </>
+
+      <div className="flex  flex-1 items-center justify-center rounded-lg border">
+        <FileViewer document={viewFile} />
+      </div>
+    </div>
   );
 }

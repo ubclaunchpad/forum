@@ -98,6 +98,24 @@ user_courses = Table(
     schema="public",
 )
 
+course_documents = Table(
+    "course_documents",
+    Base.metadata,
+    Column(
+        "course_id",
+        PUUID,
+        ForeignKey("public.courses.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "document_id",
+        PUUID,
+        ForeignKey("public.documents.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    schema="public",
+)
+
 
 class Profile(Base):
     __tablename__ = "profiles"
@@ -114,6 +132,7 @@ class Profile(Base):
         "Post", back_populates="creator", foreign_keys="[Post.created_by]"
     )
     post_edits = relationship("PostEdit", back_populates="editor")
+    documents = relationship("Document", back_populates="creators")
 
 
 class Course(Base):
@@ -129,6 +148,9 @@ class Course(Base):
 
     # Relationships
     users = relationship("Profile", secondary=user_courses, back_populates="courses")
+    documents = relationship(
+        "Document", secondary=course_documents, back_populates="courses"
+    )  # Use table object instead of string
 
     __table_args__ = (
         UniqueConstraint("c_group", "code", "section"),
@@ -186,43 +208,31 @@ class UserPostEvent(Base):
     post = relationship("Post", back_populates="events")
 
 
-course_documents = Table(
-    "course_documents",
-    Base.metadata,
-    Column(
-        "course_id",
-        PUUID,
-        ForeignKey("public.courses.id", ondelete="CASCADE"),
-        primary_key=True,
-    ),
-    Column(
-        "document_id",
-        PUUID,
-        ForeignKey("public.documents.id", ondelete="CASCADE"),
-        primary_key=True,
-    ),
-    schema="public",
-)
-
-
 class Document(Base):
     __tablename__ = "documents"
-    id = Column(
-        PUUID, server_default=text("gen_random_uuid()"), primary_key=True
-    )  # Changed to gen_random_uuid()
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
     title = Column(String(255), nullable=False)
     created_at = Column(
         DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
+    )
+    created_by = Column(
+        PUUID, ForeignKey("public.profiles.id", ondelete="CASCADE"), nullable=False
     )
     updated_at = Column(
         DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
     )
     document_type = Column(String(50), nullable=False)
     doc_metadata = Column(JSONB)
+    file_url = Column(String)
 
+    # Relationships
     courses = relationship(
         "Course", secondary=course_documents, back_populates="documents"
     )
+    creators = relationship("Profile", back_populates="documents")
+    chunks = relationship(
+        "Chunk", back_populates="document", cascade="all, delete-orphan"
+    )  # Added this relationship
 
     __table_args__ = (
         CheckConstraint(

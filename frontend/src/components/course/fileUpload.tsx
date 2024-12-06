@@ -93,7 +93,7 @@ export default function FileUpload({
 
   return (
     <>
-      <Button className="w-full" onClick={openModal}>
+      <Button className="w-fit" onClick={openModal}>
         <Upload />
         Upload Document
       </Button>

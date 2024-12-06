@@ -3,6 +3,7 @@ from uuid import UUID
 from controllers.documents import document_manager
 from core.util import file_storage
 from fastapi import APIRouter, Form, HTTPException, Request, UploadFile
+from models.old.documents import ViewDocumentResponse
 from models.schemas.document_schema import CreateDocumentRequest, DocumentFileUpload
 from models.schemas.general_schema import GeneralResponse
 
@@ -12,7 +13,7 @@ document_router = APIRouter()
 @document_router.post("", response_model=GeneralResponse)
 async def create_document(
     request: Request,
-    course_id: UUID,
+    c_id: str,
     file: UploadFile = Form(...),
     title: str = Form(...),
     metadata: str = Form(...),
@@ -23,7 +24,7 @@ async def create_document(
         document_type = await file_storage.get_file_type(file, file_content)
         create_document_request = DocumentFileUpload(
             title=title,
-            course_id=course_id,
+            course_id=UUID(c_id),
             created_by=request.state.user_id,
             file=file_content,
             document_type=document_type,
@@ -39,8 +40,8 @@ async def create_document(
 
 
 @document_router.get("")
-async def get_documents(course_id: UUID):
-    documents = document_manager.get_documents(course_id)
+async def get_documents(c_id: UUID):
+    documents = document_manager.get_documents(c_id)
     return documents
 
 
@@ -52,7 +53,7 @@ async def get_documents(course_id: UUID):
 #     return document
 
 
-# @document_router.get("/{document_id}/signed-url", response_model=ViewDocumentResponse)
-# async def get_document_view(course_id: UUID, document_id: UUID, file_path: str):
-#     signed_url = document_crud.get_signed_document_url(file_path)
-#     return signed_url
+@document_router.get("/{document_id}/signed_url")
+async def get_document_view(c_id: UUID, document_id: UUID):
+    res = document_manager.get_signed_document_url(str(document_id))
+    return {"signed_url": res["signedURL"]}
