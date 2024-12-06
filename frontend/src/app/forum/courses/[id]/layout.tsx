@@ -1,71 +1,24 @@
-
 import CourseNavbar from "@/components/course/courseNavbar";
-import { SearchIcon } from "lucide-react";
+import { CourseTopbar } from "@/components/course/courseTopbar";
 import { Toaster } from "@/components/ui/toaster";
+import { CourseContextProvider } from "@/contexts/courseContext";
 
 export default function CoursePage({
+  params,
   children,
 }: {
+  params: { id: string };
   children: React.ReactNode;
 }) {
+  const { id } = params;
   return (
-    <div className="flex flex-col h-dvh w-dvw">
-      <CourseTopbar />
-      <CourseNavbar />
-      {children}
-      <Toaster />
-    </div>
+    <CourseContextProvider id={id}>
+      <div className="flex flex-col h-dvh w-dvw">
+        <CourseTopbar />
+        <CourseNavbar />
+        {children}
+        <Toaster />
+      </div>
+    </CourseContextProvider>
   );
 }
-
-function CourseTopbar() {
-  return (
-    <div className="flex justify-center w-full items-center py-4">
-      <Searchbar />
-    </div>
-  );
-}
-
-function Searchbar() {
-  return (
-    <div className="flex items-center rounded-full  min-w-[600px] border overflow-hidden">
-      <input
-        type="text"
-        placeholder="Search for something"
-        className="px-2 h-12 outline-none w-full"
-      />
-      <button className="  px-4 py-2 rounded-full">
-        <SearchIcon />
-      </button>
-    </div>
-  );
-}
-
-// function ContentLayout() {
-//   return (
-//     <div className="flex flex-1 w-full h-full bg-muted gap-4 px-2 py-4">
-//       <LeftPane />
-//       <MainPane />
-//     </div>
-//   );
-// }
-
-// type LeftPaneProps = {
-//   children?: React.ReactNode;
-// };
-
-// function LeftPane({ children }: LeftPaneProps) {
-//   return (
-//     <div className="w-[400px] h-full bg-background rounded-md">{children}</div>
-//   );
-// }
-
-// type MainPainProps = {
-//   children?: React.ReactNode;
-// };
-
-// function MainPane({ children }: MainPainProps) {
-//   return (
-//     <div className="flex-1 h-full bg-background rounded-md">{children}</div>
-//   );
-// }
