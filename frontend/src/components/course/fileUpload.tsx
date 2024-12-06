@@ -24,11 +24,15 @@ const acceptedMimeTypes: string[] = [
   "application/vnd.ms-word.document.macroEnabled.12",
 ];
 
-export default function FileUpload({onUploadSuccess}: {onUploadSuccess: () => Promise<void>}) {
-  const [isModalOpen, setIsModalOpen] = useState(false)
+export default function FileUpload({
+  onUploadSuccess,
+}: {
+  onUploadSuccess: () => Promise<void>;
+}) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openModal = () => setIsModalOpen(true)
-  const closeModal = () => setIsModalOpen(false)
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
   const { toast } = useToast();
 
   const handleSubmit = (file: File, title: string, description?: string) => {
@@ -39,12 +43,15 @@ export default function FileUpload({onUploadSuccess}: {onUploadSuccess: () => Pr
         const data = new FormData();
         data.append("file", file);
         data.append("title", title);
-        data.append("metadata", JSON.stringify({
-          "document_type": file.type,
-          "description": description,
-          "file_size": file.size,
-          "tags": []
-        }));
+        data.append(
+          "metadata",
+          JSON.stringify({
+            document_type: file.type,
+            description: description,
+            file_size: file.size,
+            tags: [],
+          }),
+        );
 
         const response = await fetch(link, {
           method: "POST",
@@ -53,14 +60,16 @@ export default function FileUpload({onUploadSuccess}: {onUploadSuccess: () => Pr
 
         if (!response.ok) {
           const errorDetails = await response.json();
-          throw new Error(`HTTP Error ${response.status}: ${errorDetails.message || 'Something went wrong'}`);
+          throw new Error(
+            `HTTP Error ${response.status}: ${errorDetails.message || "Something went wrong"}`,
+          );
         }
 
         toast({
           title: "Document Added",
           description: `\"${title}\" has been added to your course`,
-          variant: "default"
-        })
+          variant: "default",
+        });
         onUploadSuccess();
       } catch (error: unknown) {
         if (error instanceof Error) {
@@ -68,13 +77,13 @@ export default function FileUpload({onUploadSuccess}: {onUploadSuccess: () => Pr
             title: "Error",
             description: `Failed to display document: ${error.message}`,
             variant: "destructive",
-          })
+          });
         } else {
           toast({
             title: "Error",
             description: "An unknown error occurred",
             variant: "destructive",
-          })
+          });
         }
       }
     };
@@ -84,10 +93,13 @@ export default function FileUpload({onUploadSuccess}: {onUploadSuccess: () => Pr
 
   return (
     <>
-      <Button className="w-full" onClick={openModal}><Upload/>Upload Document</Button>
+      <Button className="w-full" onClick={openModal}>
+        <Upload />
+        Upload Document
+      </Button>
       <Modal isOpen={isModalOpen} onClose={closeModal} title="Document Upload">
-        <UploadDocumentForm onCancel={closeModal} onSubmit={handleSubmit}/>
+        <UploadDocumentForm onCancel={closeModal} onSubmit={handleSubmit} />
       </Modal>
-    </>  
+    </>
   );
 }

@@ -28,10 +28,11 @@ const tabs = [
 export default function CourseNavbar() {
   const pathname = usePathname();
   const path = pathname.split("/");
-  if (path.length == 3) {
-    path.push("announcements");
+  if (
+    !["forum", "announcements", "resources"].includes(path[path.length - 1])
+  ) {
+    path.push("forum");
   }
-  console.log(path);
   const tab = path[path.length - 1];
   const courseid = path[path.length - 2];
   const isSelected = (currentTab: string) => tab === currentTab;
@@ -41,15 +42,14 @@ export default function CourseNavbar() {
       <div className="flex gap-8">
         {tabs.map((tab) => (
           <Link
-            href={`/courses/${courseid}/${tab.href}`}
+            href={`/forum/courses/${courseid}/${tab.href}`}
             key={tab.name}
-            className={`flex items-center border-b-2 rounded-none  normal  border-transparent gap-2 px-3 py-2 h-9  ${
+            className={`flex items-center no-underline  border-b-2 rounded-none font-semibold  normal  border-transparent gap-2 px-3 py-2 h-9  ${
               isSelected(tab.name)
-                ? "text-primary-600 border-primary-600  "
-                : "text-foreground"
+                ? "text-primary-600 border-b-primary-600  "
+                : "text-neutral-600 hover:text-neutral-900  border-b-transparent "
             }`}
           >
-            <tab.icon />
             {tab.label}
           </Link>
         ))}
