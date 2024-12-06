@@ -1,6 +1,6 @@
 'use client';
 
-import { DocumentInterface } from "@/app/courses/[id]/resources/document";
+import { DocumentInterface } from "@/app/forum/courses/[id]/resources/document";
 import { useToast } from "@/hooks/use-toast";
 import { FileText, Frown } from "lucide-react";
 import { useState, useEffect } from "react";
