@@ -1,19 +1,17 @@
-# """Module for document parsing using Strategy pattern."""
-
-# from typing import Dict, Protocol
+from typing import Any, Dict, Protocol
 
 
-# class ParsingStrategy(Protocol):
-#     """Protocol defining interface for parsing strategies."""
+class ParsingStrategy(Protocol):
+    """Protocol defining interface for parsing strategies."""
 
-#     def parse(self, content: any) -> Dict:
-#         pass
+    def parse(self, content: Any) -> Dict:
+        raise NotImplementedError()
 
-#     def create_metadata(self, content: any) -> Dict:
-#         pass
+    def create_metadata(self, content: Any) -> Dict:
+        raise NotImplementedError()
 
-#     def clean(self, content: any) -> any:
-#         pass
+    def clean(self, content: Any) -> Any:
+        raise NotImplementedError()
 
-#     def process(self, content: any) -> Dict:
-#         pass
+    def process(self, content: Any) -> Dict:
+        raise NotImplementedError()
