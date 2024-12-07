@@ -42,7 +42,7 @@ ENV PYTHONUNBUFFERED=1
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies (without project install)
-RUN --mount=type=cache,id=s/${RAILWAY_SERVICE_ID}-/root/.cache/uv,target=/root/.cache/uv \
+RUN --mount=type=cache,id=s/a7f9edc8-75a1-4cb9-8b8e-fe061cf20e14-/root/.cache/uv,target=/root/.cache/uv \
     uv sync --frozen --no-install-project
 
 # Copy the rest of the application
