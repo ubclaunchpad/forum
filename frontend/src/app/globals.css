@@ -90,3 +90,10 @@ html {
     @apply list-inside text-base;
   }
 }
+
+dialog {
+  margin-top: 1rem;
+}
+/* dialog::backdrop {
+  backdrop-filter: blur(1px);
+} */
