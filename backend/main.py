@@ -9,13 +9,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from models.db import get_db
 from routers.middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
+from routers.routes.documents import document_router
 from routers.routes.posts import post_router
 from routers.routes.users import user_router
-from routers.routes.documents import document_router
 
 load_dotenv()
 
 environment = os.getenv("ENV")
+
+PORT = int(os.getenv("PORT", 8000))
 
 AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=True)
 allowed_origins = (
@@ -56,5 +58,5 @@ def root():
 
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app", host="0.0.0.0", port=8000, reload=ENV.DEV.value == environment
+        "main:app", host="0.0.0.0", port=PORT, reload=ENV.DEV.value == environment
     )
