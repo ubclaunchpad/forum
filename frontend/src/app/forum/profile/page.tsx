@@ -4,6 +4,6 @@ import { userContext } from "@/contexts/userContext";
 import { useContext } from "react";
 
 export default function ProfilePage() {
-  const { user, profile } = useContext(userContext);
+  const { user } = useContext(userContext);
   return <div>{<p>{user.email}</p>}</div>;
 }
