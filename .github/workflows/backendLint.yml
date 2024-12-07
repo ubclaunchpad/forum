@@ -1,0 +1,16 @@
+name: UVX Lint
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+    branches:
+      - 'dev'
+      - 'main'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: astral-sh/ruff-action@v2
+      - run: ruff check 
