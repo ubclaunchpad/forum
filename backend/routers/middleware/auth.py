@@ -89,7 +89,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if not self.enabled:
             return await call_next(request)
 
-        # Check if path is protected before any auth logic
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         if not self.is_path_protected(request.url.path):
             return await call_next(request)
 
