@@ -19,7 +19,7 @@ AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=True
 allowed_origins = (
     ["http://localhost:3000", "http://0.0.0.0:8000"]
     if environment == ENV.DEV.value
-    else []
+    else os.getenv("ALLOWED_ORIGINS", "").split(",") or []
 )
 
 app = FastAPI(dependencies=[Depends(get_db)])
