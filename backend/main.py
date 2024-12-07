@@ -18,7 +18,9 @@ HOST = os.getenv("HOST", "0.0.0.0")
 
 AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=True)
 allowed_origins = (
-    ["http://localhost:3000", "http://0.0.0.0:8000", "https://forumai.me", "https://forumapp.up.railway.app"]
+    ["http://localhost:3000", "http://0.0.0.0:8000", 
+     "https://forumai.me", "https://forumai.me/",
+     "https://forumapp.up.railway.app", "https://forumapp.up.railway.app/"]
 )
 
 app = FastAPI(dependencies=[Depends(get_db)])
