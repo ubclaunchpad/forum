@@ -1,10 +1,14 @@
 # Build stage
 FROM ubuntu:22.04 AS builder
 
-# Railway environment variables
-ARG RAILWAY_ENVIRONMENT
+# Railway environment variables needed at build time
+ARG RAILWAY_ENVIRONMENT_NAME
+ARG RAILWAY_ENVIRONMENT_ID
 ARG RAILWAY_SERVICE_NAME
 ARG RAILWAY_SERVICE_ID
+ARG RAILWAY_PROJECT_ID
+ARG RAILWAY_PROJECT_NAME
+ARG RAILWAY_DEPLOYMENT_ID
 
 # Prevent apt from prompting for input
 ENV DEBIAN_FRONTEND=noninteractive
@@ -51,8 +55,18 @@ RUN --mount=type=cache,id=s/${RAILWAY_SERVICE_ID}-/root/.cache/uv,target=/root/.
 # Production stage
 FROM ubuntu:22.04
 
-# Railway environment variables
-ARG RAILWAY_ENVIRONMENT
+# Railway runtime environment variables
+ARG RAILWAY_PUBLIC_DOMAIN
+ARG RAILWAY_PRIVATE_DOMAIN
+ARG RAILWAY_ENVIRONMENT_NAME
+ARG RAILWAY_SERVICE_NAME
+ARG RAILWAY_PROJECT_NAME
+
+# Make certain build ARGs available at runtime via ENV
+ENV RAILWAY_ENVIRONMENT_NAME=${RAILWAY_ENVIRONMENT_NAME}
+ENV RAILWAY_SERVICE_NAME=${RAILWAY_SERVICE_NAME}
+ENV RAILWAY_PROJECT_NAME=${RAILWAY_PROJECT_NAME}
+ENV RAILWAY_PUBLIC_DOMAIN=${RAILWAY_PUBLIC_DOMAIN}
 
 # Install Python runtime
 RUN apt-get update && apt-get install -y \
@@ -78,12 +92,11 @@ ENV PYTHONUNBUFFERED=1
 # Switch to non-root user
 USER app
 
-# Expose the port that Railway will use
-EXPOSE 8000
 
-# Add healthcheck
+
+# Add healthcheck using Railway's public domain if available
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f "http://localhost:${PORT:-8000}/health" || exit 1
 
 # Command to run the application
 # Railway automatically injects PORT at runtime
