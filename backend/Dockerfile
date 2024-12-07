@@ -60,6 +60,9 @@ WORKDIR /app
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 COPY --chown=app:app . .
 
+# Fix permissions for virtual environment binaries
+RUN chmod -R +x /app/.venv/bin/
+
 # Set environment variables
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONUNBUFFERED=1
