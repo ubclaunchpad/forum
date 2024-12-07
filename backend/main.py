@@ -18,9 +18,7 @@ HOST = os.getenv("HOST", "0.0.0.0")
 
 AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=True)
 allowed_origins = (
-    ["http://localhost:3000", "http://0.0.0.0:8000"]
-    if environment == ENV.DEV.value
-    else os.getenv("ALLOWED_ORIGINS", "").split(",") or []
+    ["http://localhost:3000", "http://0.0.0.0:8000", "https://forumai.me", "https://forumapp.up.railway.app"]
 )
 
 app = FastAPI(dependencies=[Depends(get_db)])
@@ -32,10 +30,9 @@ course_router.include_router(
     document_router, tags=["Documents"], prefix="/{c_id}/documents"
 )
 
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
