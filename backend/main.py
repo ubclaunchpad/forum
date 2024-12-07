@@ -60,8 +60,6 @@ print(f"Port: {PORT}")
 print(f"Host: {HOST}")
 
 
-
-
 if __name__ == "__main__":
     uvicorn.run(
         "main:app", host=HOST, port=PORT, reload=ENV.DEV.value == environment

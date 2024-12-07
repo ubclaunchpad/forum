@@ -35,6 +35,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         Handles exact matches and wildcard patterns (e.g., /course/*).
         """
         request_path_list = request_path.split("/")
+        print(request_path_list)
+        print(self.split_protected_paths)
+        print(self.protected_paths)
         for protected_path in self.split_protected_paths:
             for i, _ in enumerate(protected_path):
                 if protected_path[i] != request_path_list[i]:
