@@ -1,13 +1,16 @@
+import json
 import logging
-from typing import Optional
+from typing import AsyncGenerator, Optional
 from uuid import UUID
 
 from controllers.documents import document_manager
 from core.pipelines.document_query_engine import DocumentQueryEngine
 from core.util import file_storage
 from fastapi import APIRouter, Form, HTTPException, Request, UploadFile
+from fastapi.responses import StreamingResponse
 from models.db import get_db
-from models.schemas.document_schema import CreateDocumentRequest, DocumentFileUpload
+from models.schemas.document_schema import (CreateDocumentRequest,
+                                            DocumentFileUpload)
 from models.schemas.general_schema import GeneralResponse
 from pydantic import BaseModel
 
@@ -111,3 +114,37 @@ async def query_documents(
     except Exception as e:
         logger.error(f"Error querying documents: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error processing query: {str(e)}")
+
+
+
+
+@document_router.post("/querystream")
+async def query_documents(
+    c_id: UUID,
+    query: DocumentQuery,
+    request: Request,
+):
+    async def stream_response() -> AsyncGenerator[str, None]:
+        try:
+            with get_db() as db:
+                query_engine = DocumentQueryEngine(
+                    db=db,
+                    model="gpt-4o",
+                    max_chunks=5,
+                )
+
+                async for chunk in query_engine.stream_query(
+                    question=query.question,
+                    course_id=c_id,
+                    template_name=query.template_name,
+                ):
+                    yield chunk
+
+        except Exception as e:
+            logger.error(f"Error querying documents: {e}", exc_info=True)
+            yield json.dumps({"error": str(e)})
+
+    return StreamingResponse(
+        stream_response(),
+        media_type="text/event-stream"
+    )

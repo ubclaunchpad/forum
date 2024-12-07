@@ -1,9 +1,10 @@
 """Module for document querying using RAG (Retrieval Augmented Generation)."""
 
+import json
 import logging
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, AsyncGenerator, Dict, List, Optional, Union
 from uuid import UUID
 
 from controllers.documents import document_manager
@@ -285,3 +286,83 @@ class DocumentQueryEngine:
         except Exception as e:
             logger.error(f"Database verification error: {e}", exc_info=True)
             raise e
+
+
+    async def stream_query(
+        self,
+        question: str,
+        course_id: Optional[UUID] = None,
+        template_name: Optional[str] = None,
+    ) -> AsyncGenerator[str, None]:
+        """Process a query through the RAG pipeline with streaming response."""
+        try:
+            question_embedding = self.embedding_processor.generate_embedding(question)
+            relevant_chunks = self._find_relevant_chunks(
+                question_embedding, threshold=0.0, course_id=course_id
+            )
+
+            if not relevant_chunks:
+                yield json.dumps({
+                    "answer": "I couldn't find any relevant information to answer your question.",
+                    "sources": [],
+                    "done": True
+                })
+                return
+
+            prompt = self._build_prompt(question, relevant_chunks, template_name)
+
+            try:
+                # Initialize sources first
+                sources = self._format_sources(relevant_chunks)
+                yield json.dumps({
+                    "answer": "",
+                    "sources": sources,
+                    "done": False
+                })
+
+                # Stream the response
+                stream = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a helpful expert who provides accurate but concise information with source citations.",
+                        },
+                        {"role": "user", "content": prompt},
+                    ],
+                    temperature=0.7,
+                    stream=True
+                )
+
+                current_answer = ""
+                for chunk in stream:
+                    if chunk.choices[0].delta.content is not None:
+                        content = chunk.choices[0].delta.content
+                        current_answer += content
+                        yield json.dumps({
+                            "answer": current_answer,
+                            "done": False
+                        })
+
+                # Send final chunk
+                yield json.dumps({
+                    "done": True
+                    # No need to send sources again
+                })
+
+            except Exception as e:
+                logger.error(f"OpenAI API error: {e}", exc_info=True)
+                yield json.dumps({
+                    "answer": "I apologize, but I encountered an error while generating the response.",
+                    "sources": sources,
+                    "done": True
+                })
+
+        except Exception as e:
+            logger.error(f"Query processing error: {e}", exc_info=True)
+            print(e)
+            yield json.dumps({
+                "answer": "An error occurred while processing ysssour question.",
+                "sources": [],
+                "done": True
+            })
