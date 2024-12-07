@@ -1,5 +1,8 @@
 # Build stage
-FROM ubuntu:22.04 AS builder
+FROM python:3.11-slim-bookworm AS builder
+
+# Copy UV binary from official image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Railway environment variables needed at build time
 ARG RAILWAY_ENVIRONMENT_NAME
@@ -10,28 +13,7 @@ ARG RAILWAY_PROJECT_ID
 ARG RAILWAY_PROJECT_NAME
 ARG RAILWAY_DEPLOYMENT_ID
 
-# Prevent apt from prompting for input
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install Python and build dependencies
-RUN apt-get update && apt-get install -y \
-    python3.11 \
-    python3.11-venv \
-    python3-pip \
-    curl \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set Python 3.11 as default
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
-
-# Install UV
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Add UV to PATH
-ENV PATH="/root/.cargo/bin:$PATH"
-
-# Set working directory
+# Set workdir
 WORKDIR /app
 
 # Set environment variables
@@ -53,7 +35,7 @@ RUN --mount=type=cache,id=s/a7f9edc8-75a1-4cb9-8b8e-fe061cf20e14-/root/.cache/uv
     uv sync --frozen --compile-bytecode
 
 # Production stage
-FROM ubuntu:22.04
+FROM python:3.11-slim-bookworm
 
 # Railway runtime environment variables
 ARG RAILWAY_PUBLIC_DOMAIN
@@ -67,13 +49,6 @@ ENV RAILWAY_ENVIRONMENT_NAME=${RAILWAY_ENVIRONMENT_NAME}
 ENV RAILWAY_SERVICE_NAME=${RAILWAY_SERVICE_NAME}
 ENV RAILWAY_PROJECT_NAME=${RAILWAY_PROJECT_NAME}
 ENV RAILWAY_PUBLIC_DOMAIN=${RAILWAY_PUBLIC_DOMAIN}
-
-# Install Python runtime
-RUN apt-get update && apt-get install -y \
-    python3.11 \
-    python3.11-venv \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user
 RUN useradd -m -u 1000 app
@@ -91,8 +66,6 @@ ENV PYTHONUNBUFFERED=1
 
 # Switch to non-root user
 USER app
-
-
 
 # Add healthcheck using Railway's public domain if available
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
