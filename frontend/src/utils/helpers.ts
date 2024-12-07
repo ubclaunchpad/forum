@@ -8,7 +8,8 @@ export function getApiUrl() {
   if (API_BASE_URL) {
     return API_BASE_URL;
   } else {
-    throw new Error("API_BASE_URL is not set");
+    return "https://forumai.up.railway.app";
+    // throw new Error("API_BASE_URL is not set");
   }
 }
 
