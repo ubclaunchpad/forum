@@ -33,14 +33,14 @@ ENV PYTHONUNBUFFERED=1
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies (without project install)
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,id=uv-dependencies \
     uv sync --frozen --no-install-project
 
 # Copy the rest of the application
 COPY . .
 
 # Install project and compile bytecode
-RUN --mount=type=cache,target=/root/.cache/uv \
+RUN --mount=type=cache,id=uv-project \
     uv sync --frozen --compile-bytecode
 
 # Production stage
@@ -78,5 +78,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Command to run the application
-# Note: Using the backend.main:app path as per your original Dockerfile
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
