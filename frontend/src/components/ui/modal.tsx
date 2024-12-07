@@ -18,9 +18,9 @@ interface ModalProps {
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader className="pb-4">
+          <DialogTitle className="text-xl">{title}</DialogTitle>
         </DialogHeader>
         {children}
       </DialogContent>

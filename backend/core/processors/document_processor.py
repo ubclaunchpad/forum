@@ -1,248 +1,189 @@
-# """Document Processor Module"""
+"""Document Processor Module for content processing and embeddings"""
 
-# import os
-# import uuid
-# from typing import Dict
-# from openai import OpenAI
-# import psycopg2
-# from dotenv import load_dotenv
-# from psycopg2.extras import Json
-# from core.parsers.document_parser import DocumentParser
-# from .embedding_processor import EmbeddingProcessor
+import logging
+import os
+import time
+from typing import Dict, List
+from uuid import UUID, uuid4
 
-# load_dotenv()
+from core.parsers.document_parser import DocumentParser
+from models.all import Chunk, ChunkRelation, Document
+from openai import OpenAI
+from sqlalchemy.orm import Session
 
-# OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-# DATABASE_URL = os.environ.get("DATABASE_URL")
+from .embedding_processor import EmbeddingProcessor
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or ""
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 
-# class DocumentProcessor:
-#     """
-#     A class that processes documents through parsing, embedding generation, and database storage.
+class DocumentProcessor:
+    """
+    A class that processes document content into chunks and generates embeddings.
+    Handles parsing, chunking, and embedding generation for documents.
+    """
 
-#     This processor handles the complete document ingestion pipeline including:
-#     - Document parsing using different strategies
-#     - Chunk creation and embedding generation
-#     - Version management
-#     - Database storage of documents, versions, chunks, and their relationships
+    def __init__(self, db: Session):
+        """Initialize the DocumentProcessor."""
+        self.client = OpenAI(api_key=OPENAI_API_KEY)
+        self.db = db
+        self.document_parser = DocumentParser()
+        self.embedding_processor = EmbeddingProcessor()
 
-#     Attributes:
-#         client (OpenAI): OpenAI client for embedding generation
-#         conn (psycopg2.extensions.connection): PostgreSQL database connection
-#         cur (psycopg2.extensions.cursor): Database cursor
-#         document_parser (DocumentParser): Parser for different document types
-#         embedding_processor (EmbeddingProcessor): Processor for generating embeddings
-#     """
+    def process_document(
+        self, document_id: UUID, file_content: bytes, strategy_type: str
+    ) -> None:
+        """Process a document's content into chunks with embeddings."""
+        start_time = time.time()
+        logger.info(
+            "Starting document processing",
+            extra={"document_id": str(document_id), "strategy": strategy_type},
+        )
 
-#     def __init__(self):
-#         """Initialize the DocumentProcessor with necessary connections and dependencies."""
-#         self.client = OpenAI(api_key=OPENAI_API_KEY)
-#         self.conn = psycopg2.connect(DATABASE_URL)
-#         self.cur = self.conn.cursor()
-#         self.document_parser = DocumentParser()
-#         self.embedding_processor = EmbeddingProcessor()
+        try:
+            # Get document
+            document = self.db.query(Document).get(document_id)
+            if not document:
+                logger.error(
+                    "Document not found", extra={"document_id": str(document_id)}
+                )
+                raise ValueError(f"Document {document_id} not found")
 
-#     def _create_chunks(self, content: str) -> list[Dict]:
-#         """
-#         Create chunks from document content using sentence-based splitting.
+            # Parse content
+            parse_start = time.time()
+            parsed_content = self.document_parser.parse(file_content, strategy_type)
+            chunks_data = self.document_parser.extract_chunks(parsed_content)
 
-#         Args:
-#             content (str): The document content to be chunked
+            logger.info(
+                "Document parsed",
+                extra={
+                    "document_id": str(document_id),
+                    "parse_time": f"{time.time() - parse_start:.2f}s",
+                    "chunks_count": len(chunks_data),
+                },
+            )
 
-#         Returns:
-#             list[Dict]: List of chunk dictionaries containing:
-#                 - id: Unique identifier for the chunk
-#                 - content: The chunk text
-#                 - embedding: Vector embedding of the chunk
-#                 - metadata: Position and section information
-#                 - prev_chunk_id: ID of the previous chunk for sequential linking
-#         """
-#         sentences = content.split(". ")  # Basic sentence splitting
-#         chunks = []
-#         prev_chunk_id = None
+            # Process chunks
+            chunks_start = time.time()
+            chunks = self._process_chunks(document_id, chunks_data)
 
-#         for idx, chunk_text in enumerate(sentences):
-#             if not chunk_text.strip():
-#                 continue
+            logger.info(
+                "Chunks processed",
+                extra={
+                    "document_id": str(document_id),
+                    "chunks_time": f"{time.time() - chunks_start:.2f}s",
+                    "chunks_created": len(chunks),
+                },
+            )
 
-#             chunk_id = str(uuid.uuid4())
-#             embedding = self.embedding_processor.generate_embedding(chunk_text)
+            # Update metadata
+            document.doc_metadata = {
+                **(document.doc_metadata or {}),
+                **parsed_content.get("metadata", {}),
+                "processed": True,
+                "chunk_count": len(chunks),
+                "processing_completed_at": "NOW()",
+                "processing_time": f"{time.time() - start_time:.2f}s",
+            }
 
-#             chunk = {
-#                 "id": chunk_id,
-#                 "content": chunk_text,
-#                 "embedding": embedding,
-#                 "metadata": {
-#                     "section": "main",
-#                     "position": {"index": idx, "is_last": idx == len(sentences) - 1},
-#                 },
-#                 "prev_chunk_id": prev_chunk_id,
-#             }
+            self.db.commit()
+            logger.info(
+                "Document processing completed",
+                extra={
+                    "document_id": str(document_id),
+                    "total_time": f"{time.time() - start_time:.2f}s",
+                    "total_chunks": len(chunks),
+                },
+            )
 
-#             chunks.append(chunk)
-#             prev_chunk_id = chunk_id
+        except Exception as e:
+            self.db.rollback()
+            logger.error(
+                "Error processing document",
+                extra={
+                    "document_id": str(document_id),
+                    "error": str(e),
+                    "strategy": strategy_type,
+                },
+                exc_info=True,
+            )
+            raise e
 
-#         return chunks
+    def _process_chunks(
+        self, document_id: UUID, chunks_data: List[Dict]
+    ) -> List[Chunk]:
+        """Process chunk data into database records with embeddings."""
+        chunks = []
+        prev_chunk = None
 
-#     def _create_document_version(
-#         self, doc_id: str, content: str, version_number: int = 1
-#     ) -> str:
-#         """
-#         Create a new version record for a document.
+        for idx, chunk_data in enumerate(chunks_data):
+            chunk_start = time.time()
 
-#         Args:
-#             doc_id (str): The document's unique identifier
-#             content (str): The document content for this version
-#             version_number (int, optional): Version number, defaults to 1
+            try:
+                # Create chunk
+                chunk = Chunk(
+                    id=uuid4(),
+                    document_id=document_id,
+                    content=chunk_data["content"],
+                    chunk_type=chunk_data["chunk_type"],
+                    chunk_index=chunk_data["chunk_index"],
+                    chunk_metadata=chunk_data["chunk_metadata"],
+                    embedding=self.embedding_processor.generate_embedding(
+                        chunk_data["content"]
+                    ),
+                )
+                self.db.add(chunk)
 
-#         Returns:
-#             str: The unique identifier of the created version
-#         """
-#         version_id = str(uuid.uuid4())
+                # Create relation if needed
+                if prev_chunk:
+                    relation = ChunkRelation(
+                        id=uuid4(),
+                        source_chunk_id=prev_chunk.id,
+                        target_chunk_id=chunk.id,
+                        relation_type="continuation_of",
+                        properties={
+                            "order": chunk_data["chunk_index"],
+                            "type": "sequential",
+                        },
+                    )
+                    self.db.add(relation)
 
-#         self.cur.execute(
-#             """
-#             INSERT INTO document_versions (id, document_id, version_number, content_hash, changes_summary)
-#             VALUES (%s, %s, %s, %s, %s)
-#             """,
-#             (
-#                 version_id,
-#                 doc_id,
-#                 version_number,
-#                 str(hash(content)),
-#                 (
-#                     "Initial version"
-#                     if version_number == 1
-#                     else f"Version {version_number}"
-#                 ),
-#             ),
-#         )
+                chunks.append(chunk)
+                prev_chunk = chunk
 
-#         return version_id
+                logger.debug(
+                    "Chunk processed",
+                    extra={
+                        "document_id": str(document_id),
+                        "chunk_index": idx,
+                        "processing_time": f"{time.time() - chunk_start:.2f}s",
+                    },
+                )
 
-#     def process(self, document: any, strategy_type: str) -> Dict:
-#         """
-#         Process a document using the specified parsing strategy and create chunks.
+            except Exception as e:
+                logger.error(
+                    "Error processing chunk",
+                    extra={
+                        "document_id": str(document_id),
+                        "chunk_index": idx,
+                        "error": str(e),
+                    },
+                    exc_info=True,
+                )
+                raise e
 
-#         Args:
-#             document (any): The document content to process
-#             strategy_type (str): The type of parsing strategy to use
+        return chunks
 
-#         Returns:
-#             Dict: Processed document containing:
-#                 - content: Parsed document content
-#                 - metadata: Document metadata
-#                 - chunks: List of document chunks with embeddings
-#         """
-#         parsed_document = self.document_parser.parse(document, strategy_type)
-#         chunks = self._create_chunks(parsed_document["content"])
+    def __enter__(self):
+        return self
 
-#         return {
-#             "content": parsed_document["content"],
-#             "metadata": parsed_document["metadata"],
-#             "chunks": chunks,
-#         }
-
-#     def ingest_document(
-#         self, default_props: Dict, document: any, title: str, strategy_type: str
-#     ) -> str:
-#         """
-#         Ingest a document into the system, creating all necessary database records.
-
-#         Args:
-#             default_props (Dict): Default properties to include in document metadata
-#             document (any): The document content to ingest
-#             title (str): The document's title
-#             strategy_type (str): The type of parsing strategy to use
-
-#         Returns:
-#             str: The unique identifier of the created document
-
-#         Raises:
-#             Exception: If any step of the ingestion process fails
-#         """
-#         try:
-#             doc_id = str(uuid.uuid4())
-#             processed_document = self.process(document, strategy_type)
-
-#             # Create document record
-#             doc = {
-#                 "title": title,
-#                 "content": document,
-#                 "type": strategy_type,
-#                 "metadata": {**processed_document.get("metadata", {}), **default_props},
-#                 "id": doc_id,
-#             }
-
-#             self.cur.execute(
-#                 """
-#                 INSERT INTO documents (id, title, original_content, document_type, metadata)
-#                 VALUES (%s, %s, %s, %s, %s)
-#                 """,
-#                 (
-#                     doc_id,
-#                     doc["title"],
-#                     doc["content"],
-#                     doc["type"],
-#                     Json(doc["metadata"]),
-#                 ),
-#             )
-
-#             # Create initial version
-#             version_id = self._create_document_version(doc_id, doc["content"])
-
-#             # Insert chunks
-#             for chunk in processed_document["chunks"]:
-#                 self.cur.execute(
-#                     """
-#                     INSERT INTO chunks (id, document_id, version_id, content, embedding, chunk_index, metadata)
-#                     VALUES (%s, %s, %s, %s, %s, %s, %s)
-#                     """,
-#                     (
-#                         chunk["id"],
-#                         doc_id,
-#                         version_id,
-#                         chunk["content"],
-#                         chunk["embedding"],
-#                         chunk["metadata"]["position"]["index"],
-#                         Json(chunk["metadata"]),
-#                     ),
-#                 )
-
-#                 # Create chunk relations
-#                 if chunk["prev_chunk_id"]:
-#                     self.cur.execute(
-#                         """
-#                         INSERT INTO chunk_relations (id, source_chunk_id, target_chunk_id, relation_type, metadata)
-#                         VALUES (%s, %s, %s, %s, %s)
-#                         """,
-#                         (
-#                             str(uuid.uuid4()),
-#                             chunk["prev_chunk_id"],
-#                             chunk["id"],
-#                             "sequential",
-#                             Json({"order": chunk["metadata"]["position"]["index"]}),
-#                         ),
-#                     )
-
-#             self.conn.commit()
-#             return doc_id
-
-#         except Exception as e:
-#             self.conn.rollback()
-#             raise e
-
-#     def __enter__(self):
-#         """Enable context manager entry."""
-#         return self
-
-#     def __exit__(self, exc_type, exc_val, exc_tb):
-#         """
-#         Clean up database connections when exiting context manager.
-
-#         Ensures proper closure of database cursor and connection.
-#         """
-#         if self.cur:
-#             self.cur.close()
-#         if self.conn:
-#             self.conn.close()
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is not None:
+            self.db.rollback()
+            logger.error(
+                "Error in processor context",
+                extra={"error": str(exc_val)},
+                exc_info=True,
+            )

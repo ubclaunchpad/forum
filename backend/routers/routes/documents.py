@@ -1,13 +1,24 @@
+import logging
+from typing import Optional
 from uuid import UUID
 
 from controllers.documents import document_manager
+from core.pipelines.document_query_engine import DocumentQueryEngine
 from core.util import file_storage
 from fastapi import APIRouter, Form, HTTPException, Request, UploadFile
-from models.old.documents import ViewDocumentResponse
+from models.db import get_db
 from models.schemas.document_schema import CreateDocumentRequest, DocumentFileUpload
 from models.schemas.general_schema import GeneralResponse
+from pydantic import BaseModel
 
 document_router = APIRouter()
+
+logger = logging.getLogger(__name__)
+
+
+class DocumentQuery(BaseModel):
+    question: str
+    template_name: Optional[str] = None
 
 
 @document_router.post("", response_model=GeneralResponse)
@@ -45,15 +56,55 @@ async def get_documents(c_id: UUID):
     return documents
 
 
-# @document_router.get("/{document_id}")
-# async def get_document(
-#     course_id: UUID, document_id: UUID, request: Request
-# ) -> DocumentResponse:
-#     document = document_crud.get_document_by_id(document_id)
-#     return document
-
-
-@document_router.get("/{document_id}/signed_url")
+@document_router.get("/signed_url")
 async def get_document_view(c_id: UUID, document_id: UUID):
     res = document_manager.get_signed_document_url(str(document_id))
     return {"signed_url": res["signedURL"]}
+
+
+@document_router.post("/query")
+async def query_documents(
+    c_id: UUID,
+    query: DocumentQuery,
+    request: Request,
+):
+    """
+    Query documents within a course using RAG.
+
+    Args:
+        c_id: Course ID
+        query: Query parameters including question and optional template
+
+    Returns:
+        Query response with answer and sources
+    """
+    try:
+        with get_db() as db:
+            query_engine = DocumentQueryEngine(
+                db=db,
+                model="gpt-4",  # You might want to make this configurable
+                max_chunks=5,
+            )
+
+            response = query_engine.query(
+                question=query.question,
+                course_id=c_id,
+                template_name=query.template_name,
+            )
+
+            return {
+                "answer": response["answer"],
+                "sources": [
+                    {
+                        "title": source["document_title"],
+                        "content": source["content"],
+                        "relevance": source["similarity"],
+                        "metadata": source["metadata"],
+                    }
+                    for source in response["sources"]
+                ],
+            }
+
+    except Exception as e:
+        logger.error(f"Error querying documents: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error processing query: {str(e)}")

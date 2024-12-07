@@ -1,28 +1,29 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
-import { ChangeEvent, useState } from "react";
+import { useContext, useState } from "react";
 import { Upload } from "lucide-react";
 import { UploadDocumentForm } from "../file/uploadFileForm";
 import { useToast } from "@/hooks/use-toast";
+import { getApiUrl } from "@/utils/helpers";
+import { courseContext } from "@/contexts/courseContext";
 
-const maxSizeBytes: number = 15728640; // 15MB
-const acceptedMimeTypes: string[] = [
-  "application/pdf",
-  "application/json",
-  "text/plain",
-  "text/csv",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
-  "application/vnd.ms-powerpoint",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  "application/vnd.openxmlformats-officedocument.presentationml.template",
-  "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
-  "application/vnd.ms-powerpoint.presentation.macroEnabled.12",
-  "application/vnd.ms-word.document.macroEnabled.12",
-];
+// const maxSizeBytes: number = 15728640; // 15MB
+// const acceptedMimeTypes: string[] = [
+//   "application/pdf",
+//   "application/json",
+//   "text/plain",
+//   "text/csv",
+//   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+//   "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
+//   "application/vnd.ms-powerpoint",
+//   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+//   "application/vnd.openxmlformats-officedocument.presentationml.template",
+//   "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+//   "application/vnd.ms-powerpoint.presentation.macroEnabled.12",
+//   "application/vnd.ms-word.document.macroEnabled.12",
+// ];
 
 export default function FileUpload({
   onUploadSuccess,
@@ -30,25 +31,23 @@ export default function FileUpload({
   onUploadSuccess: () => Promise<void>;
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const course = useContext(courseContext);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
   const { toast } = useToast();
 
-  const handleSubmit = (file: File, title: string, description?: string) => {
+  const handleSubmit = (file: File, title: string) => {
     const fetchData = async () => {
       try {
         //hardcoded course id for now, must add course to table in order for query to work
-        const link = `${process.env.NEXT_PUBLIC_BACKEND_URL}/courses/1ef384fe-040c-4ba9-813e-dfeb282402bf/documents`;
+        const link = `${getApiUrl()}/courses/${course.info.id}/documents`;
         const data = new FormData();
         data.append("file", file);
         data.append("title", title);
         data.append(
           "metadata",
           JSON.stringify({
-            document_type: file.type,
-            description: description,
-            file_size: file.size,
             tags: [],
           }),
         );

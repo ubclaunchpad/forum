@@ -65,6 +65,9 @@ dependencies = [
     "sqlalchemy>=2.0.36",
     "pgvector>=0.3.6",
     "python-magic>=0.4.27",
+    "pytesseract>=0.3.13",
+    "pillow>=11.0.0",
+    "pymupdf>=1.25.0",
 ]
 
 

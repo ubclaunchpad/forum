@@ -1,50 +1,67 @@
-# """Module for parsing documents using different strategies."""
+"""Module for parsing documents using different strategies."""
 
-# import os
-
-# from typing import Dict
-# from openai import OpenAI
-# import psycopg2
-# from dotenv import load_dotenv
-
-# from .parser_strategy import ParsingStrategy
-# from .text_parser import TextParser
-
-# load_dotenv()
-
-# OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-# DATABASE_URL = os.environ.get("DATABASE_URL")
+from typing import Dict, List
+from .parser_strategy import ParsingStrategy
+from .pdf_parser import PDFParser
+from .text_parser import TextParser
 
 
-# class DocumentParser:
-#     """Context class that manages parsing strategies."""
+class DocumentParser:
+    """Context class that manages parsing strategies."""
 
-#     def __init__(self):
-#         self.client = OpenAI(api_key=OPENAI_API_KEY)
-#         self.conn = psycopg2.connect(DATABASE_URL)
-#         self.cur = self.conn.cursor()
-#         self._strategies = {
-#             "text": TextParser(),
-#             # Add more strategies as needed
-#         }
+    def __init__(self):
+        """Initialize parser with available strategies."""
+        self._strategies = {
+            "text": TextParser(),
+            "pdf": PDFParser(),
+            # Add more strategies as needed
+        }
+        self._current_strategy = None
 
-#     def parse(self, content: any, strategy_type: str) -> Dict:
-#         """Parse content using specified strategy."""
-#         if strategy_type not in self._strategies:
-#             raise ValueError(f"Unknown parsing strategy: {strategy_type}")
+    def parse(self, content: bytes, strategy_type: str) -> Dict:
+        """
+        Parse content using specified strategy.
 
-#         strategy = self._strategies[strategy_type]
-#         return strategy.parse(content)
+        Args:
+            content: Document content in bytes
+            strategy_type: Type of parsing strategy to use
 
-#     def register_strategy(self, name: str, strategy: ParsingStrategy) -> None:
-#         """Register a new parsing strategy."""
-#         self._strategies[name] = strategy
+        Returns:
+            Dict containing parsed content and metadata
 
-#     def __enter__(self):
-#         return self
+        Raises:
+            ValueError: If strategy_type is not supported
+        """
+        if strategy_type not in self._strategies:
+            raise ValueError(f"Unknown parsing strategy: {strategy_type}")
 
-#     def __exit__(self, exc_type, exc_val, exc_tb):
-#         if self.cur:
-#             self.cur.close()
-#         if self.conn:
-#             self.conn.close()
+        self._current_strategy = self._strategies[strategy_type]
+        return self._current_strategy.parse(content)
+
+    def register_strategy(self, name: str, strategy: ParsingStrategy) -> None:
+        """
+        Register a new parsing strategy.
+
+        Args:
+            name: Strategy identifier
+            strategy: ParsingStrategy implementation
+        """
+        self._strategies[name] = strategy
+
+    def extract_chunks(self, parsed_content: Dict) -> List[Dict]:
+        """
+        Extract chunks using the current strategy.
+
+        Args:
+            parsed_content: Output from parse() method
+
+        Returns:
+            List of chunk dictionaries
+
+        Raises:
+            RuntimeError: If no strategy has been selected yet
+        """
+        if not self._current_strategy:
+            raise RuntimeError("No parsing strategy selected. Call parse() first.")
+
+        return self._current_strategy.extract_chunks(parsed_content)
