@@ -14,6 +14,7 @@ from routers.routes.users import user_router
 
 environment = os.getenv("ENV")
 PORT = int(os.getenv("PORT", 8000))
+HOST = os.getenv("HOST", "0.0.0.0")
 
 AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=True)
 allowed_origins = (
@@ -56,10 +57,12 @@ print(f"Running in {environment} environment")
 print(f"Auth middleware enabled: {AUTH_MIDDLEWARE_ENABLED}")
 print(f"Allowed origins: {allowed_origins}")
 print(f"Port: {PORT}")
+print(f"Host: {HOST}")
+
 
 
 
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app", port=PORT, reload=ENV.DEV.value == environment
+        "main:app", host=HOST, port=PORT, reload=ENV.DEV.value == environment
     )
