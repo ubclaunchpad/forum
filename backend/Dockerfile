@@ -28,6 +28,8 @@ RUN --mount=type=cache,id=s/a7f9edc8-75a1-4cb9-8b8e-fe061cf20e14-/root/.cache/uv
 
 # Production stage
 FROM python:3.11-slim-bookworm
+# Copy UV binary from official image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # Railway runtime environment variables
 ARG RAILWAY_PUBLIC_DOMAIN
 ARG RAILWAY_PRIVATE_DOMAIN
@@ -43,7 +45,8 @@ ENV PYTHONUNBUFFERED=1
 # Create a non-root user and set up directory
 RUN useradd -m -u 1000 app && \
     mkdir -p /app && \
-    chown -R app:app /app
+    chown -R app:app /app && \
+    chmod -R 755 /bin/uv
 
 # Set working directory
 WORKDIR /app
@@ -57,10 +60,9 @@ RUN chmod -R 755 /app/.venv && \
     chmod -R 755 /app
 
 # Set environment variables including PATH
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH="/app/.venv/bin:/bin:$PATH"
 ENV PYTHONPATH="/app:${PYTHONPATH}"
 ENV VIRTUAL_ENV="/app/.venv"
-ENV PYTHON_BIN="/usr/local/bin/python3"
 
 # Switch to non-root user
 USER app
@@ -69,5 +71,5 @@ USER app
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f "http://localhost:${PORT:-8000}/health" || exit 1
 
-# Command to run the application using system Python
-CMD ["/usr/local/bin/python3", "-m", "main"]
+# Command to run the application
+CMD ["/bin/uv", "run", "-m", "main"]
