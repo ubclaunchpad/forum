@@ -52,11 +52,9 @@ WORKDIR /app
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 COPY --from=builder --chown=app:app /app /app
 
-# Set up permissions more explicitly
-RUN find /app/.venv -type d -exec chmod 755 {} \; && \
-    find /app/.venv -type f -exec chmod 644 {} \; && \
-    chmod 755 /app/.venv/bin/* && \
-    chmod -R u+rwX,go+rX,go-w /app
+# Set up permissions
+RUN chmod -R 755 /app/.venv && \
+    chmod -R 755 /app
 
 # Set environment variables including PATH
 ENV PATH="/app/.venv/bin:$PATH"
