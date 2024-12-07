@@ -3,7 +3,6 @@ import sys
 
 import uvicorn
 from core.util.env_util import ENV, parse_bool_env
-from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from models.db import get_db
@@ -13,10 +12,7 @@ from routers.routes.documents import document_router
 from routers.routes.posts import post_router
 from routers.routes.users import user_router
 
-load_dotenv()
-
 environment = os.getenv("ENV")
-
 PORT = int(os.getenv("PORT", 8000))
 
 AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=True)
