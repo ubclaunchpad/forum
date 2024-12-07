@@ -37,6 +37,10 @@ export function UserContextProvider({
         Authorization: `Bearer ${token}`,
       },
     });
+
+    if (!res.ok) {
+      return;
+    }
     const profile = await res.json();
     setAccount({
       user,
@@ -51,6 +55,10 @@ export function UserContextProvider({
 
   if (!account.user) {
     return <div></div>;
+  }
+
+  if (!account.profile) {
+    return <div>Could not load profile</div>;
   }
 
   return (
