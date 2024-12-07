@@ -1,47 +1,67 @@
 """Module for parsing documents using different strategies."""
 
-import os
-from typing import Dict
-
-import psycopg2
-from openai import OpenAI
-
+from typing import Dict, List
 from .parser_strategy import ParsingStrategy
+from .pdf_parser import PDFParser
 from .text_parser import TextParser
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or ""
-DATABASE_URL = os.getenv("DATABASE_URL") or ""
 
 
 class DocumentParser:
     """Context class that manages parsing strategies."""
 
     def __init__(self):
-        self.client = OpenAI(api_key=OPENAI_API_KEY)
-        self.conn = psycopg2.connect(DATABASE_URL)
-        self.cur = self.conn.cursor()
+        """Initialize parser with available strategies."""
         self._strategies = {
             "text": TextParser(),
+            "pdf": PDFParser(),
             # Add more strategies as needed
         }
+        self._current_strategy = None
 
-    def parse(self, content: any, strategy_type: str) -> Dict:
-        """Parse content using specified strategy."""
+    def parse(self, content: bytes, strategy_type: str) -> Dict:
+        """
+        Parse content using specified strategy.
+
+        Args:
+            content: Document content in bytes
+            strategy_type: Type of parsing strategy to use
+
+        Returns:
+            Dict containing parsed content and metadata
+
+        Raises:
+            ValueError: If strategy_type is not supported
+        """
         if strategy_type not in self._strategies:
             raise ValueError(f"Unknown parsing strategy: {strategy_type}")
 
-        strategy = self._strategies[strategy_type]
-        return strategy.parse(content)
+        self._current_strategy = self._strategies[strategy_type]
+        return self._current_strategy.parse(content)
 
     def register_strategy(self, name: str, strategy: ParsingStrategy) -> None:
-        """Register a new parsing strategy."""
+        """
+        Register a new parsing strategy.
+
+        Args:
+            name: Strategy identifier
+            strategy: ParsingStrategy implementation
+        """
         self._strategies[name] = strategy
 
-    def __enter__(self):
-        return self
+    def extract_chunks(self, parsed_content: Dict) -> List[Dict]:
+        """
+        Extract chunks using the current strategy.
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.cur:
-            self.cur.close()
-        if self.conn:
-            self.conn.close()
+        Args:
+            parsed_content: Output from parse() method
+
+        Returns:
+            List of chunk dictionaries
+
+        Raises:
+            RuntimeError: If no strategy has been selected yet
+        """
+        if not self._current_strategy:
+            raise RuntimeError("No parsing strategy selected. Call parse() first.")
+
+        return self._current_strategy.extract_chunks(parsed_content)
