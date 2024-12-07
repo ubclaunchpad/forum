@@ -33,14 +33,14 @@ ENV PYTHONUNBUFFERED=1
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies (without project install)
-RUN --mount=type=cache,id=uv-dependencies \
+RUN --mount=type=cache,id=cache-uv-deps \
     uv sync --frozen --no-install-project
 
 # Copy the rest of the application
 COPY . .
 
 # Install project and compile bytecode
-RUN --mount=type=cache,id=uv-project \
+RUN --mount=type=cache,id=cache-uv-install \
     uv sync --frozen --compile-bytecode
 
 # Production stage
