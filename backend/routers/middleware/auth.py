@@ -88,8 +88,6 @@ class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         if not self.enabled:
             return await call_next(request)
-        if request.method == "OPTIONS":
-            return Response(status_code=200)
 
         # Check if path is protected before any auth logic
         if not self.is_path_protected(request.url.path):
