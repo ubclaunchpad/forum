@@ -57,7 +57,6 @@ ENV PYTHONUNBUFFERED=1
 # Create a non-root user and set up directory
 RUN useradd -m -u 1000 app && \
     mkdir -p /app && \
-    mkdir -p /app/.cache/uv && \
     chown -R app:app /app
 
 # Set working directory
@@ -67,17 +66,12 @@ WORKDIR /app
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 COPY --from=builder --chown=app:app /app /app
 
-# Set up permissions
-RUN chown -R app:app /app && \
-    chmod -R 755 /app/.venv/bin && \
-    chmod 755 /bin/uv && \
-    chmod -R 777 /app/.cache
+# Ensure the virtual environment binaries and uv are executable
+RUN chmod -R +x /app/.venv/bin && \
+    chmod +x /bin/uv
 
 # Set environment variables including PATH
 ENV PATH="/app/.venv/bin:/bin:$PATH"
-ENV PYTHONPATH="/app:${PYTHONPATH}"
-ENV HOME="/app"
-ENV UV_CACHE_DIR="/app/.cache/uv"
 
 # Switch to non-root user
 USER app
@@ -87,4 +81,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f "http://localhost:${PORT:-8000}/health" || exit 1
 
 # Command to run the application
-CMD ["uv", "run", "-m", "main"]
+CMD ["uv", "run",  "-m", "main"]
