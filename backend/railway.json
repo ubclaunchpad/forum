@@ -1,9 +1,22 @@
 {
     "$schema": "https://railway.app/railway.schema.json",
     "build": {
-      "builder": "NIXPACKS"
+      "builder": "NIXPACKS",
+      "nixpacksPlan": {
+        "providers": ["python"],
+        "phases": {
+          "setup": {
+            "name": "setup",
+            "aptPkgs": ["libmagic1", "libmagic-dev"],
+            "nixPkgs": ["file"]
+          }
+        }
+      }
     },
     "deploy": {
-      "startCommand": "python -m main"
+      "startCommand": "python -m main",
+      "healthcheckPath": "/",
+      "healthcheckTimeout": 100,
+      "restartPolicyType": "ON_FAILURE"
     }
   }
