@@ -60,8 +60,8 @@ WORKDIR /app
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 COPY --chown=app:app . .
 
-# Fix permissions for virtual environment binaries
-RUN chmod -R +x /app/.venv/bin/
+# Fix permissions for virtual environment binaries (specifically uvicorn)
+RUN chmod -R +x /app/.venv/bin/uvicorn 
 
 # Set environment variables
 ENV PATH="/app/.venv/bin:$PATH"
