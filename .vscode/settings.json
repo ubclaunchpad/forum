@@ -1,7 +1,7 @@
 {
   "python.analysis.extraPaths": ["./backend"],
   "python.analysis.diagnosticMode": "workspace",
-  "python.defaultInterpreterPath": "./backend/venv/bin/python",
+  "python.defaultInterpreterPath": "./backend/.venv/bin/python",
   "python.envFile": "${workspaceFolder}/.env",
   "python.linting.pylintEnabled": true,
   "python.linting.enabled": true,
@@ -17,5 +17,9 @@
     "**/__pycache__": true,
     "**/.pytest_cache": true,
     "**/*.pyc": true
-  }
+  },
+  "python.analysis.typeCheckingMode": "standard",
+  "python.terminal.activateEnvironment": true,
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.supportRestructuredText": false
 }

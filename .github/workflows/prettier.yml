@@ -1,42 +1,36 @@
 name: Prettier Formatting
 
 on:
-  push:
-    branches:
-      - main
-      - dev
-    paths:
-      - 'frontend/**'
-  pull_request:
-    branches:
-      - main
-      - dev
-    paths:
-      - 'frontend/**'
+  pull_request_target:
     types:
-      - opened
-      - synchronize  # Triggered on updates from Dependabot PRs
+      - closed
+    branches:
+      - main
+      - dev
+    paths:
+      - 'frontend/**'
 
 jobs:
   prettier:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]' || github.event_name == 'push' || github.event_name == 'pull_request'
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.head_ref }}
-
+          ref: ${{ github.event.pull_request.base.ref }}
+      
       - name: Install dependencies
         run: yarn install
         working-directory: frontend/
-
+      
       - name: Prettify code
         uses: creyD/prettier_action@v4.3
         with:
           prettier_options: --write **/*.{js,ts,tsx,json,md,css}
-
-      - name: Commit and push Prettier fixes from Dependabot
+          
+      - name: Commit and push Prettier fixes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"

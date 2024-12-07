@@ -1,4 +1,4 @@
-""" Utility functions for working with environment variables. """
+"""Utility functions for working with environment variables."""
 
 import os
 from enum import Enum

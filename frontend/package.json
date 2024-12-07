@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -21,31 +22,27 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.462.0",
     "next": "latest",
-    "pdfjs-dist": "^4.9.124",
     "punycode": "^2.3.1",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.53.2",
     "react-markdown": "^9.0.1",
-    "react-pdf": "^5.7.2",
     "react-resizable-panels": "^2.1.7",
+    "remark-gfm": "^4.0.0",
     "tailwind-merge": "^2.5.3",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@types/react-pdf": "^7.0.0",
     "eslint": "^8.0.0",
     "eslint-config-next": "^14.2.15",
     "postcss": "^8",
     "prettier": "3.4.1",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
-  },
-  "resolutions": {
-    "pdfjs-dist": "4.9.124"
   }
 }

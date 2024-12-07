@@ -1,64 +1,50 @@
-""" This module contains the routes for documents """
-
+import logging
+from typing import Optional
 from uuid import UUID
 
-from crud import document_crud
+from controllers.documents import document_manager
+from core.pipelines.document_query_engine import DocumentQueryEngine
+from core.util import file_storage
 from fastapi import APIRouter, Form, HTTPException, Request, UploadFile
-from models.documents import DocumentMetadata, DocumentResponse, DocumentTitle, ViewDocumentResponse
-from pydantic import ValidationError
+from models.db import get_db
+from models.schemas.document_schema import (CreateDocumentRequest,
+                                            DocumentFileUpload)
+from models.schemas.general_schema import GeneralResponse
+from pydantic import BaseModel
 
 document_router = APIRouter()
 
+logger = logging.getLogger(__name__)
 
-@document_router.post("", response_model=DocumentResponse)
+
+class DocumentQuery(BaseModel):
+    question: str
+    template_name: Optional[str] = None
+
+
+@document_router.post("", response_model=GeneralResponse)
 async def create_document(
-    course_id: UUID, file: UploadFile, title: str = Form(...), metadata: str = Form(...)
-) -> DocumentResponse:
-    """
-    Create a new document associated with a course.
-    """
-    # Validate title
+    request: Request,
+    c_id: str,
+    file: UploadFile = Form(...),
+    title: str = Form(...),
+    metadata: str = Form(...),
+):
     try:
-        validated_title = DocumentTitle(title=title)
-    except ValidationError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid title: {str(e)}")
-
-    # Parse and validate metadata
-    try:
-        metadata_obj = DocumentMetadata.model_validate_json(metadata)
-    except ValidationError as e:
-        raise HTTPException(
-            status_code=400, detail=f"Invalid metadata format: {str(e)}"
+        file_content = await file.read()
+        await file.seek(0)
+        document_type = title.split(".")[-1]
+        create_document_request = DocumentFileUpload(
+            title=title,
+            course_id=UUID(c_id),
+            created_by=request.state.user_id,
+            file=file_content,
+            document_type=document_type,
         )
-
-    # Validate file type
-    if file.content_type != metadata_obj.document_type.value:
-        raise HTTPException(
-            status_code=400,
-            detail=f"File type {file.content_type} does not match specified document type {metadata_obj.document_type.value}",
+        doc_id = await document_manager.upload_new_document(create_document_request)
+        return GeneralResponse(
+            msg="Document created successfully", properties={"document_id": str(doc_id)}
         )
-
-    # Optional: Add file size validation
-    if metadata_obj.file_size:
-        try:
-            content = await file.read()
-            actual_size = len(content)
-            if actual_size != metadata_obj.file_size:
-                metadata_obj.file_size = actual_size
-            await file.seek(0)
-        except Exception as e:
-            raise HTTPException(
-                status_code=400, detail=f"Error validating file size: {str(e)}"
-            )
-
-    try:
-        response = await document_crud.create_document(  # Add await here
-            file=file,
-            metadata=metadata_obj,
-            course_id=course_id,
-            title=validated_title.title,
-        )
-        return response
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Error creating document: {str(e)}"
@@ -66,97 +52,63 @@ async def create_document(
 
 
 @document_router.get("")
-async def get_documents(course_id: UUID) -> list[DocumentResponse]:
-    """
-    Retrieve all documents associated with a specific course.
-
-    Args:
-        course_id (UUID): Unique identifier of the course to fetch documents from
-
-    Returns:
-        list[DocumentResponse]: List of documents, each containing:
-            - id: Document UUID
-            - title: Document title
-            - document_type: Type of document
-            - metadata: Additional document metadata
-            - created_at: Creation timestamp
-            - updated_at: Last update timestamp
-            - file_url: URL to access the document (if applicable)
-
-    Raises:
-        HTTPException (404): If course_id does not exist
-        HTTPException (403): If user does not have access to the course
-
-    Example:
-        >>> course_id = UUID("123e4567-e89b-12d3-a456-426614174000")
-        >>> documents = await get_documents(course_id)
-        >>> for doc in documents:
-        ...     print(f"{doc.title} ({doc.document_type})")
-    """
-    documents = document_crud.get_documents(course_id)
+async def get_documents(c_id: UUID):
+    documents = document_manager.get_documents(c_id)
     return documents
 
 
-@document_router.get("/{document_id}")
-async def get_document(
-    course_id: UUID, document_id: UUID, request: Request
-) -> DocumentResponse:
-    """
-    Retrieve a specific document by its ID within a course context.
+@document_router.get("/{document_id}/signed_url")
+async def get_document_view(c_id: UUID, document_id: UUID):
+    res = document_manager.get_signed_document_url(str(document_id))
+    return {"signed_url": res["signedURL"]}
 
-    This endpoint verifies both the document existence and its association
-    with the specified course before returning the document details.
+
+@document_router.post("/query")
+async def query_documents(
+    c_id: UUID,
+    query: DocumentQuery,
+    request: Request,
+):
+    """
+    Query documents within a course using RAG.
 
     Args:
-        course_id (UUID): Course identifier the document belongs to
-        document_id (UUID): Unique identifier of the document to retrieve
-        request (Request): FastAPI request object for additional context
+        c_id: Course ID
+        query: Query parameters including question and optional template
 
     Returns:
-        DocumentResponse: Document details including:
-            - id: Document UUID
-            - title: Document title
-            - document_type: Type of document
-            - metadata: Additional document metadata including:
-                - file_id: Reference to stored file
-                - author: Document author (if specified)
-                - tags: Associated tags
-                - Additional custom metadata
-            - created_at: Creation timestamp
-            - updated_at: Last update timestamp
-            - file_url: URL to access the document (if applicable)
-
-    Raises:
-        HTTPException (404):
-            - If document_id does not exist
-            - If course_id does not exist
-            - If document is not associated with the course
-        HTTPException (403): If user does not have access to the document
-
-    Example:
-        >>> course_id = UUID("123e4567-e89b-12d3-a456-426614174000")
-        >>> document_id = UUID("987fcdeb-51a2-3e4b-9876-543210987654")
-        >>> document = await get_document(course_id, document_id, request)
-        >>> print(f"Retrieved: {document.title}")
+        Query response with answer and sources
     """
-    document = document_crud.get_document_by_id(document_id)
-    return document
+    try:
+        with get_db() as db:
+            query_engine = DocumentQueryEngine(
+                db=db,
+                model="gpt-4",  # You might want to make this configurable
+                max_chunks=5,
+            )
 
-@document_router.get("/{document_id}/signed-url", response_model=ViewDocumentResponse)
-async def get_document_view(course_id: UUID, document_id: UUID, file_path: str):
-    """
-    Generate a temporary signed URL for document access.
+            response = query_engine.query(
+                question=query.question,
+                course_id=c_id,
+                template_name=query.template_name,
+            )
 
-    Args:
-        course_id (UUID): Course identifier to validate document context
-        document_id (UUID): Document unique identifier
-        file_path (str): Path to the document file in storage
+            return {
+                "answer": response["answer"],
+                "sources": [
+                    {
+                        "title": source["document_title"],
+                        "content": source["content"],
+                        "relevance": source["similarity"],
+                        "metadata": source["metadata"],
+                        "document_id": source["document_id"],
+                        "signed_url": source["signed_url"],
+                        "id": source["document_id"],
+                    }
+                    for source in response["sources"]
+                ],
+            }
 
-    Returns:
-        ViewDocumentResponse: Signed URL for document viewing
-
-    Raises:
-        HTTPException (500): If internal error occurs
-    """
-    signed_url = document_crud.get_signed_document_url(file_path)
-    return signed_url 
+    except Exception as e:
+        logger.error(f"Error querying documents: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error processing query: {str(e)}")

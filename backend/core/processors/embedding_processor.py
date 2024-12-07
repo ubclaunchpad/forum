@@ -5,13 +5,10 @@ import os
 from openai import OpenAI
 import psycopg2
 import numpy as np
-from dotenv import load_dotenv
 
 
-load_dotenv()
-
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-DATABASE_URL = os.environ.get("DATABASE_URL")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or ""
+DATABASE_URL = os.getenv("DATABASE_URL") or ""
 
 
 class EmbeddingProcessor:

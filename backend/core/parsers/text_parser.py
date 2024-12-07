@@ -1,4 +1,4 @@
-""" TextParser class module."""
+"""TextParser class module."""
 
 from typing import Dict
 import re

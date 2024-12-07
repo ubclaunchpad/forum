@@ -1,43 +1,37 @@
-"""Main file for the API"""
-
 import os
 import sys
 
 import uvicorn
 from core.util.env_util import ENV, parse_bool_env
-from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from database.db import supabase
-from middleware.auth import AuthMiddleware
+from models.db import get_db
+from routers.middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 from routers.routes.documents import document_router
 from routers.routes.posts import post_router
 from routers.routes.users import user_router
 
-load_dotenv()
-
 environment = os.getenv("ENV")
+PORT = int(os.getenv("PORT", 8000))
+HOST = os.getenv("HOST", "0.0.0.0")
 
 AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=True)
 allowed_origins = (
     ["http://localhost:3000", "http://0.0.0.0:8000"]
     if environment == ENV.DEV.value
-    else []
+    else os.getenv("ALLOWED_ORIGINS", "").split(",") or []
 )
 
-app = FastAPI()
+app = FastAPI(dependencies=[Depends(get_db)])
 
-# Sub-routers
-app.include_router(user_router, tags=["Users"], prefix="/users")
 app.include_router(course_router, tags=["Courses"], prefix="/courses")
-
-# Nested routers
+app.include_router(user_router, tags=["Users"], prefix="/users")
+course_router.include_router(post_router, tags=["Posts"], prefix="/{c_id}/posts")
 course_router.include_router(
-    document_router, tags=["Documents"], prefix="/{course_id}/documents"
+    document_router, tags=["Documents"], prefix="/{c_id}/documents"
 )
-course_router.include_router(post_router, tags=["Posts"], prefix="/{course_id}/posts")
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -50,7 +44,6 @@ app.add_middleware(
 # Add the backend folder to Python's module search path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-
 app.add_middleware(AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED)
 
 
@@ -60,16 +53,14 @@ def root():
     return {"message": "ForumAI is running!"}
 
 
-# For use on Postman to login for a specific user, postman will save token as auth bearer token for requests
-@app.post("/login")
-def login(email: str, password: str):
-    response = supabase.auth.sign_in_with_password(
-        {"email": email, "password": password}
-    )
-    return response
+print(f"Running in {environment} environment")
+print(f"Auth middleware enabled: {AUTH_MIDDLEWARE_ENABLED}")
+print(f"Allowed origins: {allowed_origins}")
+print(f"Port: {PORT}")
+print(f"Host: {HOST}")
 
 
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app", host="0.0.0.0", port=8000, reload=ENV.DEV.value == environment
+        "main:app", host=HOST, port=PORT, reload=ENV.DEV.value == environment
     )

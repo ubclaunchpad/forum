@@ -1,4 +1,4 @@
-# Python Backend
+# Forum Backend
 
 ## Setup Instructions
 
@@ -7,143 +7,26 @@
 - Download and install Python from [python.org](https://www.python.org/downloads/)
 - Ensure Python is added to your system's PATH
 
-### 2. Set up a Virtual Environment
+### 2. Install UV
 
-#### For macOS and Linux
+- Copy based on your OS: <https://docs.astral.sh/uv/getting-started/installation/>
+  - e.g. macOS: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
-1. Open a terminal
-2. Navigate to the project directory
-3. Create a virtual environment:
-
-```bash
-python3 -m venv venv
-```
-
-OR
+### 3. Install Dependencies (syncing dependencies)
 
 ```bash
-python -m venv venv
+uv sync
 ```
 
-4. Activate the virtual environment:
+### 4. Syncing the Database
+
+- Run the following command to create the database tables:
 
 ```bash
-source venv/bin/activate
+uv run --env-file .env alembic upgrade head
 ```
 
-5. Your terminal prompt should now show "(venv)" at the beginning
-
-#### For Windows
-
-1. Open Command Prompt or PowerShell
-2. Navigate to the project directory
-3. Create a virtual environment:
-
-```bash
-python -m venv venv
-```
-
-4. Activate the virtual environment:
-
-```bash
-.\venv\Scripts\activate
-```
-
-5. Your command prompt should now show "(venv)" at the beginning
-
-### 3. Managing Dependencies
-
-The project uses a structured approach to manage dependencies using `manage_deps.py`.
-
-#### Initial Setup
-
-After activating your virtual environment:
-
-- sync dependencies:
-
-```bash
-python manage_deps.py sync
-```
-
-- install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-#### Adding New Packages
-
-Use the dependency management script:
-
-```bash
-# Add a production dependency
-python manage_deps.py add package_name
-
-# Add a development dependency
-python manage_deps.py add package_name --dev
-```
-
-(you might need to run `pip install -r requirements.txt` after adding new dependencies)
-
-Examples:
-
-```bash
-# Add production package
-python manage_deps.py add requests
-
-# Add development package
-python manage_deps.py add pytest --dev
-```
-
-#### Syncing Dependencies
-
-After pulling changes or switching branches:
-
-```bash
-python manage_deps.py sync
-```
-
-### 4. Experimenting with RAG (Retrieval Augmented Generation)
-
-The project includes a RAG implementation with the following structure:
-
-#### Directory Structure (Partial)
-
-```txt
-  project_root/
-├── core/
-│   ├── crud/                  # Database CRUD operations
-│   ├── database/              # Database configuration
-│   │   ├── migrations/        # Database schema changes
-│   │   │   ├── [timestamp].sql
-│   │   │   └── ...
-│   │   ├── init.py
-│   │   ├── db.py             # Database connection
-│   │   └── script.py         # Migration scripts
-│   ├── examples/
-│   │   ├── outputs/          # Generated RAG outputs
-│   │   └── main.py           # Example RAG usage
-│   ├── middleware/           # FastAPI middleware
-│   │   ├── init.py
-│   │   └── auth.py          # Authentication middleware
-│   ├── parsers/             # Document parsing
-│   ├── routers/             # API routes
-│   │   ├── routes/
-│   │   │   └── user_routes.py
-│   │   └── init.py
-│   └── templates/           # RAG response templates
-├── tests/                   # Test files
-├── venv/                    # Virtual environment
-├── .dockerignore
-├── .env
-├── .gitignore
-├── Dockerfile
-├── manage_deps.py          # Dependency management
-├── requirements.in         # Direct dependencies
-└── requirements.txt        # Locked dependencies
-```
-
-### Environment Setup
+### Environment Variables
 
 Create a `.env` file with:
 
@@ -161,6 +44,50 @@ DEV_LOGIN=true # or false
 ENV=development # or production
 ```
 
+### 4. Running the Server
+
+- With the virtual environment activated, run the following command:
+
+```bash
+   uv run --env-file .env -m main
+```
+
+## Managing Dependencies
+
+- Install new packages using `uv add <package_name>`
+- Remove packages using `uv remove <package_name>`
+
+## Directory Structure (Partial)
+
+```txt
+forum/
+├── backend/
+│   ├── controllers/                        # Business logic
+│   ├── core/                               # ML services
+│   ├── migrations/                         # Database configuration
+│   │   ├── versions/                       # Database schema changes
+│   │   │   ├── [timestamp]_<comment>.py    # Auto generated migration files
+│   │   │   └── ...
+│   │   ├── env.py                          # Alembic environment
+│   │   └── script.py.mako                  # Alembic script template
+│   ├── models/
+│   │   ├── schemas/                        # Pydantic models for request/response API
+│   │   ├── *.py                            # Models for the Database
+│   │   ├── db.py                           # Database connection
+│   ├── routers/                            # API routes
+│   │   ├── middleware/                     # FastAPI middleware
+│   │   │   └── auth_middleware.py
+│   │   ├── routes/                         # FastAPI routes
+│   │   │   └── user_routes.py
+│   │ .venv/                                # Where the virtual environment is stored
+│   │ .env
+│   │ .gitignore
+│   │ alembic.ini                           # Alembic configuration
+│   │ main.py                               # Main entry point
+│   │ pyproject.toml                        # Python project configuration
+│   │ uv.lock                               # Dependency lock file
+```
+
 Where to find these?
 
 - Go on [Supabase](https://supabase.io/) and create a new project
@@ -169,106 +96,38 @@ Where to find these?
   - In the Database section, you will find the `DATABASE_URL` (you want a connection string)
 - For most cases you will need to have the `AUTH_MIDDLEWARE_ENABLED` set to `true` and the `DEV_USER_EMAIL` and `DEV_USER_PASSWORD` set to your email and password
   - On your Supabase project, go to the `Auth` section and create a new user (you can manually set the email and password); then use these credentials in the `.env` file
-
-For the OpenAI API key:
-
 - Go on [OpenAI](https://platform.openai.com/) and create a new project (or use an existing one)
   - You do not need this unless you use the OpenAI API
 
-### Database Migrations
+### Database (Editting the Database)
 
-#### What are Migrations?
+We use SqlAlchemy and Alembic for database migrations. The database is hosted on Supabase.
 
-Migrations are version-controlled changes to your database schema. They allow you to:
-
-- Track database changes in git
-- Roll forward/backward database changes
-- Share schema changes with team members
-- Keep development/staging/production databases in sync
-
-#### Migration File Naming
-
-Files are named with timestamp prefix for ordering: `[YYYYMMDDHHmmss].sql`
-
-#### Running Migrations
-
-Before your first run, you need to make a function on the supabase dashboard:
-
-1. Click on database then functions and then click on `Create new function`
-2. name it `execute_sql` and paste the following code:
-
-```
-BEGIN
-    -- Execute the dynamic SQL query
-    EXECUTE sql;
-    -- If no errors occurred, return true
-    return true;
-EXCEPTION
-    -- If an error occurs, return false
-    WHEN OTHERS THEN
-        return false;
-END;
-```
-
-- arguments: `sql` type `text`
-- return type: `boolean`
-
-3. scroll and click on `show advanced settings`
-
-- in the section 'Type of Security' select `SECURITY DEFINER`
-
-Then you can run the migrations:
-
-1. Run all pending migrations:
+1. Change the files in `models/` to reflect the changes you want to make to the database
+2. Run the following command to generate a new migration:
 
 ```bash
-python -m database.script
+uv run --env-file .env alembic revision --autogenerate -m "migration message"
 ```
 
-### Formatting and Linting
+This will create a new migration file in the `migrations/versions/` folder
 
-Note: make sure you have activated your virtual environment before running these commands as well as in the `backend` directory.
-
-- Check formatting: in your terminal run: `black --check ./`
-- Apply formatting: in your terminal run: `black ./`
-
-### Running the API
-
-- With the virtual environment activated, run the following command:
+3. Run the following command to apply the migration:
 
 ```bash
-   python -m main
+uv run --env-file .env alembic upgrade head
 ```
 
----
+## Using the API (Endpoints)
 
-### Running the Example RAG
+- FastAPI provides a Swagger UI for the API
+- Go to `{base_url}/docs#/` to see the API documentation
 
-1. Ensure your virtual environment is activated
-2. Run the example:
+## Resources
 
-```bash
-python -m core.example.main
-```
-
-This will:
-
-- Load documents from `example/data.json`
-- Process and generate embeddings
-- Store in the database
-- Execute sample queries
-- Generate results in `outputs/` folder
-- Include timing and performance metrics
-- Clean up test data (can be disabled)
-
-#### Customization
-
-- Modify `data.json` to test different documents and queries
-- Edit templates in the `templates` folder to change response formats
-- Comment out the cleanup section in `main.py` to retain data between runs
-
-#### Notes
-
-- The `outputs` folder is git-ignored
-- Testing data is automatically cleaned up unless disabled
-- Templates use a simple format system with context and question placeholders
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [Supabase](https://supabase.io/)
+- [OpenAI](https://platform.openai.com/)
+- [Alembic](https://alembic.sqlalchemy.org/en/latest/tutorial.html)
+- [Pydantic](https://pydantic-docs.helpmanual.io/)
+- [SQLAlchemy](https://docs.sqlalchemy.org/en/20/)
