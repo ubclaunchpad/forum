@@ -37,6 +37,9 @@ RUN --mount=type=cache,id=s/a7f9edc8-75a1-4cb9-8b8e-fe061cf20e14-/root/.cache/uv
 # Production stage
 FROM python:3.11-slim-bookworm
 
+# Copy UV binary from official image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 # Railway runtime environment variables
 ARG RAILWAY_PUBLIC_DOMAIN
 ARG RAILWAY_PRIVATE_DOMAIN
@@ -49,31 +52,33 @@ ENV RAILWAY_ENVIRONMENT_NAME=${RAILWAY_ENVIRONMENT_NAME}
 ENV RAILWAY_SERVICE_NAME=${RAILWAY_SERVICE_NAME}
 ENV RAILWAY_PROJECT_NAME=${RAILWAY_PROJECT_NAME}
 ENV RAILWAY_PUBLIC_DOMAIN=${RAILWAY_PUBLIC_DOMAIN}
+ENV PYTHONUNBUFFERED=1
 
-# Create a non-root user
-RUN useradd -m -u 1000 app
+# Create a non-root user and set up directory
+RUN useradd -m -u 1000 app && \
+    mkdir -p /app && \
+    chown -R app:app /app
 
 # Set working directory
 WORKDIR /app
 
 # Copy virtual environment and application files from builder
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
-COPY --chown=app:app . .
+COPY --from=builder --chown=app:app /app /app
 
-# Fix permissions for virtual environment binaries (specifically uvicorn)
-RUN chmod -R +x /app/.venv/bin/uvicorn 
+# Ensure the virtual environment binaries and uv are executable
+RUN chmod -R +x /app/.venv/bin && \
+    chmod +x /bin/uv
 
-# Set environment variables
-ENV PATH="/app/.venv/bin:$PATH"
-ENV PYTHONUNBUFFERED=1
+# Set environment variables including PATH
+ENV PATH="/app/.venv/bin:/bin:$PATH"
 
 # Switch to non-root user
 USER app
 
-# Add healthcheck using Railway's public domain if available
+# Add healthcheck
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f "http://localhost:${PORT:-8000}/health" || exit 1
 
 # Command to run the application
-# Railway automatically injects PORT at runtime
-CMD uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}
+CMD ["uv", "run", "--env-file", ".env", "-m", "main"]
