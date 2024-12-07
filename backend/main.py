@@ -45,6 +45,11 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 app.add_middleware(AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED)
 
+@app.middleware("http")
+async def debug_request(request, call_next):
+    print(f"Incoming request origin: {request.headers.get('origin')}")
+    response = await call_next(request)
+    return response
 
 @app.get("/")
 def root():
