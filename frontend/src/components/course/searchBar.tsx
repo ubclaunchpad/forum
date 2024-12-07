@@ -30,6 +30,7 @@ export function Searchbar() {
     ) {
       return;
     }
+    setResponse(null);
     setIsLoading(true);
     const res = await fetch(
       `${getApiUrl()}/courses/${course.info.id}/documents/query`,
@@ -65,7 +66,7 @@ export function Searchbar() {
 
       <dialog className="bg-transparent" id="dialog">
         <section
-          className={`top-0 left-0 max-w-4xl gap-16 w-full min-w-[1000px] flex-shrink-0 max-h-[90dvh]  overflow-hidden bg-neutral-100 border-2 border-neutral-200 ${response ? "rounded-2xl" : "rounded-full"}`}
+          className={`top-0 left-0 max-w-4xl gap-16 w-full min-w-[1000px] flex-shrink-0 max-h-[90dvh]  overflow-hidden bg-neutral-100 border-2 border-neutral-200 ${response || isLoading ? "rounded-2xl" : "rounded-full"}`}
         >
           <div className="flex justify-between gap-2 items-center p-2">
             <Input
@@ -89,6 +90,44 @@ export function Searchbar() {
               <SearchIcon />
             </Button>
           </div>
+
+          {isLoading && 
+          <div className="flex flex-col px-4  w-full gap-4 min-h-[600px]">
+          <div className="loading-bar"></div>
+          <div className="loading-bar max-w-sm"></div>
+          <div className="flex gap-4 items-center">
+          <div className="loading-bar max-w-md"></div>
+          <div className="loading-bar"></div>
+          </div>
+          <div className="loading-bar"></div>
+          <div className="loading-bar"></div>
+          <div className="loading-bar"></div>
+          <div className="loading-bar max-w-sm"></div>
+          <div className="loading-bar max-w-sm"></div>
+          <div className="flex gap-10 flex-row w-full h-10 items-center">
+          <div className="loading-bar !max-w-xs"></div>
+          <div className="loading-bar max-w-xs"></div>
+          </div>
+          <div className="loading-bar"></div>
+          <div className="loading-bar"></div>
+          <div className="loading-bar max-w-sm"></div>
+          <div className="flex gap-4 items-center">
+          <div className="loading-bar max-w-md"></div>
+          <div className="loading-bar"></div>
+          </div>
+          <div className="loading-bar"></div>
+          <div className="loading-bar"></div>
+          <div className="loading-bar"></div>
+          <div className="loading-bar max-w-sm"></div>
+          <div className="loading-bar max-w-sm"></div>
+          <div className="flex gap-10 flex-row w-full h-10 items-center">
+          <div className="loading-bar !max-w-xs"></div>
+          <div className="loading-bar max-w-xs"></div>
+          </div>
+          <div className="loading-bar"></div>
+          <div className="loading-bar"></div>
+          </div>
+       }
 
           {response && (
             <article

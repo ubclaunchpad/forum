@@ -97,3 +97,36 @@ dialog {
 /* dialog::backdrop {
   backdrop-filter: blur(1px);
 } */
+
+
+@keyframes expanding {
+  0% {
+      transform: scaleX(0);
+      opacity: 0;
+  }
+  100% {
+      transform: scaleX(1);
+      opacity: 1;
+  }
+}
+
+/* This keyframe will create the loading gradient effect */
+@keyframes moving {
+  0% {
+      background-position: 0 0;
+  }
+  100% {
+      background-position: -200% 0;
+  }
+}
+
+.loading-bar {
+  height: 1.25rem;
+  transform-origin: left; /* Without this, you'll notice the `expanding` animation starts expanding from the  middle instead of shooting out from the left */
+  animation: expanding 0.4s 0.7s forwards linear, moving 1s 1s infinite forwards linear;
+  border-radius: 0.925rem;
+  background-image: linear-gradient(to right, theme('colors.primary.100') 30%, theme('colors.primary.500') 60%, theme('colors.primary.100'));
+  background-size: 200% auto;
+  opacity: 0; /* The `expanding` animation will fade in the loading bar */
+  animation-delay: 100ms;
+}
