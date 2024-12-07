@@ -1,3 +1,5 @@
+"use server";
+
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { UserContextProvider } from "@/contexts/userContext";
@@ -16,7 +18,13 @@ export default async function RootLayout({
     redirect("/auth/signin");
   }
 
-  const token = (await supabase.auth.getSession()).data.session?.access_token;
+  let token = null;
+
+  try {
+    token = (await supabase.auth.getSession()).data.session?.access_token;
+  } catch (error) {
+    console.error(error);
+  }
 
   if (!token) {
     redirect("/auth/signin");
