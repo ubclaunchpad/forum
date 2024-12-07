@@ -68,6 +68,7 @@ dependencies = [
     "pytesseract>=0.3.13",
     "pillow>=11.0.0",
     "pymupdf>=1.25.0",
+    "libmagic>=1.0",
 ]
 
 
