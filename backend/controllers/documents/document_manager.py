@@ -1,9 +1,9 @@
 """Document management operations with logging."""
 
 import logging
-from uuid import UUID
 import time
 from typing import Dict, Optional
+from uuid import UUID
 
 from core.processors.document_processor import DocumentProcessor
 from core.util.file_storage import FileStorage
@@ -33,7 +33,7 @@ async def upload_new_document(create_document: DocumentFileUpload) -> str:
         "Starting document upload",
         extra={
             "title": create_document.title,
-            "type": create_document.document_type,
+            "type": "application/pdf",
             "course_id": str(create_document.course_id),
         },
     )
@@ -44,7 +44,7 @@ async def upload_new_document(create_document: DocumentFileUpload) -> str:
             document = Document(
                 title=create_document.title,
                 created_by=create_document.created_by,
-                document_type=create_document.document_type,
+                document_type="application/pdf",
             )
 
             # Associate with course
@@ -87,7 +87,7 @@ async def upload_new_document(create_document: DocumentFileUpload) -> str:
                 processor.process_document(
                     document_id=document_id,
                     file_content=create_document.file,
-                    strategy_type=create_document.document_type.split("/")[1],
+                    strategy_type="application/pdf"
                 )
 
             logger.info(
