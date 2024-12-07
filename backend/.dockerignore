@@ -1,7 +1,10 @@
+.env
+.venv/
 __pycache__/
 *.pyc
 *.pyo
-*.db
-.env
-.git/
-node_modules/
+*.pyd
+.Python
+.git
+.gitignore
+.pytest_cache/
