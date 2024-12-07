@@ -87,7 +87,7 @@ async def upload_new_document(create_document: DocumentFileUpload) -> str:
                 processor.process_document(
                     document_id=document_id,
                     file_content=create_document.file,
-                    strategy_type="application/pdf"
+                    strategy_type="pdf"
                 )
 
             logger.info(
