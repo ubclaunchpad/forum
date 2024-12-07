@@ -1,13 +1,34 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { userContext } from "@/contexts/userContext";
 import { getApiUrl } from "@/utils/helpers";
 import Link from "next/link";
+import { useEffect } from "react";
+import { useState } from "react";
+import { useContext } from "react";
 
-export default async function CoursesPage() {
-  const res = await fetch(`${getApiUrl()}/courses`);
-  const { courses } = await res.json();
+export default function CoursesPage() {
+  const { token } = useContext(userContext);
+  const [courses, setCourses] = useState([]);
 
-  console.log(courses);
+  async function getCourses() {
+    const res = await fetch(`${getApiUrl()}/courses`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const { courses } = await res.json();
+
+    return courses;
+  }
+
+  useEffect(() => {
+    getCourses().then((courses) => setCourses(courses));
+  }, []);
 
   return (
     <div className="flex flex-col w-screen h-screen items-center bg-primary-900 justify-center">

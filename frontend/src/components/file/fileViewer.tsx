@@ -1,5 +1,7 @@
+"use client";
 import { DocumentInterface } from "@/app/forum/courses/[id]/resources/document";
 import { courseContext } from "@/contexts/courseContext";
+import { userContext } from "@/contexts/userContext";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
 import { FileText, Frown } from "lucide-react";
@@ -15,6 +17,7 @@ export default function FileViewer({
 }: {
   document: DocumentInterface | undefined;
 }) {
+  const { token } = useContext(userContext);
   const [doc, setDoc] = useState<DocumentViewerInterface | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -30,6 +33,9 @@ export default function FileViewer({
           `${getApiUrl()}/courses/${course.info.id}/documents/${document.id}/signed_url`,
           {
             method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
         );
         if (!response.ok) {

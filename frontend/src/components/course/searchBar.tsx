@@ -11,11 +11,13 @@ import remarkGfm from "remark-gfm";
 
 import { Input } from "../ui/input";
 import Link from "next/link";
+import { userContext } from "@/contexts/userContext";
 
 const MIN_SEARCH_LENGTH = 5;
 const MAX_SEARCH_LENGTH = 1000;
 
 export function Searchbar() {
+  const { token } = useContext(userContext);
   const course = useContext(courseContext);
   const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -39,6 +41,7 @@ export function Searchbar() {
         }),
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
       },
     );

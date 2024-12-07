@@ -8,6 +8,7 @@ import { UploadDocumentForm } from "../file/uploadFileForm";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
 import { courseContext } from "@/contexts/courseContext";
+import { userContext } from "@/contexts/userContext";
 
 // const maxSizeBytes: number = 15728640; // 15MB
 // const acceptedMimeTypes: string[] = [
@@ -30,6 +31,7 @@ export default function FileUpload({
 }: {
   onUploadSuccess: () => Promise<void>;
 }) {
+  const { token } = useContext(userContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const course = useContext(courseContext);
 
@@ -55,6 +57,9 @@ export default function FileUpload({
         const response = await fetch(link, {
           method: "POST",
           body: data,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         if (!response.ok) {

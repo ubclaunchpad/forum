@@ -7,8 +7,10 @@ import FileViewer from "@/components/file/fileViewer";
 import { ScrollArea, ScrollBar } from "@/components/ui/scrollArea";
 import { courseContext } from "@/contexts/courseContext";
 import { getApiUrl } from "@/utils/helpers";
+import { userContext } from "@/contexts/userContext";
 
 export default function ResourcesTab() {
+  const { token } = useContext(userContext);
   const [files, setFiles] = useState<DocumentInterface[]>([]);
   const [viewFile, setViewFile] = useState<DocumentInterface>();
   const course = useContext(courseContext);
@@ -18,6 +20,10 @@ export default function ResourcesTab() {
 
     const response = await fetch(link, {
       method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     });
     const result = await response.json();
     setFiles(result);
