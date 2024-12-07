@@ -52,6 +52,13 @@ def root():
     return {"message": "ForumAI is running!"}
 
 
+print(f"Running in {environment} environment")
+print(f"Auth middleware enabled: {AUTH_MIDDLEWARE_ENABLED}")
+print(f"Allowed origins: {allowed_origins}")
+print(f"Port: {PORT}")
+
+
+
 if __name__ == "__main__":
     uvicorn.run(
         "main:app", port=PORT, reload=ENV.DEV.value == environment
