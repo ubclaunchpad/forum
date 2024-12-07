@@ -1,6 +1,11 @@
 # Build stage
 FROM ubuntu:22.04 AS builder
 
+# Railway environment variables
+ARG RAILWAY_ENVIRONMENT
+ARG RAILWAY_SERVICE_NAME
+ARG RAILWAY_SERVICE_ID
+
 # Prevent apt from prompting for input
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -33,18 +38,21 @@ ENV PYTHONUNBUFFERED=1
 COPY pyproject.toml uv.lock ./
 
 # Install dependencies (without project install)
-RUN --mount=type=cache,id=cache-uv-deps \
+RUN --mount=type=cache,id=s/${RAILWAY_SERVICE_ID}-/root/.cache/uv,target=/root/.cache/uv \
     uv sync --frozen --no-install-project
 
 # Copy the rest of the application
 COPY . .
 
 # Install project and compile bytecode
-RUN --mount=type=cache,id=cache-uv-install \
+RUN --mount=type=cache,id=s/${RAILWAY_SERVICE_ID}-/root/.cache/uv,target=/root/.cache/uv \
     uv sync --frozen --compile-bytecode
 
 # Production stage
 FROM ubuntu:22.04
+
+# Railway environment variables
+ARG RAILWAY_ENVIRONMENT
 
 # Install Python runtime
 RUN apt-get update && apt-get install -y \
