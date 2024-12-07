@@ -20,15 +20,15 @@ WORKDIR /app
 ENV UV_LINK_MODE=copy
 ENV PYTHONUNBUFFERED=1
 
-# Copy the entire application first (we need pyproject.toml and the source code)
-COPY . .
+# Copy dependency files first for better caching
+COPY pyproject.toml uv.lock ./
 
-# Install all dependencies including the project itself
+# Install dependencies
 RUN uv venv /app/.venv && \
-    . /app/.venv/bin/activate && \
-    uv pip install --force-reinstall uvicorn && \
-    uv pip install -e . && \
-    uv sync
+    uv sync --python /app/.venv/bin/python
+
+# Copy the rest of the application
+COPY . .
 
 # Production stage
 FROM python:3.11-slim-bookworm
