@@ -91,6 +91,7 @@ class DocumentResponse(BaseModel):
     course_id: UUID
     document_type: DocumentType
     file_url: Optional[str] = None
+    description: Optional[str] = None
 
     model_config = {
         "json_schema_extra": {
@@ -105,6 +106,18 @@ class DocumentResponse(BaseModel):
                 "created_at": "2024-11-23T10:00:00Z",
                 "updated_at": None,
                 "file_url": "/api/documents/123e4567-e89b-12d3-a456-426614174000/file",
+            }
+        }
+    }
+
+class ViewDocumentResponse(BaseModel):
+    """Model for response from supabase storage, providing signed url"""
+    signed_url: str
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "signed_url": "https://ldubcnoplotymhbjzmja.supabase.co/storage/v1/object/sign/course-files/documents/Excel%20Tutorial%20-%20Pivot%20Tables.pdf?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJjb3Vyc2UtZmlsZXMvZG9jdW1lbnRzL0V4Y2VsIFR1dG9yaWFsIC0gUGl2b3QgVGFibGVzLnBkZiIsImlhdCI6MTczMzA4MzYwMiwiZXhwIjoxNzMzMTcwMDAyfQ.nq10l4fYG8_qBRbkoo93hEtPFEvU4cPZjWS5xMx__8c&t=2024-12-01T20%3A06%3A41.752Z",
             }
         }
     }

@@ -1,4 +1,5 @@
 import logging
+import urllib.parse
 from datetime import datetime
 from typing import Any, Dict, List
 from uuid import UUID, uuid4
@@ -8,7 +9,7 @@ from database.db import database
 from fastapi import HTTPException, UploadFile
 
 # Import the models from your API
-from models.documents import DocumentMetadata, DocumentResponse, DocumentType
+from models.documents import DocumentMetadata, DocumentResponse, DocumentType, ViewDocumentResponse
 from pydantic import BaseModel
 
 file_storage = FileStorage(bucket_name="course-files")
@@ -34,7 +35,7 @@ async def create_document(
 
         # Store file and get storage reference
         file_id = file_storage.store_file(
-            file_content, title
+            file_content, file.filename
         )  # No await here since it's not async
 
         # Reset file pointer
@@ -117,13 +118,13 @@ def get_documents(course_id: UUID) -> List[DocumentResponse]:
                 title=doc["title"],
                 course_id=course_id,
                 document_type=DocumentType(doc["document_type"]),
-                description=doc.get("description"),
-                tags=doc.get("tags", []),
+                description=doc.get("metadata", {}).get("description"),
+                tags=doc.get("metadata", {}).get("tags", []),
                 file_size=doc.get("file_size"),
                 other=doc.get("metadata", {}).get("other"),
                 created_at=doc["created_at"],
                 updated_at=doc.get("updated_at"),
-                file_url=f"/api/documents/{doc['id']}/file",
+                file_url=doc.get("metadata", {}).get("file_id"),
             )
             for doc in documents.data
         ]
@@ -195,4 +196,36 @@ def get_document_by_id(document_id: UUID) -> DocumentResponse:
         logging.error("Failed to get document: %s", e)
         raise HTTPException(
             status_code=500, detail=f"Failed to get document: {str(e)}"
+        ) from e
+
+
+def get_signed_document_url(file_path: str) -> ViewDocumentResponse:
+    """
+    Generate a signed URL for the document at the given path.
+
+    Args:
+        file_path (str): Path to the document in file storage.
+
+    Returns:
+        ViewDocumentResponse: Signed URL.
+
+    Raises:
+        HTTPException:
+            - 500: Database operation failure
+    """
+    try: 
+        result = file_storage.get_file_signed_url(file_path)
+
+        signed_url = result.get('signedURL')
+        encoded_url = urllib.parse.quote(signed_url, safe=':/?=&.')
+        return ViewDocumentResponse(
+            signed_url=encoded_url
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error("Failed to get signed url: %s", e)
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get signed url: {str(e)}"
         ) from e
