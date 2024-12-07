@@ -1,7 +1,7 @@
 "use client";
 
 import { courseContext } from "@/contexts/courseContext";
-import {  UserIcon } from "lucide-react";
+import { UserIcon } from "lucide-react";
 import { useContext } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";

@@ -7,8 +7,7 @@ from core.pipelines.document_query_engine import DocumentQueryEngine
 from core.util import file_storage
 from fastapi import APIRouter, Form, HTTPException, Request, UploadFile
 from models.db import get_db
-from models.schemas.document_schema import (CreateDocumentRequest,
-                                            DocumentFileUpload)
+from models.schemas.document_schema import CreateDocumentRequest, DocumentFileUpload
 from models.schemas.general_schema import GeneralResponse
 from pydantic import BaseModel
 

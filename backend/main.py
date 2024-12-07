@@ -17,11 +17,14 @@ PORT = int(os.getenv("PORT", 8000))
 HOST = os.getenv("HOST", "0.0.0.0")
 
 AUTH_MIDDLEWARE_ENABLED = parse_bool_env("AUTH_MIDDLEWARE_ENABLED", default=True)
-allowed_origins = (
-    ["http://localhost:3000", "http://0.0.0.0:8000", 
-     "https://forumai.me", "https://forumai.me/",
-     "https://forumapp.up.railway.app", "https://forumapp.up.railway.app/"]
-)
+allowed_origins = [
+    "http://localhost:3000",
+    "http://0.0.0.0:8000",
+    "https://forumai.me",
+    "https://forumai.me/",
+    "https://forumapp.up.railway.app",
+    "https://forumapp.up.railway.app/",
+]
 
 app = FastAPI(dependencies=[Depends(get_db)])
 
@@ -45,11 +48,13 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 app.add_middleware(AuthMiddleware, enabled=AUTH_MIDDLEWARE_ENABLED)
 
+
 @app.middleware("http")
 async def debug_request(request, call_next):
     print(f"Incoming request origin: {request.headers.get('origin')}")
     response = await call_next(request)
     return response
+
 
 @app.get("/")
 def root():
@@ -65,6 +70,4 @@ print(f"Host: {HOST}")
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "main:app", host=HOST, port=PORT, reload=ENV.DEV.value == environment
-    )
+    uvicorn.run("main:app", host=HOST, port=PORT, reload=ENV.DEV.value == environment)
