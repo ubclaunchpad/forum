@@ -56,7 +56,7 @@ async def get_documents(c_id: UUID):
     return documents
 
 
-@document_router.get("/signed_url")
+@document_router.get("/{document_id}/signed_url")
 async def get_document_view(c_id: UUID, document_id: UUID):
     res = document_manager.get_signed_document_url(str(document_id))
     return {"signed_url": res["signedURL"]}
@@ -100,6 +100,9 @@ async def query_documents(
                         "content": source["content"],
                         "relevance": source["similarity"],
                         "metadata": source["metadata"],
+                        "document_id": source["document_id"],
+                        "signed_url": source["signed_url"],
+                        "id": source["document_id"],
                     }
                     for source in response["sources"]
                 ],

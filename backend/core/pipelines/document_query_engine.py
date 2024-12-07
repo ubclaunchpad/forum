@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
+from controllers.documents import document_manager
 from core.processors.embedding_processor import EmbeddingProcessor
 from models.all import Chunk, Document
 from openai import OpenAI
@@ -69,7 +70,9 @@ class DocumentQueryEngine:
                     c.content,
                     c.chunk_metadata as metadata,
                     d.title as document_title,
-                    1 - (c.embedding <=> {vector_literal}::vector) as similarity
+                    1 - (c.embedding <=> {vector_literal}::vector) as similarity,
+                    d.id as document_id,
+                    d.file_url as document_url
                 FROM public.chunks c
                 JOIN public.documents d ON c.document_id = d.id
                 JOIN public.course_documents cd ON d.id = cd.document_id
@@ -110,6 +113,10 @@ class DocumentQueryEngine:
                     "content": chunk.content or "",
                     "metadata": chunk.metadata or {},
                     "document_title": chunk.document_title or "Unknown Document",
+                    "document_id": str(chunk.document_id),
+                    "signed_url": document_manager.get_signed_document_url(
+                        document_id=str(chunk.document_id)
+                    )["signedURL"],
                     "similarity": float(chunk.similarity)
                     if chunk.similarity is not None
                     else 0.0,
@@ -138,7 +145,10 @@ class DocumentQueryEngine:
                     "document_title": self._safe_get(
                         ctx, "document_title", "Unknown Document"
                     ),
+                    "document_id": self._safe_get(ctx, "document_id", ""),
+                    "document_url": self._safe_get(ctx, "document_url", ""),
                     "content": self._safe_get(ctx, "content", "No content available"),
+                    "signed_url": self._safe_get(ctx, "signed_url", ""),
                     "similarity": float(self._safe_get(ctx, "similarity", 0.0)),
                     "metadata": self._safe_get(ctx, "metadata", {}),
                 }

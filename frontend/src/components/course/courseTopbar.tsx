@@ -5,6 +5,7 @@ import { SearchIcon, UserIcon } from "lucide-react";
 import { useContext } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { Searchbar } from "./searchBar";
 
 export function CourseTopbar() {
   const course = useContext(courseContext);
@@ -23,21 +24,6 @@ export function CourseTopbar() {
       </Button>
       <Searchbar />
       <ProfileButton />
-    </div>
-  );
-}
-
-function Searchbar() {
-  return (
-    <div className="flex items-center rounded-full  min-w-[600px] border overflow-hidden absolute left-1/2 transform -translate-x-1/2">
-      <input
-        type="text"
-        placeholder="Search for something"
-        className="px-2 h-12 outline-none w-full"
-      />
-      <button className="  px-4 py-2 rounded-full">
-        <SearchIcon />
-      </button>
     </div>
   );
 }
