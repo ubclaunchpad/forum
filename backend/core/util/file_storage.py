@@ -7,7 +7,7 @@ from enum import Enum
 from logging import getLogger
 from typing import List, Optional
 
-import magic
+# import magic
 from dotenv import load_dotenv
 from fastapi import HTTPException, UploadFile
 from supabase import Client, create_client
@@ -172,18 +172,18 @@ class FileStorage:
             )
 
 
-async def get_file_type(file: UploadFile, file_content: bytes) -> str:
-    """Detect file type using both mime type and magic numbers."""
-    # Get mime type from file extension
-    mime_type, _ = mimetypes.guess_type(file.filename)  # type: ignore
+# async def get_file_type(file: UploadFile, file_content: bytes) -> str:
+#     """Detect file type using both mime type and magic numbers."""
+#     # Get mime type from file extension
+#     mime_type, _ = mimetypes.guess_type(file.filename)  # type: ignore
 
-    # Get mime type from file content using python-magic
-    content_type = magic.from_buffer(file_content, mime=True)
+#     # Get mime type from file content using python-magic
+#     content_type = magic.from_buffer(file_content, mime=True)
 
-    # Prefer content-based detection over extension-based
-    detected_type = content_type or mime_type or file.content_type
+#     # Prefer content-based detection over extension-based
+#     detected_type = content_type or mime_type or file.content_type
 
-    if not detected_type:
-        raise HTTPException(status_code=400, detail="Could not determine file type")
+#     if not detected_type:
+#         raise HTTPException(status_code=400, detail="Could not determine file type")
 
-    return detected_type
+#     return detected_type

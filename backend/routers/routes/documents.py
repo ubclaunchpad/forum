@@ -7,7 +7,8 @@ from core.pipelines.document_query_engine import DocumentQueryEngine
 from core.util import file_storage
 from fastapi import APIRouter, Form, HTTPException, Request, UploadFile
 from models.db import get_db
-from models.schemas.document_schema import CreateDocumentRequest, DocumentFileUpload
+from models.schemas.document_schema import (CreateDocumentRequest,
+                                            DocumentFileUpload)
 from models.schemas.general_schema import GeneralResponse
 from pydantic import BaseModel
 
@@ -32,7 +33,7 @@ async def create_document(
     try:
         file_content = await file.read()
         await file.seek(0)
-        document_type = await file_storage.get_file_type(file, file_content)
+        document_type = title.split(".")[-1]
         create_document_request = DocumentFileUpload(
             title=title,
             course_id=UUID(c_id),
