@@ -132,17 +132,16 @@ async def query_documents(
                     model="gpt-4o",
                     max_chunks=5,
                 )
-
                 async for chunk in query_engine.stream_query(
                     question=query.question,
                     course_id=c_id,
                     template_name=query.template_name,
                 ):
-                    yield chunk
-
+                    # Format as SSE
+                    yield f"data: {chunk}\n\n"
         except Exception as e:
             logger.error(f"Error querying documents: {e}", exc_info=True)
-            yield json.dumps({"error": str(e)})
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
     return StreamingResponse(
         stream_response(),
