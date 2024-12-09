@@ -61,7 +61,7 @@ dependencies = [
     "uvicorn==0.32.1",
     "websockets==13.1",
     "wheel==0.45.0",
-    "yarl==1.17.1",
+    "yarl==1.18.3",
     "sqlalchemy>=2.0.36",
     "pgvector>=0.3.6",
     "python-magic>=0.4.27",

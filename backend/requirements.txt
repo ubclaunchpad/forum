@@ -66,4 +66,4 @@ typing-extensions==4.12.2
 uvicorn==0.32.1
 websockets==13.1
 wheel==0.45.0
-yarl==1.17.1
+yarl==1.18.3
