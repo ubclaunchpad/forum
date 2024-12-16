@@ -4,6 +4,7 @@ from models.schemas.general_schema import GeneralResponse
 from models.schemas.post_schema import (
     CreatePostEditRequest,
     CreatePostRequest,
+    CreateUserPostEventRequest,
     GetPostResponse,
     GetPostsResponse,
     PostResponse,
@@ -35,8 +36,8 @@ Missing Endpoints:
     - Get event history
 - Edit post DONE
 - Delete post DONE
-- View post TODO
-- Like post TODO
+- View post DONE
+- Like post DONE
 - Get post metadata TODO
 
 - Missing DB
@@ -60,23 +61,23 @@ async def update_post(c_id: str, post_edit_info: CreatePostEditRequest):
 @post_router.delete("/{post_id}", response_model=GeneralResponse)
 async def delete_post(post_id: str, c_id: str, request: Request):
     deletion_user_id = request.state.user_id
-    post = post_controller.delete_post(deletion_user_id, c_id, post_id)
+    post_controller.delete_post(deletion_user_id, c_id, post_id)
 
-    return post
-
-
-# @post_router.put("/{post_id}/view")
-# async def view_post(post_id: str, request: Request):
-#     user_id = request.state.user_id
-#     post = post_controller.view_post(user_id, post_id)
-#     return post
+    return {"msg" : "Post edited successfully"}
 
 
-# @post_router.post("/{post_id}/like")
-# async def like_post(post_id: str, request: Request):
-#     user_id = request.state.user_id
-#     post = post_controller.like_post(user_id, post_id)
-#     return post
+@post_router.put("/{post_id}/view", response_model=GeneralResponse)
+async def view_post(post_id: str, request: Request):
+    user_id = request.state.user_id
+    post_controller.view_post(user_id, post_id)
+    return {"msg" : "Post viewed"}
+
+
+@post_router.post("/{post_id}/like", response_model=GeneralResponse)
+async def like_post(post_id: str, request: Request):
+    user_id = request.state.user_id
+    post_controller.like_post(user_id, post_id)
+    return {"msg" : "Post liked"}
 
 
 # @post_router.get("/{post_id}/metadata", response_model=PostMetadata)
