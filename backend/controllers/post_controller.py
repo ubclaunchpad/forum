@@ -45,15 +45,13 @@ def get_post(c_id: str, post_id: str) -> Post:
             post = (
                 db.query(Post).filter(Post.course_id == c_id, Post.id == post_id).first()
             )
-            # Get post edits
-            # Get post user-events
             return post
     except Exception as e:
         print(f"Error in get_post: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
 
 
-def update_post(post_edit_info: CreatePostEditRequest, c_id: str) -> PostEditResponse:
+def update_post(c_id: str, user_id: str, post_edit_info: CreatePostEditRequest) -> PostEditResponse:
     try:
         with get_db() as db:
             post_id = post_edit_info.post_id
@@ -64,18 +62,11 @@ def update_post(post_edit_info: CreatePostEditRequest, c_id: str) -> PostEditRes
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
 
-            old_content = post.content
-
-            if post_edit_info.new_content == old_content:
-                raise HTTPException(status_code=400, detail="Content is duplicate")
-
-            # Type error, needs fix
             post.content = post_edit_info.new_content
 
             post_edit = PostEdit(
                 post_id=post_edit_info.post_id,
-                edited_by=post_edit_info.edited_by,
-                previous_content=post_edit_info.previous_content,
+                edited_by=user_id,
                 new_content=post_edit_info.new_content,
                 edit_reason=post_edit_info.edit_reason,
             )
@@ -86,8 +77,7 @@ def update_post(post_edit_info: CreatePostEditRequest, c_id: str) -> PostEditRes
             return PostEditResponse(
                 id=id,
                 post_id=post_edit_info.post_id,
-                edited_by=post_edit_info.edited_by,
-                previous_content=post_edit_info.previous_content,
+                edited_by=UUID(user_id),
                 new_content=post_edit_info.new_content,
                 edit_reason=post_edit_info.edit_reason,
             )
@@ -97,7 +87,7 @@ def update_post(post_edit_info: CreatePostEditRequest, c_id: str) -> PostEditRes
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
 
 
-def delete_post(user_id, c_id, post_id):
+def delete_post(c_id, user_id, post_id):
     try:
         with get_db() as db:
             post = (
@@ -113,11 +103,11 @@ def delete_post(user_id, c_id, post_id):
         print(f"Error in get_post: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
 
-def view_post(user_id: str, post_id: str) -> UserPostEvent:
+def view_post(c_id: str, user_id: str, post_id: str) -> UserPostEvent:
     try:
         with get_db() as db:
             post = (
-                db.query(Post).filter(Post.id == post_id).first()
+                db.query(Post).filter(Post.course_id == c_id, Post.id == post_id).first()
             )
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
@@ -139,11 +129,11 @@ def view_post(user_id: str, post_id: str) -> UserPostEvent:
         print(f"Error in get_post: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
 
-def like_post(user_id : str, post_id: str) -> UserPostEvent:
+def like_post(c_id: str, user_id : str, post_id: str) -> UserPostEvent:
     try:
         with get_db() as db:
             post = (
-                db.query(Post).filter(Post.id == post_id).first()
+                db.query(Post).filter(Post.course_id == c_id, Post.id == post_id).first()
             )
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
