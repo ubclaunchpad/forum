@@ -43,7 +43,7 @@ postgrest==0.18.0
 propcache==0.2.0
 psycopg2-binary==2.9.10
 pydantic==2.9.2
-pydantic-core==2.23.4
+pydantic-core==2.27.2
 pymupdf==1.25.0
 pyproject-hooks==1.2.0
 pytesseract==0.3.13
