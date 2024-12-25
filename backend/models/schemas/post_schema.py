@@ -25,8 +25,6 @@ class PostResponse(PostBase):
 
 class PostEditBase(BaseModel):
     post_id: UUID
-    edited_by: UUID
-    previous_content: str
     new_content: str
     edit_reason: str
     applied_at: datetime = Field(default_factory=datetime.now)
@@ -38,6 +36,7 @@ class CreatePostEditRequest(PostEditBase):
 
 class PostEditResponse(PostEditBase):
     id: UUID
+    edited_by: UUID
 
 
 class UserPostEventBase(BaseModel):
@@ -61,5 +60,3 @@ class GetPostsResponse(BaseModel):
 
 class GetPostResponse(BaseModel):
     post: PostResponse
-    edits: list[PostEditResponse]
-    events: list[UserPostEventResponse]
