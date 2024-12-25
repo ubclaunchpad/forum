@@ -28,22 +28,6 @@ async def get_posts(c_id: str):
     return {"posts": posts}
 
 
-"""
-Missing Endpoints:
-- Get singlar post 
-    TODO
-    - Get edit history
-    - Get event history
-- Edit post DONE
-- Delete post DONE
-- View post DONE
-- Like post DONE
-- Get post metadata TODO
-
-- Missing DB
-    - post_impressions materialized view TODO
-"""
-
 
 @post_router.get("/{p_id}", response_model=GetPostResponse)
 async def get_post(c_id: str, p_id: str):
@@ -67,20 +51,15 @@ async def delete_post(c_id: str, post_id: str, request: Request):
     return {"msg" : "Post edited successfully"}
 
 
-@post_router.put("/{post_id}/view", response_model=GeneralResponse)
+@post_router.put("/{post_id}/events/view", response_model=GeneralResponse)
 async def view_post(c_id: str, post_id: str, request: Request):
     user_id = request.state.user_id
     post_controller.view_post(c_id, user_id, post_id)
     return {"msg" : "Post viewed"}
 
 
-@post_router.post("/{post_id}/like", response_model=GeneralResponse)
+@post_router.post("/{post_id}/events/like", response_model=GeneralResponse)
 async def like_post(c_id: str, post_id: str, request: Request):
     user_id = request.state.user_id
     post_controller.like_post(c_id, user_id, post_id)
     return {"msg" : "Post liked"}
-
-# @post_router.get("/{post_id}/metadata", response_model=PostMetadata)
-# async def get_post_metadata(post_id: str):
-#     post = post_controller.get_post_metadata(post_id)
-#     return post

@@ -81,7 +81,8 @@ def update_post(c_id: str, user_id: str, post_edit_info: CreatePostEditRequest) 
                 new_content=post_edit_info.new_content,
                 edit_reason=post_edit_info.edit_reason,
             )
-
+    except HTTPException as e:
+        raise
     except Exception as e:
         print(f"Error in update_post: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
