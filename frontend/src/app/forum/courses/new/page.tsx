@@ -1,10 +1,11 @@
 "use client";
 import { z } from "zod";
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { getApiUrl } from "@/utils/helpers";
 import { useRouter } from "next/navigation";
+import { userContext } from "@/contexts/userContext";
 
 const inputStyle =
   "rounded-full w-full px-3 py-4 h-12 border border-neutral-200 focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
@@ -19,6 +20,8 @@ const formSchema = z.object({
 });
 
 export default function CoursesNewPage() {
+  const { token } = useContext(userContext);
+
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
@@ -38,6 +41,7 @@ export default function CoursesNewPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify(validatedData),
       });
