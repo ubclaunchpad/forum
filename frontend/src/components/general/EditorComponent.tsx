@@ -77,7 +77,6 @@ const Editor: FC<EditorProps> = ({
       }),
     ],
     content: markdown,
-    editable: editable,
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       onMarkdownChange(html);
@@ -89,6 +88,12 @@ const Editor: FC<EditorProps> = ({
       editor.commands.setContent(markdown);
     }
   }, [markdown, editor]);
+
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(editable);
+    }
+  }, [editable, editor]);
 
   return (
     <div
