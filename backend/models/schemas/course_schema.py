@@ -7,8 +7,8 @@ from pydantic import BaseModel, Field
 
 class CourseBase(BaseModel):
     c_group: str
-    code: str
-    section: str
+    code: int
+    section: int
     name: Optional[str] = None
     config: Optional[Dict] = None
     start_date: Optional[date] = None

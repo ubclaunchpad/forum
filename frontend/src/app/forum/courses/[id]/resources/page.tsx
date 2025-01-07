@@ -1,57 +1,45 @@
-"use client";
-
-import { useState, useEffect, useContext, useCallback } from "react";
-import FileUpload from "@/components/course/fileUpload";
-import Document, { DocumentInterface } from "./document";
-import FileViewer from "@/components/file/fileViewer";
-import { ScrollArea, ScrollBar } from "@/components/ui/scrollArea";
-import { courseContext } from "@/contexts/courseContext";
+// ResourcesTab.tsx (Server Component)
+import { DocumentsPage } from "@/components/files/DocumentsPage";
+import { DocumentInterface } from "@/lib/types/documents";
 import { getApiUrl } from "@/utils/helpers";
-import { userContext } from "@/contexts/userContext";
+import { createClient } from "@/utils/supabase/server";
 
-export default function ResourcesTab() {
-  const { token } = useContext(userContext);
-  const [files, setFiles] = useState<DocumentInterface[]>([]);
-  const [viewFile, setViewFile] = useState<DocumentInterface>();
-  const course = useContext(courseContext);
+async function getDocuments(id: string) {
+  try {
+    const supabase = createClient();
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
 
-  const getFiles = useCallback(async () => {
-    const link = `${getApiUrl()}/courses/${course.info.id}/documents`;
-
-    const response = await fetch(link, {
-      method: "GET",
+    const res = await fetch(`${getApiUrl()}/courses/${id}/documents`, {
+      cache: "force-cache",
+      next: {
+        revalidate: 3600,
+        tags: [`course-${id}-documents`],
+      },
       headers: {
-        "Content-Type": "application/json",
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
         Authorization: `Bearer ${token}`,
       },
     });
-    const result = await response.json();
-    setFiles(result);
-  }, [course.info.id]);
 
-  useEffect(() => {
-    getFiles();
-  }, [getFiles]);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch documents: ${res.status}`);
+    }
 
-  const handleDocClick = (doc: DocumentInterface) => {
-    setViewFile(doc);
-  };
+    const documents = await res.json();
+    return documents as DocumentInterface[];
+  } catch (e) {
+    console.error("Error fetching documents:", e);
+    return [];
+  }
+}
 
-  return (
-    <div className="flex flex-row gap-2 w-full px-2 flex-1 py-4">
-      <div className="space-y-2 max-w-lg border rounded-lg p-2 flex flex-col flex-1  items-center">
-        <ScrollArea className="flex-1 w-full">
-          {files.map((doc) => (
-            <Document key={doc.id} document={doc} onClick={handleDocClick} />
-          ))}
-          <ScrollBar orientation="vertical" />
-        </ScrollArea>
-        <FileUpload onUploadSuccess={getFiles} />
-      </div>
+export default async function ResourcesTab({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
-      <div className="flex  flex-1 items-center justify-center rounded-lg border">
-        <FileViewer document={viewFile} />
-      </div>
-    </div>
-  );
+  const documents = await getDocuments(id);
+  return <DocumentsPage initialDocuments={documents} courseId={id} />;
 }

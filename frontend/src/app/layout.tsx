@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Quicksand, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 const SourceSans = Source_Sans_3({
   subsets: ["latin"],
@@ -27,6 +28,8 @@ export default function RootLayout({
       <body
         className={`${SourceSans.variable} ${quicksand.variable}  font-sans`}
       >
+        <Toaster />
+
         {children}
       </body>
     </html>

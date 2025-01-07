@@ -2,15 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  box-sizing: border-box;
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  overscroll-behavior: none;
-}
-
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -23,110 +14,172 @@ html {
     --destructive-foreground: 0 0% 98%;
     --radius: 0.5rem;
   }
-}
 
-@layer base {
-  /* * {
-    @apply border-border;
-  } */
+  /* Base HTML setup */
+  html {
+    box-sizing: border-box;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overscroll-behavior: none;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body antialiased;
   }
-}
 
-@layer base {
+  /* We can remove most typography styles since they're handled by the prose config */
+  /* Only keep non-prose contexts styles */
   * {
-    @apply font-body text-base;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-title;
-  }
-
-  button,
-  p {
     @apply font-body;
   }
 
-  h1 {
-    @apply text-4xl font-semibold leading-tight;
-  }
+  /* Only apply these styles outside of .prose contexts */
+  :not(.prose) {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      @apply font-title;
+    }
 
-  h2 {
-    @apply text-3xl font-semibold leading-snug;
-  }
-
-  h3 {
-    @apply text-2xl font-semibold leading-snug;
-  }
-
-  h4 {
-    @apply text-xl font-semibold leading-relaxed;
-  }
-
-  h5 {
-    @apply text-lg font-semibold leading-relaxed;
-  }
-
-  h6 {
-    @apply text-lg font-semibold leading-relaxed;
-  }
-
-  p {
-    @apply text-base leading-relaxed;
-  }
-
-  a {
-    @apply text-base  underline;
-  }
-
-  ul,
-  ol {
-    @apply list-inside text-base;
+    ul,
+    ol {
+      @apply text-base;
+    }
   }
 }
 
+/* Dialog styles */
 dialog {
   margin-top: 1rem;
 }
-/* dialog::backdrop {
-  backdrop-filter: blur(1px);
-} */
 
-
+/* Animations */
 @keyframes expanding {
   0% {
-      transform: scaleX(0);
-      opacity: 0;
+    transform: scaleX(0);
+    opacity: 0;
   }
   100% {
-      transform: scaleX(1);
-      opacity: 1;
+    transform: scaleX(1);
+    opacity: 1;
   }
 }
 
-/* This keyframe will create the loading gradient effect */
 @keyframes moving {
   0% {
-      background-position: 0 0;
+    background-position: 0 0;
   }
   100% {
-      background-position: -200% 0;
+    background-position: -200% 0;
   }
 }
 
 .loading-bar {
   height: 1.25rem;
-  transform-origin: left; /* Without this, you'll notice the `expanding` animation starts expanding from the  middle instead of shooting out from the left */
-  animation: expanding 0.4s 0.7s forwards linear, moving 1s 1s infinite forwards linear;
+  transform-origin: left;
+  animation:
+    expanding 0.4s 0.7s forwards linear,
+    moving 1s 1s infinite forwards linear;
   border-radius: 0.925rem;
-  background-image: linear-gradient(to right, theme('colors.primary.100') 30%, theme('colors.primary.500') 60%, theme('colors.primary.100'));
+  background-image: linear-gradient(
+    to right,
+    theme("colors.primary.100") 30%,
+    theme("colors.primary.500") 60%,
+    theme("colors.primary.100")
+  );
   background-size: 200% auto;
-  opacity: 0; /* The `expanding` animation will fade in the loading bar */
+  opacity: 0;
   animation-delay: 100ms;
+}
+
+/* MDX Editor specific styles */
+.mdxeditor-popup-container {
+  display: none !important;
+  z-index: -1;
+  position: fixed;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.loading-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(31, 86, 55, 0.1) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+.react-pdf__Document {
+  width: 100%;
+  flex: 1;
+  .react-pdf__message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+  }
+}
+
+
+@view-transition {
+  navigation: auto;
+}
+
+
+.vt {
+  view-transition-name: vt;
+}
+
+@keyframes blurIn {
+  from {
+    filter: blur(350px);
+  }
+
+  to {
+    filter: blur(0);
+  }
+}
+
+@keyframes blurOut {
+  from {
+    filter: blur(0);
+  }
+
+  to {
+    filter: blur(350px);
+  }
+}
+
+
+::view-transition-old(vr),
+::view-transition-new(vr) {
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(vr) {
+  animation: blurOut 0.3s;
+}
+
+::view-transition-new(vr) {
+  animation: blurIn 2.5s;
 }

@@ -1,11 +1,20 @@
 "use client";
-import { DocumentInterface } from "@/app/forum/courses/[id]/resources/document";
 import { courseContext } from "@/contexts/courseContext";
 import { userContext } from "@/contexts/userContext";
 import { useToast } from "@/hooks/use-toast";
+import { DocumentInterface } from "@/lib/types/documents";
 import { getApiUrl } from "@/utils/helpers";
 import { FileText, Frown } from "lucide-react";
 import { useState, useEffect, useContext } from "react";
+import { Document, Page } from "react-pdf";
+
+import { pdfjs } from "react-pdf";
+import { IsLoadingView } from "../general/IsLoadingView";
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url,
+).toString();
 
 interface DocumentViewerInterface {
   signedUrl: string;
@@ -82,15 +91,9 @@ export default function FileViewer({
     );
   }
 
-  // Loading state
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p>Loading document...</p>
-      </div>
-    );
+    return <IsLoadingView />;
   }
-
   // Error state - no document data
   if (!doc) {
     return (
@@ -102,15 +105,20 @@ export default function FileViewer({
 
   // PDF viewer
   if (doc.fileType === "application/pdf") {
-    const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.signedUrl)}&embedded=true`;
+    // const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.signedUrl)}&embedded=true`;
+    // return (
+    //   <div className="w-full h-full overflow-hidden rounded-md">
+    //     <iframe
+    //       src={googleViewerUrl}
+    //       className="w-full h-full border-0"
+    //       title="PDF viewer"
+    //     />
+    //   </div>
+    // );
     return (
-      <div className="w-full h-full overflow-hidden rounded-md">
-        <iframe
-          src={googleViewerUrl}
-          className="w-full h-full border-0"
-          title="PDF viewer"
-        />
-      </div>
+      <>
+        <PDFViewer url={doc.signedUrl} />
+      </>
     );
   }
 
@@ -180,5 +188,81 @@ export default function FileViewer({
         Download file instead
       </a>
     </div>
+  );
+}
+
+function PDFViewer({ url }: { url: string }) {
+  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchAndCachePDF = async () => {
+      try {
+        // Check sessionStorage for cached blob URL
+        const cachedUrl = sessionStorage.getItem(`pdf_${url}`);
+        if (cachedUrl) {
+          const blob = await (await fetch(cachedUrl)).blob();
+          setPdfBlob(blob);
+          return;
+        }
+
+        // Fetch and cache if not found
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        sessionStorage.setItem(`pdf_${url}`, blobUrl);
+        setPdfBlob(blob);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("Failed to load PDF"));
+      }
+    };
+
+    fetchAndCachePDF();
+
+    // Cleanup
+    return () => {
+      const cachedUrl = sessionStorage.getItem(`pdf_${url}`);
+      if (cachedUrl) {
+        URL.revokeObjectURL(cachedUrl);
+        sessionStorage.removeItem(`pdf_${url}`);
+      }
+    };
+  }, [url]);
+
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
+    setNumPages(numPages);
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p>{error.message}</p>
+      </div>
+    );
+  }
+
+  if (!pdfBlob) return <IsLoadingView />;
+
+  return (
+    <Document
+      file={pdfBlob}
+      loading={<IsLoadingView />}
+      onError={setError}
+      className="flex flex-1 w-full overflow-x-scroll"
+      error={<IsLoadingView />}
+      onLoadSuccess={onDocumentLoadSuccess}
+    >
+      {Array.from(new Array(numPages), (el, index) => (
+        <Page
+          onError={setError}
+          loading={<IsLoadingView />}
+          renderTextLayer={false}
+          renderAnnotationLayer={false}
+          key={`page_${index + 1}`}
+          pageNumber={index + 1}
+        />
+      ))}
+    </Document>
   );
 }

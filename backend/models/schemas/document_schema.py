@@ -14,6 +14,10 @@ class CreateDocumentRequest(BaseModel):
     document_type: str
 
 
+class CreateDocumentResponse(BaseModel):
+    id: UUID
+
+
 class DocumentFileUpload(BaseModel):
     title: str
     course_id: UUID

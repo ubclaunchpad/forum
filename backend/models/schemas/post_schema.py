@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -16,6 +16,11 @@ class CreatePostRequest(BaseModel):
     title: str
     content: str
     parent_id: Optional[UUID] = None
+
+
+class CreatePostResponse(PostBase):
+    id: UUID
+    applied_at: Any
 
 
 class PostResponse(PostBase):

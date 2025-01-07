@@ -1,0 +1,103 @@
+"use client";
+
+import { cn } from "@/lib/utils";
+import { useEditor, EditorContent } from "@tiptap/react";
+import Document from "@tiptap/extension-document";
+import Paragraph from "@tiptap/extension-paragraph";
+import Text from "@tiptap/extension-text";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import { createLowlight } from "lowlight";
+import css from "highlight.js/lib/languages/css";
+import js from "highlight.js/lib/languages/javascript";
+import ts from "highlight.js/lib/languages/typescript";
+import html from "highlight.js/lib/languages/xml";
+import Heading from "@tiptap/extension-heading";
+import HorizontalRule from "@tiptap/extension-horizontal-rule";
+import BulletList from "@tiptap/extension-bullet-list";
+import OrderedList from "@tiptap/extension-ordered-list";
+import ListItem from "@tiptap/extension-list-item";
+import Blockquote from "@tiptap/extension-blockquote";
+import { FC, useEffect } from "react";
+
+// Create lowlight instance
+const lowlight = createLowlight();
+lowlight.register("html", html);
+lowlight.register("css", css);
+lowlight.register("js", js);
+lowlight.register("ts", ts);
+
+interface EditorProps {
+  markdown: string;
+  // editorRef?: React.MutableRefObject<any>;
+  editable: boolean;
+  className?: string;
+  onMarkdownChange: (markdown: string) => void;
+}
+
+const Editor: FC<EditorProps> = ({
+  markdown,
+  editable,
+  className,
+  onMarkdownChange,
+}) => {
+  const editor = useEditor({
+    extensions: [
+      Document,
+      Paragraph,
+      Text,
+      Heading.configure({
+        levels: [1, 2, 3, 4, 5, 6],
+      }),
+      HorizontalRule,
+      BulletList,
+      OrderedList,
+      ListItem,
+      Blockquote,
+      CodeBlockLowlight.configure({
+        lowlight,
+      }),
+    ],
+    content: markdown,
+    editable: editable,
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      onMarkdownChange(html);
+    },
+  });
+
+  useEffect(() => {
+    if (editor && markdown !== editor.getHTML()) {
+      editor.commands.setContent(markdown);
+    }
+  }, [markdown, editor]);
+
+  return (
+    <div
+      className={cn(
+        "w-full h-full flex flex-col",
+        "prose",
+        "[&_.ProseMirror]:w-full",
+        "[&_.ProseMirror]:h-full",
+        "[&_.ProseMirror]:p-8",
+        "[&_.ProseMirror]:outline-none",
+        "[&_.ProseMirror_p]:my-4",
+        "[&_.ProseMirror_h1]:mt-8 [&_.ProseMirror_h1]:mb-4",
+        "[&_.ProseMirror_h2]:mt-6 [&_.ProseMirror_h2]:mb-4",
+        "[&_.ProseMirror_h3]:mt-4 [&_.ProseMirror_h3]:mb-2",
+        "[&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:border-jade-400 [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:my-4",
+        "[&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:my-4",
+        "[&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ol]:my-4",
+        // Add these new styles
+        "[&_.ProseMirror_li]:marker:text-neutral-900", // Style the marker
+        "[&_.ProseMirror_li]:pl-2", // Add spacing after marker
+        "[&_.ProseMirror_li>p]:inline-block", // Keep text inline but handle wrapping better
+        "[&_.ProseMirror_li>p]:my-0", // Remove vertical margins inside list items
+        className,
+      )}
+    >
+      <EditorContent editor={editor} />
+    </div>
+  );
+};
+
+export default Editor;
