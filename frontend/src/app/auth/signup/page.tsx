@@ -11,11 +11,15 @@ import { signUpSchema, SignUpFormValues } from "@/lib/schemas/auth";
 import Link from "next/link";
 import { signup } from "./actions";
 import { convertObjectToSnakeCase } from "@/utils/helpers";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 const signupInputStyle =
   " rounded-full w-full px-3 py-4 h-12 border border-neutral-200   focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
 
 export default function SignUp() {
+  const {toast} = useToast();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const {
     register,
@@ -29,7 +33,12 @@ export default function SignUp() {
     setIsLoading(true);
     const res = await signup(convertObjectToSnakeCase(data));
     if (res.ok) {
-      alert("Account created successfully");
+      toast({
+        "title": "Account created",
+        "description": "Welcome to the Forum Community",
+      }
+      );
+      router.push("/forum/courses");
     }
     setIsLoading(false);
   };

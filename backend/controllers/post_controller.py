@@ -59,11 +59,11 @@ def get_post(c_id: str, post_id: str) -> Post:
 
 
 def update_post(
-    c_id: str, user_id: str, post_edit_info: CreatePostEditRequest
+    c_id: str, user_id: str, post_id: str, post_edit_info: CreatePostEditRequest
 ) -> PostEditResponse:
     try:
         with get_db() as db:
-            post_id = post_edit_info.post_id
+            post_id = post_id
             post = (
                 db.query(Post)
                 .filter(Post.course_id == c_id, Post.id == post_id)
@@ -76,7 +76,7 @@ def update_post(
             post.content = post_edit_info.new_content
 
             post_edit = PostEdit(
-                post_id=post_edit_info.post_id,
+                post_id=post_id,
                 edited_by=user_id,
                 new_content=post_edit_info.new_content,
                 edit_reason=post_edit_info.edit_reason,
@@ -87,7 +87,6 @@ def update_post(
             id = UUID(str(post_edit.id))
             return PostEditResponse(
                 id=id,
-                post_id=post_edit_info.post_id,
                 edited_by=UUID(user_id),
                 new_content=post_edit_info.new_content,
                 edit_reason=post_edit_info.edit_reason,

@@ -11,10 +11,12 @@ export const PostsForumSidebar = ({
   setSelectedPost,
   selectedPost,
   setListOfPosts,
+  isEditing,
 }: {
   posts: Post[];
   setSelectedPost: (post: Post) => void;
   selectedPost: Post | null;
+  isEditing: string | null;
   setListOfPosts: Dispatch<SetStateAction<Post[]>>;
 }) => {
   function appendToPosts({ operation, id, post }: AppendOperation) {
@@ -48,19 +50,23 @@ export const PostsForumSidebar = ({
                 disabled={isPendingId(post.id)}
                 onClick={() => setSelectedPost(post)}
                 className={cn(
-                  `text-left border transition-all duration-500 p-2 px-4 rounded-lg flex flex-col w-full`,
+                  `text-left relative border transition-all duration-500 p-2 px-4 rounded-lg flex flex-col w-full`,
                   selectedPost?.id === post.id
                     ? "bg-primary-50 border-primary-200 shadow-sm shadow-primary-200"
                     : "border-neutral-200 bg-white",
-                  isPendingId(post.id)
+                  isPendingId(post.id) || isEditing === post.id
                     ? "cursor-wait border-dashed border-neutral-200 bg-neutral-100"
                     : "cursor-pointer",
                 )}
               >
                 <p className="text-md font-semibold pb-2">{post.title}</p>
                 <section className="max-h-40 overflow-hidden">
-                  <p className="text-sm text-neutral-500">
-                    {removeMarkdown(post.content.trim().slice(0, 200)) + "..."}
+                  <p className={`text-sm min-h-12 text-neutral-500`}>
+                    {isEditing === post.id
+                      ? "Editing..."
+                      : removeMarkdown(
+                          post.content.trim().slice(0, 200) + "...",
+                        )}
                   </p>
                 </section>
               </button>

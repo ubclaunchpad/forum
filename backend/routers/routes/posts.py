@@ -35,12 +35,12 @@ async def get_post(c_id: str, p_id: str):
     return {"post": post}
 
 
-@post_router.patch("", response_model=GeneralResponse)
+@post_router.patch("/{p_id}", response_model=GeneralResponse)
 async def update_post(
-    c_id: str, request: Request, post_edit_info: CreatePostEditRequest
+    c_id: str, p_id: str, request: Request, post_edit_info: CreatePostEditRequest
 ):
     user_id = request.state.user_id
-    post_controller.update_post(c_id, user_id, post_edit_info)
+    post_controller.update_post(c_id, user_id, p_id, post_edit_info)
 
     return {"msg": "Post edited successfully"}
 

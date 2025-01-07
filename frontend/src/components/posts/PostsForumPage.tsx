@@ -2,12 +2,22 @@
 
 import { Post } from "@/lib/types/posts";
 import { PostsForumSidebar } from "./PostsForumSidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PostView from "./PostView";
 
 export const PostsForumPage = ({ posts }: { posts: Post[] }) => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [listofPosts, setListofPosts] = useState<Post[]>(posts);
+  const [isEditing, setIsEditing] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selectedPost && isEditing) {
+      if (selectedPost.id !== isEditing) {
+        setIsEditing(null);
+      }
+    }
+  }, [isEditing, selectedPost]);
+
   return (
     <div className="flex flex-1  overflow-hidden bg-neutral-50 ">
       <div className=" relative flex flex-col">
@@ -16,6 +26,7 @@ export const PostsForumPage = ({ posts }: { posts: Post[] }) => {
           setSelectedPost={setSelectedPost}
           selectedPost={selectedPost}
           setListOfPosts={setListofPosts}
+          isEditing={isEditing}
         />
       </div>
       <div
@@ -23,7 +34,12 @@ export const PostsForumPage = ({ posts }: { posts: Post[] }) => {
       >
         {selectedPost ? (
           <>
-            <PostView post={selectedPost} />
+            <PostView
+              post={selectedPost}
+              setListOfPosts={setListofPosts}
+              isEditing={isEditing}
+              setIsEditing={setIsEditing}
+            />
           </>
         ) : (
           <div className="flex-1  w-full items-center flex-col gap-2 p-4 "></div>

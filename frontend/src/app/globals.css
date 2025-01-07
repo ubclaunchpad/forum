@@ -113,6 +113,15 @@ dialog {
   }
 }
 
+@keyframes shimmer-reverse {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
 .loading-shimmer {
   position: absolute;
   top: 0;
@@ -128,6 +137,21 @@ dialog {
   animation: shimmer 2s infinite;
 }
 
+.shimmer-reverse {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(31, 86, 55, 0.1) 50%,
+    transparent 100%
+  );
+  animation: shimmer-reverse 2s infinite;
+}
+
 .react-pdf__Document {
   width: 100%;
   flex: 1;
@@ -140,11 +164,9 @@ dialog {
   }
 }
 
-
-@view-transition {
+/* @view-transition {
   navigation: auto;
 }
-
 
 .vt {
   view-transition-name: vt;
@@ -170,16 +192,15 @@ dialog {
   }
 }
 
-
 ::view-transition-old(vr),
 ::view-transition-new(vr) {
   mix-blend-mode: normal;
 }
 
 ::view-transition-old(vr) {
-  animation: blurOut 0.3s;
+  animation: blurOut 0.1s;
 }
 
 ::view-transition-new(vr) {
-  animation: blurIn 2.5s;
-}
+  animation: blurIn 0.1s;
+} */

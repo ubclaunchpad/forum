@@ -29,7 +29,7 @@ class PostResponse(PostBase):
 
 
 class PostEditBase(BaseModel):
-    post_id: UUID
+    # post_id: UUID
     new_content: str
     edit_reason: str
     applied_at: datetime = Field(default_factory=datetime.now)

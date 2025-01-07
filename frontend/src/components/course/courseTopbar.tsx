@@ -1,11 +1,13 @@
 "use client";
 
 import { courseContext } from "@/contexts/courseContext";
-import { UserIcon } from "lucide-react";
-import { useContext } from "react";
+import { SmileIcon } from "lucide-react";
+import { Fragment, useContext, useState } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { Searchbar } from "./searchBar";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 export function CourseTopbar() {
   const course = useContext(courseContext);
@@ -29,9 +31,31 @@ export function CourseTopbar() {
 }
 
 function ProfileButton() {
+  const router = useRouter();
+
+  const supabase = createClient();
+  const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="text-neutral-500 flex border border-neutral-200 justify-center items-center w-10 h-10 rounded-full bg-white gap-2">
-      <UserIcon />
-    </div>
+    <Fragment>
+      {isOpen && (
+        <div className="fixed rounded-lg px-10 top-12 right-4 bg-white p-1 shadow-sm border border-neutral-200">
+          <button
+            className="no-underline hover:text-primary-500"
+            onClick={() => {
+              supabase.auth.signOut();
+              router.push("/");
+            }}
+          >
+            Logout
+          </button>
+        </div>
+      )}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="text-neutral-500 flex border border-neutral-200 justify-center items-center w-10 h-10 rounded-full bg-white gap-2"
+      >
+        <SmileIcon size={24} />
+      </button>
+    </Fragment>
   );
 }
