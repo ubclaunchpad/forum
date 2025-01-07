@@ -15,7 +15,7 @@ from models.schemas.document_schema import DocumentFileUpload
 logger = logging.getLogger(__name__)
 
 
-async def upload_new_document(create_document: DocumentFileUpload) -> str:
+async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
     """
     Upload and process a new document.
 
@@ -87,7 +87,7 @@ async def upload_new_document(create_document: DocumentFileUpload) -> str:
                 processor.process_document(
                     document_id=document_id,
                     file_content=create_document.file,
-                    strategy_type="pdf"
+                    strategy_type="pdf",
                 )
 
             logger.info(
@@ -99,7 +99,7 @@ async def upload_new_document(create_document: DocumentFileUpload) -> str:
                 },
             )
 
-            return str(document_id)
+            return document_id
 
         except Exception as e:
             logger.error(

@@ -19,5 +19,5 @@ export async function signin(data: Record<string, unknown>) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/forum/courses");
 }

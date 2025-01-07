@@ -1,5 +1,4 @@
 import type { Config } from "tailwindcss";
-
 const colourPalette = {
   neutral: {
     50: "#FAFAFA",
@@ -42,18 +41,26 @@ const config: Config = {
         title: ["var(--font-quicksand)"],
         body: ["var(--font-source-sans)"],
       },
+      keyframes: {
+        shimmer: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
+      },
+      // Refined modular scale for better typography hierarchy
       fontSize: {
-        xs: "10px", // 10 not used
-        sm: "12px", // 12 p(small)
-        base: "14px", // 14 p(default) h5
-        md: "16px", // 16  p(large)
-        lg: "18px", // 18 h4
-        xl: "22px", // 22 h3
-        "2xl": "26px", // 26 h2
-        "3xl": "30px", // 30 h1
-        // add more sizes for landing page
+        xs: ["0.75rem", { lineHeight: "1rem" }], // 12px
+        sm: ["0.875rem", { lineHeight: "1.25rem" }], // 14px
+        base: ["1rem", { lineHeight: "1.5rem" }], // 16px
+        md: ["1.125rem", { lineHeight: "1.75rem" }], // 18px
+        lg: ["1.25rem", { lineHeight: "1.75rem" }], // 20px
+        xl: ["1.5rem", { lineHeight: "2rem" }], // 24px
+        "2xl": ["1.875rem", { lineHeight: "2.25rem" }], // 30px
+        "3xl": ["2.25rem", { lineHeight: "2.5rem" }], // 36px
+        "4xl": ["3rem", { lineHeight: "1" }], // 48px
       },
       colors: {
+        // ... your existing colors config
         background: colourPalette.neutral[50],
         foreground: colourPalette.neutral[900],
         card: {
@@ -84,6 +91,228 @@ const config: Config = {
         input: "hsl(var(--neutral-6))",
         ring: "hsl(var(--primary-9))",
       },
+
+      typography: ({ theme }) => ({
+        DEFAULT: {
+          css: {
+            // Colors
+            "--tw-prose-body": theme("colors.neutral[800]"),
+            "--tw-prose-headings": theme("colors.neutral[900]"),
+            "--tw-prose-links": theme("colors.jade[600]"),
+            "--tw-prose-bold": theme("colors.neutral[900]"),
+            "--tw-prose-counters": theme("colors.jade[500]"),
+            "--tw-prose-bullets": theme("colors.jade[300]"),
+            "--tw-prose-hr": theme("colors.neutral[200]"),
+            "--tw-prose-quotes": theme("colors.neutral[900]"),
+            "--tw-prose-quote-borders": theme("colors.jade[300]"),
+            "--tw-prose-captions": theme("colors.neutral[700]"),
+            "--tw-prose-code": theme("colors.neutral[900]"),
+            "--tw-prose-pre-code": theme("colors.neutral[200]"),
+            "--tw-prose-pre-bg": theme("colors.primary[800]"),
+            "--tw-prose-th-borders": theme("colors.neutral[300]"),
+            "--tw-prose-td-borders": theme("colors.neutral[200]"),
+
+            // Base styles - removing all width/margin opinions
+            color: theme("colors.neutral[800]"),
+            width: "100%",
+            maxWidth: "none",
+            marginLeft: "0",
+            marginRight: "0",
+            fontSize: "1.125rem",
+            lineHeight: "1.75",
+            letterSpacing: "-0.01em",
+            fontFamily: theme("fontFamily.body"),
+
+            // Remove max-width constraints
+            "> *": {
+              maxWidth: "none",
+              marginLeft: "0",
+              marginRight: "0",
+              width: "100%",
+            },
+
+            // Text rendering
+            WebkitFontSmoothing: "antialiased",
+            MozOsxFontSmoothing: "grayscale",
+            textRendering: "optimizeLegibility",
+
+            // Headings
+            "h1, h2, h3, h4, h5": {
+              fontFamily: theme("fontFamily.title"),
+              fontWeight: "600",
+              letterSpacing: "-0.02em",
+              lineHeight: "1.2",
+              width: "100%",
+            },
+
+            h1: {
+              fontSize: theme("fontSize.3xl[0]"),
+              marginTop: "2rem",
+              marginBottom: "1.5rem",
+            },
+
+            h2: {
+              fontSize: theme("fontSize.2xl[0]"),
+              marginTop: "2rem",
+              marginBottom: "1.25rem",
+            },
+
+            h3: {
+              fontSize: theme("fontSize.xl[0]"),
+              marginTop: "1.75rem",
+              marginBottom: "1rem",
+            },
+
+            h4: {
+              fontSize: theme("fontSize.lg[0]"),
+              marginTop: "1.5rem",
+              marginBottom: "0.75rem",
+            },
+
+            // Paragraph spacing
+            p: {
+              marginTop: "1em",
+              marginBottom: "1em",
+              lineHeight: "1.75",
+              width: "100%",
+            },
+
+            // Links
+            a: {
+              color: theme("colors.jade[600]"),
+              textDecoration: "none",
+              fontWeight: "500",
+              transition: "color 150ms ease-in-out",
+              "&:hover": {
+                color: theme("colors.jade[700]"),
+                textDecoration: "underline",
+                textDecorationThickness: "1.5px",
+                textUnderlineOffset: "2px",
+              },
+            },
+
+            // Strong elements
+            strong: {
+              fontWeight: "600",
+              color: theme("colors.neutral[900]"),
+            },
+
+            // Lists
+            "ul, ol": {
+              paddingLeft: "1.5em",
+              marginTop: "1em",
+              marginBottom: "1em",
+              width: "100%",
+              listStylePosition: "outside", // Changed from 'inside' to 'outside'
+            },
+
+            // Add separate li styling
+            li: {
+              marginTop: "0.5em",
+              marginBottom: "0.5em",
+              lineHeight: "1.625",
+              paddingLeft: "0.5em", // Add padding for better spacing after marker
+              "& > p": {
+                // Target paragraphs inside list items
+                margin: 0, // Remove default paragraph margins inside lists
+                display: "inline", // Keep text inline with marker
+              },
+              "& > p + p": {
+                // Handle multiple paragraphs in a list item
+                display: "block", // Multiple paragraphs should stack
+                marginTop: "1em", // Add spacing between paragraphs
+              },
+            },
+
+            // Optional: Style markers specifically
+            "li::marker": {
+              color: theme("colors.neutral[900]"),
+              fontWeight: "400",
+            },
+
+            // Blockquotes
+            blockquote: {
+              fontWeight: "400",
+              fontStyle: "normal",
+              borderLeftWidth: "3px",
+              borderLeftColor: theme("colors.jade[400]"),
+              paddingLeft: "1.5em",
+              marginTop: "1.5em",
+              marginBottom: "1.5em",
+              color: theme("colors.neutral[700]"),
+              width: "100%",
+            },
+
+            // Code blocks
+            "pre, code": {
+              fontFamily:
+                "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+              width: "100%",
+            },
+
+            pre: {
+              backgroundColor: theme("colors.neutral[800]"),
+              padding: "1.25rem",
+              borderRadius: "0.5rem",
+              border: `1px solid ${theme("colors.neutral[200]")}`,
+              overflow: "auto",
+              fontSize: "0.875em",
+              lineHeight: "1.7142857",
+              marginTop: "1.5em",
+              marginBottom: "1.5em",
+              width: "100%",
+            },
+
+            code: {
+              fontSize: "0.875em",
+              fontWeight: "600",
+              padding: "0.25rem 0.4rem",
+              backgroundColor: theme("colors.neutral[100]"),
+              borderRadius: "0.25rem",
+            },
+
+            // Tables
+            table: {
+              width: "100%",
+              fontSize: "0.875em",
+              lineHeight: "1.7142857",
+            },
+
+            thead: {
+              borderBottomColor: theme("colors.neutral[200]"),
+              borderBottomWidth: "2px",
+              width: "100%",
+              th: {
+                fontWeight: "600",
+                verticalAlign: "bottom",
+                paddingBottom: "0.75rem",
+                paddingLeft: "0.75rem",
+                paddingRight: "0.75rem",
+              },
+            },
+
+            "tbody tr": {
+              borderBottomColor: theme("colors.neutral[200]"),
+              borderBottomWidth: "1px",
+              td: {
+                paddingLeft: "0.75rem",
+                paddingRight: "0.75rem",
+                paddingTop: "0.5rem",
+                paddingBottom: "0.5rem",
+              },
+            },
+
+            // Hr styling
+            hr: {
+              width: "100%",
+              marginTop: "2em",
+              marginBottom: "2em",
+              borderTopWidth: "1px",
+              borderColor: theme("colors.neutral[200]"),
+            },
+          },
+        },
+      }),
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -92,12 +321,7 @@ const config: Config = {
       },
     },
   },
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  plugins: [
-    require("tailwindcss-animate"),
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    require("@tailwindcss/typography"),
-  ],
+  plugins: [require("@tailwindcss/typography")],
 };
 
 export default config;

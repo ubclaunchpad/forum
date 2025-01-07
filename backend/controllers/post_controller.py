@@ -32,7 +32,12 @@ def create_post(user_id: str, c_id: str, post_info: CreatePostRequest) -> Post:
 def get_posts(c_id: str) -> List[Post]:
     try:
         with get_db() as db:
-            posts = db.query(Post).filter(Post.course_id == c_id).all()
+            posts = (
+                db.query(Post)
+                .filter(Post.course_id == c_id)
+                .order_by(Post.applied_at.desc())
+                .all()
+            )
             return posts
     except Exception as e:
         print(f"Error in get_posts: {type(e).__name__}: {str(e)}")
@@ -43,7 +48,9 @@ def get_post(c_id: str, post_id: str) -> Post:
     try:
         with get_db() as db:
             post = (
-                db.query(Post).filter(Post.course_id == c_id, Post.id == post_id).first()
+                db.query(Post)
+                .filter(Post.course_id == c_id, Post.id == post_id)
+                .first()
             )
             return post
     except Exception as e:
@@ -51,12 +58,16 @@ def get_post(c_id: str, post_id: str) -> Post:
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
 
 
-def update_post(c_id: str, user_id: str, post_edit_info: CreatePostEditRequest) -> PostEditResponse:
+def update_post(
+    c_id: str, user_id: str, post_id: str, post_edit_info: CreatePostEditRequest
+) -> PostEditResponse:
     try:
         with get_db() as db:
-            post_id = post_edit_info.post_id
+            post_id = post_id
             post = (
-                db.query(Post).filter(Post.course_id == c_id, Post.id == post_id).first()
+                db.query(Post)
+                .filter(Post.course_id == c_id, Post.id == post_id)
+                .first()
             )
 
             if not post:
@@ -65,7 +76,7 @@ def update_post(c_id: str, user_id: str, post_edit_info: CreatePostEditRequest) 
             post.content = post_edit_info.new_content
 
             post_edit = PostEdit(
-                post_id=post_edit_info.post_id,
+                post_id=post_id,
                 edited_by=user_id,
                 new_content=post_edit_info.new_content,
                 edit_reason=post_edit_info.edit_reason,
@@ -76,7 +87,6 @@ def update_post(c_id: str, user_id: str, post_edit_info: CreatePostEditRequest) 
             id = UUID(str(post_edit.id))
             return PostEditResponse(
                 id=id,
-                post_id=post_edit_info.post_id,
                 edited_by=UUID(user_id),
                 new_content=post_edit_info.new_content,
                 edit_reason=post_edit_info.edit_reason,
@@ -92,7 +102,9 @@ def delete_post(c_id, user_id, post_id):
     try:
         with get_db() as db:
             post = (
-                db.query(Post).filter(Post.course_id == c_id, Post.id == post_id).first()
+                db.query(Post)
+                .filter(Post.course_id == c_id, Post.id == post_id)
+                .first()
             )
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
@@ -104,24 +116,28 @@ def delete_post(c_id, user_id, post_id):
         print(f"Error in get_post: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
 
+
 def view_post(c_id: str, user_id: str, post_id: str) -> UserPostEvent:
     try:
         with get_db() as db:
             post = (
-                db.query(Post).filter(Post.course_id == c_id, Post.id == post_id).first()
+                db.query(Post)
+                .filter(Post.course_id == c_id, Post.id == post_id)
+                .first()
             )
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
-            post_event = db.query(UserPostEvent).filter(UserPostEvent.id == post.id, UserPostEvent.user_id == user_id).first()
-            
+            post_event = (
+                db.query(UserPostEvent)
+                .filter(UserPostEvent.id == post.id, UserPostEvent.user_id == user_id)
+                .first()
+            )
+
             if post_event:
                 return post_event
 
             event = UserPostEvent(
-                viewed=True,
-                liked=False,
-                user_id=user_id,
-                post_id=post_id
+                viewed=True, liked=False, user_id=user_id, post_id=post_id
             )
             db.add(event)
             db.flush()
@@ -130,22 +146,28 @@ def view_post(c_id: str, user_id: str, post_id: str) -> UserPostEvent:
         print(f"Error in get_post: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
 
-def like_post(c_id: str, user_id : str, post_id: str) -> UserPostEvent:
+
+def like_post(c_id: str, user_id: str, post_id: str) -> UserPostEvent:
     try:
         with get_db() as db:
             post = (
-                db.query(Post).filter(Post.course_id == c_id, Post.id == post_id).first()
+                db.query(Post)
+                .filter(Post.course_id == c_id, Post.id == post_id)
+                .first()
             )
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
-            post_event = db.query(UserPostEvent).filter(UserPostEvent.post_id == post.id, UserPostEvent.user_id == user_id).first()
-            
+            post_event = (
+                db.query(UserPostEvent)
+                .filter(
+                    UserPostEvent.post_id == post.id, UserPostEvent.user_id == user_id
+                )
+                .first()
+            )
+
             if not post_event:
                 event = UserPostEvent(
-                    viewed=True,
-                    liked=True,
-                    user_id=user_id,
-                    post_id=post_id
+                    viewed=True, liked=True, user_id=user_id, post_id=post_id
                 )
                 db.add(event)
             else:
