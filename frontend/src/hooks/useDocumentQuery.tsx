@@ -7,7 +7,7 @@ interface Source {
   title: string;
   content: string;
   relevance: number;
-  metadata: any;
+  metadata: Record<string, string>;
   document_id: string;
   signed_url: string;
   id: string;

@@ -12,7 +12,6 @@ import { Button } from "../ui/button";
 import { getApiUrl } from "@/utils/helpers";
 import { courseContext } from "@/contexts/courseContext";
 import { useToast } from "@/hooks/use-toast";
-import { DotSquareIcon, FileScanIcon } from "lucide-react";
 
 export default function PostView({
   post,

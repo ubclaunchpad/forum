@@ -13,22 +13,22 @@ export default function CoursesPage() {
   const { token } = useContext(userContext);
   const [courses, setCourses] = useState([]);
 
-  async function getCourses() {
-    const res = await fetch(`${getApiUrl()}/courses`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const { courses } = await res.json();
-
-    return courses;
-  }
-
   useEffect(() => {
+    if (!token) return;
+    const getCourses = async () => {
+      const res = await fetch(`${getApiUrl()}/courses`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const { courses } = await res.json();
+  
+      return courses;
+    }
     getCourses().then((courses) => setCourses(courses));
-  }, []);
+  }, [token]);
 
   return (
     <div className="flex flex-col w-screen h-screen items-center bg-primary-900 justify-center">

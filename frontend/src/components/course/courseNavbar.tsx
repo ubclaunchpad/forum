@@ -1,6 +1,6 @@
 "use client";
 
-import { Megaphone, MessagesSquare, FileText } from "lucide-react";
+import {  MessagesSquare, FileText } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 

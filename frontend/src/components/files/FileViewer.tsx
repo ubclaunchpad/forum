@@ -56,7 +56,7 @@ export default function FileViewer({
         const result = await response.json();
         setDoc({
           signedUrl: result.signed_url,
-          fileType: document.document_type,
+          fileType: document.document_type || "unknown",
         });
       } catch (error: unknown) {
         if (error instanceof Error) {
@@ -77,7 +77,7 @@ export default function FileViewer({
       }
     }
     fetchDocumentContent();
-  }, [course.info.id, document, toast]);
+  }, [course.info.id, document, toast, token]);
 
   // No document selected
   if (document === undefined) {
@@ -145,11 +145,12 @@ export default function FileViewer({
   if (doc.fileType.startsWith("image")) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-black/5">
-        <img
+        NOT IMPLEMENTED
+        {/* <img
           src={doc.signedUrl}
           alt={document.title}
           className="max-w-full max-h-full object-contain"
-        />
+        /> */}
       </div>
     );
   }

@@ -19,7 +19,6 @@ const formSchema = z.object({
 });
 
 export default function CoursesNewPage() {
-  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
@@ -28,7 +27,6 @@ export default function CoursesNewPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent the default form submission
     setLoading(true);
-    setError(false);
 
     const formData = new FormData(e.currentTarget);
 
@@ -82,7 +80,6 @@ export default function CoursesNewPage() {
           action: <ToastAction altText="Try again">Try again</ToastAction>,
         });
       }
-      setError(true);
     } finally {
       setLoading(false);
     }
