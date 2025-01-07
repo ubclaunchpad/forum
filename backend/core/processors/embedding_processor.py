@@ -38,7 +38,7 @@ class EmbeddingProcessor:
                         Returns None if an error occurs during the embedding generation.
         """
         resp = self.client.embeddings.create(
-            model="text-embedding-3-large", input=text, encoding_format="float"
+            model="text-embedding-3-small", input=text, encoding_format="float"
         )
         try:
             return resp.data[0].embedding
