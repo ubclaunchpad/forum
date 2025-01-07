@@ -18,7 +18,7 @@ const signupInputStyle =
   " rounded-full w-full px-3 py-4 h-12 border border-neutral-200   focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
 
 export default function SignUp() {
-  const {toast} = useToast();
+  const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const {
@@ -34,10 +34,9 @@ export default function SignUp() {
     const res = await signup(convertObjectToSnakeCase(data));
     if (res.ok) {
       toast({
-        "title": "Account created",
-        "description": "Welcome to the Forum Community",
-      }
-      );
+        title: "Account created",
+        description: "Welcome to the Forum Community",
+      });
       router.push("/forum/courses");
     }
     setIsLoading(false);

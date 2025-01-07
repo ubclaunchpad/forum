@@ -14,15 +14,15 @@ export default async function CoursePage({
   const { id } = await params;
   return (
     // <ViewTransitions>
-      <CourseContextProvider id={id}>
-        <div className="flex flex-col max-h-dvh h-dvh w-dvw overflow-hidden">
-          <ClientWrapper>
-            <CourseTopbar />
-            <CourseNavbar />
-            {children}
-          </ClientWrapper>
-        </div>
-      </CourseContextProvider>
+    <CourseContextProvider id={id}>
+      <div className="flex flex-col max-h-dvh h-dvh w-dvw overflow-hidden">
+        <ClientWrapper>
+          <CourseTopbar />
+          <CourseNavbar />
+          {children}
+        </ClientWrapper>
+      </div>
+    </CourseContextProvider>
     // </ViewTransitions>
   );
 }

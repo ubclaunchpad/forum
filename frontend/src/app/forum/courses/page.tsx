@@ -24,9 +24,9 @@ export default function CoursesPage() {
         },
       });
       const { courses } = await res.json();
-  
+
       return courses;
-    }
+    };
     getCourses().then((courses) => setCourses(courses));
   }, [token]);
 
