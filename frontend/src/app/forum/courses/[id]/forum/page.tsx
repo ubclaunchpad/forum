@@ -1,8 +1,10 @@
 import { getApiUrl } from "@/utils/helpers";
 import { Post } from "@/lib/types/posts";
 import { PostsForumPage } from "@/components/posts/PostsForumPage";
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
 
-async function getPosts(id: string) {
+async function getPosts(id: string, token: string) {
   try {
     const res = await fetch(`${getApiUrl()}/courses/${id}/posts`, {
       cache: "force-cache",
@@ -12,6 +14,7 @@ async function getPosts(id: string) {
       },
       headers: {
         "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -33,6 +36,11 @@ export default async function Forum({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const posts = await getPosts(id);
+  const supabase = createClient();
+  const token = (await supabase.auth.getSession())?.data.session?.access_token;
+  if (!token) {
+    redirect("auth/login");
+  }
+  const posts = await getPosts(id, token);
   return <PostsForumPage posts={posts} />;
 }

@@ -3,12 +3,10 @@ import { DocumentsPage } from "@/components/files/DocumentsPage";
 import { DocumentInterface } from "@/lib/types/documents";
 import { getApiUrl } from "@/utils/helpers";
 import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
 
-async function getDocuments(id: string) {
+async function getDocuments(id: string, token: string) {
   try {
-    const supabase = createClient();
-    const token = (await supabase.auth.getSession()).data.session?.access_token;
-
     const res = await fetch(`${getApiUrl()}/courses/${id}/documents`, {
       cache: "force-cache",
       next: {
@@ -39,7 +37,12 @@ export default async function ResourcesTab({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const supabase = createClient();
+  const token = (await supabase.auth.getSession())?.data.session?.access_token;
+  if (!token) {
+    redirect("auth/login");
+  }
 
-  const documents = await getDocuments(id);
+  const documents = await getDocuments(id, token);
   return <DocumentsPage initialDocuments={documents} courseId={id} />;
 }
