@@ -89,10 +89,7 @@ class DocumentQueryEngine:
                 LIMIT :limit
             """
 
-            # Create query with proper parameter binding for non-vector parameters
             query = text(query_str)
-
-            # Bind remaining parameters normally
             params = {
                 "threshold": threshold,
                 "limit": self.max_chunks,
@@ -101,16 +98,14 @@ class DocumentQueryEngine:
                 params["course_id"] = str(course_id)
 
             logger.debug(f"Executing query with params: {params}")
-
-            # Execute query
             result = self.db.execute(statement=query, params=params)
             chunks = result.fetchall()
-
             logger.debug(f"Found {len(chunks)} relevant chunks")
 
             return [
                 {
                     "id": str(chunk.id),
+                    "type": "document",
                     "content": chunk.content or "",
                     "metadata": chunk.metadata or {},
                     "document_title": chunk.document_title or "Unknown Document",
@@ -130,6 +125,68 @@ class DocumentQueryEngine:
             logger.error("Error finding relevant chunks", exc_info=True)
             raise e
 
+    def _find_post_relevant_posts(
+        self,
+        question_embedding: List[float],
+        threshold: float = 0.0,
+        course_id: Optional[UUID] = None,
+    ) -> List[Dict[str, Any]]:
+        """Find relevant posts using vector similarity."""
+        try:
+            vector_literal = f"'[{','.join(map(str, question_embedding))}]'"
+
+            query_str = f"""
+                SELECT 
+                    p.id,
+                    p.title,
+                    p.content,
+                    p.course_id,
+                    1 - (p.embedding <=> {vector_literal}::vector) as similarity
+                FROM public.posts p
+                WHERE 1 - (p.embedding <=> {vector_literal}::vector) > :threshold
+                AND p.embedding IS NOT NULL
+            """
+
+            if course_id:
+                query_str += " AND p.course_id = :course_id"
+
+            query_str += """
+                ORDER BY similarity DESC
+                LIMIT :limit
+            """
+
+            query = text(query_str)
+            params = {
+                "threshold": threshold,
+                "limit": self.max_chunks,
+            }
+            if course_id:
+                params["course_id"] = str(course_id)
+
+            logger.debug(f"Executing post query with params: {params}")
+            result = self.db.execute(statement=query, params=params)
+            posts = result.fetchall()
+            logger.debug(f"Found {len(posts)} relevant posts")
+
+            return [
+                {
+                    "id": str(post.id),
+                    "type": "post",
+                    "title": post.title or "Untitled Post",
+                    "content": post.content or "",
+                    "course_id": str(post.course_id) if post.course_id else None,
+                    "similarity": float(post.similarity)
+                    if post.similarity is not None
+                    else 0.0,
+                }
+                for post in posts
+                if post is not None
+            ]
+
+        except Exception as e:
+            logger.error("Error finding relevant posts", exc_info=True)
+            raise e
+
     def _process_openai_response(self, response: ChatCompletion) -> str:
         """Safely process OpenAI response."""
         if not response or not response.choices or not response.choices[0].message:
@@ -142,23 +199,40 @@ class DocumentQueryEngine:
 
         for ctx in contexts:
             try:
-                source = {
-                    "document_title": self._safe_get(
-                        ctx, "document_title", "Unknown Document"
-                    ),
-                    "document_id": self._safe_get(ctx, "document_id", ""),
-                    "document_url": self._safe_get(ctx, "document_url", ""),
-                    "content": self._safe_get(ctx, "content", "No content available"),
-                    "signed_url": self._safe_get(ctx, "signed_url", ""),
+                base_source = {
                     "similarity": float(self._safe_get(ctx, "similarity", 0.0)),
-                    "metadata": self._safe_get(ctx, "metadata", {}),
+                    "content": self._safe_get(ctx, "content", "No content available"),
                 }
 
-                if not 0 <= source["similarity"] <= 1:
-                    source["similarity"] = 0.0
+                # Ensure similarity is in valid range
+                if not 0 <= base_source["similarity"] <= 1:
+                    base_source["similarity"] = 0.0
 
-                if not isinstance(source["metadata"], dict):
-                    source["metadata"] = {}
+                if ctx.get("type") == "document":
+                    source = {
+                        **base_source,
+                        "fe_type": "pdf",  # Frontend type
+                        "type": "document",
+                        "title": self._safe_get(
+                            ctx, "document_title", "Unknown Document"
+                        ),
+                        "id": self._safe_get(ctx, "document_id", ""),
+                        "url": self._safe_get(ctx, "signed_url", ""),
+                        "metadata": self._safe_get(ctx, "metadata", {}),
+                    }
+                else:  # post
+                    course_id = self._safe_get(ctx, "course_id", "")
+                    post_id = self._safe_get(ctx, "id", "")
+                    source = {
+                        **base_source,
+                        "fe_type": "post",  # Frontend type
+                        "type": "post",
+                        "title": self._safe_get(ctx, "title", "Untitled Post"),
+                        "id": post_id,
+                        "url": f"courses/{course_id}/posts/{post_id}"
+                        if course_id and post_id
+                        else "",
+                    }
 
                 formatted_sources.append(source)
 
@@ -166,6 +240,7 @@ class DocumentQueryEngine:
                 logger.error(f"Error formatting source: {e}", exc_info=True)
                 continue
 
+        formatted_sources.sort(key=lambda x: x["similarity"], reverse=True)
         return formatted_sources
 
     def _safe_get(self, d: Dict[str, Any], key: str, default: Any) -> Any:
@@ -205,7 +280,8 @@ class DocumentQueryEngine:
     ) -> str:
         """Build the prompt with context and question."""
         context_str = "\n\n".join(
-            f"[Source: {ctx['document_title']}, Relevance: {ctx['similarity']:.2f}]\n{ctx['content']}"
+            f"[Source: {'Document: ' + ctx['document_title'] if ctx.get('type') == 'document' else 'Post: ' + ctx.get('title', 'Untitled Post')}, "
+            f"Relevance: {ctx['similarity']:.2f}]\n{ctx['content']}"
             for ctx in contexts
             if ctx.get("content")
         )
@@ -229,14 +305,18 @@ class DocumentQueryEngine:
             relevant_chunks = self._find_relevant_chunks(
                 question_embedding, threshold=0.0, course_id=course_id
             )
+            relevant_posts = self._find_post_relevant_posts(
+                question_embedding, threshold=0.0, course_id=course_id
+            )
 
-            if not relevant_chunks:
+            if not relevant_chunks and not relevant_posts:
                 return {
                     "answer": "I couldn't find any relevant information to answer your question.",
                     "sources": [],
                 }
 
-            prompt = self._build_prompt(question, relevant_chunks, template_name)
+            all_contexts = relevant_chunks + relevant_posts
+            prompt = self._build_prompt(question, all_contexts, template_name)
 
             try:
                 response = self.client.chat.completions.create(
@@ -252,13 +332,13 @@ class DocumentQueryEngine:
                 )
 
                 answer = self._process_openai_response(response)
-                return self._format_response(answer, relevant_chunks)
+                return self._format_response(answer, all_contexts)
 
             except Exception as e:
                 logger.error(f"OpenAI API error: {e}", exc_info=True)
                 return {
                     "answer": "I apologize, but I encountered an error while generating the response.",
-                    "sources": self._format_sources(relevant_chunks),
+                    "sources": self._format_sources(all_contexts),
                 }
 
         except Exception as e:
@@ -299,8 +379,13 @@ class DocumentQueryEngine:
             relevant_chunks = self._find_relevant_chunks(
                 question_embedding, threshold=0.0, course_id=course_id
             )
+            relevant_posts = self._find_post_relevant_posts(
+                question_embedding, threshold=0.0, course_id=course_id
+            )
 
-            if not relevant_chunks:
+            all_contexts = relevant_chunks + relevant_posts
+
+            if not all_contexts:
                 yield json.dumps(
                     {
                         "answer": "I couldn't find any relevant information to answer your question.",
@@ -310,11 +395,11 @@ class DocumentQueryEngine:
                 )
                 return
 
-            prompt = self._build_prompt(question, relevant_chunks, template_name)
+            prompt = self._build_prompt(question, all_contexts, template_name)
 
             try:
                 # Initialize sources first
-                sources = self._format_sources(relevant_chunks)
+                sources = self._format_sources(all_contexts)
                 yield json.dumps({"answer": "", "sources": sources, "done": False})
 
                 # Stream the response
@@ -361,7 +446,7 @@ class DocumentQueryEngine:
             print(e)
             yield json.dumps(
                 {
-                    "answer": "An error occurred while processing ysssour question.",
+                    "answer": "An error occurred while processing your question.",
                     "sources": [],
                     "done": True,
                 }

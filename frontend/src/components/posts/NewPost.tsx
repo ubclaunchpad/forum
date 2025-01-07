@@ -9,20 +9,25 @@ import { getApiUrl } from "@/utils/helpers";
 import { useToast } from "@/hooks/use-toast";
 import { courseContext } from "@/contexts/courseContext";
 import { AppendOperation } from "@/lib/types/posts";
+import { userContext } from "@/contexts/userContext";
 
-async function createPost({
-  title,
-  content,
-  courseId,
-}: {
-  title: string;
-  content: string;
-  courseId: string;
-}) {
+async function createPost(
+  {
+    title,
+    content,
+    courseId,
+  }: {
+    title: string;
+    content: string;
+    courseId: string;
+  },
+  token: string,
+) {
   const res = await fetch(`${getApiUrl()}/courses/${courseId}/posts`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ title, content, parentId: null }),
   });
@@ -45,6 +50,7 @@ export const NewPost = ({
 }: {
   appendToPosts: (args: AppendOperation) => string | undefined;
 }) => {
+  const user = useContext(userContext);
   const { toast } = useToast();
   const course = useContext(courseContext);
 
@@ -115,11 +121,14 @@ export const NewPost = ({
                   throw new Error("Failed to create post");
                 }
                 closeModal();
-                createPost({
-                  title,
-                  content,
-                  courseId: course.info.id as string,
-                })
+                createPost(
+                  {
+                    title,
+                    content,
+                    courseId: course.info.id as string,
+                  },
+                  user.token,
+                )
                   .then((res) => {
                     appendToPosts({
                       operation: "real",

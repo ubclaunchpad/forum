@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { useEditor, EditorContent } from "@tiptap/react";
 import Document from "@tiptap/extension-document";
+import History from "@tiptap/extension-history";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
@@ -17,6 +18,12 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import ListItem from "@tiptap/extension-list-item";
 import Blockquote from "@tiptap/extension-blockquote";
+import Youtube from "@tiptap/extension-youtube";
+import Table from "@tiptap/extension-table";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
+import TableRow from "@tiptap/extension-table-row";
+
 import { FC, useEffect } from "react";
 
 // Create lowlight instance
@@ -53,8 +60,20 @@ const Editor: FC<EditorProps> = ({
       OrderedList,
       ListItem,
       Blockquote,
+      History,
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
       CodeBlockLowlight.configure({
         lowlight,
+      }),
+      Youtube.configure({
+        controls: false,
+        nocookie: true,
+        inline: true,
       }),
     ],
     content: markdown,
