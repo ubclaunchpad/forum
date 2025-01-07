@@ -1,6 +1,8 @@
 from typing import List, Optional
 from uuid import UUID
 
+from core.processors import embedding_processor
+from core.processors.embedding_processor import EmbeddingProcessor
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from models.all import Post, PostEdit, Profile, UserPostEvent
@@ -73,6 +75,10 @@ def update_post(
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
 
+            embedding_processor = EmbeddingProcessor()
+            post.embedding = embedding_processor.generate_embedding(
+                post_edit_info.new_content
+            )
             post.content = post_edit_info.new_content
 
             post_edit = PostEdit(
@@ -80,6 +86,7 @@ def update_post(
                 edited_by=user_id,
                 new_content=post_edit_info.new_content,
                 edit_reason=post_edit_info.edit_reason,
+                # embedding=post.embedding,
             )
 
             db.add(post_edit)

@@ -167,6 +167,7 @@ class Post(Base):
     parent_id = Column(PUUID)
     applied_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
+    embedding = Column(Vector(1536), nullable=True)
 
     creator = relationship("Profile", back_populates="posts", foreign_keys=[created_by])
     edits = relationship(

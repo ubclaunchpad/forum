@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
 import { DocumentListSidebar } from "./DocumentListSidebar";
 import { getApiUrl } from "@/utils/helpers";
 import { DocumentInterface } from "@/lib/types/documents";
 import FileViewer from "./FileViewer";
+import { userContext } from "@/contexts/userContext";
 
 export function DocumentsPage({
   initialDocuments,
@@ -17,6 +18,7 @@ export function DocumentsPage({
 }) {
   const [files, setFiles] = useState<DocumentInterface[]>(initialDocuments);
   const [selectedFile, setSelectedFile] = useState<DocumentInterface>();
+  const user = useContext(userContext);
 
   const handleUploadSuccess = async () => {
     // You could either fetch new data here or handle optimistic updates
@@ -25,6 +27,7 @@ export function DocumentsPage({
       {
         headers: {
           "Cache-Control": "no-cache",
+          Authorization: `Bearer ${user.token}`,
         },
       },
     );
