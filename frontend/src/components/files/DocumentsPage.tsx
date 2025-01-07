@@ -6,7 +6,7 @@ import { XIcon } from "lucide-react";
 import { DocumentListSidebar } from "./DocumentListSidebar";
 import { getApiUrl } from "@/utils/helpers";
 import { DocumentInterface } from "@/lib/types/documents";
-import FileViewer from "./fileViewer";
+import FileViewer from "./FileViewer";
 
 export function DocumentsPage({
   initialDocuments,
