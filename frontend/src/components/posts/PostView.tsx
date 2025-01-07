@@ -12,6 +12,7 @@ import { Button } from "../ui/button";
 import { getApiUrl } from "@/utils/helpers";
 import { courseContext } from "@/contexts/courseContext";
 import { useToast } from "@/hooks/use-toast";
+import { userContext } from "@/contexts/userContext";
 
 export default function PostView({
   post,
@@ -29,6 +30,7 @@ export default function PostView({
   const course = useContext(courseContext);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const user = useContext(userContext);
 
   async function handleSave() {
     setIsSaving(true);
@@ -51,6 +53,7 @@ export default function PostView({
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
         },
         body: JSON.stringify(requestData),
       },
@@ -143,7 +146,7 @@ export default function PostView({
             <EditorComponent
               markdown={content}
               onMarkdownChange={setContent}
-              editable={true}
+              editable={isEditing === post.id}
             />
           </div>
         </div>
