@@ -105,21 +105,21 @@ export default function FileViewer({
 
   // PDF viewer
   if (doc.fileType === "application/pdf") {
-    // const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.signedUrl)}&embedded=true`;
-    // return (
-    //   <div className="w-full h-full overflow-hidden rounded-md">
-    //     <iframe
-    //       src={googleViewerUrl}
-    //       className="w-full h-full border-0"
-    //       title="PDF viewer"
-    //     />
-    //   </div>
-    // );
+    const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.signedUrl)}&embedded=true`;
     return (
-      <>
-        <PDFViewer url={doc.signedUrl} />
-      </>
+      <div className="w-full h-full overflow-hidden rounded-md">
+        <iframe
+          src={googleViewerUrl}
+          className="w-full h-full border-0"
+          title="PDF viewer"
+        />
+      </div>
     );
+    // return (
+    //   <>
+    //     <PDFViewer url={doc.signedUrl} />
+    //   </>
+    // );
   }
 
   // Text viewer
