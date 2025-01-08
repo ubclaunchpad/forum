@@ -107,7 +107,7 @@ export default function FileUpload({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ courseId: course.info.id }),
+        body: JSON.stringify({ courseId: course.info.id, type: "documents" }),
       });
     } catch (error) {
       toast({

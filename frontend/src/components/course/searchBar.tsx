@@ -90,12 +90,12 @@ export function Searchbar() {
     <>
       <Button
         variant="ghost"
-        className="flex items-center rounded-full bg-white max-w-md px-2 w-full min-w-[500px] border overflow-hidden absolute left-1/2 transform h-10 -translate-x-1/2"
+        className="flex items-center font-medium text-neutral-600 rounded-full bg-white max-w-md px-2 w-full min-w-[500px] border overflow-hidden absolute left-1/2 transform h-10 -translate-x-1/2"
         onClick={() => {
           window.dialog.showModal();
         }}
       >
-        <SearchIcon className="mr-2" />
+        <SearchIcon className="mr-2 max-w-4 max-h-4" />
         Search documents and posts...
       </Button>
 

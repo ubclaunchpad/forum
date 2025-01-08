@@ -66,16 +66,19 @@ export const NewPost = ({
   };
 
   const closeModal = () => {
+    setTitle("");
+    setContent("");
     const el = document.getElementById("new-post") as
       | HTMLDialogElement
       | null
       | undefined;
     el?.close();
   };
+
   return (
     <Fragment>
       <Button
-        className="flex items-center gap-2  h-fit w-fit  p-2 absolute right-4 bottom-4 shadow-sm"
+        className="flex items-center gap-2  h-fit w-fit  p-2 absolute right-4 bottom-4 shadow-lg"
         onClick={() => openModal()}
       >
         <PlusIcon className="min-w-10 min-h-10" />
@@ -85,8 +88,11 @@ export const NewPost = ({
         id="new-post"
       >
         <div className="flex flex-col flex-1  h-full overflow-hidden ">
-          <div className="flex justify-between items-center p-4 border-b">
-            <button onClick={() => closeModal()}>
+          <div className="flex justify-between items-center bg-neutral-50 p-4 py-2 border-b">
+            <button
+              onClick={() => closeModal()}
+              className="p-2 rounded-full hover:bg-neutral-100"
+            >
               <XIcon className="w-6 h-6" />
             </button>
           </div>
@@ -107,8 +113,9 @@ export const NewPost = ({
               editable={true}
             />
           </form>
-          <div className="flex justify-end p-4 h-20 border-t items-center flex-shrink-0">
+          <div className="flex justify-end p-4 min-h-10 border-t items-center flex-shrink-0">
             <Button
+              size={"sm"}
               disabled={!title || !content}
               className="self-end"
               onClick={() => {

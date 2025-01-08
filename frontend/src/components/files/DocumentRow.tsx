@@ -1,6 +1,6 @@
 import { DocumentInterface } from "@/lib/types/documents";
 import { cn } from "@/lib/utils";
-import { FileText } from "lucide-react";
+import { FileText, MoreHorizontal } from "lucide-react";
 
 export default function DocumentRow({
   document,
@@ -18,8 +18,8 @@ export default function DocumentRow({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "text-left border transition-all duration-500  rounded-lg w-full relative overflow-hidden",
-        "flex items-center justify-between",
+        "text-left border transition-all duration-500 rounded-lg w-full relative overflow-hidden",
+        "flex items-center",
         isSelected
           ? "bg-primary-50 border-primary-200 shadow-sm shadow-primary-200"
           : "border-neutral-200 bg-white",
@@ -28,23 +28,44 @@ export default function DocumentRow({
           : "cursor-pointer",
       )}
     >
-      <div className="flex gap-3 items-center flex-1 text-neutral-800 ">
-        <div className=" flex items-center justify-center bg-neutral-50 border-r p-2 ">
-          <FileText className="h-5 w-5 text-neutral-600" />
+      {/* Main content container */}
+      <div className="flex flex-1 items-center min-w-0">
+        {/* Icon container */}
+        <div
+          className={cn(
+            "flex items-center justify-center border-r p-2 flex-shrink-0",
+            isSelected
+              ? "bg-inherit border-primary-100 text-primary-400"
+              : "bg-neutral-50",
+          )}
+        >
+          <FileText className="h-4 w-4" />
         </div>
-        <div className="flex flex-col overflow-hidden">
-          <span className="text-md  truncate">{document.title}</span>
+
+        {/* Text content container */}
+        <div className="flex flex-col min-w-0 flex-1 px-2">
+          <span
+            className={cn(
+              "text-sm truncate",
+              isSelected ? " text-primary-700" : "text-neutral-800",
+            )}
+          >
+            {document.title}
+          </span>
           {document.description && (
-            <p className="text-sm text-neutral-500 truncate max-w-[400px]">
+            <p className="text-sm text-neutral-500 truncate">
               {document.description}
             </p>
           )}
         </div>
       </div>
-      {/* <div variant="ghost" size="sm" className="ml-2 flex-shrink-0">
-        <MoreHorizontal className="h-4 w-4" />
-      </div> */}
 
+      {/* Actions container */}
+      <div className="flex-shrink-0 px-2">
+        <MoreHorizontal className="h-4 w-4" />
+      </div>
+
+      {/* Loading overlay */}
       {disabled && (
         <div className="absolute inset-0 animate-[shimmer_2s_infinite]">
           <div className="w-1/2 h-full bg-gradient-to-r from-transparent via-primary-500/10 to-transparent" />

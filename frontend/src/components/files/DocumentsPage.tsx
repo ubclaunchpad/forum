@@ -49,7 +49,7 @@ export function DocumentsPage({
       <div className="flex flex-col flex-1 overflow-hidden">
         {selectedFile ? (
           <>
-            <nav className="flex items-center gap-1 border-b p-2">
+            <nav className="flex items-center gap-1 h-12 border-b p-2">
               <Button
                 onClick={() => setSelectedFile(undefined)}
                 variant="ghost"
@@ -58,7 +58,7 @@ export function DocumentsPage({
               >
                 <XIcon className="min-h-5 min-w-5" />
               </Button>
-              <h5 className="font-semibold  w-full  p-2 flex items-center ">
+              <h5 className="font-semibold text-sm  w-full  p-2 flex items-center ">
                 {selectedFile.title}
               </h5>
 
@@ -67,7 +67,7 @@ export function DocumentsPage({
                 size="sm"
                 variant="outline"
                 disabled
-                className="cursor-not-allowed"
+                className="cursor-not-allowed py-2 px-4"
               >
                 Download
               </Button>

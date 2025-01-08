@@ -41,21 +41,20 @@ export const DocumentListSidebar = ({
   }
   return (
     <Fragment>
-      <section className="flex relative vt flex-col h-full overflow-y-auto min-w-[500px] max-w-[500px] border-r">
-        <ScrollArea className="flex-1 w-full p-2 py-4">
-          <ul className="flex flex-col gap-2 p-2 min-w-[476px]">
-            {files.map((doc) => (
-              <li key={doc.id}>
-                <DocumentRow
-                  disabled={isPendingId(doc.id)}
-                  document={doc}
-                  isSelected={selectedFile?.id === doc.id}
-                  onClick={() => setSelectedFile(doc)}
-                />
-              </li>
-            ))}
-          </ul>
-        </ScrollArea>
+      <section className="flex relative vt flex-col h-full  overflow-y-auto overflow-x-hidden min-w-[500px] max-w-[500px] border-r">
+        <div className="flex justify-center h-12 flex-shrink-0 border-b w-full gap-2"></div>
+        <ul className="flex flex-col gap-2 p-2">
+          {files.map((doc) => (
+            <li key={doc.id} className="w-full flex items-center">
+              <DocumentRow
+                disabled={isPendingId(doc.id)}
+                document={doc}
+                isSelected={selectedFile?.id === doc.id}
+                onClick={() => setSelectedFile(doc)}
+              />
+            </li>
+          ))}
+        </ul>
         <FileUpload
           appendToFiles={appendToFiles}
           onUploadSuccess={onUploadSuccess}

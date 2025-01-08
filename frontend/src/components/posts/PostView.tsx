@@ -104,9 +104,9 @@ export default function PostView({
       {isSaving && <div className="  shimmer-reverse"></div>}
       <Suspense fallback={null}>
         <div className="flex flex-col  flex-1 w-full  gap-4 items-center border-t-neutral-200">
-          <div className=" w-full border-b  p-2 flex items-center ">
+          <div className=" w-full border-b  h-12 p-2 flex items-center ">
             <div className="flex-1 flex items-center gap-2">
-              <h5 className=" font-medium  ">{post.title}</h5>
+              <h5 className=" font-semibold text-sm  ">{post.title}</h5>
               {/* <Button className="p-0" variant="ghost" size="sm">
             <FileScanIcon className="w-5 h-5" />
             </Button> */}

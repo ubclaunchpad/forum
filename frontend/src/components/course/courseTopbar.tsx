@@ -19,7 +19,10 @@ export function CourseTopbar() {
         size="md"
         className="border-neutral-200 border h-10 px-4 text-neutral-600"
       >
-        <Link href="/forum/courses" className="no-underline font-semibold">
+        <Link
+          href="/forum/courses"
+          className="no-underline text-sm font-semibold"
+        >
           {courseName}
         </Link>
       </Button>
