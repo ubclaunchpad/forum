@@ -124,6 +124,7 @@ def get_documents(c_id: UUID) -> list[Document]:
                 db.query(Document)
                 .join(Document.courses)
                 .filter(Course.id == c_id)
+                .order_by(Document.created_at.desc())
                 .all()
             )
 

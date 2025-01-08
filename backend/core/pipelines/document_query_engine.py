@@ -71,13 +71,13 @@ class DocumentQueryEngine:
                     c.content,
                     c.chunk_metadata as metadata,
                     d.title as document_title,
-                    1 - (c.embedding <=> {vector_literal}::vector) as similarity,
+                    (1 - (c.embedding <=> {vector_literal}::vector)) * 0.8 as similarity,
                     d.id as document_id,
                     d.file_url as document_url
                 FROM public.chunks c
                 JOIN public.documents d ON c.document_id = d.id
                 JOIN public.course_documents cd ON d.id = cd.document_id
-                WHERE 1 - (c.embedding <=> {vector_literal}::vector) > :threshold
+                WHERE (1 - (c.embedding <=> {vector_literal}::vector)) * 0.8 > :threshold
                 AND c.embedding IS NOT NULL
             """
 
@@ -86,7 +86,7 @@ class DocumentQueryEngine:
 
             query_str += """
                 ORDER BY similarity DESC
-                LIMIT :limit
+                LIMIT 10
             """
 
             query = text(query_str)
@@ -141,9 +141,9 @@ class DocumentQueryEngine:
                     p.title,
                     p.content,
                     p.course_id,
-                    1 - (p.embedding <=> {vector_literal}::vector) as similarity
+                    (1 - (p.embedding <=> {vector_literal}::vector)) * 1.5 as similarity
                 FROM public.posts p
-                WHERE 1 - (p.embedding <=> {vector_literal}::vector) > :threshold
+                WHERE (1 - (p.embedding <=> {vector_literal}::vector)) * 1.5 > :threshold
                 AND p.embedding IS NOT NULL
             """
 
@@ -152,7 +152,7 @@ class DocumentQueryEngine:
 
             query_str += """
                 ORDER BY similarity DESC
-                LIMIT :limit
+                LIMIT 10
             """
 
             query = text(query_str)
@@ -205,7 +205,9 @@ class DocumentQueryEngine:
                 }
 
                 # Ensure similarity is in valid range
-                if not 0 <= base_source["similarity"] <= 1:
+                if (
+                    not 0 <= base_source["similarity"] <= 1.5
+                ):  # Updated max range to account for post weight
                     base_source["similarity"] = 0.0
 
                 if ctx.get("type") == "document":
@@ -241,7 +243,7 @@ class DocumentQueryEngine:
                 continue
 
         formatted_sources.sort(key=lambda x: x["similarity"], reverse=True)
-        return formatted_sources
+        return formatted_sources[:10]  # Limit to top 10 sources
 
     def _safe_get(self, d: Dict[str, Any], key: str, default: Any) -> Any:
         """Safely get a value from a dictionary."""
