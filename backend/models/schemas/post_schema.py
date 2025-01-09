@@ -8,23 +8,23 @@ from pydantic import BaseModel, Field
 class PostBase(BaseModel):
     title: str
     content: str
-    parent_id: Optional[UUID] = None
+    parent_id: Optional[int] = None
     created_by: UUID
 
 
 class CreatePostRequest(BaseModel):
     title: str
     content: str
-    parent_id: Optional[UUID] = None
+    parent_id: Optional[int] = None
 
 
 class CreatePostResponse(PostBase):
-    id: UUID
+    id: int
     applied_at: Any
 
 
 class PostResponse(PostBase):
-    id: UUID
+    id: int
     course_id: UUID
 
 
