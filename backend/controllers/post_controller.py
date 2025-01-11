@@ -124,7 +124,7 @@ def delete_post(c_id, user_id, post_id):
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
 
 
-def view_post(c_id: str, user_id: str, post_id: str) -> UserPostEvent:
+def view_post(c_id: str, user_id: str, post_id: int) -> UserPostEvent:
     try:
         with get_db() as db:
             post = (
@@ -136,7 +136,7 @@ def view_post(c_id: str, user_id: str, post_id: str) -> UserPostEvent:
                 raise HTTPException(status_code=404, detail="Post not found")
             post_event = (
                 db.query(UserPostEvent)
-                .filter(UserPostEvent.id == post.id, UserPostEvent.user_id == user_id)
+                .filter(UserPostEvent.post_id == post.id, UserPostEvent.user_id == user_id)
                 .first()
             )
 
@@ -154,7 +154,7 @@ def view_post(c_id: str, user_id: str, post_id: str) -> UserPostEvent:
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
 
 
-def like_post(c_id: str, user_id: str, post_id: str) -> UserPostEvent:
+def like_post(c_id: str, user_id: str, post_id: int) -> UserPostEvent:
     try:
         with get_db() as db:
             post = (

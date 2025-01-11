@@ -29,8 +29,8 @@ async def get_posts(c_id: str):
     return {"posts": posts}
 
 
-@post_router.get("/{p_id}", response_model=GetPostResponse)
-async def get_post(c_id: str, p_id: str):
+@post_router.get("/{post_id}", response_model=GetPostResponse)
+async def get_post(c_id: str, post_id: int):
     post = post_controller.get_post(c_id, p_id)
     return {"post": post}
 
@@ -46,22 +46,22 @@ async def update_post(
 
 
 @post_router.delete("/{post_id}", response_model=GeneralResponse)
-async def delete_post(c_id: str, post_id: str, request: Request):
+async def delete_post(c_id: str, post_id: int, request: Request):
     user_id = request.state.user_id
     post_controller.delete_post(c_id, user_id, post_id)
 
-    return {"msg": "Post edited successfully"}
+    return {"msg": "Post deleted successfully"}
 
 
 @post_router.put("/{post_id}/events/view", response_model=GeneralResponse)
-async def view_post(c_id: str, post_id: str, request: Request):
+async def view_post(c_id: str, post_id: int, request: Request):
     user_id = request.state.user_id
     post_controller.view_post(c_id, user_id, post_id)
     return {"msg": "Post viewed"}
 
 
 @post_router.post("/{post_id}/events/like", response_model=GeneralResponse)
-async def like_post(c_id: str, post_id: str, request: Request):
+async def like_post(c_id: str, post_id: int, request: Request):
     user_id = request.state.user_id
     post_controller.like_post(c_id, user_id, post_id)
     return {"msg": "Post liked"}

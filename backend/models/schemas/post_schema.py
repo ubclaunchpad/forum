@@ -40,7 +40,7 @@ class CreatePostEditRequest(PostEditBase):
 
 
 class PostEditResponse(PostEditBase):
-    id: UUID
+    id: int
     edited_by: UUID
 
 
@@ -48,7 +48,7 @@ class UserPostEventBase(BaseModel):
     viewed: bool
     liked: bool
     user_id: UUID
-    post_id: UUID
+    post_id: int
 
 
 class CreateUserPostEventRequest(UserPostEventBase):
@@ -56,7 +56,7 @@ class CreateUserPostEventRequest(UserPostEventBase):
 
 
 class UserPostEventResponse(UserPostEventBase):
-    id: UUID
+    id: int
 
 
 class GetPostsResponse(BaseModel):
