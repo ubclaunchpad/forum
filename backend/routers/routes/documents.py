@@ -43,13 +43,14 @@ async def create_document(
     try:
         file_content = await file.read()
         await file.seek(0)
-        document_type = title.split(".")[-1]
+        extension = file.filename.split(".")[-1]
         create_document_request = DocumentFileUpload(
             title=title,
             course_id=UUID(c_id),
             created_by=request.state.user_id,
             file=file_content,
-            document_type=document_type,
+            type=file.content_type,
+            extension=extension,
         )
         doc_id = await document_manager.upload_new_document(create_document_request)
         return CreateDocumentResponse(id=doc_id)
@@ -100,7 +101,10 @@ async def get_document_view(c_id: UUID, document_id: UUID, request: Request):
         return {"signed_url": cached_url}
 
     # If not in cache or expired, generate new signed URL
-    res = document_manager.get_signed_document_url(str(document_id))
+    res = document_manager.get_signed_document_url(
+        course_id=str(c_id),
+        document_id=str(document_id)
+    )
     signed_url = res["signedURL"]
 
     # Cache the new URL

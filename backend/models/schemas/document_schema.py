@@ -23,7 +23,8 @@ class DocumentFileUpload(BaseModel):
     course_id: UUID
     created_by: UUID
     file: bytes
-    document_type: str
+    type: str
+    extension: str
 
 
 class GetCourseDocumentsResponse(BaseModel):

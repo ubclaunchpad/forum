@@ -44,17 +44,24 @@ class ConflictResolution(Enum):
 
 
 class FileStorage:
+    MAX_SIZE_MB = 15
+
     def __init__(
         self,
         bucket_name: str,
         supa_client: Optional[Client] = None,
         conflict_resolution: ConflictResolution = ConflictResolution.APPEND_TIMESTAMP,
+        create_bucket_if_not_found= True
     ):
         if not bucket_name:
             raise ValueError("Bucket name cannot be empty")
 
         self.supabase = supa_client if supa_client else create_client(url, key)
         self.bucket_name = bucket_name
+
+        if not self._bucket_exists() and create_bucket_if_not_found:
+            self._create_bucket()
+
         self.conflict_resolution = conflict_resolution
 
     def _get_content_type(self, filename: str) -> str:
@@ -75,8 +82,28 @@ class FileStorage:
         base_name, extension = os.path.splitext(filename)
         timestamp = dt.now().strftime("%Y%m%d_%H%M%S")
         return f"{base_name}_{timestamp}{extension}"
-
+    
+    def _bucket_exists(self) -> bool:
+        try:
+            buckets = self.supabase.storage.from_(self.bucket_name).list()
+            return len(buckets) > 0
+        except Exception as e:
+            return False
+    
+    def _create_bucket(self) -> None:
+        try:
+            self.supabase.storage.create_bucket(self.bucket_name)
+        except Exception as e:
+            raise e
+        
+    def _can_upload_file(self, file_content: bytes) -> None:
+        file_content_MB = len(file_content) / (2 ** 20)
+        if file_content_MB > self.MAX_SIZE_MB:
+            raise ValueError(f"Filesize {file_content_MB}MB exceeds maximum limit of {self.MAX_SIZE_MB}MB")
+        
     def store_file(self, file_content: bytes, filename: str) -> str:
+        self._can_upload_file(file_content)
+
         content_type = self._get_content_type(filename)
 
         try:
@@ -170,7 +197,6 @@ class FileStorage:
             raise HTTPException(
                 status_code=500, detail=f"Could not generate signed URL: {e}"
             )
-
 
 # async def get_file_type(file: UploadFile, file_content: bytes) -> str:
 #     """Detect file type using both mime type and magic numbers."""
