@@ -15,6 +15,12 @@ from models.schemas.document_schema import DocumentFileUpload
 logger = logging.getLogger(__name__)
 
 
+supportedTypes = {
+    "pdf": "application/pdf",
+    "txt": "text/plain",
+    "md": "text/markdown"
+}
+
 async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
     """
     Upload and process a new document.
@@ -29,12 +35,15 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
         Exception: If upload or processing fails
     """
     start_time = time.time()
+
+    validate_document_type(create_document)
+
     logger.info(
         "Starting document upload",
         extra={
             "title": create_document.title,
-            "type": "application/pdf",
-            "course_id": str(create_document.course_id),
+            "type": create_document.type,
+            "course_id": str(create_document.course_id), 
         },
     )
 
@@ -44,7 +53,7 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
             document = Document(
                 title=create_document.title,
                 created_by=create_document.created_by,
-                document_type="application/pdf",
+                document_type=create_document.type,
             )
 
             # Associate with course
@@ -67,7 +76,7 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
 
             # Store file
             storage_start = time.time()
-            file_storage = FileStorage(bucket_name="course-files")
+            file_storage = FileStorage(bucket_name=f"course-{str(create_document.course_id)}")
             path = file_storage.store_file(create_document.file, str(document_id))
             document.file_url = path  # type: ignore
             db.commit()
@@ -83,21 +92,21 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
 
             # Process document content
             process_start = time.time()
-            with DocumentProcessor(db) as processor:
-                processor.process_document(
-                    document_id=document_id,
-                    file_content=create_document.file,
-                    strategy_type="pdf",
-                )
+            # with DocumentProcessor(db) as processor:
+            #     processor.process_document(
+            #         document_id=document_id,
+            #         file_content=create_document.file,
+            #         strategy_type="pdf",
+            #     )
 
-            logger.info(
-                "Document processing completed",
-                extra={
-                    "document_id": str(document_id),
-                    "processing_time": f"{time.time() - process_start:.2f}s",
-                    "total_time": f"{time.time() - start_time:.2f}s",
-                },
-            )
+            # logger.info(
+            #     "Document processing completed",
+            #     extra={
+            #         "document_id": str(document_id),
+            #         "processing_time": f"{time.time() - process_start:.2f}s",
+            #         "total_time": f"{time.time() - start_time:.2f}s",
+            #     },
+            # )
 
             return document_id
 
@@ -112,7 +121,40 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
                 exc_info=True,
             )
             raise e
+        
+def validate_document_type(document: DocumentFileUpload) -> None:
+    if document.extension not in supportedTypes.keys():
+        logger.error(
+            "File extension not supported",
+            extra={"extension": str(document.extension)},
+        )
+        raise ValueError(f".{document.extension} extension not supported.")
 
+    content_type = supportedTypes[str(document.extension)]
+
+    if content_type != document.type:
+        logger.error(
+            "File extension doesn't match MIME type",
+            extra={
+                "type": str(document.type),
+                "extension": str(document.extension),    
+            },
+        )
+        raise ValueError("Extension doesn't match MIME type.")
+    
+    if content_type == "application/pdf" and not valid_pdf_signature(document.file):
+        logger.error(
+            "Invalid PDF signature",
+            extra={
+                "type": str(document.type),
+                "extension": str(document.extension),    
+            },
+        )
+        raise ValueError("Invalid PDF")
+
+def valid_pdf_signature(file: bytes) -> bool:
+    header = file[:4]  # check first four bytes for PDF signature
+    return header == b"%PDF"
 
 def get_documents(c_id: UUID) -> list[Document]:
     """Get all documents for a course."""
@@ -143,7 +185,7 @@ def get_documents(c_id: UUID) -> list[Document]:
             raise e
 
 
-def get_signed_document_url(document_id: str) -> Dict[str, str]:
+def get_signed_document_url(course_id: UUID, document_id: str) -> Dict[str, str]:
     """Get a signed URL for document access."""
     logger.info("Getting signed URL", extra={"document_id": document_id})
 
@@ -155,7 +197,10 @@ def get_signed_document_url(document_id: str) -> Dict[str, str]:
                 raise ValueError("Document not found")
 
             file_path = document.file_url
-            file_storage = FileStorage(bucket_name="course-files")
+            file_storage = FileStorage(
+                bucket_name=f"course-{str(course_id)}", 
+                create_bucket_if_not_found=False
+                )
             url = file_storage.get_file_signed_url(file_path)
 
             logger.info("Signed URL generated", extra={"document_id": document_id})
