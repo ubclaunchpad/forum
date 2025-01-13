@@ -55,6 +55,8 @@ async def create_document(
         doc_id = await document_manager.upload_new_document(create_document_request)
         return CreateDocumentResponse(id=doc_id)
     except Exception as e:
+        if isinstance(e, ValueError):
+            raise HTTPException(status_code=422, detail=f"Error creating document: {str(e)}")
         raise HTTPException(
             status_code=500, detail=f"Error creating document: {str(e)}"
         )

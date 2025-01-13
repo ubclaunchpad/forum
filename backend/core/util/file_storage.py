@@ -85,8 +85,9 @@ class FileStorage:
     
     def _bucket_exists(self) -> bool:
         try:
-            buckets = self.supabase.storage.from_(self.bucket_name).list()
-            return len(buckets) > 0
+            buckets = self.supabase.storage.list_buckets()
+            if self.bucket_name in [bucket.name for bucket in buckets]:
+                return True
         except Exception as e:
             return False
     
