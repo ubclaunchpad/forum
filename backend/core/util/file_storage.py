@@ -127,14 +127,15 @@ class FileStorage:
             )
             return response.path  # type: ignore
 
-        except FileExistsError as e:
-            # logger.error(f"File exists error: {e}")
-            raise HTTPException(status_code=409, detail=str(e))
+        # except FileExistsError as e:
+        #     # logger.error(f"File exists error: {e}")
+        #     raise HTTPException(status_code=409, detail=str(e))
         except Exception as e:
             # logger.error(f"Error storing file: {e}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to store file: {str(e)}"
-            )
+            # raise HTTPException(
+            #     status_code=500, detail=f"Failed to store file: {str(e)}"
+            # )
+            raise e
 
     def retrieve_file(self, file_path: str) -> Optional[bytes]:
         storage = self.supabase.storage.from_(self.bucket_name)
