@@ -32,8 +32,12 @@ export const PostsForumPage = ({
   }
 
   function setPostAndRoute(post: Post): void {
+    if (selectedPost) {
+      router.push(post.id);
+    } else {
+      router.push("forum/" + post.id);
+    }
     setSelectedPost(post);
-    router.push(post.id);
   }
 
   return (
