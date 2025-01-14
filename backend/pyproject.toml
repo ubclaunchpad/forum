@@ -28,7 +28,7 @@ dependencies = [
     "hyperframe==6.0.1",
     "idna==3.10",
     "iniconfig==2.0.0",
-    "jiter==0.7.1",
+    "jiter==0.8.2",
     "multidict==6.1.0",
     "mypy-extensions==1.0.0",
     "numpy==2.1.3",
