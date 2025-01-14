@@ -49,7 +49,7 @@ dependencies = [
     "python-dateutil==2.9.0.post0",
     "python-dotenv==1.0.1",
     "python-multipart==0.0.19",
-    "realtime==2.0.6",
+    "realtime==2.1.0",
     "six==1.16.0",
     "sniffio==1.3.1",
     "starlette==0.41.2",
