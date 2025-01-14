@@ -56,7 +56,9 @@ async def create_document(
         return CreateDocumentResponse(id=doc_id)
     except Exception as e:
         if isinstance(e, ValueError):
-            raise HTTPException(status_code=422, detail=f"Error creating document: {str(e)}")
+            raise HTTPException(
+                status_code=422, detail=f"Error creating document: {str(e)}"
+            )
         raise HTTPException(
             status_code=500, detail=f"Error creating document: {str(e)}"
         )
@@ -104,8 +106,7 @@ async def get_document_view(c_id: UUID, document_id: UUID, request: Request):
 
     # If not in cache or expired, generate new signed URL
     res = document_manager.get_signed_document_url(
-        course_id=str(c_id),
-        document_id=str(document_id)
+        course_id=str(c_id), document_id=str(document_id)
     )
     signed_url = res["signedURL"]
 
@@ -113,6 +114,17 @@ async def get_document_view(c_id: UUID, document_id: UUID, request: Request):
     cache_signed_url(user_id, str(document_id), signed_url)
 
     return {"signed_url": signed_url}
+
+
+@document_router.delete("/{document_id}", response_model=GeneralResponse)
+async def delete_document(c_id: UUID, document_id: UUID):
+    try:
+        document_manager.delete_document(document_id)
+        return GeneralResponse(msg="Document deleted successfully")
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error deleting document: {str(e)}"
+        )
 
 
 @document_router.post("/query")

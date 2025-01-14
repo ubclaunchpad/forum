@@ -111,8 +111,7 @@ class DocumentQueryEngine:
                     "document_title": chunk.document_title or "Unknown Document",
                     "document_id": str(chunk.document_id),
                     "signed_url": document_manager.get_signed_document_url(
-                        course_id=str(course_id),
-                        document_id=str(chunk.document_id)
+                        course_id=str(course_id), document_id=str(chunk.document_id)
                     )["signedURL"],
                     "similarity": float(chunk.similarity)
                     if chunk.similarity is not None

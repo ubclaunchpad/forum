@@ -15,11 +15,8 @@ from models.schemas.document_schema import DocumentFileUpload
 logger = logging.getLogger(__name__)
 
 
-supportedTypes = {
-    "pdf": "application/pdf",
-    "txt": "text/plain",
-    "md": "text/markdown"
-}
+supportedTypes = {"pdf": "application/pdf", "txt": "text/plain", "md": "text/markdown"}
+
 
 async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
     """
@@ -43,7 +40,7 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
         extra={
             "title": create_document.title,
             "type": create_document.type,
-            "course_id": str(create_document.course_id), 
+            "course_id": str(create_document.course_id),
         },
     )
 
@@ -76,7 +73,9 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
 
             # Store file
             storage_start = time.time()
-            file_storage = FileStorage(bucket_name=f"course-{str(create_document.course_id)}")
+            file_storage = FileStorage(
+                bucket_name=f"course-{str(create_document.course_id)}"
+            )
             path = file_storage.store_file(create_document.file, str(document_id))
             document.file_url = path  # type: ignore
             db.commit()
@@ -121,7 +120,8 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
                 exc_info=True,
             )
             raise e
-        
+
+
 def validate_document_type(document: DocumentFileUpload) -> None:
     if document.extension not in supportedTypes.keys():
         logger.error(
@@ -137,24 +137,26 @@ def validate_document_type(document: DocumentFileUpload) -> None:
             "File extension doesn't match MIME type",
             extra={
                 "type": str(document.type),
-                "extension": str(document.extension),    
+                "extension": str(document.extension),
             },
         )
         raise ValueError("Extension doesn't match MIME type.")
-    
+
     if content_type == "application/pdf" and not valid_pdf_signature(document.file):
         logger.error(
             "Invalid PDF signature",
             extra={
                 "type": str(document.type),
-                "extension": str(document.extension),    
+                "extension": str(document.extension),
             },
         )
         raise ValueError("Invalid PDF")
 
+
 def valid_pdf_signature(file: bytes) -> bool:
     header = file[:4]  # check first four bytes for PDF signature
     return header == b"%PDF"
+
 
 def get_documents(c_id: UUID) -> list[Document]:
     """Get all documents for a course."""
@@ -185,6 +187,42 @@ def get_documents(c_id: UUID) -> list[Document]:
             raise e
 
 
+def delete_document(document_id: UUID) -> None:
+    """Delete a document."""
+    logger.info("Deleting document", extra={"document_id": str(document_id)})
+
+    with get_db() as db:
+        try:
+            document = (
+                db.query(Document)
+                .join(Document.courses)
+                .filter(Document.id == document_id)
+                .first()
+            )
+            if not document:
+                logger.error(
+                    "Document not found", extra={"document_id": str(document_id)}
+                )
+                raise ValueError("Document not found")
+
+            file_storage = FileStorage(
+                bucket_name=f"course-{str(document.courses[0].id)}"
+            )
+            file_storage.delete_file(str(document.file_url))
+            db.delete(document)
+            db.commit()
+
+            logger.info("Document deleted", extra={"document_id": str(document_id)})
+
+        except Exception as e:
+            logger.error(
+                "Error deleting document",
+                extra={"document_id": str(document_id), "error": str(e)},
+                exc_info=True,
+            )
+            raise e
+
+
 def get_signed_document_url(course_id: UUID, document_id: str) -> Dict[str, str]:
     """Get a signed URL for document access."""
     logger.info("Getting signed URL", extra={"document_id": document_id})
@@ -198,9 +236,8 @@ def get_signed_document_url(course_id: UUID, document_id: str) -> Dict[str, str]
 
             file_path = document.file_url
             file_storage = FileStorage(
-                bucket_name=f"course-{str(course_id)}", 
-                create_bucket_if_not_found=False
-                )
+                bucket_name=f"course-{str(course_id)}", create_bucket_if_not_found=False
+            )
             url = file_storage.get_file_signed_url(file_path)
 
             logger.info("Signed URL generated", extra={"document_id": document_id})

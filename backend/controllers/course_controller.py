@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from models.all import Course, Profile
+from models.all import Course, Profile, user_courses
 from models.db import get_db
 from models.schemas.course_schema import (
     CourseResponse,
@@ -13,7 +13,9 @@ from models.schemas.course_schema import (
 from pydantic import ValidationError
 
 
-def create_course(create_course_req: CreateCourseReq) -> CreateCourseResponse:
+def create_course(
+    user_id: str, create_course_req: CreateCourseReq
+) -> CreateCourseResponse:
     with get_db() as db:
         course = Course(
             c_group=create_course_req.c_group,
@@ -24,19 +26,27 @@ def create_course(create_course_req: CreateCourseReq) -> CreateCourseResponse:
             start_date=create_course_req.start_date,
             end_date=create_course_req.end_date,
         )
+
         try:
+            # Add course first
             db.add(course)
             db.flush()
             course_id = UUID(str(course.id))
+            # Insert into user_courses association table
+            stmt = user_courses.insert().values(user_id=user_id, course_id=course_id)
+            db.execute(stmt)
+
+            db.commit()
             return CreateCourseResponse(id=course_id)
         except Exception as e:
+            db.rollback()
             raise e
 
 
-def get_courses() -> List[CourseResponse]:
+def get_courses(user_id) -> List[CourseResponse]:
     try:
         with get_db() as db:
-            courses = db.query(Course).all()
+            courses = db.query(Course).filter(Course.users.any(id=user_id)).all()
             pydantic_courses = []
 
             for course in courses:

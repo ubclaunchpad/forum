@@ -1,12 +1,11 @@
 "use client";
 
-import { ScrollArea } from "@/components/ui/scrollArea";
 import DocumentRow from "@/components/files/DocumentRow";
 import type {
   DocumentAppendOperation,
   DocumentInterface,
 } from "@/lib/types/documents";
-import { Dispatch, Fragment, SetStateAction } from "react";
+import { Dispatch, Fragment, SetStateAction, useEffect } from "react";
 import FileUpload from "@/components/files/NewFileUpload";
 import { generateTempId, isPendingId } from "@/lib/utils";
 
@@ -20,7 +19,9 @@ export const DocumentListSidebar = ({
   files: DocumentInterface[];
   setFiles: Dispatch<SetStateAction<DocumentInterface[]>>;
   selectedFile: DocumentInterface | undefined;
-  setSelectedFile: (file: DocumentInterface) => void;
+  setSelectedFile: Dispatch<
+    SetStateAction<DocumentInterface | null | undefined>
+  >;
   onUploadSuccess: () => Promise<void>;
 }) => {
   function appendToFiles({ operation, id, document }: DocumentAppendOperation) {
@@ -39,6 +40,13 @@ export const DocumentListSidebar = ({
       });
     }
   }
+
+  useEffect(() => {
+    if (selectedFile && !files.find((f) => f.id === selectedFile.id)) {
+      setSelectedFile(undefined);
+    }
+  }, [files, selectedFile, setSelectedFile]);
+
   return (
     <Fragment>
       <section className="flex relative vt flex-col h-full  overflow-y-auto overflow-x-hidden min-w-[500px] max-w-[500px] border-r">
@@ -47,6 +55,7 @@ export const DocumentListSidebar = ({
           {files.map((doc) => (
             <li key={doc.id} className="w-full flex items-center">
               <DocumentRow
+                setDocuments={setFiles}
                 disabled={isPendingId(doc.id)}
                 document={doc}
                 isSelected={selectedFile?.id === doc.id}

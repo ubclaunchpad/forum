@@ -99,7 +99,7 @@ const Editor: FC<EditorProps> = ({
     <div
       className={cn(
         "w-full h-full flex flex-col",
-        "prose prose-sm",
+        "prose",
         "[&_.ProseMirror]:w-full",
         "[&_.ProseMirror]:h-full",
         "[&_.ProseMirror]:p-8",

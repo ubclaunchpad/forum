@@ -251,16 +251,18 @@ const config: Config = {
             },
 
             pre: {
-              backgroundColor: theme("colors.neutral[800]"),
+              backgroundColor: theme("colors.neutral[50]"),
               padding: "1.25rem",
               borderRadius: "0.5rem",
-              border: `1px solid ${theme("colors.neutral[200]")}`,
+              border: `1px solid ${theme("colors.neutral[100]")}`,
               overflow: "auto",
+              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.10)",
               fontSize: "0.875em",
               lineHeight: "1.7142857",
-              marginTop: "1.5em",
-              marginBottom: "1.5em",
+              marginTop: "1.8em",
+              marginBottom: "1.8em",
               width: "100%",
+              color: theme("colors.neutral[700]"),
             },
 
             code: {
