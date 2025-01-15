@@ -99,7 +99,7 @@ Where to find these?
 - Go on [OpenAI](https://platform.openai.com/) and create a new project (or use an existing one)
   - You do not need this unless you use the OpenAI API
 
-### Database (Editting the Database)
+### Database (Editing the Database)
 
 We use SqlAlchemy and Alembic for database migrations. The database is hosted on Supabase.
 
