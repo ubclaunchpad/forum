@@ -44,6 +44,17 @@ DEV_LOGIN=true # or false
 ENV=development # or production
 ```
 
+Where to find these?
+
+- Go on [Supabase](https://supabase.io/) and create a new project
+- Go to the project settings:
+  - In the API section, you will find the `SUPABASE_URL` and `SUPABASE_KEY`
+  - In the Database section, you will find the `DATABASE_URL` (you want a connection string)
+- For most cases you will need to have the `AUTH_MIDDLEWARE_ENABLED` set to `true` and the `DEV_USER_EMAIL` and `DEV_USER_PASSWORD` set to your email and password
+  - On your Supabase project, go to the `Auth` section and create a new user (you can manually set the email and password); then use these credentials in the `.env` file
+- Go on [OpenAI](https://platform.openai.com/) and create a new project (or use an existing one)
+  - You do not need this unless you use the OpenAI API
+
 ### 4. Running the Server
 
 - With the virtual environment activated, run the following command:
@@ -87,17 +98,6 @@ forum/
 │   │ pyproject.toml                        # Python project configuration
 │   │ uv.lock                               # Dependency lock file
 ```
-
-Where to find these?
-
-- Go on [Supabase](https://supabase.io/) and create a new project
-- Go to the project settings:
-  - In the API section, you will find the `SUPABASE_URL` and `SUPABASE_KEY`
-  - In the Database section, you will find the `DATABASE_URL` (you want a connection string)
-- For most cases you will need to have the `AUTH_MIDDLEWARE_ENABLED` set to `true` and the `DEV_USER_EMAIL` and `DEV_USER_PASSWORD` set to your email and password
-  - On your Supabase project, go to the `Auth` section and create a new user (you can manually set the email and password); then use these credentials in the `.env` file
-- Go on [OpenAI](https://platform.openai.com/) and create a new project (or use an existing one)
-  - You do not need this unless you use the OpenAI API
 
 ### Database (Editting the Database)
 
