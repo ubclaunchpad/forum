@@ -36,6 +36,10 @@ async def delete_course(c_id: str):
     res = course_controller.delete_course(c_id)
     return res
 
+@course_router.put("/{c_id}", response_model=CourseResponse)
+async def update_course(create_course_req: CreateCourseReq, c_id: str):
+    course = course_controller.update_course(create_course_req, c_id)
+    return course
 
 # ----------------- Course Members -----------------#
 
