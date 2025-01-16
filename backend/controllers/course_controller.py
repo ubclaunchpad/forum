@@ -9,6 +9,7 @@ from models.schemas.course_schema import (
     CourseResponse,
     CreateCourseReq,
     CreateCourseResponse,
+    UpdateCourseReq,
 )
 from pydantic import ValidationError
 
@@ -153,7 +154,7 @@ def get_course_members(c_id: str) -> List[Dict[str, str]]:
             )
         return members
 
-def update_course(create_course_req: CreateCourseReq, c_id: str):
+def update_course(create_course_req: UpdateCourseReq, c_id: str):
     with get_db() as db:
         c_uuid = UUID(c_id)
 
