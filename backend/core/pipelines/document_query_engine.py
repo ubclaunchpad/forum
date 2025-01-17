@@ -322,6 +322,7 @@ class DocumentQueryEngine:
 
             all_contexts = relevant_chunks + relevant_posts
             prompt = self._build_prompt(question, all_contexts, template_name)
+            print(prompt)
 
             try:
                 response = self.client.chat.completions.create(
@@ -331,6 +332,7 @@ class DocumentQueryEngine:
                             "role": "system",
                             "content": "You are a helpful expert who provides accurate but concise information with source citations.",
                         },
+                       # TODO: Add previous messages here
                         {"role": "user", "content": prompt},
                     ],
                     temperature=0.7,
@@ -416,6 +418,7 @@ class DocumentQueryEngine:
                             "role": "system",
                             "content": "You are a helpful expert who provides accurate but concise information with source citations.",
                         },
+                        # TODO: Add query history as messages here
                         {"role": "user", "content": prompt},
                     ],
                     temperature=0.7,
@@ -436,6 +439,7 @@ class DocumentQueryEngine:
                         # No need to send sources again
                     }
                 )
+                # TODO: Save current_answer into query_history
 
             except Exception as e:
                 logger.error(f"OpenAI API error: {e}", exc_info=True)

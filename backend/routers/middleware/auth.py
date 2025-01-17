@@ -127,7 +127,6 @@ class AuthMiddleware(BaseHTTPMiddleware):
             )
             if not user:
                 user = supabase.auth.sign_up({"email": email, "password": password})
-
         # Production authentication
         if not user and login_required:
             auth_header = request.headers.get("Authorization")
