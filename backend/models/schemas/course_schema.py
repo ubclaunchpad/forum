@@ -31,8 +31,8 @@ class CreateCourseResponse(BaseModel):
 
 class UpdateCourseReq(BaseModel):
     c_group: Optional[str] = None
-    code: Optional[str] = None
-    section: Optional[str] = None
+    code: Optional[int] = None
+    section: Optional[int] = None
     name: Optional[str] = None
     config: Optional[CourseConfig] = None
     start_date: Optional[date] = None
