@@ -283,7 +283,7 @@ class DocumentQueryEngine:
         contexts: List[Dict[str, Any]],
         template_name: Optional[str] = None,
     ) -> str:
-        """Build the prompt with context and question."""
+        """Build the answer with context and question."""
         context_str = "\n\n".join(
             f"[Source: {'Document: ' + ctx['document_title'] if ctx.get('type') == 'document' else 'Post: ' + ctx.get('title', 'Untitled Post')}, "
             f"Relevance: {ctx['similarity']:.2f}]\n{ctx['content']}"

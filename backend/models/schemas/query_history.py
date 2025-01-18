@@ -6,5 +6,5 @@ from pydantic import BaseModel, Field
 
 class QueryEntry(BaseModel):
     question: str
-    prompt: str
+    answer: str
     sources: List[Dict[str, Any]]
