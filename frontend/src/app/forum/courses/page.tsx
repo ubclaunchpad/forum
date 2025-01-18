@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useContext } from "react";
 import { Check, Trash2, Pencil, Settings, X } from "lucide-react";
+import { CourseSettingsModal } from "@/components/course/CourseSettingsModal";
 
 interface Course {
   id: number;
@@ -16,6 +17,12 @@ interface Course {
   code: string;
   section: string;
   name: string;
+  info: {
+    config?: {
+      theme_colour?: string;
+      font?: string;
+    };
+  };
 }
 
 export default function CoursesPage() {
@@ -23,6 +30,8 @@ export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Course | null>(null);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -113,6 +122,48 @@ export default function CoursesPage() {
     }
   };
 
+  const handleSettingsClick = (course: Course) => {
+    setSelectedCourse(course);
+    setSettingsModalOpen(true);
+  };
+
+  const handleSettingsSave = async (config: { theme_colour?: string; font?: string }) => {
+    if (!selectedCourse) return;
+
+    try {
+      const res = await fetch(`${getApiUrl()}/courses/${selectedCourse.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          c_group: selectedCourse.c_group,
+          code: selectedCourse.code,
+          section: selectedCourse.section,
+          name: selectedCourse.name,
+          info: {
+            ...selectedCourse.info,
+            config
+          }
+        }),
+      });
+
+      if (res.ok) {
+        setCourses(courses.map(course => 
+          course.id === selectedCourse.id 
+            ? { 
+                ...course, 
+                info: { ...course.info, config }
+              } 
+            : course
+        ));
+      }
+    } catch (error) {
+      console.error("Failed to update course settings:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col w-screen h-screen items-center bg-primary-900 justify-center">
       <Card className="w-full max-w-2xl rounded-xl p-4 py-8 h-full bg-neutral-50 max-h-[600px] ">
@@ -185,7 +236,10 @@ export default function CoursesPage() {
                       >
                         <Pencil size={18} />
                       </button>
-                      <button className="p-2 hover:text-gray-600 transition-colors">
+                      <button 
+                        className="p-2 hover:text-gray-600 transition-colors"
+                        onClick={() => handleSettingsClick(course)}
+                      >
                         <Settings size={18} />
                       </button>
                       <button 
@@ -202,6 +256,15 @@ export default function CoursesPage() {
           ))}
         </ul>
       </Card>
+
+      {selectedCourse && (
+        <CourseSettingsModal
+          isOpen={settingsModalOpen}
+          onClose={() => setSettingsModalOpen(false)}
+          course={selectedCourse}
+          onSave={handleSettingsSave}
+        />
+      )}
     </div>
   );
 }
