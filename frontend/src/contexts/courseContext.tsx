@@ -11,8 +11,14 @@ import {
 import { getApiUrl } from "@/utils/helpers";
 import { userContext } from "./userContext";
 
-type Course = {
-  info: Record<string, unknown>;
+export type Course = {
+  info: {
+    config?: {
+      theme_colour?: string;
+      font?: string;
+    };
+    [key: string]: unknown;
+  };
 };
 
 export const courseContext = createContext({} as Course);
