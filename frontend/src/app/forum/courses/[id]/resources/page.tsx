@@ -37,7 +37,7 @@ export default async function ResourcesTab({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const token = (await supabase.auth.getSession())?.data.session?.access_token;
   if (!token) {
     redirect("auth/login");
