@@ -8,3 +8,6 @@ class QueryEntry(BaseModel):
     question: str
     answer: str
     sources: List[Dict[str, Any]]
+
+class GetHistoryResponse(BaseModel):
+    history: List[QueryEntry]
