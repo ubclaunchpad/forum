@@ -21,6 +21,9 @@ jobs:
           node-version: 'lts/*'
           cache: 'yarn'
 
+      - name: List frontend directory contents
+        run: ls -la frontend/
+      
       - name: Install dependencies
         run: yarn install
         working-directory: frontend/
