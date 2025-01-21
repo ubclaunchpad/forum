@@ -17,7 +17,7 @@ export function DocumentsPage({
   courseId: string;
 }) {
   const [files, setFiles] = useState<DocumentInterface[]>(initialDocuments);
-  const [selectedFile, setSelectedFile] = useState<DocumentInterface>();
+  const [selectedFile, setSelectedFile] = useState<DocumentInterface | null>();
   const user = useContext(userContext);
 
   const handleUploadSuccess = async () => {

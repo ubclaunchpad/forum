@@ -14,13 +14,14 @@ course_router = APIRouter()
 
 @course_router.post("", response_model=CreateCourseResponse)
 async def create_course(create_course_req: CreateCourseReq, request: Request):
-    # user_id = request.state.user_id
-    return course_controller.create_course(create_course_req)
+    user_id = request.state.user_id
+    return course_controller.create_course(user_id, create_course_req)
 
 
 @course_router.get("", response_model=GetCoursesResponse)
-async def get_courses_route():
-    courses = course_controller.get_courses()
+async def get_courses_route(request: Request):
+    user_id = request.state.user_id
+    courses = course_controller.get_courses(user_id)
     return {"courses": courses}
 
 

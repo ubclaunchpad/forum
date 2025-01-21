@@ -2,6 +2,7 @@ import CourseNavbar from "@/components/course/courseNavbar";
 import { CourseTopbar } from "@/components/course/courseTopbar";
 import { CourseContextProvider } from "@/contexts/courseContext";
 import ClientWrapper from "./resources/wrapper";
+import { Suspense } from "react";
 // import { ViewTransitions } from "next-view-transitions";
 
 export default async function CoursePage({
@@ -19,7 +20,7 @@ export default async function CoursePage({
         <ClientWrapper>
           <CourseTopbar />
           <CourseNavbar />
-          {children}
+          <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
         </ClientWrapper>
       </div>
     </CourseContextProvider>

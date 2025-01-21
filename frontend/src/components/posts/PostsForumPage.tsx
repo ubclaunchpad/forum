@@ -4,15 +4,38 @@ import { Post } from "@/lib/types/posts";
 import { PostsForumSidebar } from "./PostsForumSidebar";
 import { useState } from "react";
 import PostView from "./PostView";
+import { useRouter } from "next/navigation";
 
-export const PostsForumPage = ({ posts }: { posts: Post[] }) => {
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+export const PostsForumPage = ({
+  posts,
+  initalPost,
+}: {
+  posts: Post[];
+  initalPost?: any;
+}) => {
+  const foundPost = initalPost
+    ? posts.find((post) => post.id === initalPost)
+    : null;
+  const [selectedPost, setSelectedPost] = useState<Post | null>(
+    foundPost ? foundPost : null,
+  );
   const [listofPosts, setListofPosts] = useState<Post[]>(posts);
   const [isEditing, setIsEditing] = useState<string | null>(null);
+
+  const router = useRouter();
 
   function edittingSelectPost(post: Post): void {
     if (isEditing !== post.id) {
       setIsEditing(null);
+    }
+    setPostAndRoute(post);
+  }
+
+  function setPostAndRoute(post: Post): void {
+    if (selectedPost) {
+      router.push(post.id);
+    } else {
+      router.push("forum/" + post.id);
     }
     setSelectedPost(post);
   }

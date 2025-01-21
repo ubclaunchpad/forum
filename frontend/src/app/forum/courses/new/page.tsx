@@ -56,16 +56,7 @@ export default function CoursesNewPage() {
       toast({
         title: "Course created",
         description: "The course has been created successfully.",
-        action: (
-          <ToastAction
-            altText="View course"
-            onClick={() => {
-              router.push(`/forum/courses/${id}`);
-            }}
-          >
-            View course
-          </ToastAction>
-        ),
+        action: <ToastAction altText="View course">View course</ToastAction>,
       });
 
       formRef.current?.reset();

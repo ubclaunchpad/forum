@@ -36,14 +36,15 @@ async function getPosts(id: string, token: string) {
 export default async function Forum({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; slug }>;
 }) {
-  const { id } = await params;
+  const { id, slug } = await params;
+  const selectPost = slug ? slug[0] : null;
   const supabase = createClient();
   const token = (await supabase.auth.getSession())?.data.session?.access_token;
   if (!token) {
     redirect("auth/login");
   }
   const posts = await getPosts(id, token);
-  return <PostsForumPage posts={posts} />;
+  return <PostsForumPage posts={posts} initalPost={selectPost} />;
 }

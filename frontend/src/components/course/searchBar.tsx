@@ -6,9 +6,10 @@ import {
   XIcon,
   FileTextIcon,
   MessageSquareIcon,
+  CommandIcon,
 } from "lucide-react";
 import { Button } from "../ui/button";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { courseContext } from "@/contexts/courseContext";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -76,6 +77,41 @@ export function Searchbar() {
     token,
   });
 
+  function listenForEnter(e) {
+    if (e.key === "Escape") {
+      window.dialog.close();
+    }
+
+    if (isLoading || !search) return;
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  }
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Check for Cmd/Ctrl + K
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault(); // Prevent default browser behavior
+        // window.dialog.toggle();
+        if (window.dialog.hasAttribute("open")) {
+          window.dialog.close();
+        } else {
+          window.dialog.showModal();
+        }
+        const input = document.getElementById("search-input-dialog");
+        input?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    // Cleanup listener on unmount
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   const handleSearch = () => {
     if (
       search.length < MIN_SEARCH_LENGTH ||
@@ -90,13 +126,22 @@ export function Searchbar() {
     <>
       <Button
         variant="ghost"
-        className="flex items-center font-medium text-neutral-600 rounded-full bg-white max-w-md px-2 w-full min-w-[500px] border overflow-hidden absolute left-1/2 transform h-10 -translate-x-1/2"
+        className="flex  items-center font-medium text-neutral-600 rounded-full px-1 bg-white max-w-md  w-full min-w-[500px] border overflow-hidden absolute left-1/2 transform h-10 -translate-x-1/2"
         onClick={() => {
           window.dialog.showModal();
+          const input = document.getElementById("search-input-dialog");
+          input?.focus();
         }}
       >
-        <SearchIcon className="mr-2 max-w-4 max-h-4" />
-        Search documents and posts...
+        <span className="relative flex w-full justify-end">
+          <span className="hidden lg:block lg:absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm ">
+            Search documents and posts...
+          </span>
+          <span className="hidden flex-row gap-1 items-center border rounded-full p-1 px-2 lg:flex lg:absolute top-1/2 left-0 transform -translate-y-1/2 text-sm text-neutral-400">
+            <CommandIcon className="w-3 h-3" />+ K
+          </span>
+          <SearchIcon className="mr-2 font-normal max-w-4 max-h-4" />
+        </span>
       </Button>
 
       <dialog className="bg-transparent top-0" id="dialog">
@@ -105,7 +150,10 @@ export function Searchbar() {
             response || isLoading ? "rounded-lg rounded-t-3xl" : "rounded-full"
           }`}
         >
-          <div className="flex justify-center gap-1 items-center p-2">
+          <div
+            className="flex justify-center gap-1 items-center p-2"
+            onKeyDown={listenForEnter}
+          >
             <Button
               variant="ghost"
               className="rounded-full h-10 w-10 flex-shrink-0 border p-0 border-neutral-200"
@@ -116,6 +164,7 @@ export function Searchbar() {
               <XIcon />
             </Button>
             <Input
+              id="search-input-dialog"
               value={search}
               disabled={isLoading}
               onChange={(e) => setSearch(e.target.value)}
