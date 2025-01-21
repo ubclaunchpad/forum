@@ -136,7 +136,9 @@ def view_post(c_id: str, user_id: str, post_id: int) -> UserPostEvent:
                 raise HTTPException(status_code=404, detail="Post not found")
             post_event = (
                 db.query(UserPostEvent)
-                .filter(UserPostEvent.post_id == post.id, UserPostEvent.user_id == user_id)
+                .filter(
+                    UserPostEvent.post_id == post.id, UserPostEvent.user_id == user_id
+                )
                 .first()
             )
 
