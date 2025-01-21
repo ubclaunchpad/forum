@@ -11,7 +11,7 @@ export const PostsForumPage = ({
   initalPost,
 }: {
   posts: Post[];
-  initalPost?: any;
+  initalPost?: string;
 }) => {
   const foundPost = initalPost
     ? posts.find((post) => post.id === initalPost)

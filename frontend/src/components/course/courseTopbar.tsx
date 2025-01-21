@@ -2,7 +2,7 @@
 
 import { courseContext } from "@/contexts/courseContext";
 import { SmileIcon } from "lucide-react";
-import { Fragment, useContext, useEffect, useState } from "react";
+import { Fragment, useContext, useState } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { Searchbar } from "./searchBar";

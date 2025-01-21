@@ -4,7 +4,7 @@ import { useState, useRef, useContext } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { getApiUrl } from "@/utils/helpers";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { userContext } from "@/contexts/userContext";
 
 const inputStyle =
@@ -25,7 +25,7 @@ export default function CoursesNewPage() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const router = useRouter();
+  // const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent the default form submission
@@ -50,13 +50,14 @@ export default function CoursesNewPage() {
         throw new Error("Failed to create course");
       }
 
-      const body = await res.json();
-      const { id } = body;
+      // const body = await res.json();
+      // const { id } = body;
 
       toast({
         title: "Course created",
         description: "The course has been created successfully.",
-        action: <ToastAction altText="View course">View course</ToastAction>,
+        action: <ToastAction altText="View course"
+         >View course</ToastAction>,
       });
 
       formRef.current?.reset();
