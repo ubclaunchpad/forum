@@ -23,7 +23,10 @@ async function getPosts(id: string, token: string) {
     }
 
     const body = await res.json();
-    return body.posts as Post[];
+    return (body.posts as Post[]).map((post) => ({
+      ...post,
+      id: post.id.toString(),
+    }));
   } catch (e) {
     console.error("Error fetching posts:", e);
     return [];
