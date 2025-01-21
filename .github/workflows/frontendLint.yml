@@ -13,14 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
           cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
 
+      - name: List frontend directory contents
+        run: ls -la frontend/
+      
       - name: Install dependencies
         run: yarn install
         working-directory: frontend/

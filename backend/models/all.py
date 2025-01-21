@@ -160,11 +160,11 @@ class Course(Base):
 
 class Post(Base):
     __tablename__ = "posts"
-    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     course_id = Column(PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"))
     title = Column(Text)
     content = Column(Text)
-    parent_id = Column(PUUID)
+    parent_id = Column(Integer)
     applied_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
     embedding = Column(Vector(1536), nullable=True)
@@ -180,7 +180,7 @@ class PostEdit(Base):
     __tablename__ = "post_edits"
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
     post_id = Column(
-        PUUID, ForeignKey("public.posts.id", ondelete="CASCADE"), nullable=False
+        Integer, ForeignKey("public.posts.id", ondelete="CASCADE"), nullable=False
     )
     edited_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
     previous_content = Column(Text)
@@ -202,7 +202,7 @@ class UserPostEvent(Base):
     liked = Column(Boolean)
     user_id = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
     post_id = Column(
-        PUUID, ForeignKey("public.posts.id", ondelete="CASCADE"), nullable=False
+        Integer, ForeignKey("public.posts.id", ondelete="CASCADE"), nullable=False
     )
 
     # Relationships
