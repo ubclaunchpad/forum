@@ -11,9 +11,9 @@ async def get_course_query_history(c_id: str, request: Request):
         query_history = get_history_for_course(c_id, user_id)
         if not query_history or len(query_history) == 0 or len(query_history[0].messages) == 0:
             raise HTTPException(status_code=500, detail=f"Query context for course {c_id} not found")
-        return {"context" : query_history[0].messages}
+        return {"history" : query_history[0].messages}
     except Exception as e:
-        return {"context" : []}
+        return {"history" : []}
 
 
 
@@ -21,4 +21,4 @@ async def get_course_query_history(c_id: str, request: Request):
 async def clear_user_history(c_id: str, request: Request):
     user_id = request.state.user_id
     delete_history(c_id, user_id)
-    return {"msg" : "context deleted"}
+    return {"msg" : "history deleted"}
