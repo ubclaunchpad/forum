@@ -378,10 +378,13 @@ class DocumentQueryEngine:
         self,
         question: str,
         course_id: Optional[UUID] = None,
+        history: Optional[Dict[str,str]] = None,
         template_name: Optional[str] = None,
     ) -> AsyncGenerator[str, None]:
         """Process a query through the RAG pipeline with streaming response."""
         try:
+            if history is None:
+                history = []
             question_embedding = self.embedding_processor.generate_embedding(question)
             relevant_chunks = self._find_relevant_document_chunks(
                 question_embedding, threshold=0.0, course_id=course_id
@@ -410,17 +413,16 @@ class DocumentQueryEngine:
                 sources = self._format_sources(all_contexts)
                 yield json.dumps({"answer": "", "sources": sources, "done": False})
 
+                messages = ([{
+                            "role": "system",
+                            "content": "You are a helpful expert who provides accurate but concise information with source citations.",
+                        }] + history
+                            + [{"role": "user", "content": prompt}])
+
                 # Stream the response
                 stream = self.client.chat.completions.create(
                     model=self.model,
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": "You are a helpful expert who provides accurate but concise information with source citations.",
-                        },
-                        # TODO: Add query history as messages here
-                        {"role": "user", "content": prompt},
-                    ],
+                    messages=messages,
                     temperature=0.7,
                     stream=True,
                 )
@@ -439,8 +441,6 @@ class DocumentQueryEngine:
                         # No need to send sources again
                     }
                 )
-                # TODO: Save current_answer into query_history
-
             except Exception as e:
                 logger.error(f"OpenAI API error: {e}", exc_info=True)
                 yield json.dumps(

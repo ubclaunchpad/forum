@@ -28,7 +28,6 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-# TODO: Add migration script with table
 
 def include_object(object, name, type_, reflected, compare_to):
     # Check if the object has a schema attribute

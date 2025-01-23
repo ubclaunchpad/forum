@@ -1,7 +1,6 @@
 from http.client import HTTPException
 from typing import List
 from models.db import get_db
-from models.schemas.query_history import QueryEntry
 from models.all import QueryHistory
 
 
@@ -16,7 +15,7 @@ def get_history_for_course(course_id, user_id) -> List[QueryHistory]:
             return queries
     except Exception as e:
         print(f"Error in get_history_for course: {type(e).__name__}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get course history: {str(e)}")
 
 def update_course_history(course_id, user_id, messages):
     try:
@@ -24,7 +23,6 @@ def update_course_history(course_id, user_id, messages):
             db.query(QueryHistory).filter(QueryHistory.user_id == user_id).filter(QueryHistory.course_id == course_id
                                                                                   ).update({"messages": messages})
             db.flush()
-            print("DB Flushed")
     except Exception as e:
         print(f"Error in updating history for course: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to update history: {str(e)}")
@@ -33,7 +31,7 @@ def update_course_history(course_id, user_id, messages):
 
 def add_query_to_history(course_id, user_id, query):
     queries = get_history_for_course(course_id, user_id)
-    # ensures there is only one query history entry for this course and user
+    # ensures there is only one query context entry for this course and user
     if queries and len(queries) == 1:
         query_to_update = queries[0]
         if query_to_update.messages and isinstance(query_to_update.messages, list):
@@ -45,9 +43,37 @@ def add_query_to_history(course_id, user_id, query):
                 messages = [query]
                 query_history = QueryHistory(user_id=user_id, course_id=course_id, messages=messages)
                 db.add(query_history)
-                db.commit()
+                db.flush()
                 return
             except Exception as e:
                 db.rollback()
                 raise e
     return
+
+def delete_history(course_id, user_id):
+    try:
+        with get_db() as db:
+            db.query(QueryHistory).filter(QueryHistory.user_id == user_id
+                                          ).filter(QueryHistory.course_id == course_id).delete()
+    except Exception as e:
+        print(f"Error in delete_history_: {type(e).__name__}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete history: {str(e)}")
+
+def get_open_ai_context(course_id, user_id):
+    try:
+        history = get_history_for_course(course_id, user_id)
+        ret = []
+        for m in history[0].messages:
+            user = {
+                "role": "user",
+                "content": m["question"]
+            }
+            assistant = {
+                "role": "assistant",
+                "content": m["answer"]
+            }
+            ret.append(user)
+            ret.append(assistant)
+        return ret
+    except Exception as e:
+        return []
