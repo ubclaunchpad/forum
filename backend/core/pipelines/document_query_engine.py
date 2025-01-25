@@ -416,8 +416,7 @@ class DocumentQueryEngine:
                 messages = ([{
                             "role": "system",
                             "content": "You are a helpful expert who provides accurate but concise information with source citations.",
-                        }] + history
-                            + [{"role": "user", "content": prompt}])
+                        }] + history + [{"role": "user", "content": prompt}])
 
                 # Stream the response
                 stream = self.client.chat.completions.create(
