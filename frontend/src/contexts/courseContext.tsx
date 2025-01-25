@@ -12,7 +12,6 @@ import { getApiUrl } from "@/utils/helpers";
 import { userContext } from "./userContext";
 import { Course } from "@/lib/types/course";
 import { hexToHSL } from "@/lib/utils";
-import { colourPalette } from "../../tailwind.config";
 
 const fonts = {
   "space-grotesk": "var(--font-space-grotesk)",
