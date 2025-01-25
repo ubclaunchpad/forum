@@ -199,7 +199,7 @@ async def query_documents_stream(
                 async for chunk in query_engine.stream_query(
                     question=query.question,
                     course_id=c_id,
-                    context=context,
+                    history=context,
                     template_name=query.template_name,
                 ):
                     answer_json = json.loads(chunk)
