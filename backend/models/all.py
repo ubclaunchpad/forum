@@ -334,3 +334,45 @@ class ChunkRelation(Base):
         CheckConstraint("jsonb_typeof(properties) = 'object'", name="valid_metadata"),
         {"schema": "public"},
     )
+
+
+class jobs(Base):
+    __tablename__ = "jobs"
+    
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    params = Column(JSONB)
+    status = Column(
+        Enum("not started" "running", "success", "failed", name="job_status"), nullable=False
+    )
+    retry_count = Column(Integer, nullable=False)
+    created_at = Column(
+        DateTime, server_default=func.current_timestamp(), nullable=False
+    )
+    updated_at = Column(
+        DateTime, server_default=func.current_timestamp(), nullable=False
+    )
+    priority = Column(
+        Enum("low", "medium", "high", name="job_priority"), nullable=False
+    )
+    recurring = Column(Boolean, nullable=False)
+    recurring_interval = Column(Integer, nullable=True) # measured in seconds
+    recurring_end_date = Column(DateTime, nullable=True)
+
+
+class jobsSpecification(Base):
+    __tablename__ = "jobs_specification"
+    
+    id = Column(
+        PUUID, server_default=text("gen_random_uuid()"), primary_key=True
+    )
+    job_id = Column(
+        PUUID, ForeignKey("public.jobs.id", ondelete="CASCADE"), nullable=False
+    )
+    description = Column(Text, nullable=False)
+    action_name = Column(Text, nullable=False)
+    timeout = Column(Integer, nullable=False)
+    failure_strategy = Column(
+        Enum("retry", "abort", name="job_failure_strategy"), nullable=False
+    )
+    cleanup_action = Column(Text, nullable=True)
+    job_file = Column(String, nullable=False)
