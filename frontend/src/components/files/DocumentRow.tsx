@@ -43,7 +43,7 @@ export default function DocumentRow({
     setDocuments((prev) => prev.filter((d) => d.id !== document.id));
 
     const res = await fetch(
-      `${getApiUrl()}/courses/${course.info.id as string}/documents/${document.id}`,
+      `${getApiUrl()}/courses/${course.id}/documents/${document.id}`,
       {
         method: "DELETE",
         headers: {
@@ -59,7 +59,7 @@ export default function DocumentRow({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ courseId: course.info.id }),
+      body: JSON.stringify({ courseId: course.id }),
     });
 
     if (!res.ok) {

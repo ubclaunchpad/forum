@@ -4,7 +4,7 @@ import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Course, courseContext } from "@/contexts/courseContext";
+import { Course } from "@/lib/types/course";
 import { useState } from "react";
 
 interface CourseSettingsModalProps {
@@ -21,8 +21,8 @@ interface CourseConfig {
 
 export function CourseSettingsModal({ isOpen, onClose, course, onSave }: CourseSettingsModalProps) {
   const [config, setConfig] = useState<CourseConfig>({
-    theme_colour: course?.info?.config?.theme_colour ?? "#000000",
-    font: course?.info?.config?.font ?? "default"
+    theme_colour: course?.config?.theme_colour ?? "#000000",
+    font: course?.config?.font ?? "default"
   });
 
   const handleSave = () => {
@@ -48,13 +48,14 @@ export function CourseSettingsModal({ isOpen, onClose, course, onSave }: CourseS
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="font">Font</Label>
-          <div className="flex gap-2">
-            {["default", "serif", "sans-serif", "monospace"].map((font) => (
+          <Label htmlFor="font" className="text-primary-min">Font</Label>
+          <div className={`flex gap-2`}>
+            {["default", "space-grotesk", "inter", "playfair-display", "roboto-mono"].map((font) => (
               <Button
                 key={font}
                 variant={config.font === font ? "solid" : "outline"}
                 onClick={() => setConfig(prev => ({ ...prev, font }))}
+                className={font === "default" ? "font-quicksand" : font === "space-grotesk" ? "font-space-grotesk" : font === "inter" ? "font-inter" : font === "playfair-display" ? "font-playfair-display" : "font-roboto-mono"}
               >
                 {font}
               </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { courseContext } from "@/contexts/courseContext";
+import { courseContext, setDefaultTheme } from "@/contexts/courseContext";
 import { SmileIcon } from "lucide-react";
 import { Fragment, useContext, useEffect, useState } from "react";
 import { Button } from "../ui/button";
@@ -10,7 +10,7 @@ import { signOut } from "./actions";
 
 export function CourseTopbar() {
   const course = useContext(courseContext);
-  const courseName = `${course.info.c_group} ${course.info.code} ${course.info.name}`;
+  const courseName = `${course.c_group} ${course.code} ${course.name}`;
 
   return (
     <div className="flex relative justify-between  w-full items-center py-2 px-2 ">
@@ -18,6 +18,7 @@ export function CourseTopbar() {
         variant="outline"
         size="md"
         className="border-neutral-200 border h-10 px-4 text-neutral-600"
+        onClick={setDefaultTheme}
       >
         <Link
           href="/forum/courses"

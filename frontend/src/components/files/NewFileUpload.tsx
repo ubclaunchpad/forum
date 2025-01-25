@@ -45,7 +45,7 @@ export default function FileUpload({
     if (!file || !title) return;
 
     try {
-      const link = `${getApiUrl()}/courses/${course.info.id}/documents`;
+      const link = `${getApiUrl()}/courses/${course.id}/documents`;
       const data = new FormData();
       data.append("file", file);
       data.append("title", title);
@@ -64,7 +64,7 @@ export default function FileUpload({
         document: {
           title,
           description: "",
-          course_id: course.info.id as string,
+          course_id: course.id,
         },
       });
 
@@ -107,7 +107,7 @@ export default function FileUpload({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ courseId: course.info.id, type: "documents" }),
+        body: JSON.stringify({ courseId: course.id, type: "documents" }),
       });
     } catch (error) {
       toast({

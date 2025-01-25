@@ -8,27 +8,14 @@ import { getApiUrl } from "@/utils/helpers";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useContext } from "react";
-import { Check, Trash2, Pencil, Settings, X } from "lucide-react";
+import { Check, Trash2, Pencil, Settings, X, Circle } from "lucide-react";
 import { CourseSettingsModal } from "@/components/course/CourseSettingsModal";
-
-interface Course {
-  id: number;
-  c_group: string;
-  code: string;
-  section: string;
-  name: string;
-  info: {
-    config?: {
-      theme_colour?: string;
-      font?: string;
-    };
-  };
-}
+import { Course } from "@/lib/types/course";
 
 export default function CoursesPage() {
   const { token } = useContext(userContext);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Course | null>(null);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -96,7 +83,7 @@ export default function CoursesPage() {
     }
   };
 
-  const handleDelete = async (courseId: number) => {
+  const handleDelete = async (courseId: string) => {
     if (!window.confirm("Are you sure you want to delete this course?")) {
       return;
     }
@@ -142,10 +129,7 @@ export default function CoursesPage() {
           code: selectedCourse.code,
           section: selectedCourse.section,
           name: selectedCourse.name,
-          info: {
-            ...selectedCourse.info,
-            config
-          }
+          config: config
         }),
       });
 
@@ -154,7 +138,7 @@ export default function CoursesPage() {
           course.id === selectedCourse.id 
             ? { 
                 ...course, 
-                info: { ...course.info, config }
+                config
               } 
             : course
         ));
@@ -224,12 +208,15 @@ export default function CoursesPage() {
                       className="flex flex-1 no-underline items-center gap-2"
                       href={`/forum/courses/${course.id}`}
                     >
+                      <button>
+                        <Circle size={18} color={course.config?.theme_colour} fill={course.config?.theme_colour} />
+                      </button>
                       <span className="w-20">{course.c_group}</span>
                       <span className="w-20">{course.code}</span>
                       <span className="w-20">{course.section}</span>
                       <span className="w-full">{course.name}</span>
                     </Link>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2">                  
                       <button 
                         className="p-2 hover:text-blue-600 transition-colors"
                         onClick={() => handleEdit(course)}
