@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request
-from controllers.query_history_controller import get_history_for_course, delete_history, delete_history_after_48_hours
+from controllers.query_history_controller import get_history_for_course, delete_history
 from models.schemas.query_history import GetHistoryResponse
 
 query_history_router = APIRouter()
@@ -22,9 +22,3 @@ async def clear_user_history(c_id: str, request: Request):
     user_id = request.state.user_id
     delete_history(c_id, user_id)
     return {"msg" : "history deleted"}
-
-
-# @query_history_router.delete("/all")
-# add a cron job here
-async def delete_history_job():
-    delete_history_after_48_hours()
