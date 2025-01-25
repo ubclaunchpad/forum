@@ -61,6 +61,10 @@ export function CourseContextProvider({
   useEffect(() => {
     getCourse();
   }, [getCourse]);
+
+  if (!course.id) {
+    return <div></div>;
+  }
   
   return (
     <courseContext.Provider value={course}>{children}</courseContext.Provider>
@@ -71,8 +75,8 @@ export function setTheme(colour?: string, font?: string) {
   const root = document.documentElement;
   
   if (font && font in fonts) {
-    root.style.setProperty('--font-title', fonts[font as keyof typeof fonts]);
-    root.style.setProperty('--font-body', fonts[font as keyof typeof fonts]);
+    root.style.setProperty('--course-font-title', fonts[font as keyof typeof fonts]);
+    root.style.setProperty('--course-font-body', fonts[font as keyof typeof fonts]);
   }
   
   if (colour) {
@@ -95,35 +99,7 @@ export function setTheme(colour?: string, font?: string) {
     };
     
     Object.entries(primaryShades).forEach(([shade, hsl]) => {
-      root.style.setProperty(`--primary-${shade}`, hsl);
+      root.style.setProperty(`--course-primary-${shade}`, hsl);
     });
   }
-}
-
-export function setDefaultTheme() {
-  console.log("default");
-  const root = document.documentElement;
-
-  console.log("font");
-  root.style.setProperty('--font-title', fonts["quicksand" as keyof typeof fonts]);
-  root.style.setProperty('--font-body', fonts["source-sans" as keyof typeof fonts]);
-
-  const primaryShades = {
-    50: colourPalette.jade[50],
-    100: colourPalette.jade[100],
-    200: colourPalette.jade[200],
-    300: colourPalette.jade[300],
-    400: colourPalette.jade[400],
-    500: colourPalette.jade[500],
-    600: colourPalette.jade[600],
-    700: colourPalette.jade[700],
-    800: colourPalette.jade[800],
-    900: colourPalette.jade[900],
-    950: colourPalette.jade[950],
-  };
-  
-  console.log("colours");
-  Object.entries(primaryShades).forEach(([shade, hsl]) => {
-    root.style.setProperty(`--primary-${shade}`, hsl);
-  });
 }

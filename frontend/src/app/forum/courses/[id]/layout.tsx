@@ -16,7 +16,7 @@ export default async function CoursePage({
   return (
     // <ViewTransitions>
     <CourseContextProvider id={id}>
-      <div className="flex flex-col max-h-dvh h-dvh w-dvw overflow-hidden">
+      <div className="course flex flex-col max-h-dvh h-dvh w-dvw overflow-hidden">
         <ClientWrapper>
           <CourseTopbar />
           <CourseNavbar />

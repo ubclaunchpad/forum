@@ -1,10 +1,11 @@
 "use client";
 
-import { courseContext, setDefaultTheme } from "@/contexts/courseContext";
+import { courseContext } from "@/contexts/courseContext";
 import { SmileIcon } from "lucide-react";
 import { Fragment, useContext, useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Searchbar } from "./searchBar";
 import { signOut } from "./actions";
 
@@ -18,14 +19,13 @@ export function CourseTopbar() {
         variant="outline"
         size="md"
         className="border-neutral-200 border h-10 px-4 text-neutral-600"
-        onClick={setDefaultTheme}
       >
         <Link
           href="/forum/courses"
           className="no-underline text-sm font-semibold"
         >
           {courseName}
-        </Link>
+        </Link>  
       </Button>
       <Searchbar />
       <ProfileButton />
