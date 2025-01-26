@@ -175,7 +175,9 @@ class Post(Base):
     events = relationship("UserPostEvent", back_populates="post")
     embeddings = relationship(
         "Embedding",
-        primaryjoin="and_(Post.id==Embedding.entity_id, Embedding.entity_type=='post')",
+        foreign_keys="[Embedding.entity_id]",
+        primaryjoin="and_(Post.id==Embedding.entity_id, "
+                   "Embedding.entity_type=='post')",
         cascade="all, delete-orphan",
         back_populates="post"
     )
@@ -238,7 +240,9 @@ class Document(Base):
     creators = relationship("Profile", back_populates="documents")
     embeddings = relationship(
         "Embedding",
-        primaryjoin="and_(Document.id==Embedding.entity_id, Embedding.entity_type=='document')",
+        foreign_keys="[Embedding.entity_id]",
+        primaryjoin="and_(Document.id==Embedding.entity_id, "
+                   "Embedding.entity_type=='document')",
         cascade="all, delete-orphan",
         back_populates="document"
     )
@@ -294,12 +298,16 @@ class Embedding(Base):
     # Add relationships
     document = relationship(
         "Document",
-        primaryjoin="and_(Document.id==Embedding.entity_id, Embedding.entity_type=='document')",
+        foreign_keys=[entity_id],
+        primaryjoin="and_(Document.id==Embedding.entity_id, "
+                   "Embedding.entity_type=='document')",
         back_populates="embeddings"
     )
     post = relationship(
         "Post",
-        primaryjoin="and_(Post.id==Embedding.entity_id, Embedding.entity_type=='post')",
+        foreign_keys=[entity_id],
+        primaryjoin="and_(Post.id==Embedding.entity_id, "
+                   "Embedding.entity_type=='post')",
         back_populates="embeddings"
     )
 
@@ -319,5 +327,7 @@ class Embedding(Base):
             "jsonb_typeof(chunk_metadata) = 'object' OR chunk_metadata IS NULL",
             name="valid_metadata",
         ),
+        # Add composite index for entity lookups
+        Index("ix_embeddings_entity", entity_type, entity_id),
         {"schema": "public"},
     )

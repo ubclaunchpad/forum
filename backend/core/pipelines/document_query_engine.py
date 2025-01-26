@@ -144,7 +144,7 @@ class DocumentQueryEngine:
                     p.course_id,
                     (1 - (e.embedding <=> {vector_literal}::vector)) * 1.5 as similarity
                 FROM public.posts p
-                JOIN public.embeddings e ON e.entity_id = p.id
+                JOIN public.embeddings e ON e.entity_id = CAST(p.id::text AS uuid)
                 WHERE (1 - (e.embedding <=> {vector_literal}::vector)) * 1.5 > :threshold
                 AND e.embedding IS NOT NULL
                 AND e.entity_type = 'post'
