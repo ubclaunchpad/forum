@@ -166,7 +166,7 @@ class Post(Base):
     course_id = Column(PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"))
     title = Column(Text)
     content = Column(Text)
-    parent_id = Column(Integer)
+    parent_id = Column(PUUID)
     applied_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
     embedding = Column(Vector(1536), nullable=True)
