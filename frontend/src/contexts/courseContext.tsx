@@ -3,13 +3,8 @@
 import {
   createContext,
   ReactNode,
-  useCallback,
-  useContext,
   useEffect,
-  useState,
 } from "react";
-import { getApiUrl } from "@/utils/helpers";
-import { userContext } from "./userContext";
 import { Course } from "@/lib/types/course";
 import { hexToHSL } from "@/lib/utils";
 
@@ -27,44 +22,22 @@ export const courseContext = createContext({} as Course);
 
 export function CourseContextProvider({
   children,
-  id,
+  course,
 }: {
   children: ReactNode;
-  id: string;
+  course: Course;
 }) {
-  const [course, setCourse] = useState<Course>({} as Course);
-  const { token } = useContext(userContext);
-
-  const getCourse = useCallback(async () => {
-    const res = await fetch(`${getApiUrl()}/courses/${id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const courseResp = await res.json();
-    setCourse(courseResp);
-  }, [id, token]);
 
   // Apply theme when course info changes
   useEffect(() => {
     if (!course.config) return;
-
     const themeColour = course.config.theme_colour;
     const font = course.config.font;
     setTheme(themeColour, font)
     
   }, [course.config]);
 
-  useEffect(() => {
-    getCourse();
-  }, [getCourse]);
 
-  if (!course.id) {
-    return <div></div>;
-  }
-  
   return (
     <courseContext.Provider value={course}>{children}</courseContext.Provider>
   );

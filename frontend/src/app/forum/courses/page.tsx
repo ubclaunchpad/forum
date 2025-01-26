@@ -1,34 +1,43 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { userContext } from "@/contexts/userContext";
 import { getApiUrl } from "@/utils/helpers";
 import Link from "next/link";
-import { useEffect, useState, useContext } from "react";
 import { Course } from "@/lib/types/course";
 import { Circle } from "lucide-react";
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
 
-export default function CoursesPage() {
-  const { token } = useContext(userContext);
-  const [courses, setCourses] = useState([]);
+async function getCourses(token: string) {
+  try {
+    const res = await fetch(`${getApiUrl()}/courses`, {
+      next: {
+        tags: [`courses`],
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  useEffect(() => {
-    if (!token) return;
-    const getCourses = async () => {
-      const res = await fetch(`${getApiUrl()}/courses`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const { courses } = await res.json();
+    if (!res.ok) {
+      throw new Error(`Failed to fetch posts: ${res.status}`);
+    }
 
-      return courses;
-    };
-    getCourses().then((courses) => setCourses(courses));
-  }, [token]);
+    const body = await res.json();
+    return body as {courses: Course[]}
+  } catch (e) {
+    console.error("Error fetching course:", e);
+    return {courses: []}
+  }
+}
+
+export default async function CoursesPage() {
+  const supabase = await createClient();
+  const token = (await supabase.auth.getSession())?.data.session?.access_token;
+  if (!token) {
+    redirect("auth/login");
+  }
+  const {courses} = await getCourses(token);
+
 
   return (
     <div className="flex flex-col w-screen h-screen items-center bg-primary-900 justify-center">
@@ -46,10 +55,14 @@ export default function CoursesPage() {
             <li key={course.id}>
               <Link
                 className="flex no-underline items-center justify-between gap-2 p-2 rounded-lg bg-neutral-100 hover:bg-primary-100"
-                href={`/forum/courses/${course.id}`}
+                href={`/forum/courses/${course.id}/forum`}
               >
                 <button>
-                  <Circle size={18} color={course.config?.theme_colour} fill={course.config?.theme_colour} />
+                  <Circle
+                    size={18}
+                    color={course.config?.theme_colour}
+                    fill={course.config?.theme_colour}
+                  />
                 </button>
                 <span className="w-20">{course.c_group}</span>
                 <span className="w-20">{course.code}</span>
