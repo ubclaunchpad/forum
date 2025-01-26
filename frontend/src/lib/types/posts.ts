@@ -3,6 +3,7 @@ export type Post = {
   content: string;
   created_by: string | null;
   id: string;
+  applied_at: string;
 };
 
 type OptimisticOperation = {

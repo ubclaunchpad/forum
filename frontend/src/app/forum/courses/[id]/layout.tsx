@@ -34,8 +34,6 @@ async function getCourse(id: string, token: string) {
   }
 }
 
-
-
 export default async function CoursePage({
   params,
   children,
@@ -62,7 +60,7 @@ export default async function CoursePage({
         <ClientWrapper>
           <CourseTopbar />
           <CourseNavbar />
-          <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+          {children}
         </ClientWrapper>
       </div>
     </CourseContextProvider>

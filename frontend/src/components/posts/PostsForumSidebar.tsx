@@ -176,7 +176,12 @@ export const PostsForumSidebar = ({
 
   return (
     <Fragment>
-      <section className="flex relative flex-col h-full overflow-y-auto min-w-[500px] max-w-[500px]">
+      <section
+        className={cn(
+          "flex relative flex-col h-full overflow-y-auto min-w-[500px] lg:max-w-[500px]",
+          selectedPost ? "hidden xl:block" : "",
+        )}
+      >
         <div className="flex justify-center h-12 flex-shrink-0 border-b w-full gap-2" />
         <ul className="flex flex-col gap-2 p-2">
           {posts.map((post) => (

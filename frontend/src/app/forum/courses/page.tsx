@@ -40,7 +40,7 @@ export default async function CoursesPage() {
 
 
   return (
-    <div className="flex flex-col w-screen h-screen items-center bg-primary-900 justify-center">
+    <div className="flex flex-col w-screen h-screen items-center bg-neutral-100 justify-center">
       <Card className="w-full max-w-2xl rounded-xl p-4 py-8 h-full bg-neutral-50 max-h-[600px] ">
         <div className="flex items-center pb-4 justify-between">
           <h3 className="font-semibold">Your Courses</h3>

@@ -1,15 +1,11 @@
 from controllers import post_controller
 from fastapi import APIRouter, HTTPException, Request
 from models.schemas.general_schema import GeneralResponse
-from models.schemas.post_schema import (
-    CreatePostEditRequest,
-    CreatePostRequest,
-    CreatePostResponse,
-    CreateUserPostEventRequest,
-    GetPostResponse,
-    GetPostsResponse,
-    PostResponse,
-)
+from models.schemas.post_schema import (CreatePostEditRequest,
+                                        CreatePostRequest, CreatePostResponse,
+                                        CreateUserPostEventRequest,
+                                        GetPostResponse, GetPostsResponse,
+                                        PostResponse)
 
 post_router = APIRouter()
 

@@ -26,8 +26,10 @@ export function CourseTopbar() {
           {courseName}
         </Button>
       </Link>
+      <div className="flex flex-1 gap-2 justify-end">
       <Searchbar />
       <ProfileButton />
+      </div>
     </div>
   );
 }

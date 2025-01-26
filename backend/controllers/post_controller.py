@@ -9,13 +9,9 @@ from fastapi.encoders import jsonable_encoder
 from models.all import Post, PostEdit, Profile, UserPostEvent
 from models.db import get_db
 from models.schemas.general_schema import GeneralResponse
-from models.schemas.post_schema import (
-    CreatePostEditRequest,
-    CreatePostRequest,
-    GetPostResponse,
-    PostEditResponse,
-    PostResponse,
-)
+from models.schemas.post_schema import (CreatePostEditRequest,
+                                        CreatePostRequest, GetPostResponse,
+                                        PostEditResponse, PostResponse)
 
 
 def create_post(user_id: str, c_id: str, post_info: CreatePostRequest) -> Post:

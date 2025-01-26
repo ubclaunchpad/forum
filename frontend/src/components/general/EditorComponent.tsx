@@ -81,6 +81,11 @@ const Editor: FC<EditorProps> = ({
       const html = editor.getHTML();
       onMarkdownChange(html);
     },
+    // editorProps: {
+    //   attributes: {
+    //     className: "p-0"
+    //   }
+    // }
   });
 
   useEffect(() => {
@@ -98,11 +103,11 @@ const Editor: FC<EditorProps> = ({
   return (
     <div
       className={cn(
-        "w-full h-full flex flex-col",
+        "w-full h-full flex flex-col ",
         "prose",
         "[&_.ProseMirror]:w-full",
         "[&_.ProseMirror]:h-full",
-        "[&_.ProseMirror]:p-8",
+        "[&_.ProseMirror]:p-0",
         "[&_.ProseMirror]:outline-none",
         "[&_.ProseMirror_p]:my-4",
         "[&_.ProseMirror_h1]:mt-8 [&_.ProseMirror_h1]:mb-4",

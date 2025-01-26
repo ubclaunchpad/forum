@@ -126,21 +126,21 @@ export function Searchbar() {
     <>
       <Button
         variant="ghost"
-        className="flex  items-center font-medium text-neutral-600 rounded-full px-1 bg-white max-w-md  w-full min-w-[500px] border overflow-hidden absolute left-1/2 transform h-10 -translate-x-1/2"
+        className="flex  w-10 items-center font-medium text-neutral-600 rounded-full px-1 bg-white max-w-md  min-w-0 lg:min-w-[500px] lg:w-full  border overflow-hidden lg:absolute lg:left-1/2 lg:transform h-10 lg:-translate-x-1/2"
         onClick={() => {
           window.dialog.showModal();
           const input = document.getElementById("search-input-dialog");
           input?.focus();
         }}
       >
-        <span className="relative flex w-full justify-end">
+        <span className="relative flex w-full justify-center md:justify-end">
           <span className="hidden lg:block lg:absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm ">
             Search documents and posts...
           </span>
           <span className="hidden flex-row gap-1 items-center border rounded-full p-1 px-2 lg:flex lg:absolute top-1/2 left-0 transform -translate-y-1/2 text-sm text-neutral-400">
             <CommandIcon className="w-3 h-3" />+ K
           </span>
-          <SearchIcon className="mr-2 font-normal max-w-4 max-h-4" />
+          <SearchIcon className="md:mr-2 font-normal max-w-4 max-h-4" />
         </span>
       </Button>
 

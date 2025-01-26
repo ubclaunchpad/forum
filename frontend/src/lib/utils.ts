@@ -13,7 +13,7 @@ export function generateTempId(): string {
 }
 
 export function isPendingId(id: string): boolean {
-  return id.startsWith(PENDING_PREFIX);
+  return id.toString().startsWith(PENDING_PREFIX);
 }
 
 
@@ -41,4 +41,31 @@ export function hexToHSL(hex: string) {
     h *= 60;
   }
   return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) };
+}
+
+/**
+ * Convert a date to a relative time string, such as
+ * "a minute ago", "in 2 hours", "yesterday", "3 months ago", etc.
+ * using Intl.RelativeTimeFormat
+ */
+export function getRelativeTimeString(
+  date: Date | number,
+  lang = navigator.language,
+  relativeCutoff = 30 // Default 30 days
+): string {
+  const timeMs = typeof date === "number" ? date : date.getTime();
+  const deltaSeconds = Math.round((timeMs - Date.now()) / 1000);
+  
+  // Check if beyond cutoff
+  if (Math.abs(deltaSeconds) > relativeCutoff * 86400) {
+    const d = new Date(timeMs);
+    return d.toLocaleDateString('en-GB'); // dd/mm/yyyy format
+  }
+
+  const cutoffs = [60, 3600, 86400, 86400 * 7, 86400 * 30, 86400 * 365, Infinity];
+  const units: Intl.RelativeTimeFormatUnit[] = ["second", "minute", "hour", "day", "week", "month", "year"];
+  const unitIndex = cutoffs.findIndex(cutoff => cutoff > Math.abs(deltaSeconds));
+  const divisor = unitIndex ? cutoffs[unitIndex - 1] : 1;
+  const rtf = new Intl.RelativeTimeFormat(lang, { numeric: "auto" });
+  return rtf.format(Math.floor(deltaSeconds / divisor), units[unitIndex]);
 }

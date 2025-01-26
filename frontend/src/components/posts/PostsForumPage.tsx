@@ -2,9 +2,10 @@
 
 import { Post } from "@/lib/types/posts";
 import { PostsForumSidebar } from "./PostsForumSidebar";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import PostView from "./PostView";
 import { useRouter } from "next/navigation";
+import { courseContext } from "@/contexts/courseContext";
 
 export const PostsForumPage = ({
   posts,
@@ -13,6 +14,7 @@ export const PostsForumPage = ({
   posts: Post[];
   initalPost?: string;
 }) => {
+  const course = useContext(courseContext);
   const foundPost = initalPost
     ? posts.find((post) => post.id === initalPost)
     : null;
@@ -31,7 +33,12 @@ export const PostsForumPage = ({
     setPostAndRoute(post);
   }
 
-  function setPostAndRoute(post: Post): void {
+  function setPostAndRoute(post: Post | null): void {
+    if (!post) {
+      setSelectedPost(null);
+      router.push(`/forum/courses/${course.id}/forum`);
+      return;
+    }
     if (selectedPost) {
       router.push(post.id);
     } else {
@@ -59,6 +66,7 @@ export const PostsForumPage = ({
             <PostView
               post={selectedPost}
               setListOfPosts={setListofPosts}
+              setSelectedPost={setPostAndRoute}
               isEditing={isEditing}
               setIsEditing={setIsEditing}
             />

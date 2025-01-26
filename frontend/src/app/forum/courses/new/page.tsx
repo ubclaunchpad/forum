@@ -6,13 +6,14 @@ import { ToastAction } from "@/components/ui/toast";
 import { getApiUrl } from "@/utils/helpers";
 import { userContext } from "@/contexts/userContext";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const inputStyle =
   "rounded-full w-full px-3 py-4 h-12 border border-neutral-200 focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
 
 const formSchema = z.object({
-  name: z.string().min(6, {
-    message: "Course name must be at least 6 characters long",
+  name: z.string().min(4, {
+    message: "Course name must be at least 4 characters long",
   }),
   code: z.coerce.number().int().positive(),
   c_group: z.string(),
@@ -25,10 +26,10 @@ export default function CoursesNewPage() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  // const router = useRouter();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
@@ -52,6 +53,7 @@ export default function CoursesNewPage() {
 
       const body = await res.json();
       const { id } = body;
+      router.prefetch(`/forum/courses/${id}`);
 
       toast({
         title: "Course created",
@@ -85,7 +87,7 @@ export default function CoursesNewPage() {
   };
 
   return (
-    <div className="flex flex-col w-dvw h-dvh bg-primary-800 items-center justify-center">
+    <div className="flex flex-col w-dvw h-dvh bg-neutral-100 items-center justify-center">
       <section className="max-w-xl bg-neutral-50 flex flex-col w-full border rounded-lg gap-10 shadow p-8">
         <h3 className="font-semibold">New Course</h3>
         <form
