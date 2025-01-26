@@ -39,7 +39,7 @@ export default function FileViewer({
       setIsLoading(true);
       try {
         const response = await fetch(
-          `${getApiUrl()}/courses/${course.info.id}/documents/${document.id}/signed_url`,
+          `${getApiUrl()}/courses/${course.id}/documents/${document.id}/signed_url`,
           {
             method: "GET",
             headers: {
@@ -77,7 +77,7 @@ export default function FileViewer({
       }
     }
     fetchDocumentContent();
-  }, [course.info.id, document, toast, token]);
+  }, [course.id, document, toast, token]);
 
   // No document selected
   if (document === undefined) {

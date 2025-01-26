@@ -132,7 +132,7 @@ export const NewPost = ({
                   {
                     title,
                     content,
-                    courseId: course.info.id as string,
+                    courseId: course.id,
                   },
                   user.token,
                 )

@@ -73,7 +73,7 @@ export function Searchbar() {
   const [search, setSearch] = useState("");
 
   const { queryDocuments, response, isLoading } = useDocumentQuery({
-    courseId: course.info.id as string,
+    courseId: course.id,
     token,
   });
 

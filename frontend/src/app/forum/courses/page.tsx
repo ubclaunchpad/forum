@@ -5,9 +5,9 @@ import { Card } from "@/components/ui/card";
 import { userContext } from "@/contexts/userContext";
 import { getApiUrl } from "@/utils/helpers";
 import Link from "next/link";
-import { useEffect } from "react";
-import { useState } from "react";
-import { useContext } from "react";
+import { useEffect, useState, useContext } from "react";
+import { Course } from "@/lib/types/course";
+import { Circle } from "lucide-react";
 
 export default function CoursesPage() {
   const { token } = useContext(userContext);
@@ -42,12 +42,15 @@ export default function CoursesPage() {
           </Link>
         </div>
         <ul className="bg-neutral-100 rounded-lg border border-neutral-200 overflow-hidden">
-          {courses.map((course) => (
+          {courses.map((course: Course) => (
             <li key={course.id}>
               <Link
                 className="flex no-underline items-center justify-between gap-2 p-2 rounded-lg bg-neutral-100 hover:bg-primary-100"
                 href={`/forum/courses/${course.id}`}
               >
+                <button>
+                  <Circle size={18} color={course.config?.theme_colour} fill={course.config?.theme_colour} />
+                </button>
                 <span className="w-20">{course.c_group}</span>
                 <span className="w-20">{course.code}</span>
                 <span className="w-20">{course.section}</span>

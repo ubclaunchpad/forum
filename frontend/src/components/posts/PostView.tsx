@@ -48,7 +48,7 @@ export default function PostView({
       });
     });
     const res = await fetch(
-      `${getApiUrl()}/courses/${course.info.id as string}/posts/${post.id}`,
+      `${getApiUrl()}/courses/${course.id as string}/posts/${post.id}`,
       {
         method: "PATCH",
         headers: {
@@ -65,7 +65,7 @@ export default function PostView({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ courseId: course.info.id }),
+          body: JSON.stringify({ courseId: course.id }),
         });
       }
     } else {

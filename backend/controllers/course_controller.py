@@ -9,6 +9,7 @@ from models.schemas.course_schema import (
     CourseResponse,
     CreateCourseReq,
     CreateCourseResponse,
+    UpdateCourseReq,
 )
 from pydantic import ValidationError
 
@@ -152,3 +153,25 @@ def get_course_members(c_id: str) -> List[Dict[str, str]]:
                 {"id": str(user.id), "name": user.first_name + " " + user.last_name}
             )
         return members
+
+def update_course(create_course_req: UpdateCourseReq, c_id: str):
+    with get_db() as db:
+        c_uuid = UUID(c_id)
+
+        course = db.query(Course).filter(Course.id == c_uuid).first()
+
+        if not course:
+            raise HTTPException(status_code=404, detail="Course not found")
+
+        course.c_group = create_course_req.c_group
+        course.code = create_course_req.code
+        course.section = create_course_req.section
+        course.name = create_course_req.name
+        course.config = jsonable_encoder(create_course_req.config)
+        course.start_date = create_course_req.start_date
+        course.end_date = create_course_req.end_date
+
+        db.commit()
+        db.refresh(course)
+
+        return course

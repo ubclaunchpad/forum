@@ -43,7 +43,7 @@ const PostCard = ({
     const toDelete = post;
     setListOfPosts((prev) => prev.filter((p) => p.id !== post.id));
     const res = await fetch(
-      `${getApiUrl()}/courses/${course.info.id as string}/posts/${post.id}`,
+      `${getApiUrl()}/courses/${course.id as string}/posts/${post.id}`,
       {
         method: "DELETE",
         headers: {
@@ -58,7 +58,7 @@ const PostCard = ({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ courseId: course.info.id }),
+      body: JSON.stringify({ courseId: course.id }),
     });
 
     if (!res.ok) {

@@ -4,13 +4,16 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+class CourseConfig(BaseModel):
+    theme_colour: Optional[str] = None
+    font: Optional[str] = None
 
 class CourseBase(BaseModel):
     c_group: str
     code: int
     section: int
     name: Optional[str] = None
-    config: Optional[Dict] = None
+    config: Optional[CourseConfig] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
 
@@ -28,10 +31,10 @@ class CreateCourseResponse(BaseModel):
 
 class UpdateCourseReq(BaseModel):
     c_group: Optional[str] = None
-    code: Optional[str] = None
-    section: Optional[str] = None
+    code: Optional[int] = None
+    section: Optional[int] = None
     name: Optional[str] = None
-    config: Optional[Dict] = None
+    config: Optional[CourseConfig] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
 
