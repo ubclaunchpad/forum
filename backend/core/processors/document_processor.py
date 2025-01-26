@@ -4,10 +4,10 @@ import logging
 import os
 import time
 from typing import Dict, List
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from core.parsers.document_parser import DocumentParser
-from models.all import Chunk, Document
+from models.all import Document, Embedding
 from openai import OpenAI
 from sqlalchemy.orm import Session
 
@@ -113,18 +113,18 @@ class DocumentProcessor:
 
     def _process_chunks(
         self, document_id: UUID, chunks_data: List[Dict]
-    ) -> List[Chunk]:
+    ) -> List[Embedding]:
         """Process chunk data into database records with embeddings."""
-        chunks = []
+        embeddings = []
 
         for idx, chunk_data in enumerate(chunks_data):
             chunk_start = time.time()
 
             try:
-                # Create chunk
-                chunk = Chunk(
-                    id=uuid4(),
-                    document_id=document_id,
+                # Create embedding
+                embedding = Embedding(
+                    entity_type="document",
+                    entity_id=document_id,
                     content=chunk_data["content"],
                     chunk_type=chunk_data["chunk_type"],
                     chunk_index=chunk_data["chunk_index"],
@@ -133,9 +133,9 @@ class DocumentProcessor:
                         chunk_data["content"]
                     ),
                 )
-                self.db.add(chunk)
+                self.db.add(embedding)
 
-                chunks.append(chunk)
+                embeddings.append(embedding)
 
                 logger.debug(
                     "Chunk processed",
@@ -158,7 +158,7 @@ class DocumentProcessor:
                 )
                 raise e
 
-        return chunks
+        return embeddings
 
     def __enter__(self):
         return self
