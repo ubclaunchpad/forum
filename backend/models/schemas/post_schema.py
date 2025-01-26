@@ -65,3 +65,5 @@ class GetPostsResponse(BaseModel):
 
 class GetPostResponse(BaseModel):
     post: PostResponse
+    stats: dict
+    user_interactions: dict
