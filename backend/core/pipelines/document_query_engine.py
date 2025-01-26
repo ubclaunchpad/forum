@@ -55,7 +55,7 @@ class DocumentQueryEngine:
             raise FileNotFoundError("Required default.txt template not found")
         return templates
 
-    def _find_relevant_chunks(
+    def _find_relevant_document_chunks(
         self,
         question_embedding: List[float],
         threshold: float = 0.0,
@@ -126,7 +126,7 @@ class DocumentQueryEngine:
             logger.error("Error finding relevant chunks", exc_info=True)
             raise e
 
-    def _find_post_relevant_posts(
+    def _find_relevant_post_chunks(
         self,
         question_embedding: List[float],
         threshold: float = 0.0,
@@ -307,10 +307,10 @@ class DocumentQueryEngine:
         """Process a query through the RAG pipeline."""
         try:
             question_embedding = self.embedding_processor.generate_embedding(question)
-            relevant_chunks = self._find_relevant_chunks(
+            relevant_chunks = self._find_relevant_document_chunks(
                 question_embedding, threshold=0.0, course_id=course_id
             )
-            relevant_posts = self._find_post_relevant_posts(
+            relevant_posts = self._find_relevant_post_chunks(
                 question_embedding, threshold=0.0, course_id=course_id
             )
 
@@ -381,10 +381,10 @@ class DocumentQueryEngine:
         """Process a query through the RAG pipeline with streaming response."""
         try:
             question_embedding = self.embedding_processor.generate_embedding(question)
-            relevant_chunks = self._find_relevant_chunks(
+            relevant_chunks = self._find_relevant_document_chunks(
                 question_embedding, threshold=0.0, course_id=course_id
             )
-            relevant_posts = self._find_post_relevant_posts(
+            relevant_posts = self._find_relevant_post_chunks(
                 question_embedding, threshold=0.0, course_id=course_id
             )
 
