@@ -157,6 +157,8 @@ class Course(Base):
         {"schema": "public"},
     )
 
+    roles = relationship("CourseRoles", back_populates = "course")
+
 
 class Post(Base):
     __tablename__ = "posts"
@@ -334,3 +336,85 @@ class ChunkRelation(Base):
         CheckConstraint("jsonb_typeof(properties) = 'object'", name="valid_metadata"),
         {"schema": "public"},
     )
+
+class VisibilityEnum(enum.Enum):
+    public = "public"
+    private = "private"
+    
+class CourseRoles(Base):
+    __tablename__ = 'course_roles'
+
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    course_id = Column(PUUID, ForeignKey('public.courses.id', ondelete = "CASCADE"), nullable = False)
+    name = Column(String(255), nullable=False)  # 'owner', 'admin', 'user', 'viewer'
+    description = Column(Text)  # Optional description
+    visibility = Column(Enum(VisibilityEnum, native_enum = True), nullable=False)
+    created_by = Column(PUUID, ForeignKey('auth.users.id'), nullable = False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    course = relationship("Courses", back_populates = "roles")
+    user = relationship("Users")
+
+class CourseUserRoles(Base):
+    __tablename__ = 'course_user_roles'
+
+    course_role_id = Column(PUUID, ForeignKey('public.course_roles.id', ondelete="CASCADE"), primary_key=True)
+    user_id = Column(PUUID, ForeignKey('auth.users.id', ondelete="CASCADE"), primary_key=True)
+    assigned_by = Column(PUUID, ForeignKey('auth.users.id', ondelete="SET NULL"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    course_role = relationship("CourseRoles")
+    user = relationship("Users", foreign_keys=[user_id])
+    assigned_by_user = relationship("Users", foreign_keys=[assigned_by])
+
+class PermissionTypeEnum(enum.Enum):
+    Self = "Self"
+    Others = "Others"
+
+class Permissions(Base):
+    __tablename__ = 'permissions'
+
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    area = Column(String(255), nullable=False)  # 'post', 'comment', etc.
+    type = Column(Enum(PermissionTypeEnum, native_enum = True), nullable=False)
+    access = Column(String(255), nullable=False)  # 'read', 'write', 'delete', etc.
+    description = Column(Text)
+
+class CourseRolePermissions(Base):
+    __tablename__ = 'course_role_permissions'
+
+    course_role_id = Column(PUUID, ForeignKey('public.course_roles.id', ondelete="CASCADE"), primary_key=True)
+    permission_id = Column(PUUID, ForeignKey('public.permissions.id', ondelete="CASCADE"), primary_key=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    course_role = relationship("CourseRoles")
+    permission = relationship("Permissions")
+
+class Tags(Base):
+    __tablename__ = 'tags'
+
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    name = Column(String(255), nullable=False)
+    visibility = Column(Enum(VisibilityEnum), nullable=False)
+    course_id = Column(PUUID, ForeignKey('public.courses.id', ondelete="CASCADE"))
+    parent_tag_id = Column(PUUID, ForeignKey('public.tags.id', ondelete="CASCADE"))
+    created_by = Column(PUUID, ForeignKey('auth.users.id', ondelete="SET NULL"))
+    properties = Column(JSONB)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    course = relationship("Course")
+    parent_tag = relationship("Tags", remote_side=[id])
+    user = relationship("Users")
+
+class RoleTagAssociations(Base):
+    __tablename__ = 'role_tag_associations'
+
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    role_id = Column(PUUID, ForeignKey('public.course_roles.id', ondelete="CASCADE"))
+    tag_id = Column(PUUID, ForeignKey('public.tags.id', ondelete="CASCADE"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    course_role = relationship("CourseRoles")
+    tag = relationship("Tags")
