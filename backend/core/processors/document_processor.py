@@ -7,7 +7,7 @@ from typing import Dict, List
 from uuid import UUID, uuid4
 
 from core.parsers.document_parser import DocumentParser
-from models.all import Chunk, ChunkRelation, Document
+from models.all import Chunk, Document
 from openai import OpenAI
 from sqlalchemy.orm import Session
 
@@ -116,7 +116,6 @@ class DocumentProcessor:
     ) -> List[Chunk]:
         """Process chunk data into database records with embeddings."""
         chunks = []
-        prev_chunk = None
 
         for idx, chunk_data in enumerate(chunks_data):
             chunk_start = time.time()
@@ -136,22 +135,7 @@ class DocumentProcessor:
                 )
                 self.db.add(chunk)
 
-                # Create relation if needed
-                if prev_chunk:
-                    relation = ChunkRelation(
-                        id=uuid4(),
-                        source_chunk_id=prev_chunk.id,
-                        target_chunk_id=chunk.id,
-                        relation_type="continuation_of",
-                        properties={
-                            "order": chunk_data["chunk_index"],
-                            "type": "sequential",
-                        },
-                    )
-                    self.db.add(relation)
-
                 chunks.append(chunk)
-                prev_chunk = chunk
 
                 logger.debug(
                     "Chunk processed",

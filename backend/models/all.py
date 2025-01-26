@@ -271,18 +271,6 @@ class Chunk(Base):
         backref=backref("parent_chunk", remote_side=[id]),
         cascade="all, delete-orphan",
     )
-    outgoing_relations = relationship(
-        "ChunkRelation",
-        foreign_keys="ChunkRelation.source_chunk_id",
-        back_populates="source_chunk",
-        cascade="all, delete-orphan",
-    )
-    incoming_relations = relationship(
-        "ChunkRelation",
-        foreign_keys="ChunkRelation.target_chunk_id",
-        back_populates="target_chunk",
-        cascade="all, delete-orphan",
-    )
 
     __table_args__ = (
         Index(
@@ -301,36 +289,3 @@ class Chunk(Base):
         {"schema": "public"},
     )
 
-
-class ChunkRelation(Base):
-    __tablename__ = "chunk_relations"
-
-    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-    source_chunk_id = Column(
-        PUUID, ForeignKey("public.chunks.id", ondelete="CASCADE"), nullable=False
-    )
-    target_chunk_id = Column(
-        PUUID, ForeignKey("public.chunks.id", ondelete="CASCADE"), nullable=False
-    )
-    relation_type = Column(String(50), nullable=False)
-    properties = Column(JSONB)
-    created_at = Column(
-        DateTime, server_default=func.current_timestamp(), nullable=False
-    )
-
-    # Relationships
-    source_chunk = relationship(
-        "Chunk", foreign_keys=[source_chunk_id], back_populates="outgoing_relations"
-    )
-    target_chunk = relationship(
-        "Chunk", foreign_keys=[target_chunk_id], back_populates="incoming_relations"
-    )
-
-    __table_args__ = (
-        CheckConstraint(
-            "relation_type IN ('contains', 'references', 'similar_to', 'continuation_of')",
-            name="valid_relation_type",
-        ),
-        CheckConstraint("jsonb_typeof(properties) = 'object'", name="valid_metadata"),
-        {"schema": "public"},
-    )
