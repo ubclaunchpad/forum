@@ -97,23 +97,23 @@ def update_post(
                 raise HTTPException(status_code=404, detail="Post not found")
 
             embedding_processor = EmbeddingProcessor()
-            post.embedding = embedding_processor.generate_embedding(
-                post_edit_info.new_content
-            )
+            # post.embedding = embedding_processor.generate_embedding(
+            #     post_edit_info.new_content
+            # )
             post.content = post_edit_info.new_content
 
-            post_edit = PostEdit(
-                post_id=post_id,
-                edited_by=user_id,
-                new_content=post_edit_info.new_content,
-                edit_reason=post_edit_info.edit_reason,
-                # embedding=post.embedding,
-            )
+            # post_edit = PostEdit(
+            #     post_id=post_id,
+            #     edited_by=user_id,
+            #     new_content=post_edit_info.new_content,
+            #     edit_reason=post_edit_info.edit_reason,
+            #     # embedding=post.embedding,
+            # )
 
-            db.add(post_edit)
+            # db.add(post_edit)
             db.flush()
             return PostEditResponse(
-                id=int(str(post_edit.id)),
+                id=int(str(post.id)),
                 edited_by=UUID(user_id),
                 new_content=post_edit_info.new_content,
                 edit_reason=post_edit_info.edit_reason,
