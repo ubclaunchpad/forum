@@ -219,7 +219,7 @@ dialog {
   }
 }
 
-.loading-shimmer {
+/* .loading-shimmer {
   position: absolute;
   top: 0;
   left: 0;
@@ -247,7 +247,7 @@ dialog {
     transparent 100%
   );
   animation: shimmer-reverse 2s infinite;
-}
+} */
 
 .react-pdf__Document {
   width: 100%;
@@ -301,3 +301,22 @@ dialog {
 ::view-transition-new(vr) {
   animation: blurIn 0.1s;
 } */
+
+.tiptap-math.latex {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+}
+
+.tiptap-math.latex.ProseMirror-selectednode {
+  outline: 1px solid black;
+}
+
+.tiptap-math.result {
+  background-color: #78e65618;
+  border-bottom: rgb(68, 194, 68) 2px solid;
+  padding-left: 4px;
+  padding-right: 2px;
+  height: fit-content;
+}
+

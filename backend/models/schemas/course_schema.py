@@ -4,9 +4,11 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+
 class CourseConfig(BaseModel):
     theme_colour: Optional[str] = None
     font: Optional[str] = None
+
 
 class CourseBase(BaseModel):
     c_group: str

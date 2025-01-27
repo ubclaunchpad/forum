@@ -236,13 +236,13 @@ export default function PostView<T extends PostType>({
             handleSave={handleSaveAction}
           />
         </Suspense>
-        {!isTemporary && (
+        {/* {!isTemporary && (
           <div className="flex flex-col font-semibold gap-4 p-4">
             <div className="flex flex-col gap-2">
               <h4>Comments</h4>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

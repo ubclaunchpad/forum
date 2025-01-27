@@ -154,6 +154,7 @@ def get_course_members(c_id: str) -> List[Dict[str, str]]:
             )
         return members
 
+
 def update_course(create_course_req: UpdateCourseReq, c_id: str):
     with get_db() as db:
         c_uuid = UUID(c_id)

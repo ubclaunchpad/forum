@@ -9,16 +9,15 @@ import { redirect } from "next/navigation";
 
 async function getCourse(id: string, token: string) {
   try {
-    const res = await fetch(`${getApiUrl()}/courses/${id}`, {
-      cache: "force-cache",
+       const res = await fetch(`${getApiUrl()}/courses/${id}`, {
       next: {
         revalidate: 3600,
         tags: [`course-${id}`],
       },
       headers: {
-        "Cache-Control": "public, s-maxage=600, stale-while-revalidate=86400",
-        Authorization: `Bearer ${token}`,
-      },
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+        "Authorization": `Bearer ${token}`,
+      }
     });
 
     if (!res.ok) {

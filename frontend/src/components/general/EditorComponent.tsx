@@ -24,6 +24,9 @@ import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import TableRow from "@tiptap/extension-table-row";
 import Placeholder from "@tiptap/extension-placeholder";
+import Link from '@tiptap/extension-link'
+import MathExtension from '@aarkue/tiptap-math-extension';
+
 
 import { FC, useEffect } from "react";
 
@@ -89,6 +92,9 @@ const Editor: FC<EditorProps> = ({
         },
       }),
       Document,
+      Link.configure({
+        protocols: ['ftp', 'mailto'],
+      }),
       Paragraph,
       Text,
       Heading.configure({
@@ -100,6 +106,11 @@ const Editor: FC<EditorProps> = ({
       ListItem,
       Blockquote,
       History,
+      MathExtension.configure({ evaluation: true,
+        katexOptions: {
+          output: "mathml"
+        }
+       }),
       Table.configure({
         resizable: true,
       }),
