@@ -322,8 +322,6 @@ class DocumentQueryEngine:
 
             all_contexts = relevant_chunks + relevant_posts
             prompt = self._build_prompt(question, all_contexts, template_name)
-            print(prompt)
-
             try:
                 response = self.client.chat.completions.create(
                     model=self.model,
