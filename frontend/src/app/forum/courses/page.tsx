@@ -80,13 +80,11 @@ export default async function CoursesPage() {
                   }}
                 >
                   <ArrowRightCircleIcon
-                   className=" w-4 h-4"
+                    className=" w-4 h-4"
                     style={{
                       stroke: `${shades[course.id]?.[600] || "var(--primary-600)"}`,
-                      color: `${shades[course.id]?.[600] || "var(--primary-600)"}`
-  
+                      color: `${shades[course.id]?.[600] || "var(--primary-600)"}`,
                     }}
-                   
                   />
                 </div>
 

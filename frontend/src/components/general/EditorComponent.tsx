@@ -23,8 +23,7 @@ import Table from "@tiptap/extension-table";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import TableRow from "@tiptap/extension-table-row";
-import Placeholder from '@tiptap/extension-placeholder'
-
+import Placeholder from "@tiptap/extension-placeholder";
 
 import { FC, useEffect } from "react";
 
@@ -39,7 +38,7 @@ const editorClasses = cn(
   "w-full h-full flex flex-col",
   "prose",
   "[&_.ProseMirror]:w-full",
-  "[&_.ProseMirror]:h-full", 
+  "[&_.ProseMirror]:h-full",
   "[&_.ProseMirror]:p-0",
   "[&_.ProseMirror]:outline-none",
   "[&_.ProseMirror_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)]",
@@ -49,7 +48,7 @@ const editorClasses = cn(
   "[&_.ProseMirror_p.is-editor-empty:first-child]:before:pointer-events-none",
   "[&_.ProseMirror_p]:my-4",
   "[&_.ProseMirror_h1]:mt-8 [&_.ProseMirror_h1]:mb-4",
-  "[&_.ProseMirror_h2]:mt-6 [&_.ProseMirror_h2]:mb-4", 
+  "[&_.ProseMirror_h2]:mt-6 [&_.ProseMirror_h2]:mb-4",
   "[&_.ProseMirror_h3]:mt-4 [&_.ProseMirror_h3]:mb-2",
   "[&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:border-primary-400 [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:my-4",
   "[&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:my-4",
@@ -57,8 +56,8 @@ const editorClasses = cn(
   "[&_.ProseMirror_li]:marker:text-neutral-900",
   "[&_.ProseMirror_li]:pl-2",
   "[&_.ProseMirror_li>p]:inline-block",
-  "[&_.ProseMirror_li>p]:my-0"
-)
+  "[&_.ProseMirror_li>p]:my-0",
+);
 
 interface EditorProps {
   markdown: string;
@@ -78,15 +77,15 @@ const Editor: FC<EditorProps> = ({
     extensions: [
       Placeholder.configure({
         placeholder: ({ node }) => {
-          console.log(node)
+          console.log(node);
           if (node.isText && (!node.text || node.text?.length <= 0)) {
-            return "..."
+            return "...";
           }
-          if (node.type.name === 'heading') {
-            return 'What’s the title?'
+          if (node.type.name === "heading") {
+            return "What’s the title?";
           }
-      
-          return 'Write here....'
+
+          return "Write here....";
         },
       }),
       Document,
@@ -121,7 +120,7 @@ const Editor: FC<EditorProps> = ({
       const html = editor.getHTML();
       onMarkdownChange(html);
     },
-  
+
     // editorProps: {
     //   attributes: {
     //     className: "p-0"

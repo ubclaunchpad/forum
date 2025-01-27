@@ -6,7 +6,7 @@ import { courseContext } from "@/contexts/courseContext";
 import { useToast } from "@/hooks/use-toast";
 import { userContext } from "@/contexts/userContext";
 import { ArrowRightFromLine, DotIcon } from "lucide-react";
-import {  getRelativeTimeString, isIDTemporary } from "@/lib/utils";
+import { getRelativeTimeString, isIDTemporary } from "@/lib/utils";
 import { forumPostsContext } from "@/contexts/PostsContext";
 import PostTextEditor from "./PostTextEditor";
 
@@ -29,19 +29,17 @@ export default function PostView<T extends PostType>({
 
   const oldContent = post?.content;
 
-  const [title, setTitle] = useState(post?.title?? "");
-  const [content, setContent] = useState(post?.content?? "");
+  const [title, setTitle] = useState(post?.title ?? "");
+  const [content, setContent] = useState(post?.content ?? "");
 
   const isTemporary = isIDTemporary(post?.id);
 
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
 
-  
-
   async function handleSaveAction() {
     if (isIDTemporary(post.id)) {
-      await handlePublish()
+      await handlePublish();
     } else {
       await handleSave();
     }
@@ -74,7 +72,7 @@ export default function PostView<T extends PostType>({
         setListOfDrafts((prev) => prev.filter((p) => p.id !== post.id));
 
         // Add to list of posts
-        setListOfPosts((prev) => [newPost, ...prev ]);
+        setListOfPosts((prev) => [newPost, ...prev]);
 
         // Update selected post to the new published version
         setSelectedPost(newPost);
@@ -153,7 +151,7 @@ export default function PostView<T extends PostType>({
         },
         body: JSON.stringify({
           ...requestData,
-          post_id: parseInt(requestData.post_id)
+          post_id: parseInt(requestData.post_id),
         }),
       },
     );
@@ -185,10 +183,9 @@ export default function PostView<T extends PostType>({
     setIsSaving(false);
   }
 
-
   useEffect(() => {
-    setContent(post.content?? "");
-    setTitle(post.title?? "")
+    setContent(post.content ?? "");
+    setTitle(post.title ?? "");
   }, [post]);
 
   return (
@@ -231,21 +228,22 @@ export default function PostView<T extends PostType>({
 
         {isSaving && <div className="shimmer-reverse"></div>}
         <Suspense fallback={null}>
-          <PostTextEditor post={post}
-          title={title}
-          content={content}
-          setTitle={setTitle}
-          setContent={setContent}
-          handleSave={handleSaveAction}
-           />
+          <PostTextEditor
+            post={post}
+            title={title}
+            content={content}
+            setTitle={setTitle}
+            setContent={setContent}
+            handleSave={handleSaveAction}
+          />
         </Suspense>
         {!isTemporary && (
-        <div className="flex flex-col font-semibold gap-4 p-4">
-          <div className="flex flex-col gap-2">
-            <h4>Comments</h4>
+          <div className="flex flex-col font-semibold gap-4 p-4">
+            <div className="flex flex-col gap-2">
+              <h4>Comments</h4>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </div>
   );

@@ -40,7 +40,7 @@ const config: Config = {
         sans: ["var(--font-quicksand)", "var(--font-figtree)", "sans-serif"],
         title: ["var(--font-title)"],
         body: ["var(--font-body)"],
-        quicksand: ['var(--font-quicksand)', 'sans-serif'],
+        quicksand: ["var(--font-quicksand)", "sans-serif"],
         "space-grotesk": ["var(--font-space-grotesk)", "sans-serif"],
         inter: ["var(--font-inter)", "sans-serif"],
         "playfair-display": ["var(--font-playfair-display)", "serif"],

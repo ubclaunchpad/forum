@@ -108,7 +108,7 @@
 
     ::selection {
       background: var(--primary-200);
-      color:  var(--primary-800);
+      color: var(--primary-800);
     }
   }
 

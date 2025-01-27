@@ -6,7 +6,7 @@ export type Post = {
   applied_at: string;
 };
 
-export type PostWithRequiredId = { id: string } & Partial<Omit<Post, 'id'>>;
+export type PostWithRequiredId = { id: string } & Partial<Omit<Post, "id">>;
 
 type OptimisticOperation = {
   operation: "optimistic";

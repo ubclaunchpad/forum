@@ -5,7 +5,7 @@ export type Course = {
   section: string;
   name: string;
   config?: {
-      theme_colour?: string;
-      font?: string;
+    theme_colour?: string;
+    font?: string;
   };
-}
+};

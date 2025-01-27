@@ -99,7 +99,6 @@ function ProfileButton() {
   );
 }
 
-
 function CourseButton() {
   const [isOpen, setIsOpen] = useState(false);
   const course = useContext(courseContext);
@@ -126,7 +125,7 @@ function CourseButton() {
                 Course Settings
               </Link>
               <button
-              disabled
+                disabled
                 className="w-full text-neutral-400 disabled:hover:text-neutral-400 cursor-not-allowed no-underline hover:text-primary-500 p-1 px-2 text-sm flex items-center gap-2"
                 onClick={() => {
                   // Add leave course functionality here
@@ -146,7 +145,7 @@ function CourseButton() {
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "border-neutral-200 border h-10 px-4 text-neutral-600",
-          isOpen ? "shadow-lg" : "shadow-sm"
+          isOpen ? "shadow-lg" : "shadow-sm",
         )}
       >
         {courseName}

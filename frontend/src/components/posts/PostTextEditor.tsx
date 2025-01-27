@@ -51,12 +51,12 @@ export default function PostTextEditor({
                 className="px-2 hover:text-neutral-700"
                 size="sm"
                 onClick={() => {
-                    setTitle(post.title??"")
-                    setContent(post.content??"")
-                    setIsEditing(null)
+                  setTitle(post.title ?? "");
+                  setContent(post.content ?? "");
+                  setIsEditing(null);
                 }}
               >
-                <XIcon/>
+                <XIcon />
                 Cancel
               </Button>
             ) : (
@@ -66,20 +66,24 @@ export default function PostTextEditor({
                 size="sm"
                 onClick={() => setIsEditing(post.id)}
               >
-                <PencilIcon/>
+                <PencilIcon />
                 Edit
               </Button>
             )}
 
             {isEditing && (
               <Button
-              className="px-4 "
+                className="px-4 "
                 variant={`${isEditing ? "solid" : "ghost"}`}
                 onClick={handleClick}
-                disabled={(content === post.content && title === post.title) || (content.length <= 2 || title.length <= 2)}
+                disabled={
+                  (content === post.content && title === post.title) ||
+                  content.length <= 2 ||
+                  title.length <= 2
+                }
                 size="sm"
               >
-                <CheckIcon/>
+                <CheckIcon />
                 {isTemporary ? "Publish Post" : "Update Post"}
               </Button>
             )}
@@ -98,7 +102,6 @@ export default function PostTextEditor({
       </div>
       <div className="flex max-w-4xl flex-1 p-2 px-6  w-full flex-col gap-2">
         <EditorComponent
-        
           markdown={content ?? ""}
           onMarkdownChange={setContent}
           editable={isEditing === post.id}
