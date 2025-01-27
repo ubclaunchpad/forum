@@ -1,7 +1,7 @@
 "use client";
 
-import { AppendOperation, Post, PostWithRequiredId } from "@/lib/types/posts";
-import { generateTempId, getIdType } from "@/lib/utils";
+import { Post, PostWithRequiredId } from "@/lib/types/posts";
+import { getIdType } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import {
   createContext,
@@ -48,20 +48,20 @@ export function ForumContextProvider({
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<PostWithRequiredId[]>([]);
 
-  function appendToPosts({ operation, id, post }: AppendOperation) {
-    if (operation === "optimistic") {
-      const tempId = generateTempId();
-      setListOfPosts((prev) => [
-        { ...post, id: tempId, created_by: null },
-        ...prev,
-      ]);
-      return tempId;
-    } else {
-      setListOfPosts((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, id: post.id } : p)),
-      );
-    }
-  }
+  //   function appendToPosts({ operation, id, post }: AppendOperation) {
+  //     if (operation === "optimistic") {
+  //       const tempId = generateTempId();
+  //       setListOfPosts((prev) => [
+  //         { ...post, id: tempId, created_by: null },
+  //         ...prev,
+  //       ]);
+  //       return tempId;
+  //     } else {
+  //       setListOfPosts((prev) =>
+  //         prev.map((p) => (p.id === id ? { ...p, id: post.id } : p)),
+  //       );
+  //     }
+  //   }
 
   function edittingSelectPost(post: Post): void {
     if (isEditing !== post.id) {

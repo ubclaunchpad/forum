@@ -3,12 +3,7 @@ import { Card } from "@/components/ui/card";
 import { getApiUrl } from "@/utils/helpers";
 import Link from "next/link";
 import { Course } from "@/lib/types/course";
-import {
-  ArrowRightCircleIcon,
-  BookTextIcon,
-  Circle,
-  MoveRightIcon,
-} from "lucide-react";
+import { ArrowRightCircleIcon, BookTextIcon } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { generatePalette } from "@/lib/utils";
@@ -44,7 +39,7 @@ export default async function CoursesPage() {
   }
   const { courses } = await getCourses(token);
 
-  const shades: Record<string, any> = {};
+  const shades: Record<string, object> = {};
 
   courses.map((c) => {
     if (c.config && c.config.theme_colour) {

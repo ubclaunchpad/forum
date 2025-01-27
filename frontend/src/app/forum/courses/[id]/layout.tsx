@@ -2,7 +2,6 @@ import CourseNavbar from "@/components/course/courseNavbar";
 import { CourseTopbar } from "@/components/course/courseTopbar";
 import { CourseContextProvider } from "@/contexts/courseContext";
 import ClientWrapper from "./resources/wrapper";
-import { Suspense } from "react";
 import { getApiUrl } from "@/utils/helpers";
 import { Course } from "@/lib/types/course";
 import { createClient } from "@/utils/supabase/server";

@@ -20,7 +20,6 @@ export default function PostView<T extends PostType>({
     selectedPost,
     setDrafts: setListOfDrafts,
     setSelectedPost,
-    isEditing,
     setIsEditing,
   } = useContext(forumPostsContext);
 

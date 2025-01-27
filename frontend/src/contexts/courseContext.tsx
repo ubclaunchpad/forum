@@ -2,7 +2,7 @@
 
 import { createContext, ReactNode, useEffect } from "react";
 import { Course } from "@/lib/types/course";
-import { generatePalette, hexToHSL } from "@/lib/utils";
+import { generatePalette } from "@/lib/utils";
 
 const fonts = {
   "space-grotesk": "var(--font-space-grotesk)",
