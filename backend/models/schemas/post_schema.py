@@ -8,14 +8,12 @@ from pydantic import BaseModel, Field
 class PostBase(BaseModel):
     title: str
     content: str
-    parent_id: Optional[int] = None
     created_by: UUID
 
 
 class CreatePostRequest(BaseModel):
     title: str
     content: str
-    parent_id: Optional[int] = None
 
 
 class CreatePostResponse(PostBase):

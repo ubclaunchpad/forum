@@ -69,7 +69,6 @@ def get_post(user_id: str, c_id: str, post_id: int) -> GetPostResponse:
             post_response = PostResponse(
                 title=post.title,
                 content=post.content,
-                parent_id=post.parent_id,
                 created_by=post.created_by,
                 id=post.id,
                 course_id=post.course_id
