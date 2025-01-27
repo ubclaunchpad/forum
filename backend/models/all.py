@@ -334,3 +334,35 @@ class ChunkRelation(Base):
         CheckConstraint("jsonb_typeof(properties) = 'object'", name="valid_metadata"),
         {"schema": "public"},
     )
+
+
+class Message(Base):
+    __tablename__ = "messages"
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    content = Column(Text, nullable=False)
+    created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
+    created_at = Column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
+    )
+
+
+class Channel(Base):
+    __tablename__ = "channels"
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    name = Column(String, nullable=False)
+    created_at = Column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
+    )
+    created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
+
+
+
+class UserChannel(Base):
+    __tablename__ = "user_channels"
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    user_id = Column(
+        PUUID, ForeignKey("public.profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    channel_id = Column(
+        PUUID, ForeignKey("public.channels.id", ondelete="CASCADE"), nullable=False
+    )

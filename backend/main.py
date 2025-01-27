@@ -11,6 +11,7 @@ from routers.routes.courses import course_router
 from routers.routes.documents import document_router
 from routers.routes.posts import post_router
 from routers.routes.users import user_router
+from routers.routes.websockets import web_router
 
 environment = os.getenv("ENV")
 PORT = int(os.getenv("PORT", 8000))
@@ -30,6 +31,7 @@ app = FastAPI(dependencies=[Depends(get_db)])
 
 app.include_router(course_router, tags=["Courses"], prefix="/courses")
 app.include_router(user_router, tags=["Users"], prefix="/users")
+app.include_router(web_router)
 course_router.include_router(post_router, tags=["Posts"], prefix="/{c_id}/posts")
 course_router.include_router(
     document_router, tags=["Documents"], prefix="/{c_id}/documents"
