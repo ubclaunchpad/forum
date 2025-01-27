@@ -215,6 +215,4 @@ async def query_documents_stream(
         except Exception as e:
             logger.error(f"Error querying documents: {e}", exc_info=True)
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
-
-    response = StreamingResponse(stream_response(), media_type="text/event-stream")
-    return response
+    return StreamingResponse(stream_response(), media_type="text/event-stream")

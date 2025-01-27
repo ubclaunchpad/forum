@@ -332,7 +332,6 @@ class DocumentQueryEngine:
                             "role": "system",
                             "content": "You are a helpful expert who provides accurate but concise information with source citations.",
                         },
-                       # TODO: Add previous messages here
                         {"role": "user", "content": prompt},
                     ],
                     temperature=0.7,
