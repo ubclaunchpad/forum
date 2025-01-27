@@ -22,6 +22,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+      <script src="https://unpkg.com/react-scan/dist/auto.global.js" async />
+
+      </head>
       <body
         className={`${SourceSans.variable} ${quicksand.variable} ${spaceGrotesk.variable} ${inter.variable} ${playfairDisplay.variable} ${robotoMono.variable}  font-sans`}
       >

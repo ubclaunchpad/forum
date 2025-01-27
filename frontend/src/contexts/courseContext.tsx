@@ -6,7 +6,7 @@ import {
   useEffect,
 } from "react";
 import { Course } from "@/lib/types/course";
-import { hexToHSL } from "@/lib/utils";
+import { generatePalette, hexToHSL } from "@/lib/utils";
 
 const fonts = {
   "space-grotesk": "var(--font-space-grotesk)",
@@ -52,24 +52,7 @@ export function setTheme(colour?: string, font?: string) {
   }
   
   if (colour) {
-    // Convert colour to HSL
-    const colorHSL = hexToHSL(colour);
-    
-    // Generate primary shades
-    const primaryShades = {
-      50: `hsl(${colorHSL.h}, ${colorHSL.s * 0.6}%, 94%)`,
-      100: `hsl(${colorHSL.h}, ${colorHSL.s * 0.8}%, 86%)`,
-      200: `hsl(${colorHSL.h}, ${colorHSL.s}%, 76%)`,
-      300: `hsl(${colorHSL.h}, ${colorHSL.s}%, 66%)`,
-      400: `hsl(${colorHSL.h}, ${colorHSL.s}%, 55%)`,
-      500: `hsl(${colorHSL.h}, ${colorHSL.s}%, 50%)`,
-      600: colour,
-      700: `hsl(${colorHSL.h}, ${colorHSL.s}%, 35%)`,
-      800: `hsl(${colorHSL.h}, ${colorHSL.s}%, 25%)`,
-      900: `hsl(${colorHSL.h}, ${colorHSL.s * 1.1}%, 15%)`,
-      950: `hsl(${colorHSL.h}, ${colorHSL.s * 1.2}%, 7%)`
-    };
-    
+    const primaryShades = generatePalette(colour)
     Object.entries(primaryShades).forEach(([shade, hsl]) => {
       root.style.setProperty(`--course-primary-${shade}`, hsl);
     });

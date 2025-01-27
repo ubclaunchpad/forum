@@ -6,6 +6,8 @@ export type Post = {
   applied_at: string;
 };
 
+export type PostWithRequiredId = { id: string } & Partial<Omit<Post, 'id'>>;
+
 type OptimisticOperation = {
   operation: "optimistic";
   id: null;
@@ -19,3 +21,5 @@ type RealOperation = {
 };
 
 export type AppendOperation = OptimisticOperation | RealOperation;
+
+export type PostType = "draft" | "published";

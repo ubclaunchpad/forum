@@ -6,9 +6,15 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 const PENDING_PREFIX = "pending_";
+const LOCAL_PREFIX = "local_";
 
-export function generateTempId(): string {
+type IDType = "pending" | "local" | "none" | "other" | "uuid";
+
+export function generateTempId(type: "pending" | "local" = "pending"): string {
   const random = Math.random().toString(36).substr(2, 9);
+  if (type === "local") {
+    return `${LOCAL_PREFIX}_${random}`;
+  }
   return `${PENDING_PREFIX}_${random}`;
 }
 
@@ -16,12 +22,39 @@ export function isPendingId(id: string): boolean {
   return id.toString().startsWith(PENDING_PREFIX);
 }
 
+export function getIdType(id?: string): IDType {
+  if (!id) {
+    return "none";
+  }
+
+  switch (true) {
+    case id.toString().startsWith(PENDING_PREFIX):
+      return "pending";
+    case id.toString().startsWith(LOCAL_PREFIX):
+      return "local";
+    case /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      id,
+    ):
+      return "uuid";
+    default:
+      return "other";
+  }
+}
+
+export function isIDTemporary(id?: string): boolean {
+  const type = getIdType(id);
+
+  if (["local", "pending", "none"].includes(type)) {
+    return true;
+  }
+  return false;
+}
 
 export function hexToHSL(hex: string) {
   const r = parseInt(hex.substring(1, 3), 16) / 255;
   const g = parseInt(hex.substring(3, 5), 16) / 255;
   const b = parseInt(hex.substring(5, 7), 16) / 255;
-  
+
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   let h = (max + min) / 2;
@@ -34,9 +67,15 @@ export function hexToHSL(hex: string) {
     const d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
     switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
     }
     h *= 60;
   }
@@ -51,21 +90,58 @@ export function hexToHSL(hex: string) {
 export function getRelativeTimeString(
   date: Date | number,
   lang = navigator.language,
-  relativeCutoff = 30 // Default 30 days
+  relativeCutoff = 30, // Default 30 days
 ): string {
   const timeMs = typeof date === "number" ? date : date.getTime();
   const deltaSeconds = Math.round((timeMs - Date.now()) / 1000);
-  
+
   // Check if beyond cutoff
   if (Math.abs(deltaSeconds) > relativeCutoff * 86400) {
     const d = new Date(timeMs);
-    return d.toLocaleDateString('en-GB'); // dd/mm/yyyy format
+    return d.toLocaleDateString("en-GB"); // dd/mm/yyyy format
   }
 
-  const cutoffs = [60, 3600, 86400, 86400 * 7, 86400 * 30, 86400 * 365, Infinity];
-  const units: Intl.RelativeTimeFormatUnit[] = ["second", "minute", "hour", "day", "week", "month", "year"];
-  const unitIndex = cutoffs.findIndex(cutoff => cutoff > Math.abs(deltaSeconds));
+  const cutoffs = [
+    60,
+    3600,
+    86400,
+    86400 * 7,
+    86400 * 30,
+    86400 * 365,
+    Infinity,
+  ];
+  const units: Intl.RelativeTimeFormatUnit[] = [
+    "second",
+    "minute",
+    "hour",
+    "day",
+    "week",
+    "month",
+    "year",
+  ];
+  const unitIndex = cutoffs.findIndex(
+    (cutoff) => cutoff > Math.abs(deltaSeconds),
+  );
   const divisor = unitIndex ? cutoffs[unitIndex - 1] : 1;
   const rtf = new Intl.RelativeTimeFormat(lang, { numeric: "auto" });
   return rtf.format(Math.floor(deltaSeconds / divisor), units[unitIndex]);
+}
+
+
+
+export function generatePalette(colour: string) {
+  const colorHSL = hexToHSL(colour);
+  return  {
+    50: `hsl(${colorHSL.h}, ${colorHSL.s * 0.6}%, 94%)`,
+    100: `hsl(${colorHSL.h}, ${colorHSL.s * 0.8}%, 86%)`,
+    200: `hsl(${colorHSL.h}, ${colorHSL.s}%, 76%)`,
+    300: `hsl(${colorHSL.h}, ${colorHSL.s}%, 66%)`,
+    400: `hsl(${colorHSL.h}, ${colorHSL.s}%, 55%)`,
+    500: `hsl(${colorHSL.h}, ${colorHSL.s}%, 50%)`,
+    600: colour,
+    700: `hsl(${colorHSL.h}, ${colorHSL.s}%, 35%)`,
+    800: `hsl(${colorHSL.h}, ${colorHSL.s}%, 25%)`,
+    900: `hsl(${colorHSL.h}, ${colorHSL.s * 1.1}%, 15%)`,
+    950: `hsl(${colorHSL.h}, ${colorHSL.s * 1.2}%, 7%)`
+  };
 }

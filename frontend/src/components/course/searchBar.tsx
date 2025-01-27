@@ -9,7 +9,7 @@ import {
   CommandIcon,
 } from "lucide-react";
 import { Button } from "../ui/button";
-import { useContext, useEffect, useState } from "react";
+import { HTMLAttributeReferrerPolicy, useContext, useEffect, useState } from "react";
 import { courseContext } from "@/contexts/courseContext";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -33,7 +33,7 @@ const SourceLink = ({ source }) => {
     className:
       "flex items-center gap-2 border rounded-full bg-neutral-200 p-1 px-4 no-underline text-primary-800",
     target: source.fe_type === "pdf" ? "_blank" : undefined,
-    referrerPolicy: source.fe_type === "pdf" ? "no-referrer" : undefined,
+    referrerPolicy: source.fe_type === "pdf" ? "no-referrer" as HTMLAttributeReferrerPolicy : undefined,
   };
 
   if (source.fe_type === "pdf") {

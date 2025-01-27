@@ -150,7 +150,7 @@ export default function CoursesNewPage() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-4 bg-primary text-white rounded-full px-4 py-2 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-4 bg-neutral-950 text-white rounded-full px-4 py-2 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Creating..." : "Create Course"}
           </button>
