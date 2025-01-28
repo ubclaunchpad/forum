@@ -7,7 +7,7 @@ import { getApiUrl } from "@/utils/helpers";
 import Link from "next/link";
 import { useEffect, useState, useContext } from "react";
 import { Course } from "@/lib/types/course";
-import { Circle } from "lucide-react";
+import { Circle, Settings } from "lucide-react";
 
 export default function CoursesPage() {
   const { token } = useContext(userContext);
@@ -43,9 +43,9 @@ export default function CoursesPage() {
         </div>
         <ul className="bg-neutral-100 rounded-lg border border-neutral-200 overflow-hidden">
           {courses.map((course: Course) => (
-            <li key={course.id}>
+            <li key={course.id} className="flex items-center hover:bg-primary-100 group">
               <Link
-                className="flex no-underline items-center justify-between gap-2 p-2 rounded-lg bg-neutral-100 hover:bg-primary-100"
+                className="flex flex-1 no-underline items-center gap-2 p-2 rounded-lg"
                 href={`/forum/courses/${course.id}`}
               >
                 <button>
@@ -55,6 +55,12 @@ export default function CoursesPage() {
                 <span className="w-20">{course.code}</span>
                 <span className="w-20">{course.section}</span>
                 <span className="w-full">{course.name}</span>
+              </Link>
+              <Link
+                href={`/forum/courses/${course.id}/settings`}
+                className="p-2 rounded-full transition-colors mr-2 hover:bg-primary-200"
+              >
+                <Settings className="h-4 w-4 text-neutral-500 group-hover:text-neutral-900" />
               </Link>
             </li>
           ))}
