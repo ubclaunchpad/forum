@@ -331,3 +331,10 @@ class Embedding(Base):
         Index("ix_embeddings_entity", entity_type, entity_id),
         {"schema": "public"},
     )
+
+class QueryHistory(Base):
+    __tablename__ = "query_history"
+    user_id = Column(PUUID, ForeignKey("auth.users.id", ondelete="CASCADE"), nullable=True, primary_key=True)
+    course_id = Column(PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"), primary_key=True)
+    messages = Column(JSONB)
+

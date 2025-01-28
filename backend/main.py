@@ -10,6 +10,7 @@ from routers.middleware.auth import AuthMiddleware
 from routers.routes.courses import course_router
 from routers.routes.documents import document_router
 from routers.routes.posts import post_router
+from routers.routes.query_history import query_history_router
 from routers.routes.users import user_router
 
 environment = os.getenv("ENV")
@@ -33,6 +34,9 @@ app.include_router(user_router, tags=["Users"], prefix="/users")
 course_router.include_router(post_router, tags=["Posts"], prefix="/{c_id}/posts")
 course_router.include_router(
     document_router, tags=["Documents"], prefix="/{c_id}/documents"
+)
+course_router.include_router(
+    query_history_router, tags=["Course Query History"], prefix="/{c_id}/query_history"
 )
 
 app.add_middleware(

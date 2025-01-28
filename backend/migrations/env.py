@@ -29,7 +29,6 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-
 def include_object(object, name, type_, reflected, compare_to):
     # Check if the object has a schema attribute
     if hasattr(object, "schema"):

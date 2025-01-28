@@ -283,7 +283,7 @@ class DocumentQueryEngine:
         contexts: List[Dict[str, Any]],
         template_name: Optional[str] = None,
     ) -> str:
-        """Build the prompt with context and question."""
+        """Build the answer with context and question."""
         context_str = "\n\n".join(
             f"[Source: {'Document: ' + ctx['document_title'] if ctx.get('type') == 'document' else 'Post: ' + ctx.get('title', 'Untitled Post')}, "
             f"Relevance: {ctx['similarity']:.2f}]\n{ctx['content']}"
@@ -322,7 +322,6 @@ class DocumentQueryEngine:
 
             all_contexts = relevant_chunks + relevant_posts
             prompt = self._build_prompt(question, all_contexts, template_name)
-
             try:
                 response = self.client.chat.completions.create(
                     model=self.model,
@@ -376,10 +375,13 @@ class DocumentQueryEngine:
         self,
         question: str,
         course_id: Optional[UUID] = None,
+        history: Optional[Dict[str,str]] = None,
         template_name: Optional[str] = None,
     ) -> AsyncGenerator[str, None]:
         """Process a query through the RAG pipeline with streaming response."""
         try:
+            if history is None:
+                history = []
             question_embedding = self.embedding_processor.generate_embedding(question)
             relevant_chunks = self._find_relevant_document_chunks(
                 question_embedding, threshold=0.0, course_id=course_id
@@ -408,16 +410,15 @@ class DocumentQueryEngine:
                 sources = self._format_sources(all_contexts)
                 yield json.dumps({"answer": "", "sources": sources, "done": False})
 
+                messages = ([{
+                            "role": "system",
+                            "content": "You are a helpful expert who provides accurate but concise information with source citations.",
+                        }] + history + [{"role": "user", "content": prompt}])
+
                 # Stream the response
                 stream = self.client.chat.completions.create(
                     model=self.model,
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": "You are a helpful expert who provides accurate but concise information with source citations.",
-                        },
-                        {"role": "user", "content": prompt},
-                    ],
+                    messages=messages,
                     temperature=0.7,
                     stream=True,
                 )
@@ -436,7 +437,6 @@ class DocumentQueryEngine:
                         # No need to send sources again
                     }
                 )
-
             except Exception as e:
                 logger.error(f"OpenAI API error: {e}", exc_info=True)
                 yield json.dumps(
