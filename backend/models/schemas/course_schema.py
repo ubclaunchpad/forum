@@ -53,6 +53,7 @@ class AssignRoleRequest(BaseModel):
     role_id: UUID
 
 class BasicCourseRoleInformation(BaseModel):
+    role_id: str
     name: str
     description: Optional[str]
 

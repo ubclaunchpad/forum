@@ -157,6 +157,21 @@ def get_course_members(c_id: str) -> List[Dict[str, str]]:
             )
         return members
 
+def get_course_roles_for_user(c_id: str, u_id: str) -> List[BasicCourseRoleInformation]:
+    with get_db() as db:
+        c_uuid = UUID(c_id)
+        u_uuid = UUID(u_id)
+        roles = db.query(CourseRole).join(CourseUserRole, CourseRole.id == CourseUserRole.course_role_id).filter(CourseUserRole.user_id == u_uuid, CourseRole.course_id == c_uuid).all()
+        basic_roles = []
+        for role in roles:
+            basic_role = BasicCourseRoleInformation(
+                role_id=str(role.id),
+                name=str(role.name),
+                description=str(role.description)
+            )
+            basic_roles.append(basic_role)
+    return basic_roles
+
 def get_basic_course_roles(c_id: str) -> List[BasicCourseRoleInformation]:
     with get_db() as db:
         c_uuid = UUID(c_id)
@@ -164,6 +179,7 @@ def get_basic_course_roles(c_id: str) -> List[BasicCourseRoleInformation]:
         basic_roles = []
         for role in roles:
             basic_role = BasicCourseRoleInformation(
+                role_id=str(role.id),
                 name=str(role.name),
                 description=str(role.description)
             )
@@ -184,7 +200,7 @@ def create_course_role(c_id: str, req: CreateCourseRoleRequest, u_id: str) -> bo
             name=req.name,
             description=req.description,
             visibility=req.visibility,
-            created_by=UUID(u_id),
+            # created_by=UUID(u_id),
             created_at=datetime.now(),
             updated_at=datetime.now()
         )
@@ -201,7 +217,7 @@ def assign_user_course_role(u_id: str, r_id: str, a_id: str) -> bool:
         course_user_role = CourseUserRole(
             course_role_id=UUID(r_id),
             user_id=UUID(u_id),
-            assigned_by=UUID(a_id),
+            # assigned_by=UUID(a_id),
             created_at=datetime.now()
         )
         try:

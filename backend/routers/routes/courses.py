@@ -71,17 +71,11 @@ async def unregister_user(c_id: str, u_id: str):
 
 @course_router.get("/{c_id}/members/{u_id}/roles")
 async def get_roles_for_user(c_id: str, u_id: str):
-    return None
-
-@course_router.post("/{c_id}/members/roles/assign")
-async def assign_user_role(assignReq: AssignRoleRequest, req: Request):
-    author_id = req.state.user_id
-    res = course_controller.assign_user_course_role(str(assignReq.user_id), str(assignReq.role_id), author_id)
-    return res
-
-@course_router.delete("/{c_id}/members/roles/unassign")
-async def unassign_user_role(assignReq: AssignRoleRequest):
-    res = course_controller.unassign_user_course_role(str(assignReq.user_id), str(assignReq.role_id))
+    res = course_controller.get_course_roles_for_user(c_id, u_id)
+    if not res:
+        raise HTTPException(
+            status_code=400, detail="Failed to get course roles for {u_id}"
+        )
     return res
 
 # ----------------- Course Roles -----------------#
@@ -97,8 +91,8 @@ async def get_course_roles(c_id: str):
 
 @course_router.post("/{c_id}/roles", response_model=GeneralResponse)
 async def create_course_role(c_id: str, role_req: CreateCourseRoleRequest, request: Request):
-    user_id = request.state.user_id
-    res = course_controller.create_course_role(c_id, role_req, user_id)
+    author_id = ""
+    res = course_controller.create_course_role(c_id, role_req, author_id)
     if not res:
         raise HTTPException(
             status_code=400, detail="Failed to get course roles"
@@ -127,3 +121,14 @@ async def add_permission_to_course_role(c_id: str, r_id: str):
 @course_router.delete("/{c_id}/roles/{r_id}/permissions")
 async def delete_permission_from_course_role(c_id: str, r_id: str):
     return None
+
+@course_router.post("/{c_id}/roles/assign")
+async def assign_user_role(assignReq: AssignRoleRequest, req: Request):
+    author_id = ""
+    res = course_controller.assign_user_course_role(str(assignReq.user_id), str(assignReq.role_id), author_id)
+    return GeneralResponse(msg=f"Assigned role")
+
+@course_router.delete("/{c_id}/roles/unassign")
+async def unassign_user_role(assignReq: AssignRoleRequest):
+    res = course_controller.unassign_user_course_role(str(assignReq.user_id), str(assignReq.role_id))
+    return GeneralResponse(msg=f"Unassigned role")
