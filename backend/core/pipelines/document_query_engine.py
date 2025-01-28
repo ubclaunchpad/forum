@@ -365,7 +365,9 @@ class DocumentQueryEngine:
                 "document_count": doc_count,
                 "embedding_count": embedding_count,
                 "has_embeddings": sample_embedding is not None,
-                "sample_embedding_id": str(sample_embedding.id) if sample_embedding else None,
+                "sample_embedding_id": str(sample_embedding.id)
+                if sample_embedding
+                else None,
             }
         except Exception as e:
             logger.error(f"Database verification error: {e}", exc_info=True)
@@ -375,7 +377,7 @@ class DocumentQueryEngine:
         self,
         question: str,
         course_id: Optional[UUID] = None,
-        history: Optional[Dict[str,str]] = None,
+        history: Optional[Dict[str, str]] = None,
         template_name: Optional[str] = None,
     ) -> AsyncGenerator[str, None]:
         """Process a query through the RAG pipeline with streaming response."""
@@ -410,10 +412,16 @@ class DocumentQueryEngine:
                 sources = self._format_sources(all_contexts)
                 yield json.dumps({"answer": "", "sources": sources, "done": False})
 
-                messages = ([{
+                messages = (
+                    [
+                        {
                             "role": "system",
                             "content": "You are a helpful expert who provides accurate but concise information with source citations.",
-                        }] + history + [{"role": "user", "content": prompt}])
+                        }
+                    ]
+                    + history
+                    + [{"role": "user", "content": prompt}]
+                )
 
                 # Stream the response
                 stream = self.client.chat.completions.create(

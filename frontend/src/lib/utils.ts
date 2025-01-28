@@ -127,7 +127,20 @@ export function getRelativeTimeString(
   return rtf.format(Math.floor(deltaSeconds / divisor), units[unitIndex]);
 }
 
-export function generatePalette(colour: string) {
+export type Palette = {
+  50: string;
+  100: string;
+  200: string;
+  300: string;
+  400: string;
+  500: string;
+  600: string;
+  700: string;
+  800: string;
+  900: string;
+  950: string;
+};
+export function generatePalette(colour: string): Palette {
   const colorHSL = hexToHSL(colour);
   return {
     50: `hsl(${colorHSL.h}, ${colorHSL.s * 0.6}%, 94%)`,

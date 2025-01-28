@@ -1,7 +1,5 @@
-import CourseNavbar from "@/components/course/courseNavbar";
-import { CourseTopbar } from "@/components/course/courseTopbar";
 import { CourseContextProvider } from "@/contexts/courseContext";
-import ClientWrapper from "./resources/wrapper";
+import ClientWrapper from "./(core)/resources/wrapper";
 import { getApiUrl } from "@/utils/helpers";
 import { Course } from "@/lib/types/course";
 import { createClient } from "@/utils/supabase/server";
@@ -9,15 +7,15 @@ import { redirect } from "next/navigation";
 
 async function getCourse(id: string, token: string) {
   try {
-       const res = await fetch(`${getApiUrl()}/courses/${id}`, {
+    const res = await fetch(`${getApiUrl()}/courses/${id}`, {
       next: {
         revalidate: 3600,
         tags: [`course-${id}`],
       },
       headers: {
         "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
-        "Authorization": `Bearer ${token}`,
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (!res.ok) {
@@ -55,11 +53,7 @@ export default async function CoursePage({
   return (
     <CourseContextProvider course={course}>
       <div className="course flex flex-col max-h-dvh h-dvh w-dvw overflow-hidden">
-        <ClientWrapper>
-          <CourseTopbar />
-          <CourseNavbar />
-          {children}
-        </ClientWrapper>
+        <ClientWrapper>{children}</ClientWrapper>
       </div>
     </CourseContextProvider>
   );

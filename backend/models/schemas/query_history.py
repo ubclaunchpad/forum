@@ -9,5 +9,6 @@ class QueryEntry(BaseModel):
     timestamp: str | datetime
     sources: List[Dict[str, Any]]
 
+
 class GetHistoryResponse(BaseModel):
     history: List[QueryEntry]

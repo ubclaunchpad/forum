@@ -6,7 +6,7 @@ import { Course } from "@/lib/types/course";
 import { ArrowRightCircleIcon, BookTextIcon } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { generatePalette } from "@/lib/utils";
+import { generatePalette, Palette } from "@/lib/utils";
 
 async function getCourses(token: string) {
   try {
@@ -39,7 +39,7 @@ export default async function CoursesPage() {
   }
   const { courses } = await getCourses(token);
 
-  const shades: Record<string, object> = {};
+  const shades: Record<string, Palette> = {};
 
   courses.map((c) => {
     if (c.config && c.config.theme_colour) {

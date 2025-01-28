@@ -5,6 +5,7 @@ import { Course } from "@/lib/types/course";
 import { generatePalette } from "@/lib/utils";
 
 const fonts = {
+  default: "var(--font-quicksand)",
   "space-grotesk": "var(--font-space-grotesk)",
   inter: "var(--font-inter)",
   raleway: "var(--font-raleway)",
@@ -29,7 +30,7 @@ export function CourseContextProvider({
     const themeColour = course.config.theme_colour;
     const font = course.config.font;
     setTheme(themeColour, font);
-  }, [course.config]);
+  }, [course]);
 
   return (
     <courseContext.Provider value={course}>{children}</courseContext.Provider>

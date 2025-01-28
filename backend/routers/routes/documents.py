@@ -6,7 +6,10 @@ from typing import AsyncGenerator, Dict, Optional, Tuple
 from uuid import UUID
 
 from controllers.documents import document_manager
-from controllers.query_history_controller import add_query_to_history, get_open_ai_context
+from controllers.query_history_controller import (
+    add_query_to_history,
+    get_open_ai_context,
+)
 from core.pipelines.document_query_engine import DocumentQueryEngine
 from core.util import file_storage
 from fastapi import APIRouter, Form, HTTPException, Request, UploadFile
@@ -188,6 +191,7 @@ async def query_documents_stream(
 ):
     context = get_open_ai_context(c_id, request.state.user_id)
     query_builder = {"question": query.question, "sources": []}
+
     async def stream_response() -> AsyncGenerator[str, None]:
         try:
             with get_db() as db:
@@ -205,14 +209,19 @@ async def query_documents_stream(
                     answer_json = json.loads(chunk)
                     if not answer_json["done"]:
                         query_builder["answer"] = answer_json["answer"]
-                        if "sources" in answer_json and isinstance(answer_json["sources"], list):
+                        if "sources" in answer_json and isinstance(
+                            answer_json["sources"], list
+                        ):
                             query_builder["sources"] += answer_json["sources"]
                     else:
-                        query_builder["timestamp"] = datetime.now().strftime(DATE_FORMAT)
+                        query_builder["timestamp"] = datetime.now().strftime(
+                            DATE_FORMAT
+                        )
                         add_query_to_history(c_id, request.state.user_id, query_builder)
                     # Format as SSE
                     yield f"data: {chunk}\n\n"
         except Exception as e:
             logger.error(f"Error querying documents: {e}", exc_info=True)
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
     return StreamingResponse(stream_response(), media_type="text/event-stream")

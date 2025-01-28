@@ -134,7 +134,7 @@ export function Searchbar() {
     <>
       <Button
         variant="ghost"
-        className="flex  w-10 items-center font-medium text-neutral-600 rounded-full px-1 bg-white max-w-md  min-w-0 lg:min-w-[500px] lg:w-full  border overflow-hidden lg:absolute lg:left-1/2 lg:transform h-10 lg:-translate-x-1/2"
+        className="flex  w-10 items-center font-medium text-neutral-600 rounded-full px-1 bg-white max-w-full lg:max-w-md  min-w-0 lg:min-w-[500px] lg:w-full  border overflow-hidden lg:absolute lg:left-1/2 lg:transform h-10 lg:-translate-x-1/2"
         onClick={() => {
           window.dialog.showModal();
           const input = document.getElementById("search-input-dialog");
@@ -154,7 +154,7 @@ export function Searchbar() {
 
       <dialog className="bg-transparent top-0" id="dialog">
         <section
-          className={`top-10 left-0 flex flex-col max-w-4xl gap-2 w-full  min-w-[1000px] flex-shrink-0  max-h-[90dvh] overflow-hidden bg-white border-neutral-100 ${
+          className={`top-10 left-0 flex flex-col max-w-4xl gap-2 w-full  xl:min-w-[1000px] flex-shrink-0  max-h-[90dvh] overflow-hidden bg-white border-neutral-100 ${
             response || isLoading ? "rounded-lg rounded-t-3xl" : "rounded-full"
           }`}
         >
@@ -203,7 +203,7 @@ export function Searchbar() {
 
           {response && (
             <article className="pt-0 px-4 roundex-xl h-full pb-4 w-full min-h-1 flex flex-col gap-4 overflow-y-scroll">
-              <div className="flex flex-col w-full rounded-2xl justify-center items-center bg-primary-500 bg-opacity-10 border border-neutral-200 py-4 pb-0">
+              <div className="flex flex-col w-full rounded-2xl justify-center items-center  border border-neutral-200 py-4 pb-0">
                 <div className="p-2 text-primary-800 prose max-w-none">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {response.answer}

@@ -176,10 +176,9 @@ class Post(Base):
     embeddings = relationship(
         "Embedding",
         foreign_keys="[Embedding.entity_id]",
-        primaryjoin="and_(Post.id==Embedding.entity_id, "
-                   "Embedding.entity_type=='post')",
+        primaryjoin="and_(Post.id==Embedding.entity_id, Embedding.entity_type=='post')",
         cascade="all, delete-orphan",
-        back_populates="post"
+        back_populates="post",
     )
 
 
@@ -242,9 +241,9 @@ class Document(Base):
         "Embedding",
         foreign_keys="[Embedding.entity_id]",
         primaryjoin="and_(Document.id==Embedding.entity_id, "
-                   "Embedding.entity_type=='document')",
+        "Embedding.entity_type=='document')",
         cascade="all, delete-orphan",
-        back_populates="document"
+        back_populates="document",
     )
 
     __table_args__ = (
@@ -273,6 +272,7 @@ class Embedding(Base):
     embedding: Vector - Embedding vector (1536 since we are using OpenAI's text-embedding-3-small model)
     created_at: DateTime - Basic timestamps, etc.
     """
+
     __tablename__ = "embeddings"
 
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
@@ -286,29 +286,30 @@ class Embedding(Base):
     chunk_type = Column(String(50), nullable=True)
     chunk_metadata = Column(JSONB)
     parent_chunk_id = Column(
-        PUUID, 
+        PUUID,
         ForeignKey("public.embeddings.id", ondelete="CASCADE"),
         nullable=True,
     )
 
     embedding = Column(Vector(1536), nullable=False)
 
-    created_at = Column(DateTime, server_default=func.current_timestamp(), nullable=False)
+    created_at = Column(
+        DateTime, server_default=func.current_timestamp(), nullable=False
+    )
 
     # Add relationships
     document = relationship(
         "Document",
         foreign_keys=[entity_id],
         primaryjoin="and_(Document.id==Embedding.entity_id, "
-                   "Embedding.entity_type=='document')",
-        back_populates="embeddings"
+        "Embedding.entity_type=='document')",
+        back_populates="embeddings",
     )
     post = relationship(
         "Post",
         foreign_keys=[entity_id],
-        primaryjoin="and_(Post.id==Embedding.entity_id, "
-                   "Embedding.entity_type=='post')",
-        back_populates="embeddings"
+        primaryjoin="and_(Post.id==Embedding.entity_id, Embedding.entity_type=='post')",
+        back_populates="embeddings",
     )
 
     __table_args__ = (
@@ -332,9 +333,16 @@ class Embedding(Base):
         {"schema": "public"},
     )
 
+
 class QueryHistory(Base):
     __tablename__ = "query_history"
-    user_id = Column(PUUID, ForeignKey("auth.users.id", ondelete="CASCADE"), nullable=True, primary_key=True)
-    course_id = Column(PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"), primary_key=True)
+    user_id = Column(
+        PUUID,
+        ForeignKey("auth.users.id", ondelete="CASCADE"),
+        nullable=True,
+        primary_key=True,
+    )
+    course_id = Column(
+        PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"), primary_key=True
+    )
     messages = Column(JSONB)
-
