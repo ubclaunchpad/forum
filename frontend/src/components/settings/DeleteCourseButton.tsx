@@ -18,7 +18,11 @@ interface DeleteCourseButtonProps {
   token: string;
 }
 
-export function DeleteCourseButton({ courseId, courseName, token }: DeleteCourseButtonProps) {
+export function DeleteCourseButton({
+  courseId,
+  courseName,
+  token,
+}: DeleteCourseButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -80,7 +84,8 @@ export function DeleteCourseButton({ courseId, courseName, token }: DeleteCourse
           <DialogHeader>
             <DialogTitle>Delete Course</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete &quot;{courseName}&quot;? This action cannot be undone.
+              Are you sure you want to delete &quot;{courseName}&quot;? This
+              action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -104,4 +109,4 @@ export function DeleteCourseButton({ courseId, courseName, token }: DeleteCourse
       </Dialog>
     </>
   );
-} 
+}

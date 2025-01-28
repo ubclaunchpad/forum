@@ -52,7 +52,7 @@ def get_posts(c_id: str) -> List[Post]:
 def get_post(user_id: str, c_id: str, post_id: int) -> GetPostResponse:
     try:
         with get_db() as db:
-            post : Post = (
+            post: Post = (
                 db.query(Post)
                 .filter(Post.course_id == c_id, Post.id == post_id)
                 .first()
@@ -60,25 +60,21 @@ def get_post(user_id: str, c_id: str, post_id: int) -> GetPostResponse:
 
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
-            
 
             stats = getMetadata(db, post.id)
             user_interactions = getUserInteractions(db, user_id, post.id)
 
-            
             post_response = PostResponse(
                 title=post.title,
                 content=post.content,
                 parent_id=post.parent_id,
                 created_by=post.created_by,
                 id=post.id,
-                course_id=post.course_id
+                course_id=post.course_id,
             )
-            
+
             return GetPostResponse(
-                post=post_response,
-                stats=stats,
-                user_interactions=user_interactions
+                post=post_response, stats=stats, user_interactions=user_interactions
             )
     except Exception as e:
         print(f"Error in get_post: {type(e).__name__}: {str(e)}")
@@ -101,23 +97,23 @@ def update_post(
                 raise HTTPException(status_code=404, detail="Post not found")
 
             embedding_processor = EmbeddingProcessor()
-            post.embedding = embedding_processor.generate_embedding(
-                post_edit_info.new_content
-            )
+            # post.embedding = embedding_processor.generate_embedding(
+            #     post_edit_info.new_content
+            # )
             post.content = post_edit_info.new_content
 
-            post_edit = PostEdit(
-                post_id=post_id,
-                edited_by=user_id,
-                new_content=post_edit_info.new_content,
-                edit_reason=post_edit_info.edit_reason,
-                # embedding=post.embedding,
-            )
+            # post_edit = PostEdit(
+            #     post_id=post_id,
+            #     edited_by=user_id,
+            #     new_content=post_edit_info.new_content,
+            #     edit_reason=post_edit_info.edit_reason,
+            #     # embedding=post.embedding,
+            # )
 
-            db.add(post_edit)
+            # db.add(post_edit)
             db.flush()
             return PostEditResponse(
-                id=int(str(post_edit.id)),
+                id=int(str(post.id)),
                 edited_by=UUID(user_id),
                 new_content=post_edit_info.new_content,
                 edit_reason=post_edit_info.edit_reason,
@@ -213,27 +209,18 @@ def like_post(c_id: str, user_id: str, post_id: int) -> UserPostEvent:
         print(f"Error in get_post: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
 
-def getMetadata(db, id: int):
-    numLikes = (
-        db.query(UserPostEvent)
-        .filter_by(post_id=id, liked=True)
-        .count()
-    )
 
-    numViews = (
-        db.query(UserPostEvent)
-        .filter_by(post_id=id, viewed=True)
-        .count()
-    )
+def getMetadata(db, id: int):
+    numLikes = db.query(UserPostEvent).filter_by(post_id=id, liked=True).count()
+
+    numViews = db.query(UserPostEvent).filter_by(post_id=id, viewed=True).count()
 
     return {"views": numViews, "likes": numLikes}
-    
+
 
 def getUserInteractions(db, user_id: str, post_id: str):
     user_interaction = (
-        db.query(UserPostEvent)
-        .filter_by(post_id=post_id, user_id=user_id)
-        .first()
+        db.query(UserPostEvent).filter_by(post_id=post_id, user_id=user_id).first()
     )
 
     if not user_interaction:

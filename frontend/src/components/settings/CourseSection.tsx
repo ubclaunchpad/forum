@@ -9,6 +9,7 @@ import { DeleteCourseButton } from "./DeleteCourseButton";
 
 export function CourseSection() {
   const course = useContext(courseContext);
+  console.log(course);
   const { token } = useContext(userContext);
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -16,7 +17,7 @@ export function CourseSection() {
     name: course.name || "",
     code: course.code || "",
     c_group: course.c_group || "",
-    section: course.section || ""
+    section: course.section || "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,7 +75,7 @@ export function CourseSection() {
             { id: "name", label: "Course Name" },
             { id: "code", label: "Course Code" },
             { id: "c_group", label: "Course Group" },
-            { id: "section", label: "Section" }
+            { id: "section", label: "Section" },
           ].map((field) => (
             <div key={field.id} className="grid gap-2">
               <label htmlFor={field.id} className="text-sm font-medium">
@@ -83,7 +84,12 @@ export function CourseSection() {
               <Input
                 id={field.id}
                 value={formData[field.id as keyof typeof formData]}
-                onChange={(e) => setFormData(prev => ({ ...prev, [field.id]: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    [field.id]: e.target.value,
+                  }))
+                }
                 className="max-w-lg"
               />
             </div>
@@ -95,7 +101,7 @@ export function CourseSection() {
         </Button>
       </form>
 
-      <DeleteCourseButton 
+      <DeleteCourseButton
         courseId={course.id}
         courseName={course.name}
         token={token}

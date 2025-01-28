@@ -10,15 +10,15 @@ export const courseSettingsConfig = {
           id: "course",
           label: "Course",
           path: "course",
-          icon: Layout
+          icon: Layout,
         },
         {
           id: "appearance",
           label: "Look and Feel",
           path: "appearance",
-          icon: Layout
-        }
-      ]
+          icon: Layout,
+        },
+      ],
     },
     {
       id: "access",
@@ -28,17 +28,17 @@ export const courseSettingsConfig = {
           id: "members",
           label: "Members",
           path: "members",
-          icon: Users
+          icon: Users,
         },
         {
           id: "permissions",
           label: "Permissions",
           path: "permissions",
-          icon: Shield
-        }
-      ]
-    }
-  ]
+          icon: Shield,
+        },
+      ],
+    },
+  ],
 } as const;
 
 // Types can be in the same file since they're tightly coupled to the config

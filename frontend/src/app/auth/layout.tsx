@@ -7,8 +7,8 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-dvh w-full  bg-primary-800 flex items-center overflow-hiddne">
-      <section className="flex-1 w-full min-h-screen flex-shrink-0">
-        <Link href="/" passHref className="no-underline">
+      <section className="flex-1 hidden xl:block w-full min-h-screen flex-shrink-0">
+        <Link href="/" passHref className="fixed top-20 left-20 no-underline">
           <h1 className="text-5xl no-underline text-white px-20 py-20">
             Forum AI
           </h1>

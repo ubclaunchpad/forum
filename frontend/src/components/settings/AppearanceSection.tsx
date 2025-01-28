@@ -13,7 +13,7 @@ export function AppearanceSection() {
   const [isLoading, setIsLoading] = useState(false);
   const [config, setConfig] = useState({
     theme_colour: course.config?.theme_colour || "#000000",
-    font: course.config?.font || "default"
+    font: course.config?.font || "default",
   });
 
   const fontOptions = [
@@ -21,7 +21,7 @@ export function AppearanceSection() {
     { value: "space-grotesk", className: "font-space-grotesk" },
     { value: "inter", className: "font-inter" },
     { value: "playfair-display", className: "font-playfair-display" },
-    { value: "roboto-mono", className: "font-roboto-mono" }
+    { value: "roboto-mono", className: "font-roboto-mono" },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,8 +41,8 @@ export function AppearanceSection() {
           c_group: course.c_group,
           section: course.section,
           config: config,
-        //   start_date: course.start_date,
-        //   end_date: course.end_date
+          //   start_date: course.start_date,
+          //   end_date: course.end_date
         }),
       });
 
@@ -82,7 +82,9 @@ export function AppearanceSection() {
               id="theme_colour"
               type="color"
               value={config.theme_colour}
-              onChange={(e) => setConfig(prev => ({ ...prev, theme_colour: e.target.value }))}
+              onChange={(e) =>
+                setConfig((prev) => ({ ...prev, theme_colour: e.target.value }))
+              }
               className="w-20 h-10"
             />
           </div>
@@ -95,7 +97,9 @@ export function AppearanceSection() {
                   key={font.value}
                   type="button"
                   variant={config.font === font.value ? "solid" : "outline"}
-                  onClick={() => setConfig(prev => ({ ...prev, font: font.value }))}
+                  onClick={() =>
+                    setConfig((prev) => ({ ...prev, font: font.value }))
+                  }
                   className={font.className}
                 >
                   {font.value}
