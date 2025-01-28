@@ -59,8 +59,13 @@ class UserPostEventResponse(UserPostEventBase):
     id: int
 
 
+class GetPost(PostBase):
+    id: int
+    applied_at: datetime = Field(default_factory=datetime.now)
+
+
 class GetPostsResponse(BaseModel):
-    posts: list[PostResponse]
+    posts: list[GetPost]
 
 
 class GetPostResponse(BaseModel):

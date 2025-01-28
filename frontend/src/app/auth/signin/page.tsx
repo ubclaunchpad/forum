@@ -35,7 +35,7 @@ export default function SignIn() {
   };
 
   return (
-    <Card className="w-full max-w-lg min-h-[450px] px-12 py-3 flex flex-col bg-neutral-50 rounded-xl [&_label]:pl-1">
+    <Card className="w-full max-w-lg min-h-[450px] px-12 py-3 flex flex-col rounded-xl [&_label]:pl-1">
       <CardHeader className="pl-0">
         <h2 className="text-2xl pl-0 pb-2">Sign In</h2>
       </CardHeader>

@@ -4,15 +4,16 @@ import { useState, useRef, useContext } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { getApiUrl } from "@/utils/helpers";
-// import { useRouter } from "next/navigation";
 import { userContext } from "@/contexts/userContext";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const inputStyle =
   "rounded-full w-full px-3 py-4 h-12 border border-neutral-200 focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
 
 const formSchema = z.object({
-  name: z.string().min(6, {
-    message: "Course name must be at least 6 characters long",
+  name: z.string().min(4, {
+    message: "Course name must be at least 4 characters long",
   }),
   code: z.coerce.number().int().positive(),
   c_group: z.string(),
@@ -25,10 +26,10 @@ export default function CoursesNewPage() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  // const router = useRouter();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent the default form submission
+    e.preventDefault();
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
@@ -50,14 +51,18 @@ export default function CoursesNewPage() {
         throw new Error("Failed to create course");
       }
 
-      // const body = await res.json();
-      // const { id } = body;
+      const body = await res.json();
+      const { id } = body;
+      router.prefetch(`/forum/courses/${id}`);
 
       toast({
         title: "Course created",
         description: "The course has been created successfully.",
-        action: <ToastAction altText="View course"
-         >View course</ToastAction>,
+        action: (
+          <ToastAction altText="View course">
+            <Link href={`/forum/courses/${id}`}>View Course</Link>
+          </ToastAction>
+        ),
       });
 
       formRef.current?.reset();
@@ -82,7 +87,7 @@ export default function CoursesNewPage() {
   };
 
   return (
-    <div className="flex flex-col w-dvw h-dvh items-center justify-center">
+    <div className="flex flex-col w-dvw h-dvh bg-neutral-100 items-center justify-center">
       <section className="max-w-xl bg-neutral-50 flex flex-col w-full border rounded-lg gap-10 shadow p-8">
         <h3 className="font-semibold">New Course</h3>
         <form
@@ -99,7 +104,7 @@ export default function CoursesNewPage() {
               name="name"
               type="text"
               className={inputStyle}
-              placeholder="Course name"
+              placeholder="Course name e.g. Introduction to AI"
               required
             />
           </div>
@@ -112,7 +117,7 @@ export default function CoursesNewPage() {
               name="code"
               type="number"
               className={inputStyle}
-              placeholder="Course code"
+              placeholder="Course code e.g. 123"
               required
             />
           </div>
@@ -125,7 +130,7 @@ export default function CoursesNewPage() {
               name="c_group"
               type="text"
               className={inputStyle}
-              placeholder="Course group"
+              placeholder="Course group e.g. CPSC"
               required
             />
           </div>
@@ -138,14 +143,14 @@ export default function CoursesNewPage() {
               name="section"
               type="number"
               className={inputStyle}
-              placeholder="Course section"
+              placeholder="Course section e.g. 1"
               required
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="mt-4 bg-primary text-white rounded-full px-4 py-2 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-4 bg-neutral-950 text-white rounded-full px-4 py-2 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Creating..." : "Create Course"}
           </button>
