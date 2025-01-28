@@ -22,7 +22,7 @@ const formSchema = z.object({
 
 // Add these constants at the top of the file
 const DEFAULT_CONFIG = {
-  theme_colour: "#000000",
+  theme_colour: "#347370",
   font: "default",
 };
 
