@@ -157,7 +157,7 @@ class Course(Base):
         {"schema": "public"},
     )
 
-    roles = relationship("CourseRoles", back_populates = "course")
+    roles = relationship("CourseRole", back_populates = "course")
 
 
 class Post(Base):
@@ -341,7 +341,7 @@ class VisibilityEnum(enum.Enum):
     public = "public"
     private = "private"
     
-class CourseRoles(Base):
+class CourseRole(Base):
     __tablename__ = 'course_roles'
 
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
@@ -353,10 +353,10 @@ class CourseRoles(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    course = relationship("Courses", back_populates = "roles")
-    user = relationship("Users")
+    course = relationship("Course", back_populates = "roles")
+    # user = relationship("Users")
 
-class CourseUserRoles(Base):
+class CourseUserRole(Base):
     __tablename__ = 'course_user_roles'
 
     course_role_id = Column(PUUID, ForeignKey('public.course_roles.id', ondelete="CASCADE"), primary_key=True)
@@ -364,15 +364,15 @@ class CourseUserRoles(Base):
     assigned_by = Column(PUUID, ForeignKey('auth.users.id', ondelete="SET NULL"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    course_role = relationship("CourseRoles")
-    user = relationship("Users", foreign_keys=[user_id])
-    assigned_by_user = relationship("Users", foreign_keys=[assigned_by])
+    course_role = relationship("CourseRole")
+    # user = relationship("Users", foreign_keys=[user_id])
+    # assigned_by_user = relationship("Users", foreign_keys=[assigned_by])
 
 class PermissionTypeEnum(enum.Enum):
     Self = "Self"
     Others = "Others"
 
-class Permissions(Base):
+class Permission(Base):
     __tablename__ = 'permissions'
 
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
@@ -381,17 +381,17 @@ class Permissions(Base):
     access = Column(String(255), nullable=False)  # 'read', 'write', 'delete', etc.
     description = Column(Text)
 
-class CourseRolePermissions(Base):
+class CourseRolePermission(Base):
     __tablename__ = 'course_role_permissions'
 
     course_role_id = Column(PUUID, ForeignKey('public.course_roles.id', ondelete="CASCADE"), primary_key=True)
     permission_id = Column(PUUID, ForeignKey('public.permissions.id', ondelete="CASCADE"), primary_key=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    course_role = relationship("CourseRoles")
-    permission = relationship("Permissions")
+    course_role = relationship("CourseRole")
+    permission = relationship("Permission")
 
-class Tags(Base):
+class Tag(Base):
     __tablename__ = 'tags'
 
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
@@ -405,10 +405,10 @@ class Tags(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     course = relationship("Course")
-    parent_tag = relationship("Tags", remote_side=[id])
-    user = relationship("Users")
+    parent_tag = relationship("Tag", remote_side=[id])
+    # user = relationship("Users")
 
-class RoleTagAssociations(Base):
+class RoleTagAssociation(Base):
     __tablename__ = 'role_tag_associations'
 
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
@@ -416,5 +416,5 @@ class RoleTagAssociations(Base):
     tag_id = Column(PUUID, ForeignKey('public.tags.id', ondelete="CASCADE"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    course_role = relationship("CourseRoles")
-    tag = relationship("Tags")
+    course_role = relationship("CourseRole")
+    tag = relationship("Tag")
