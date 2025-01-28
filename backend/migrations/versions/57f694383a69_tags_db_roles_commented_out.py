@@ -1,8 +1,8 @@
-"""roles and tags migrations
+"""tags db, roles commented out
 
-Revision ID: 56a0d7bdfc5f
+Revision ID: 57f694383a69
 Revises: cec36a0a76fd
-Create Date: 2025-01-26 03:10:22.789468
+Create Date: 2025-01-28 10:32:14.365514
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import pgvector
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '56a0d7bdfc5f'
+revision: str = '57f694383a69'
 down_revision: Union[str, None] = 'cec36a0a76fd'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -27,20 +27,6 @@ def upgrade() -> None:
     sa.Column('type', sa.Enum('Self', 'Others', name='permissiontypeenum'), nullable=False),
     sa.Column('access', sa.String(length=255), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    schema='public'
-    )
-    op.create_table('course_roles',
-    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
-    sa.Column('course_id', sa.UUID(), nullable=False),
-    sa.Column('name', sa.String(length=255), nullable=False),
-    sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('visibility', sa.Enum('public', 'private', name='visibilityenum'), nullable=False),
-    sa.Column('created_by', sa.UUID(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['course_id'], ['public.courses.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['created_by'], ['auth.users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     schema='public'
     )
@@ -60,38 +46,8 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     schema='public'
     )
-    op.create_table('course_role_permissions',
-    sa.Column('course_role_id', sa.UUID(), nullable=False),
-    sa.Column('permission_id', sa.UUID(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['course_role_id'], ['public.course_roles.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['permission_id'], ['public.permissions.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('course_role_id', 'permission_id'),
-    schema='public'
-    )
-    op.create_table('course_user_roles',
-    sa.Column('course_role_id', sa.UUID(), nullable=False),
-    sa.Column('user_id', sa.UUID(), nullable=False),
-    sa.Column('assigned_by', sa.UUID(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['assigned_by'], ['auth.users.id'], ondelete='SET NULL'),
-    sa.ForeignKeyConstraint(['course_role_id'], ['public.course_roles.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['user_id'], ['auth.users.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('course_role_id', 'user_id'),
-    schema='public'
-    )
-    op.create_table('role_tag_associations',
-    sa.Column('id', sa.UUID(), server_default=sa.text('gen_random_uuid()'), nullable=False),
-    sa.Column('role_id', sa.UUID(), nullable=True),
-    sa.Column('tag_id', sa.UUID(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['role_id'], ['public.course_roles.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['tag_id'], ['public.tags.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id'),
-    schema='public'
-    )
-    op.create_foreign_key(None, 'chunk_relations', 'chunks', ['source_chunk_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'chunk_relations', 'chunks', ['target_chunk_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
+    op.create_foreign_key(None, 'chunk_relations', 'chunks', ['source_chunk_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'chunks', 'chunks', ['parent_chunk_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'chunks', 'documents', ['document_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'course_documents', 'documents', ['document_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
@@ -99,11 +55,11 @@ def upgrade() -> None:
     op.create_foreign_key(None, 'documents', 'profiles', ['created_by'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'post_edits', 'posts', ['post_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'post_edits', 'profiles', ['edited_by'], ['id'], source_schema='public', referent_schema='public')
-    op.create_foreign_key(None, 'posts', 'courses', ['course_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'posts', 'profiles', ['created_by'], ['id'], source_schema='public', referent_schema='public')
+    op.create_foreign_key(None, 'posts', 'courses', ['course_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'profiles', 'users', ['id'], ['id'], source_schema='public', referent_schema='auth', ondelete='CASCADE')
-    op.create_foreign_key(None, 'user_courses', 'courses', ['course_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'user_courses', 'profiles', ['user_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
+    op.create_foreign_key(None, 'user_courses', 'courses', ['course_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'user_post_events', 'profiles', ['user_id'], ['id'], source_schema='public', referent_schema='public')
     op.create_foreign_key(None, 'user_post_events', 'posts', ['post_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     # ### end Alembic commands ###
@@ -127,10 +83,6 @@ def downgrade() -> None:
     op.drop_constraint(None, 'chunks', schema='public', type_='foreignkey')
     op.drop_constraint(None, 'chunk_relations', schema='public', type_='foreignkey')
     op.drop_constraint(None, 'chunk_relations', schema='public', type_='foreignkey')
-    op.drop_table('role_tag_associations', schema='public')
-    op.drop_table('course_user_roles', schema='public')
-    op.drop_table('course_role_permissions', schema='public')
     op.drop_table('tags', schema='public')
-    op.drop_table('course_roles', schema='public')
     op.drop_table('permissions', schema='public')
     # ### end Alembic commands ###

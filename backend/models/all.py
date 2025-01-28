@@ -340,7 +340,8 @@ class ChunkRelation(Base):
 class VisibilityEnum(enum.Enum):
     public = "public"
     private = "private"
-    
+
+'''
 class CourseRole(Base):
     __tablename__ = 'course_roles'
 
@@ -356,6 +357,7 @@ class CourseRole(Base):
     course = relationship("Course", back_populates = "roles")
     # user = relationship("Users")
 
+
 class CourseUserRole(Base):
     __tablename__ = 'course_user_roles'
 
@@ -367,6 +369,7 @@ class CourseUserRole(Base):
     course_role = relationship("CourseRole")
     # user = relationship("Users", foreign_keys=[user_id])
     # assigned_by_user = relationship("Users", foreign_keys=[assigned_by])
+'''
 
 class PermissionTypeEnum(enum.Enum):
     Self = "Self"
@@ -380,7 +383,7 @@ class Permission(Base):
     type = Column(Enum(PermissionTypeEnum, native_enum = True), nullable=False)
     access = Column(String(255), nullable=False)  # 'read', 'write', 'delete', etc.
     description = Column(Text)
-
+'''
 class CourseRolePermission(Base):
     __tablename__ = 'course_role_permissions'
 
@@ -390,6 +393,7 @@ class CourseRolePermission(Base):
 
     course_role = relationship("CourseRole")
     permission = relationship("Permission")
+'''
 
 class Tag(Base):
     __tablename__ = 'tags'
@@ -408,6 +412,7 @@ class Tag(Base):
     parent_tag = relationship("Tag", remote_side=[id])
     # user = relationship("Users")
 
+'''
 class RoleTagAssociation(Base):
     __tablename__ = 'role_tag_associations'
 
@@ -418,3 +423,4 @@ class RoleTagAssociation(Base):
 
     course_role = relationship("CourseRole")
     tag = relationship("Tag")
+'''
