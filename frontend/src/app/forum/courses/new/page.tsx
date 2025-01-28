@@ -19,6 +19,12 @@ const formSchema = z.object({
   section: z.coerce.number().int().positive(),
 });
 
+// Add these constants at the top of the file
+const DEFAULT_CONFIG = {
+  theme_colour: "#000000",
+  font: "default"
+};
+
 export default function CoursesNewPage() {
   const { token } = useContext(userContext);
 
@@ -28,7 +34,7 @@ export default function CoursesNewPage() {
   // const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Prevent the default form submission
+    e.preventDefault();
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
@@ -37,13 +43,19 @@ export default function CoursesNewPage() {
       const dataToValidate = Object.fromEntries(formData.entries());
       const validatedData = formSchema.parse(dataToValidate);
 
+      // Add the default config to the request body
+      const requestBody = {
+        ...validatedData,
+        config: DEFAULT_CONFIG
+      };
+
       const res = await fetch(`${getApiUrl()}/courses`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(validatedData),
+        body: JSON.stringify(requestBody),
       });
 
       if (!res.ok) {

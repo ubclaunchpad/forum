@@ -14,6 +14,7 @@ import { Course } from "@/lib/types/course";
 import { hexToHSL } from "@/lib/utils";
 
 const fonts = {
+  "default": "var(--font-quicksand)",
   "space-grotesk": "var(--font-space-grotesk)",
   "inter": "var(--font-inter)",
   "raleway": "var(--font-raleway)",
