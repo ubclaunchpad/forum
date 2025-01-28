@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { use } from "react";
-import { CourseContextProvider } from "@/contexts/courseContext";
 import { useSearchParams } from "next/navigation";
 
 export default function SettingsLayout({

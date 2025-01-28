@@ -53,6 +53,8 @@ export function AppearanceSection() {
         description: "Course appearance updated successfully",
       });
     } catch (error) {
+      console.error(error);
+
       toast({
         title: "Error",
         description: "Failed to update appearance",

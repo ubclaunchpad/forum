@@ -50,6 +50,8 @@ export function CourseSection() {
         description: "Course details updated successfully",
       });
     } catch (error) {
+      console.error(error);
+
       toast({
         title: "Error",
         description: "Failed to update course details",

@@ -50,6 +50,7 @@ export function DeleteCourseButton({
       // Redirect to courses page
       router.push("/forum/courses");
     } catch (error) {
+      console.error(error);
       toast({
         title: "Error",
         description: "Failed to delete course",

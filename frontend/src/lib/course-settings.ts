@@ -1,4 +1,4 @@
-import { Settings, Layout, Users, Shield, LucideIcon } from "lucide-react";
+import { Layout, Users, Shield, LucideIcon } from "lucide-react";
 
 export const courseSettingsConfig = {
   sections: [
