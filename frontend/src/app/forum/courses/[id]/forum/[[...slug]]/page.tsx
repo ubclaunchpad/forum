@@ -36,7 +36,7 @@ async function getPosts(id: string, token: string) {
 export default async function Forum({
   params,
 }: {
-  params: Promise<{ id: string; slug }>;
+  params: Promise<{ id: string; slug: any }>;
 }) {
   const { id, slug } = await params;
   const selectPost = slug ? slug[0] : null;
