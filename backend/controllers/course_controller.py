@@ -1,14 +1,18 @@
+from datetime import datetime
 from typing import Dict, List, Optional
 from uuid import UUID
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from models.all import Course, Profile, user_courses
+from sqlalchemy import desc
+from models.all import Course, CourseRole, CourseUserRole, Profile, user_courses
 from models.db import get_db
 from models.schemas.course_schema import (
+    BasicCourseRoleInformation,
     CourseResponse,
     CreateCourseReq,
     CreateCourseResponse,
+    CreateCourseRoleRequest,
 )
 from pydantic import ValidationError
 
@@ -152,3 +156,68 @@ def get_course_members(c_id: str) -> List[Dict[str, str]]:
                 {"id": str(user.id), "name": user.first_name + " " + user.last_name}
             )
         return members
+
+def get_basic_course_roles(c_id: str) -> List[BasicCourseRoleInformation]:
+    with get_db() as db:
+        c_uuid = UUID(c_id)
+        roles: List[CourseRole] = db.query(CourseRole).filter(CourseRole.course_id == c_uuid).all()
+        basic_roles = []
+        for role in roles:
+            basic_role = BasicCourseRoleInformation(
+                name=str(role.name),
+                description=str(role.description)
+            )
+            basic_roles.append(basic_role)
+    return basic_roles
+
+def get_course_role(c_id: str, r_id: str) -> CourseRole:
+    with get_db() as db:
+        course_role = db.query(CourseRole).filter(CourseRole.course_id == UUID(c_id), CourseRole.id == UUID(r_id)).first()
+        if not course_role:
+            raise HTTPException(status_code=404, detail="Course role not found")
+        return course_role
+
+def create_course_role(c_id: str, req: CreateCourseRoleRequest, u_id: str) -> bool:
+    with get_db() as db:
+        course_role = CourseRole(
+            course_id=UUID(c_id),
+            name=req.name,
+            description=req.description,
+            visibility=req.visibility,
+            created_by=UUID(u_id),
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        try:
+            db.add(course_role)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise e
+    return True
+
+def assign_user_course_role(u_id: str, r_id: str, a_id: str) -> bool:
+    with get_db() as db:
+        course_user_role = CourseUserRole(
+            course_role_id=UUID(r_id),
+            user_id=UUID(u_id),
+            assigned_by=UUID(a_id),
+            created_at=datetime.now()
+        )
+        try:
+            db.add(course_user_role)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise e
+    return True
+
+def unassign_user_course_role(u_id: str, r_id: str) -> bool:
+    with get_db() as db:
+        try:
+            db.query(CourseUserRole).filter(CourseUserRole.course_role_id == r_id, CourseUserRole.user_id == u_id).delete()
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise e
+    return True

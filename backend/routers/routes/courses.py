@@ -1,10 +1,15 @@
 from controllers import course_controller
 from fastapi import APIRouter, HTTPException, Request
+from models.all import CourseRole
 from models.schemas.course_schema import (
+    AssignRoleRequest,
     CourseMembersResponse,
     CourseResponse,
+    CourseRoleBase,
+    CourseRolesResponse,
     CreateCourseReq,
     CreateCourseResponse,
+    CreateCourseRoleRequest,
     GetCoursesResponse,
 )
 from models.schemas.general_schema import GeneralResponse
@@ -63,3 +68,62 @@ async def unregister_user(c_id: str, u_id: str):
             status_code=400, detail="Failed to unregister user from course"
         )
     return GeneralResponse(msg=f"User {u_id} unregistered from course {c_id}")
+
+@course_router.get("/{c_id}/members/{u_id}/roles")
+async def get_roles_for_user(c_id: str, u_id: str):
+    return None
+
+@course_router.post("/{c_id}/members/roles/assign")
+async def assign_user_role(assignReq: AssignRoleRequest, req: Request):
+    author_id = req.state.user_id
+    res = course_controller.assign_user_course_role(str(assignReq.user_id), str(assignReq.role_id), author_id)
+    return res
+
+@course_router.delete("/{c_id}/members/roles/unassign")
+async def unassign_user_role(assignReq: AssignRoleRequest):
+    res = course_controller.unassign_user_course_role(str(assignReq.user_id), str(assignReq.role_id))
+    return res
+
+# ----------------- Course Roles -----------------#
+
+@course_router.get("/{c_id}/roles", response_model=CourseRolesResponse)
+async def get_course_roles(c_id: str):
+    res = course_controller.get_basic_course_roles(c_id)
+    if not res:
+        raise HTTPException(
+            status_code=400, detail="Failed to get course roles"
+        )
+    return CourseRolesResponse(roles=res)
+
+@course_router.post("/{c_id}/roles", response_model=GeneralResponse)
+async def create_course_role(c_id: str, role_req: CreateCourseRoleRequest, request: Request):
+    user_id = request.state.user_id
+    res = course_controller.create_course_role(c_id, role_req, user_id)
+    if not res:
+        raise HTTPException(
+            status_code=400, detail="Failed to get course roles"
+        )
+    return GeneralResponse(msg=f"{role_req.name} successfully created in course {c_id}")
+
+@course_router.get("/{c_id}/roles/{r_id}", response_model=CourseRoleBase)
+async def get_course_role(c_id: str, r_id: str):
+    res = course_controller.get_course_role(c_id, r_id)
+    if not res:
+        raise HTTPException(status_code=400, detail="Failed to get course role")
+    return res
+
+@course_router.put("/{c_id}/roles/{r_id}")
+async def update_course_role(c_id: str, r_id: str):
+    return None
+
+@course_router.delete("/{c_id}/role/{r_id}")
+async def delete_course_role(c_id: str, r_id: str):
+    return None
+
+@course_router.post("/{c_id}/roles/{r_id}/permissions")
+async def add_permission_to_course_role(c_id: str, r_id: str):
+    return None
+
+@course_router.delete("/{c_id}/roles/{r_id}/permissions")
+async def delete_permission_from_course_role(c_id: str, r_id: str):
+    return None
