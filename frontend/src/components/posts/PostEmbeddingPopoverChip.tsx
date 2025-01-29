@@ -10,8 +10,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
-import { LinkIcon, DeleteIcon, FileScanIcon, RefreshCcwIcon } from "lucide-react";
-import { useContext, useEffect, useState } from "react";
+import { FileScanIcon, RefreshCcwIcon } from "lucide-react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
 interface EmbeddingMetadata {
   last_updated: string | null;
@@ -20,7 +20,7 @@ interface EmbeddingMetadata {
 }
 
 // Helper function to get/set cache
-const CACHE_PREFIX = 'post_embedding_';
+const CACHE_PREFIX = "post_embedding_";
 const CACHE_DURATION = 1000 * 60 * 5; // 5 minutes
 
 function getCachedMetadata(postId: string): EmbeddingMetadata | null {
@@ -28,7 +28,7 @@ function getCachedMetadata(postId: string): EmbeddingMetadata | null {
   if (!cached) return null;
 
   const { data, timestamp } = JSON.parse(cached);
-  
+
   // Check if cache is stale
   if (Date.now() - timestamp > CACHE_DURATION) {
     localStorage.removeItem(`${CACHE_PREFIX}${postId}`);
@@ -43,55 +43,62 @@ function setCachedMetadata(postId: string, data: EmbeddingMetadata) {
     `${CACHE_PREFIX}${postId}`,
     JSON.stringify({
       data,
-      timestamp: Date.now()
-    })
+      timestamp: Date.now(),
+    }),
   );
 }
 
 export default function PostEmbeddingPopoverChip({ post }: { post: Post }) {
   const course = useContext(courseContext);
   const user = useContext(userContext);
-  const [metadata, setMetadata] = useState<EmbeddingMetadata | null>(() => 
-    getCachedMetadata(`${course.id}_${post.local_id}`)
+  const [metadata, setMetadata] = useState<EmbeddingMetadata | null>(() =>
+    getCachedMetadata(`${course.id}_${post.local_id}`),
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  async function getEmbeddingMetadata(forceRefresh = false) {
-    if (!forceRefresh) {
-      const cached = getCachedMetadata(`${course.id}_${post.local_id}`);
-      if (cached) {
-        setMetadata(cached);
-        return cached;
-      }
-    }
-
-    try {
-      const res = await fetch(
-        `${getApiUrl()}/courses/${course.id}/posts/${post.local_id}/embeddings/metadata`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
+  const getEmbeddingMetadata = useCallback(
+    async (forceRefresh = false) => {
+      if (!forceRefresh) {
+        const cached = getCachedMetadata(`${course.id}_${post.local_id}`);
+        if (cached) {
+          setMetadata(cached);
+          return cached;
         }
-      );
+      }
 
-      if (!res.ok) throw new Error("Failed to fetch embedding metadata");
+      try {
+        const res = await fetch(
+          `${getApiUrl()}/courses/${course.id}/posts/${post.local_id}/embeddings/metadata`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${user.token}`,
+            },
+          },
+        );
 
-      const data = await res.json();
-      setMetadata(data);
-      setCachedMetadata(`${course.id}_${post.local_id}`, data);
-      return data;
-    } catch (error) {
-      console.error("Error fetching embedding metadata:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch embedding status",
-        variant: "destructive",
-      });
-    }
-  }
+        if (!res.ok) throw new Error("Failed to fetch embedding metadata");
+
+        const data = await res.json();
+        setMetadata(data);
+        setCachedMetadata(`${course.id}_${post.local_id}`, data);
+        return data;
+      } catch (error) {
+        console.error("Error fetching embedding metadata:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch embedding status",
+          variant: "destructive",
+        });
+      }
+    },
+    [course.id, post.local_id, user.token],
+  );
+
+  useEffect(() => {
+    getEmbeddingMetadata();
+  }, [getEmbeddingMetadata]);
 
   async function generateEmbeddingData() {
     try {
@@ -104,7 +111,7 @@ export default function PostEmbeddingPopoverChip({ post }: { post: Post }) {
             "Content-Type": "application/json",
             Authorization: `Bearer ${user.token}`,
           },
-        }
+        },
       );
 
       if (!res.ok) throw new Error("Failed to generate embeddings");
@@ -126,10 +133,6 @@ export default function PostEmbeddingPopoverChip({ post }: { post: Post }) {
     }
   }
 
-  useEffect(() => {
-    getEmbeddingMetadata();
-  }, []);
-
   return (
     <Popover>
       <PopoverContent
@@ -147,18 +150,26 @@ export default function PostEmbeddingPopoverChip({ post }: { post: Post }) {
               disabled={isLoading}
               className="text-sm flex gap-6 font-medium items-center p-4 py-1 w-full border-b hover:text-primary-500"
             >
-              <RefreshCcwIcon className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-              <span>{metadata?.has_embeddings ? "Regenerate embeddings" : "Generate embeddings"}</span>
+              <RefreshCcwIcon
+                className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+              />
+              <span>
+                {metadata?.has_embeddings
+                  ? "Regenerate embeddings"
+                  : "Generate embeddings"}
+              </span>
             </button>
           </li>
           {metadata && (
             <li className="p-4 py-1 flex flex-col gap-1 text-xs font-medium items-center text-neutral-600">
               <div className="text-xs">
-                Status: {metadata.has_embeddings ? "Generated" : "Not generated"}
+                Status:{" "}
+                {metadata.has_embeddings ? "Generated" : "Not generated"}
               </div>
               {metadata.has_embeddings && (
                 <div className="">
-                  Last updated: {new Date(metadata.last_updated!).toLocaleString()}
+                  Last updated:{" "}
+                  {new Date(metadata.last_updated!).toLocaleString()}
                 </div>
               )}
             </li>
@@ -169,9 +180,11 @@ export default function PostEmbeddingPopoverChip({ post }: { post: Post }) {
         <button
           type="button"
           onClick={() => getEmbeddingMetadata(true)}
-          className={`focus:outline-none p-2 rounded-full bg-white border ${metadata?.has_embeddings ? 'bg-primary-50 border-primary-200': ''}`}
+          className={`focus:outline-none p-2 rounded-full bg-white border ${metadata?.has_embeddings ? "bg-primary-50 border-primary-200" : ""}`}
         >
-          <FileScanIcon className={`h-4 w-4 ${metadata?.has_embeddings ? 'text-primary-200' : ''}`} />
+          <FileScanIcon
+            className={`h-4 w-4 ${metadata?.has_embeddings ? "text-primary-200" : ""}`}
+          />
         </button>
       </PopoverTrigger>
     </Popover>

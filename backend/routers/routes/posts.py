@@ -1,11 +1,16 @@
 from controllers import post_controller
 from fastapi import APIRouter, HTTPException, Request
 from models.schemas.general_schema import GeneralResponse
-from models.schemas.post_schema import (CreatePostEditRequest,
-                                        CreatePostRequest, CreatePostResponse,
-                                        CreateUserPostEventRequest,
-                                        GetPostResponse, GetPostsResponse, PostEmbeddingMetadata,
-                                        PostResponse)
+from models.schemas.post_schema import (
+    CreatePostEditRequest,
+    CreatePostRequest,
+    CreatePostResponse,
+    CreateUserPostEventRequest,
+    GetPostResponse,
+    GetPostsResponse,
+    PostEmbeddingMetadata,
+    PostResponse,
+)
 
 post_router = APIRouter()
 
@@ -46,7 +51,6 @@ async def update_post(
 async def delete_post(c_id: str, post_id: int, request: Request):
     user_id = request.state.user_id
     post_controller.delete_post(c_id, user_id, post_id)
-    
 
     return {"msg": "Post deleted successfully"}
 
@@ -70,7 +74,10 @@ async def update_embeddings(c_id: str, post_id: int, request: Request):
     user_id = request.state.user_id
     return post_controller.update_embeddings(c_id, user_id, post_id)
 
-@post_router.get("/{local_id}/embeddings/metadata", response_model=PostEmbeddingMetadata)
+
+@post_router.get(
+    "/{local_id}/embeddings/metadata", response_model=PostEmbeddingMetadata
+)
 async def get_embedding_metadata(c_id: str, local_id: int, request: Request):
     user_id = request.state.user_id
     return post_controller.get_embedding_metadata(c_id, user_id, local_id)

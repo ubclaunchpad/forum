@@ -21,7 +21,7 @@ class CreatePostResponse(PostBase):
     local_id: int
     applied_at: Any
 
- 
+
 class PostResponse(PostBase):
     id: UUID
     local_id: int
@@ -39,7 +39,7 @@ class CreatePostEditRequest(PostEditBase):
 
 
 class PostEditResponse(PostEditBase):
-    id: UUID 
+    id: UUID
     edited_by: UUID
     post_id: UUID
 
@@ -58,11 +58,12 @@ class CreateUserPostEventRequest(UserPostEventBase):
 class UserPostEventResponse(UserPostEventBase):
     id: UUID
 
+
 class GetPost(PostBase):
     id: UUID
     local_id: int
     applied_at: datetime = Field(default_factory=datetime.now)
-    status: Optional[str] = None 
+    status: Optional[str] = None
 
 
 class GetPostsResponse(BaseModel):

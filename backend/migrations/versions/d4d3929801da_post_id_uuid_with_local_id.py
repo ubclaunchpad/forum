@@ -3,6 +3,7 @@ Revision ID: d4d3929801da
 Revises: 990400c7ca82
 Create Date: 2025-01-28 22:31:14.341886
 """
+
 from typing import Sequence, Union
 
 import pgvector
@@ -11,10 +12,11 @@ from alembic import op
 from sqlalchemy.dialects.postgresql import UUID
 
 # revision identifiers, used by Alembic.
-revision: str = 'd4d3929801da'
-down_revision: Union[str, None] = '990400c7ca82'
+revision: str = "d4d3929801da"
+down_revision: Union[str, None] = "990400c7ca82"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
+
 
 def upgrade() -> None:
     # Create sequence management table
@@ -45,23 +47,45 @@ def upgrade() -> None:
     """)
 
     # 1. First drop all existing foreign key constraints
-    op.execute('ALTER TABLE public.post_edits DROP CONSTRAINT IF EXISTS post_edits_post_id_fkey CASCADE')
-    op.execute('ALTER TABLE public.post_edits DROP CONSTRAINT IF EXISTS post_edits_post_id_fkey1 CASCADE')
-    op.execute('ALTER TABLE public.post_edits DROP CONSTRAINT IF EXISTS post_edits_post_id_fkey2 CASCADE')
-    op.execute('ALTER TABLE public.post_edits DROP CONSTRAINT IF EXISTS post_edits_post_id_fkey3 CASCADE')
-    op.execute('ALTER TABLE public.post_edits DROP CONSTRAINT IF EXISTS post_edits_post_id_fkey4 CASCADE')
-    
-    op.execute('ALTER TABLE public.user_post_events DROP CONSTRAINT IF EXISTS user_post_events_post_id_fkey CASCADE')
-    op.execute('ALTER TABLE public.user_post_events DROP CONSTRAINT IF EXISTS user_post_events_post_id_fkey1 CASCADE')
-    op.execute('ALTER TABLE public.user_post_events DROP CONSTRAINT IF EXISTS user_post_events_post_id_fkey2 CASCADE')
-    op.execute('ALTER TABLE public.user_post_events DROP CONSTRAINT IF EXISTS user_post_events_post_id_fkey3 CASCADE')
-    op.execute('ALTER TABLE public.user_post_events DROP CONSTRAINT IF EXISTS user_post_events_post_id_fkey4 CASCADE')
+    op.execute(
+        "ALTER TABLE public.post_edits DROP CONSTRAINT IF EXISTS post_edits_post_id_fkey CASCADE"
+    )
+    op.execute(
+        "ALTER TABLE public.post_edits DROP CONSTRAINT IF EXISTS post_edits_post_id_fkey1 CASCADE"
+    )
+    op.execute(
+        "ALTER TABLE public.post_edits DROP CONSTRAINT IF EXISTS post_edits_post_id_fkey2 CASCADE"
+    )
+    op.execute(
+        "ALTER TABLE public.post_edits DROP CONSTRAINT IF EXISTS post_edits_post_id_fkey3 CASCADE"
+    )
+    op.execute(
+        "ALTER TABLE public.post_edits DROP CONSTRAINT IF EXISTS post_edits_post_id_fkey4 CASCADE"
+    )
+
+    op.execute(
+        "ALTER TABLE public.user_post_events DROP CONSTRAINT IF EXISTS user_post_events_post_id_fkey CASCADE"
+    )
+    op.execute(
+        "ALTER TABLE public.user_post_events DROP CONSTRAINT IF EXISTS user_post_events_post_id_fkey1 CASCADE"
+    )
+    op.execute(
+        "ALTER TABLE public.user_post_events DROP CONSTRAINT IF EXISTS user_post_events_post_id_fkey2 CASCADE"
+    )
+    op.execute(
+        "ALTER TABLE public.user_post_events DROP CONSTRAINT IF EXISTS user_post_events_post_id_fkey3 CASCADE"
+    )
+    op.execute(
+        "ALTER TABLE public.user_post_events DROP CONSTRAINT IF EXISTS user_post_events_post_id_fkey4 CASCADE"
+    )
 
     # 2. Add new columns to posts and related tables
-    op.execute('ALTER TABLE public.posts ADD COLUMN uuid_id UUID DEFAULT gen_random_uuid()')
-    op.execute('ALTER TABLE public.posts ADD COLUMN local_id INTEGER')
-    op.execute('ALTER TABLE public.post_edits ADD COLUMN new_post_id UUID')
-    op.execute('ALTER TABLE public.user_post_events ADD COLUMN new_post_id UUID')
+    op.execute(
+        "ALTER TABLE public.posts ADD COLUMN uuid_id UUID DEFAULT gen_random_uuid()"
+    )
+    op.execute("ALTER TABLE public.posts ADD COLUMN local_id INTEGER")
+    op.execute("ALTER TABLE public.post_edits ADD COLUMN new_post_id UUID")
+    op.execute("ALTER TABLE public.user_post_events ADD COLUMN new_post_id UUID")
 
     # 3. Initialize sequences and local_ids
     op.execute("""
@@ -108,26 +132,32 @@ def upgrade() -> None:
     """)
 
     # 5. Make new columns NOT NULL
-    op.execute('ALTER TABLE public.posts ALTER COLUMN uuid_id SET NOT NULL')
-    op.execute('ALTER TABLE public.posts ALTER COLUMN local_id SET NOT NULL')
-    op.execute('ALTER TABLE public.post_edits ALTER COLUMN new_post_id SET NOT NULL')
-    op.execute('ALTER TABLE public.user_post_events ALTER COLUMN new_post_id SET NOT NULL')
+    op.execute("ALTER TABLE public.posts ALTER COLUMN uuid_id SET NOT NULL")
+    op.execute("ALTER TABLE public.posts ALTER COLUMN local_id SET NOT NULL")
+    op.execute("ALTER TABLE public.post_edits ALTER COLUMN new_post_id SET NOT NULL")
+    op.execute(
+        "ALTER TABLE public.user_post_events ALTER COLUMN new_post_id SET NOT NULL"
+    )
 
     # 6. Drop old primary key constraint and old columns
-    op.execute('ALTER TABLE public.posts DROP CONSTRAINT posts_pkey CASCADE')
-    op.execute('ALTER TABLE public.posts DROP COLUMN id')
-    op.execute('ALTER TABLE public.posts DROP COLUMN parent_id')
-    op.execute('ALTER TABLE public.post_edits DROP COLUMN post_id')
-    op.execute('ALTER TABLE public.user_post_events DROP COLUMN post_id')
+    op.execute("ALTER TABLE public.posts DROP CONSTRAINT posts_pkey CASCADE")
+    op.execute("ALTER TABLE public.posts DROP COLUMN id")
+    op.execute("ALTER TABLE public.posts DROP COLUMN parent_id")
+    op.execute("ALTER TABLE public.post_edits DROP COLUMN post_id")
+    op.execute("ALTER TABLE public.user_post_events DROP COLUMN post_id")
 
     # 7. Rename columns
-    op.execute('ALTER TABLE public.posts RENAME COLUMN uuid_id TO id')
-    op.execute('ALTER TABLE public.post_edits RENAME COLUMN new_post_id TO post_id')
-    op.execute('ALTER TABLE public.user_post_events RENAME COLUMN new_post_id TO post_id')
+    op.execute("ALTER TABLE public.posts RENAME COLUMN uuid_id TO id")
+    op.execute("ALTER TABLE public.post_edits RENAME COLUMN new_post_id TO post_id")
+    op.execute(
+        "ALTER TABLE public.user_post_events RENAME COLUMN new_post_id TO post_id"
+    )
 
     # 8. Add new primary key and constraints
-    op.execute('ALTER TABLE public.posts ADD PRIMARY KEY (id)')
-    op.execute('ALTER TABLE public.posts ADD CONSTRAINT uq_course_local_id UNIQUE (course_id, local_id)')
+    op.execute("ALTER TABLE public.posts ADD PRIMARY KEY (id)")
+    op.execute(
+        "ALTER TABLE public.posts ADD CONSTRAINT uq_course_local_id UNIQUE (course_id, local_id)"
+    )
 
     # 9. Add new foreign key constraints
     op.execute("""
@@ -166,21 +196,26 @@ def upgrade() -> None:
         EXECUTE FUNCTION public.set_post_local_id();
     """)
 
+
 def downgrade() -> None:
     # Remove trigger and functions
-    op.execute('DROP TRIGGER IF EXISTS tr_set_post_local_id ON public.posts')
-    op.execute('DROP FUNCTION IF EXISTS public.set_post_local_id()')
-    op.execute('DROP FUNCTION IF EXISTS public.next_post_local_id(UUID)')
-    
+    op.execute("DROP TRIGGER IF EXISTS tr_set_post_local_id ON public.posts")
+    op.execute("DROP FUNCTION IF EXISTS public.set_post_local_id()")
+    op.execute("DROP FUNCTION IF EXISTS public.next_post_local_id(UUID)")
+
     # Remove constraints first
-    op.execute('ALTER TABLE public.post_edits DROP CONSTRAINT IF EXISTS post_edits_post_id_fkey')
-    op.execute('ALTER TABLE public.user_post_events DROP CONSTRAINT IF EXISTS user_post_events_post_id_fkey')
-    op.execute('ALTER TABLE public.posts DROP CONSTRAINT IF EXISTS uq_course_local_id')
-    
+    op.execute(
+        "ALTER TABLE public.post_edits DROP CONSTRAINT IF EXISTS post_edits_post_id_fkey"
+    )
+    op.execute(
+        "ALTER TABLE public.user_post_events DROP CONSTRAINT IF EXISTS user_post_events_post_id_fkey"
+    )
+    op.execute("ALTER TABLE public.posts DROP CONSTRAINT IF EXISTS uq_course_local_id")
+
     # Remove sequence table
-    op.execute('DROP TABLE IF EXISTS public.post_sequences')
-    
+    op.execute("DROP TABLE IF EXISTS public.post_sequences")
+
     # Restore original structure
-    op.execute('ALTER TABLE public.posts DROP CONSTRAINT IF EXISTS posts_pkey')
-    op.execute('ALTER TABLE public.posts DROP COLUMN IF EXISTS local_id')
-    op.execute('ALTER TABLE public.posts ADD COLUMN IF NOT EXISTS parent_id INTEGER')
+    op.execute("ALTER TABLE public.posts DROP CONSTRAINT IF EXISTS posts_pkey")
+    op.execute("ALTER TABLE public.posts DROP COLUMN IF EXISTS local_id")
+    op.execute("ALTER TABLE public.posts ADD COLUMN IF NOT EXISTS parent_id INTEGER")

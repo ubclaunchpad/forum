@@ -7,20 +7,11 @@ import { useToast } from "@/hooks/use-toast";
 import { userContext } from "@/contexts/userContext";
 import {
   ArrowRightFromLine,
-  DeleteIcon,
   DotIcon,
-  FileScanIcon,
-  LinkIcon,
-  MoreHorizontal,
 } from "lucide-react";
-import { getRelativeTimeString, isIDTemporary, isPendingId } from "@/lib/utils";
+import { getRelativeTimeString, isIDTemporary } from "@/lib/utils";
 import { forumPostsContext } from "@/contexts/PostsContext";
 import PostTextEditor from "./PostTextEditor";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@radix-ui/react-popover";
 import PostEmbeddingPopoverChip from "./PostEmbeddingPopoverChip";
 
 export default function PostView<T extends PostType>({
@@ -251,7 +242,7 @@ export default function PostView<T extends PostType>({
         </Suspense>
         {!isTemporary && (
           <div className="flex w-full justify-end p-2">
-           <PostEmbeddingPopoverChip post={post as Post}/>
+            <PostEmbeddingPopoverChip post={post as Post} />
           </div>
         )}
       </div>

@@ -10,10 +10,14 @@ from fastapi.encoders import jsonable_encoder
 from models.all import Embedding, Post, PostEdit, Profile, UserPostEvent
 from models.db import get_db
 from models.schemas.general_schema import GeneralResponse
-from models.schemas.post_schema import (CreatePostEditRequest,
-                                        CreatePostRequest, GetPostResponse,
-                                        PostEditResponse,
-                                        PostEmbeddingMetadata, PostResponse)
+from models.schemas.post_schema import (
+    CreatePostEditRequest,
+    CreatePostRequest,
+    GetPostResponse,
+    PostEditResponse,
+    PostEmbeddingMetadata,
+    PostResponse,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +123,7 @@ def update_post(
 
             db.add(post_edit)
             db.flush()
-            
+
             return PostEditResponse(
                 id=post_edit.id,
                 edited_by=UUID(user_id),
@@ -163,7 +167,7 @@ def view_post(c_id: str, user_id: str, local_id: int) -> UserPostEvent:
             )
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
-                
+
             post_event = (
                 db.query(UserPostEvent)
                 .filter(
@@ -196,7 +200,7 @@ def like_post(c_id: str, user_id: str, local_id: int) -> UserPostEvent:
             )
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
-                
+
             post_event = (
                 db.query(UserPostEvent)
                 .filter(
@@ -248,7 +252,7 @@ def update_embeddings(c_id: str, user_id: str, local_id: int) -> GeneralResponse
                 .filter(Post.course_id == c_id, Post.local_id == local_id)
                 .first()
             )
-            
+
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
 
@@ -263,19 +267,17 @@ def update_embeddings(c_id: str, user_id: str, local_id: int) -> GeneralResponse
     except Exception as e:
         logger.error(
             "Error updating post embeddings",
-            extra={
-                "course_id": c_id,
-                "local_id": local_id,
-                "error": str(e)
-            },
-            exc_info=True
+            extra={"course_id": c_id, "local_id": local_id, "error": str(e)},
+            exc_info=True,
         )
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to update post embeddings: {str(e)}"
+            status_code=500, detail=f"Failed to update post embeddings: {str(e)}"
         )
-        
-def get_embedding_metadata(c_id: str, user_id: str, local_id: int) -> PostEmbeddingMetadata:
+
+
+def get_embedding_metadata(
+    c_id: str, user_id: str, local_id: int
+) -> PostEmbeddingMetadata:
     """Get metadata about a post's embeddings."""
     try:
         with get_db() as db:
@@ -285,28 +287,25 @@ def get_embedding_metadata(c_id: str, user_id: str, local_id: int) -> PostEmbedd
                 .filter(Post.course_id == c_id, Post.local_id == local_id)
                 .first()
             )
-            
+
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
 
             # Get the embeddings for this post
             embeddings = (
                 db.query(Embedding)
-                .filter(
-                    Embedding.entity_type == 'post',
-                    Embedding.entity_id == post.id
-                )
+                .filter(Embedding.entity_type == "post", Embedding.entity_id == post.id)
                 .order_by(Embedding.created_at.desc())
                 .all()
             )
-            
+
             if not embeddings:
                 return PostEmbeddingMetadata()  # Returns with default values
 
             return PostEmbeddingMetadata(
                 last_updated=embeddings[0].created_at,
                 chunk_count=len(embeddings),
-                has_embeddings=True
+                has_embeddings=True,
             )
 
     except HTTPException as e:
@@ -314,14 +313,9 @@ def get_embedding_metadata(c_id: str, user_id: str, local_id: int) -> PostEmbedd
     except Exception as e:
         logger.error(
             "Error getting post embedding metadata",
-            extra={
-                "course_id": c_id,
-                "local_id": local_id,
-                "error": str(e)
-            },
-            exc_info=True
+            extra={"course_id": c_id, "local_id": local_id, "error": str(e)},
+            exc_info=True,
         )
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to get post embedding metadata: {str(e)}"
+            status_code=500, detail=f"Failed to get post embedding metadata: {str(e)}"
         )

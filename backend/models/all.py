@@ -5,14 +5,30 @@ from uuid import UUID
 
 from httpx import post
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import (ARRAY, DDL, Boolean, CheckConstraint, Column, Date,
-                        DateTime, Enum, Float, ForeignKey,
-                        ForeignKeyConstraint, Index, Integer, String, Table,
-                        Text, UniqueConstraint, event, text)
+from sqlalchemy import (
+    ARRAY,
+    DDL,
+    Boolean,
+    CheckConstraint,
+    Column,
+    Date,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    ForeignKeyConstraint,
+    Index,
+    Integer,
+    String,
+    Table,
+    Text,
+    UniqueConstraint,
+    event,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PUUID
-from sqlalchemy.orm import (backref, declarative_base, declared_attr,
-                            relationship)
+from sqlalchemy.orm import backref, declarative_base, declared_attr, relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import VARCHAR, TypeDecorator
 
@@ -146,25 +162,33 @@ class Post(Base):
     __tablename__ = "posts"
     # Primary UUID
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-    
+
     # Course-specific sequential ID
     local_id = Column(Integer, nullable=False)
-    course_id = Column(PUUID, ForeignKey("public.courses.id", ondelete="CASCADE", name="posts_course_id_fkey"), nullable=False)
-    
+    course_id = Column(
+        PUUID,
+        ForeignKey(
+            "public.courses.id", ondelete="CASCADE", name="posts_course_id_fkey"
+        ),
+        nullable=False,
+    )
+
     # Regular fields
     title = Column(Text)
     content = Column(Text)
-    status = Column('status', Enum('poststatus', schema='public'), nullable=True)
+    status = Column("status", Enum("poststatus", schema="public"), nullable=True)
     applied_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(
-        PUUID, 
-        ForeignKey("public.profiles.id", name="posts_created_by_fkey"), 
-        nullable=False
+        PUUID,
+        ForeignKey("public.profiles.id", name="posts_created_by_fkey"),
+        nullable=False,
     )
 
     # Relationships
     creator = relationship("Profile", back_populates="posts", foreign_keys=[created_by])
-    edits = relationship("PostEdit", back_populates="post", cascade="all, delete-orphan")
+    edits = relationship(
+        "PostEdit", back_populates="post", cascade="all, delete-orphan"
+    )
     events = relationship("UserPostEvent", back_populates="post")
     embeddings = relationship(
         "Embedding",
@@ -175,10 +199,11 @@ class Post(Base):
     )
 
     __table_args__ = (
-        UniqueConstraint('course_id', 'local_id', name='uq_posts_course_local_id'),
-        {"schema": "public"}
+        UniqueConstraint("course_id", "local_id", name="uq_posts_course_local_id"),
+        {"schema": "public"},
     )
-    
+
+
 class PostEdit(Base):
     __tablename__ = "post_edits"
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)

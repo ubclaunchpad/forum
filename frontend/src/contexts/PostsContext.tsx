@@ -38,7 +38,9 @@ export function ForumContextProvider({
   const course = useContext(courseContext);
   const router = useRouter();
   const foundPost = initialSelectedId
-    ? initialPosts.find((post) => post.local_id.toString() === initialSelectedId)
+    ? initialPosts.find(
+        (post) => post.local_id.toString() === initialSelectedId,
+      )
     : null;
 
   const [selectedPost, setSelectedPost] = useState<Post | null>(

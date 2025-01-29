@@ -14,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CopyIcon, DeleteIcon, LinkIcon, MoreHorizontal } from "lucide-react";
+import {  DeleteIcon, LinkIcon, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { courseContext } from "@/contexts/courseContext";
 import { userContext } from "@/contexts/userContext";
@@ -146,7 +146,8 @@ export const PostCard = <T extends PostType>({
                       type="button"
                       onClick={() => {
                         navigator.clipboard.writeText(
-                          `${window.location.origin}/forum/courses/${course.id}/forum/${post.local_id}`);
+                          `${window.location.origin}/forum/courses/${course.id}/forum/${post.local_id}`,
+                        );
                         toast({
                           title: "Copied link to post",
                         });
