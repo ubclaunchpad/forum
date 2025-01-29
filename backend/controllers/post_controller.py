@@ -2,15 +2,20 @@ import stat
 from typing import List, Optional
 from uuid import UUID
 
+import logging
+
 from core.processors.embedding_processor import EmbeddingProcessor
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
+from core.processors.post_processor import PostProcessor
 from models.all import Post, PostEdit, Profile, UserPostEvent
 from models.db import get_db
 from models.schemas.general_schema import GeneralResponse
 from models.schemas.post_schema import (CreatePostEditRequest,
                                         CreatePostRequest, GetPostResponse,
                                         PostEditResponse, PostResponse)
+
+logger = logging.getLogger(__name__)
 
 
 def create_post(user_id: str, c_id: str, post_info: CreatePostRequest) -> Post:
@@ -231,3 +236,41 @@ def getUserInteractions(db, user_id: str, post_id: UUID):
         return {"viewed": False, "liked": False}
 
     return {"viewed": user_interaction.viewed, "liked": user_interaction.liked}
+
+
+def update_embeddings(c_id: str, user_id: str, local_id: int) -> GeneralResponse:
+    """Update embeddings for a post."""
+    try:
+        with get_db() as db:
+            # First get the post
+            post = (
+                db.query(Post)
+                .filter(Post.course_id == c_id, Post.local_id == local_id)
+                .first()
+            )
+            
+            if not post:
+                raise HTTPException(status_code=404, detail="Post not found")
+
+            # Initialize post processor and process embeddings
+            with PostProcessor(db) as processor:
+                processor.process_post(post.id)
+
+            return GeneralResponse(msg="Post embeddings updated successfully")
+
+    except HTTPException as e:
+        raise
+    except Exception as e:
+        logger.error(
+            "Error updating post embeddings",
+            extra={
+                "course_id": c_id,
+                "local_id": local_id,
+                "error": str(e)
+            },
+            exc_info=True
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to update post embeddings: {str(e)}"
+        )
