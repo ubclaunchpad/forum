@@ -1,7 +1,7 @@
 import json
 
 from controllers import websocket_controller
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 from models.schemas import message_schema
 
 
@@ -26,15 +26,21 @@ class ConnectionManager:
 web_router = APIRouter()
 manager = ConnectionManager()
 
-@web_router.websocket("/ws/chat/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: int):
+
+@web_router.websocket("/ws/chat/{channel_id}")
+async def websocket_endpoint(websocket: WebSocket, channel_id: str, id : str = Query(None)):
+
+    if not websocket_controller.verifyUserChannel(id, channel_id):
+        print('this is lit')
+        return
+
     await manager.connect(websocket)
     try:
         while True:
             data = await websocket.receive_text()
+            websocket_controller.sendMessage(data, id)
             await manager.send_personal_message(f"You wrote: {data}", websocket)
-            await manager.broadcast(f"Client #{client_id} says: {data}")
+            await manager.broadcast(f"Client #{channel_id} says: {data}")
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        await manager.broadcast(f"Client #{client_id} left the chat")
-        
+        await manager.broadcast(f"Client #{channel_id} left the chat")

@@ -11,7 +11,7 @@ export default function Chat() {
   const user = useContext(userContext);
 
   useEffect(() => {
-    const socket = new WebSocket(WS_URL + `?token=${user.token}`);
+    const socket = new WebSocket(WS_URL + `?id=${user.user.id}`);
 
     console.log(socket);
 
