@@ -11,8 +11,8 @@ from models.schemas.course_schema import (
     CreateCourseResponse,
     CreateCourseRoleRequest,
     GetCoursesResponse,
-    CourseTagsResponse
-    UpdateCourseReq,
+    CourseTagsResponse,
+    UpdateCourseReq
 )
 from models.schemas.general_schema import GeneralResponse
 
