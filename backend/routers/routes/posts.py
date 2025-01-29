@@ -4,7 +4,7 @@ from models.schemas.general_schema import GeneralResponse
 from models.schemas.post_schema import (CreatePostEditRequest,
                                         CreatePostRequest, CreatePostResponse,
                                         CreateUserPostEventRequest,
-                                        GetPostResponse, GetPostsResponse,
+                                        GetPostResponse, GetPostsResponse, PostEmbeddingMetadata,
                                         PostResponse)
 
 post_router = APIRouter()
@@ -68,3 +68,8 @@ async def like_post(c_id: str, post_id: int, request: Request):
 async def update_embeddings(c_id: str, post_id: int, request: Request):
     user_id = request.state.user_id
     return post_controller.update_embeddings(c_id, user_id, post_id)
+
+@post_router.get("/{local_id}/embeddings/metadata", response_model=PostEmbeddingMetadata)
+async def get_embedding_metadata(c_id: str, local_id: int, request: Request):
+    user_id = request.state.user_id
+    return post_controller.get_embedding_metadata(c_id, user_id, local_id)

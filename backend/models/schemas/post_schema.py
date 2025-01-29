@@ -73,3 +73,10 @@ class GetPostResponse(BaseModel):
     post: PostResponse
     stats: dict
     user_interactions: dict
+
+
+class PostEmbeddingMetadata(BaseModel):
+    last_updated: datetime
+    chunk_count: int
+    has_embeddings: bool
+    

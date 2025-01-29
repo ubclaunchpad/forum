@@ -8,12 +8,12 @@ from core.processors.embedding_processor import EmbeddingProcessor
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from core.processors.post_processor import PostProcessor
-from models.all import Post, PostEdit, Profile, UserPostEvent
+from models.all import Embedding, Post, PostEdit, Profile, UserPostEvent
 from models.db import get_db
 from models.schemas.general_schema import GeneralResponse
 from models.schemas.post_schema import (CreatePostEditRequest,
                                         CreatePostRequest, GetPostResponse,
-                                        PostEditResponse, PostResponse)
+                                        PostEditResponse, PostEmbeddingMetadata, PostResponse)
 
 logger = logging.getLogger(__name__)
 
@@ -273,4 +273,59 @@ def update_embeddings(c_id: str, user_id: str, local_id: int) -> GeneralResponse
         raise HTTPException(
             status_code=500,
             detail=f"Failed to update post embeddings: {str(e)}"
+        )
+        
+def get_embedding_metadata(c_id: str, user_id: str, local_id: int) -> PostEmbeddingMetadata:
+    """Get metadata about a post's embeddings."""
+    try:
+        with get_db() as db:
+            # First get the post
+            post = (
+                db.query(Post)
+                .filter(Post.course_id == c_id, Post.local_id == local_id)
+                .first()
+            )
+            
+            if not post:
+                raise HTTPException(status_code=404, detail="Post not found")
+
+            # Get the embeddings for this post
+            embeddings = (
+                db.query(Embedding)
+                .filter(
+                    Embedding.entity_type == 'post',
+                    Embedding.entity_id == post.id
+                )
+                .order_by(Embedding.created_at.desc())
+                .all()
+            )
+            
+            if not embeddings:
+                return PostEmbeddingMetadata(
+                    last_updated=None,
+                    chunk_count=0,
+                    has_embeddings=False
+                )
+
+            return PostEmbeddingMetadata(
+                last_updated=embeddings[0].created_at,
+                chunk_count=len(embeddings),
+                has_embeddings=True
+            )
+
+    except HTTPException as e:
+        raise
+    except Exception as e:
+        logger.error(
+            "Error getting post embedding metadata",
+            extra={
+                "course_id": c_id,
+                "local_id": local_id,
+                "error": str(e)
+            },
+            exc_info=True
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get post embedding metadata: {str(e)}"
         )

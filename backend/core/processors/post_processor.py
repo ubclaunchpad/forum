@@ -1,7 +1,14 @@
-from typing import List, Dict
+import logging
 import re
-from models.all import Post
+from typing import Dict, List
+
 import tiktoken
+from core.processors.embedding_processor import EmbeddingProcessor
+from models.all import Post
+from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
+
 
 class PostProcessor:
     # Add this as a class constant
@@ -125,3 +132,25 @@ class PostProcessor:
             chunks.extend(content_chunks)
 
         return chunks
+    
+    def __init__(self, db: Session):
+        """Initialize the PostProcessor."""
+        self.db = db
+        self.embedding_processor = EmbeddingProcessor()
+
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit."""
+        if exc_type is not None:
+            # If there was an error, rollback
+            self.db.rollback()
+            logger.error(
+                "Error in processor context",
+                extra={"error": str(exc_val)},
+                exc_info=True,
+            )
+            return False  # Re-raise the exception
+        return True
