@@ -5,10 +5,23 @@ import { getApiUrl } from "@/utils/helpers";
 import { courseContext } from "@/contexts/courseContext";
 import { useToast } from "@/hooks/use-toast";
 import { userContext } from "@/contexts/userContext";
-import { ArrowRightFromLine, DotIcon } from "lucide-react";
-import { getRelativeTimeString, isIDTemporary } from "@/lib/utils";
+import {
+  ArrowRightFromLine,
+  DeleteIcon,
+  DotIcon,
+  FileScanIcon,
+  LinkIcon,
+  MoreHorizontal,
+} from "lucide-react";
+import { getRelativeTimeString, isIDTemporary, isPendingId } from "@/lib/utils";
 import { forumPostsContext } from "@/contexts/PostsContext";
 import PostTextEditor from "./PostTextEditor";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@radix-ui/react-popover";
+import PostEmbeddingPopoverChip from "./PostEmbeddingPopoverChip";
 
 export default function PostView<T extends PostType>({
   post,
@@ -236,13 +249,11 @@ export default function PostView<T extends PostType>({
             handleSave={handleSaveAction}
           />
         </Suspense>
-        {/* {!isTemporary && (
-          <div className="flex flex-col font-semibold gap-4 p-4">
-            <div className="flex flex-col gap-2">
-              <h4>Comments</h4>
-            </div>
+        {!isTemporary && (
+          <div className="flex w-full justify-end p-2">
+           <PostEmbeddingPopoverChip post={post as Post}/>
           </div>
-        )} */}
+        )}
       </div>
     </div>
   );

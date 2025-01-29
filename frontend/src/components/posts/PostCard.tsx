@@ -105,7 +105,7 @@ export const PostCard = <T extends PostType>({
           {post.title}
         </p>
 
-        <h2 className=" font-medium text-xs ">
+        <h2 className=" font-medium text-xs flex-shrink-0 ">
           {post.applied_at &&
             getRelativeTimeString(
               new Date(post.applied_at).getTime(),

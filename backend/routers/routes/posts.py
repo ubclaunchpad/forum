@@ -46,6 +46,7 @@ async def update_post(
 async def delete_post(c_id: str, post_id: int, request: Request):
     user_id = request.state.user_id
     post_controller.delete_post(c_id, user_id, post_id)
+    
 
     return {"msg": "Post deleted successfully"}
 
