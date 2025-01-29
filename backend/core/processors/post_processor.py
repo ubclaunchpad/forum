@@ -1,10 +1,12 @@
 import logging
 import re
+import time
 from typing import Dict, List
+from uuid import UUID
 
 import tiktoken
 from core.processors.embedding_processor import EmbeddingProcessor
-from models.all import Post
+from models.all import Embedding, Post
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
@@ -102,7 +104,6 @@ class PostProcessor:
             })
 
         return chunks
-
     def _create_chunks(self, post: Post) -> List[Dict]:
         """Create smart chunks from post content."""
         chunks = []
@@ -112,10 +113,10 @@ class PostProcessor:
             "course_id": str(post.course_id)
         }
 
-        # Create title chunk separately
+        # Create title chunk separately - using 'text' type instead of 'title'
         title_chunk = {
             "content": f"Title: {post.title}",
-            "chunk_type": "title",
+            "chunk_type": "text",  # Changed from 'title' to 'text'
             "chunk_index": 0,
             "chunk_metadata": {**base_metadata, "is_title": True}
         }
@@ -125,13 +126,14 @@ class PostProcessor:
         if post.content:
             content_chunks = self._create_chunks_from_text(
                 post.content,
-                "content",
+                "text",  # Explicitly using 'text' type
                 len(chunks),  # Start index after title chunk
                 {**base_metadata, "is_title": False}
             )
             chunks.extend(content_chunks)
 
         return chunks
+    
     
     def __init__(self, db: Session):
         """Initialize the PostProcessor."""
@@ -154,3 +156,89 @@ class PostProcessor:
             )
             return False  # Re-raise the exception
         return True
+    
+    def process_post(self, post_id: UUID) -> None:
+        """Process a post's content and generate embeddings.
+        
+        Args:
+            post_id: UUID of the post to process
+            
+        Raises:
+            ValueError: If post not found
+            Exception: For other processing errors
+        """
+        start_time = time.time()
+        logger.info(
+            "Starting post processing",
+            extra={"post_id": str(post_id)}
+        )
+
+        try:
+            # Get post
+            post = self.db.query(Post).get(post_id)
+            if not post:
+                logger.error(
+                    "Post not found", 
+                    extra={"post_id": str(post_id)}
+                )
+                raise ValueError(f"Post {post_id} not found")
+
+            # Delete existing embeddings if any
+            self.db.query(Embedding).filter(
+                Embedding.entity_type == 'post',
+                Embedding.entity_id == post_id
+            ).delete()
+
+            # Create chunks from post content
+            chunks_start = time.time()
+            chunks_data = self._create_chunks(post)
+            
+            logger.info(
+                "Chunks created",
+                extra={
+                    "post_id": str(post_id),
+                    "chunks_time": f"{time.time() - chunks_start:.2f}s",
+                    "chunks_count": len(chunks_data),
+                }
+            )
+
+            # Process each chunk and create embeddings
+            embedding_start = time.time()
+            for chunk_data in chunks_data:
+                embedding = Embedding(
+                    entity_type="post",
+                    entity_id=post_id,
+                    content=chunk_data["content"],
+                    chunk_type=chunk_data["chunk_type"],
+                    chunk_index=chunk_data["chunk_index"],
+                    chunk_metadata=chunk_data["chunk_metadata"],
+                    embedding=self.embedding_processor.generate_embedding(
+                        chunk_data["content"]
+                    )
+                )
+                self.db.add(embedding)
+
+            # Commit the changes
+            self.db.commit()
+
+            logger.info(
+                "Post processing completed",
+                extra={
+                    "post_id": str(post_id),
+                    "total_time": f"{time.time() - start_time:.2f}s",
+                    "total_chunks": len(chunks_data),
+                    "embedding_time": f"{time.time() - embedding_start:.2f}s"
+                }
+            )
+
+        except Exception as e:
+            self.db.rollback()
+            logger.error(
+                "Error processing post",
+                extra={
+                    "post_id": str(post_id),
+                    "error": str(e),
+                },
+                exc_info=True
+            )
+            raise e

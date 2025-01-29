@@ -76,7 +76,6 @@ class GetPostResponse(BaseModel):
 
 
 class PostEmbeddingMetadata(BaseModel):
-    last_updated: datetime
-    chunk_count: int
-    has_embeddings: bool
-    
+    last_updated: Optional[datetime] = None
+    chunk_count: int = 0
+    has_embeddings: bool = False

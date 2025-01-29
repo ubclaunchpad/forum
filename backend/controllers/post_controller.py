@@ -1,19 +1,19 @@
+import logging
 import stat
 from typing import List, Optional
 from uuid import UUID
 
-import logging
-
 from core.processors.embedding_processor import EmbeddingProcessor
+from core.processors.post_processor import PostProcessor
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from core.processors.post_processor import PostProcessor
 from models.all import Embedding, Post, PostEdit, Profile, UserPostEvent
 from models.db import get_db
 from models.schemas.general_schema import GeneralResponse
 from models.schemas.post_schema import (CreatePostEditRequest,
                                         CreatePostRequest, GetPostResponse,
-                                        PostEditResponse, PostEmbeddingMetadata, PostResponse)
+                                        PostEditResponse,
+                                        PostEmbeddingMetadata, PostResponse)
 
 logger = logging.getLogger(__name__)
 
@@ -301,11 +301,7 @@ def get_embedding_metadata(c_id: str, user_id: str, local_id: int) -> PostEmbedd
             )
             
             if not embeddings:
-                return PostEmbeddingMetadata(
-                    last_updated=None,
-                    chunk_count=0,
-                    has_embeddings=False
-                )
+                return PostEmbeddingMetadata()  # Returns with default values
 
             return PostEmbeddingMetadata(
                 last_updated=embeddings[0].created_at,
