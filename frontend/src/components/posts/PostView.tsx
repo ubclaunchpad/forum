@@ -141,7 +141,7 @@ export default function PostView<T extends PostType>({
       });
     }
     const res = await fetch(
-      `${getApiUrl()}/courses/${course.id as string}/posts/${post.id}`,
+      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}`,
       {
         method: "PATCH",
         headers: {
@@ -208,7 +208,7 @@ export default function PostView<T extends PostType>({
               <></>
             ) : (
               <>
-                <h2 className=" font-medium text-sm ">Post #{post.id}</h2>
+                <h2 className=" font-medium text-sm ">Post #{post.local_id}</h2>
                 <span>
                   <DotIcon className="opacity-50 min-w-5 min-h-5 " />
                 </span>
