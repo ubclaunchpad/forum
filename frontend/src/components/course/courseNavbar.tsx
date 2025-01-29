@@ -5,13 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const tabs = [
-  // {
-  //   name: "announcements",
-  //   icon: Megaphone,
-  //   label: "Announcements",
-  //   href: "announcements",
-  //   disabled: true,
-  // },
   {
     name: "forum",
     icon: MessagesSquare,
@@ -32,12 +25,13 @@ export default function CourseNavbar() {
   const pathname = usePathname();
   const path = pathname.split("/");
   if (
-    !["forum", "announcements", "resources"].includes(path[path.length - 1])
+    path.length < 5 &&
+    !["forum", "announcements", "resources"].includes(path[4])
   ) {
     path.push("forum");
   }
-  const tab = path[path.length - 1];
-  const courseid = path[path.length - 2];
+  const tab = path[4];
+  const courseid = path[3];
   const isSelected = (currentTab: string) => tab === currentTab;
 
   return (

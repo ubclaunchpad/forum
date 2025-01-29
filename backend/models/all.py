@@ -169,13 +169,19 @@ class Post(Base):
     parent_id = Column(PUUID)
     applied_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
-    embedding = Column(Vector(1536), nullable=True)
 
     creator = relationship("Profile", back_populates="posts", foreign_keys=[created_by])
     edits = relationship(
         "PostEdit", back_populates="post", cascade="all, delete-orphan"
     )
     events = relationship("UserPostEvent", back_populates="post")
+    embeddings = relationship(
+        "Embedding",
+        foreign_keys="[Embedding.entity_id]",
+        primaryjoin="and_(Post.id==Embedding.entity_id, Embedding.entity_type=='post')",
+        cascade="all, delete-orphan",
+        back_populates="post",
+    )
 
 
 class PostEdit(Base):
@@ -233,9 +239,14 @@ class Document(Base):
         "Course", secondary=course_documents, back_populates="documents"
     )
     creators = relationship("Profile", back_populates="documents")
-    chunks = relationship(
-        "Chunk", back_populates="document", cascade="all, delete-orphan"
-    )  # Added this relationship
+    embeddings = relationship(
+        "Embedding",
+        foreign_keys="[Embedding.entity_id]",
+        primaryjoin="and_(Document.id==Embedding.entity_id, "
+        "Embedding.entity_type=='document')",
+        cascade="all, delete-orphan",
+        back_populates="document",
+    )
 
     __table_args__ = (
         CheckConstraint(
@@ -247,59 +258,80 @@ class Document(Base):
     )
 
 
-class Chunk(Base):
-    __tablename__ = "chunks"
+class Embedding(Base):
+    """
+    A single table to store 'chunks' of content (from a Post or a Document)
+    along with their vector embeddings and metadata.
+
+    id: UUID - primary key
+    entity_type: String - e.g., "document" or "post" as of 25/01/2025. can be extended to other entities in the future
+    entity_id: ID of the record in the corresponding table (documents.id or posts.id, etc.)
+    content: Text - the textual content of this "chunk. In the case of images/videos, store the URL of the image/video
+    chunk_index: Integer - if you're chunking large posts or documents, store chunk index
+    chunk_type: String - enum("text", "image", "code")
+    chunk_metadata: JSONB - Optionally store chunk type and other metadata
+    parent_chunk_id: UUID - For parent-child chunk relationships (if needed)
+    embedding: Vector - Embedding vector (1536 since we are using OpenAI's text-embedding-3-small model)
+    created_at: DateTime - Basic timestamps, etc.
+    """
+
+    __tablename__ = "embeddings"
 
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-    document_id = Column(
-        PUUID, ForeignKey("public.documents.id", ondelete="CASCADE"), nullable=False
-    )
-    content = Column(String, nullable=False)
-    chunk_index = Column(Integer, nullable=False)
+
+    entity_type = Column(String(50), nullable=False)
+    entity_id = Column(PUUID, nullable=False)
+
+    content = Column(Text, nullable=False)
+
+    chunk_index = Column(Integer, nullable=True)
     chunk_type = Column(String(50), nullable=True)
     chunk_metadata = Column(JSONB)
-    embedding = Column(Vector(1536), nullable=True)
     parent_chunk_id = Column(
-        PUUID, ForeignKey("public.chunks.id", ondelete="CASCADE"), nullable=True
+        PUUID,
+        ForeignKey("public.embeddings.id", ondelete="CASCADE"),
+        nullable=True,
     )
+
+    embedding = Column(Vector(1536), nullable=False)
+
     created_at = Column(
         DateTime, server_default=func.current_timestamp(), nullable=False
     )
 
-    # Relationships
-    document = relationship("Document", back_populates="chunks")
-    child_chunks = relationship(
-        "Chunk",
-        backref=backref("parent_chunk", remote_side=[id]),
-        cascade="all, delete-orphan",
+    # Add relationships
+    document = relationship(
+        "Document",
+        foreign_keys=[entity_id],
+        primaryjoin="and_(Document.id==Embedding.entity_id, "
+        "Embedding.entity_type=='document')",
+        back_populates="embeddings",
     )
-    outgoing_relations = relationship(
-        "ChunkRelation",
-        foreign_keys="ChunkRelation.source_chunk_id",
-        back_populates="source_chunk",
-        cascade="all, delete-orphan",
-    )
-    incoming_relations = relationship(
-        "ChunkRelation",
-        foreign_keys="ChunkRelation.target_chunk_id",
-        back_populates="target_chunk",
-        cascade="all, delete-orphan",
+    post = relationship(
+        "Post",
+        foreign_keys=[entity_id],
+        primaryjoin="and_(Post.id==Embedding.entity_id, Embedding.entity_type=='post')",
+        back_populates="embeddings",
     )
 
     __table_args__ = (
         Index(
-            "chunks_embedding_idx",
+            "embeddings_vector_idx",
             embedding,
             postgresql_using="ivfflat",
             postgresql_with={"lists": 100},
             postgresql_ops={"embedding": "vector_cosine_ops"},
         ),
         CheckConstraint(
-            "chunk_type IN ('text', 'image', 'code')", name="valid_chunk_type"
+            "chunk_type IN ('text', 'image', 'code') OR chunk_type IS NULL",
+            name="valid_chunk_type",
         ),
         CheckConstraint(
-            "jsonb_typeof(chunk_metadata) = 'object'", name="valid_metadata"
+            "jsonb_typeof(chunk_metadata) = 'object' OR chunk_metadata IS NULL",
+            name="valid_metadata",
         ),
+        # Add composite index for entity lookups
+        Index("ix_embeddings_entity", entity_type, entity_id),
         {"schema": "public"},
     )
 

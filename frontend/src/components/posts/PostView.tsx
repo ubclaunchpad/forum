@@ -1,61 +1,157 @@
-import { Post } from "@/lib/types/posts";
-import {
-  Dispatch,
-  SetStateAction,
-  Suspense,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-import EditorComponent from "../general/EditorComponent";
+import { Post, PostType, PostWithRequiredId } from "@/lib/types/posts";
+import { Suspense, useContext, useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { getApiUrl } from "@/utils/helpers";
 import { courseContext } from "@/contexts/courseContext";
 import { useToast } from "@/hooks/use-toast";
 import { userContext } from "@/contexts/userContext";
+import { ArrowRightFromLine, DotIcon } from "lucide-react";
+import { getRelativeTimeString, isIDTemporary } from "@/lib/utils";
+import { forumPostsContext } from "@/contexts/PostsContext";
+import PostTextEditor from "./PostTextEditor";
 
-export default function PostView({
+export default function PostView<T extends PostType>({
   post,
-  setListOfPosts,
-  isEditing,
-  setIsEditing,
 }: {
-  post: Post;
-  setListOfPosts: Dispatch<SetStateAction<Post[]>>;
-  isEditing: string | null;
-  setIsEditing: Dispatch<SetStateAction<string | null>>;
+  post: T extends "draft" ? PostWithRequiredId : Post;
 }) {
-  const [content, setContent] = useState(post.content);
-  const oldContent = post.content;
+  const {
+    setListOfPosts,
+    selectedPost,
+    setDrafts: setListOfDrafts,
+    setSelectedPost,
+    setIsEditing,
+  } = useContext(forumPostsContext);
+
   const course = useContext(courseContext);
-  const [isSaving, setIsSaving] = useState(false);
-  const { toast } = useToast();
   const user = useContext(userContext);
+
+  const oldContent = post?.content;
+
+  const [title, setTitle] = useState(post?.title ?? "");
+  const [content, setContent] = useState(post?.content ?? "");
+
+  const isTemporary = isIDTemporary(post?.id);
+
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+
+  async function handleSaveAction() {
+    if (isIDTemporary(post.id)) {
+      await handlePublish();
+    } else {
+      await handleSave();
+    }
+  }
+
+  async function handlePublish() {
+    setIsSaving(true);
+    const requestData = {
+      title: title,
+      content: content,
+    };
+
+    try {
+      const res = await fetch(
+        `${getApiUrl()}/courses/${course.id as string}/posts`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify(requestData),
+        },
+      );
+
+      if (res.ok) {
+        const newPost = await res.json();
+
+        // Remove from drafts
+        setListOfDrafts((prev) => prev.filter((p) => p.id !== post.id));
+
+        // Add to list of posts
+        setListOfPosts((prev) => [newPost, ...prev]);
+
+        // Update selected post to the new published version
+        setSelectedPost(newPost);
+
+        // Clear editing state
+        setIsEditing(null);
+
+        // Revalidate
+        await fetch("/api/revalidate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ courseId: course.id }),
+        });
+
+        toast({
+          title: "Success",
+          description: "Post published successfully",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to publish post",
+        });
+      }
+    } catch (error) {
+      console.error("Error publishing post:", error);
+      toast({
+        title: "Error",
+        description: "Failed to publish post",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   async function handleSave() {
     setIsSaving(true);
     const requestData = {
       post_id: post.id,
+      title: title,
       new_content: content,
       edit_reason: "Post edited",
     };
-    setListOfPosts((prev) => {
-      return prev.map((p) => {
-        if (p.id === post.id) {
-          return { ...p, content: content };
-        }
-        return p;
+
+    if (isTemporary) {
+      setIsSaving(false);
+      setListOfDrafts((prev) => {
+        return prev.map((p) => {
+          if (p.id === post.id) {
+            return { ...p, content: content };
+          }
+          return p;
+        });
       });
-    });
+
+      return;
+    } else {
+      setListOfPosts((prev) => {
+        return prev.map((p) => {
+          if (p.id === post.id) {
+            return { ...p, content: content } as Post;
+          }
+          return p;
+        });
+      });
+    }
     const res = await fetch(
-      `${getApiUrl()}/courses/${course.info.id as string}/posts/${post.id}`,
+      `${getApiUrl()}/courses/${course.id as string}/posts/${post.id}`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.token}`,
         },
-        body: JSON.stringify(requestData),
+        body: JSON.stringify({
+          ...requestData,
+          post_id: parseInt(requestData.post_id),
+        }),
       },
     );
     if (res.ok) {
@@ -65,7 +161,7 @@ export default function PostView({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ courseId: course.info.id }),
+          body: JSON.stringify({ courseId: course.id }),
         });
       }
     } else {
@@ -76,7 +172,7 @@ export default function PostView({
       setListOfPosts((prev) => {
         return prev.map((p) => {
           if (p.id === post.id) {
-            return { ...p, content: oldContent };
+            return { ...p, content: oldContent } as Post;
           }
           return p;
         });
@@ -86,76 +182,68 @@ export default function PostView({
     setIsSaving(false);
   }
 
-  async function handleClick() {
-    if (isEditing) {
-      await handleSave();
-    } else {
-      console.log("Edit");
-    }
-    setIsEditing(isEditing ? null : post.id);
-  }
-
   useEffect(() => {
-    setContent(post.content);
-  }, [post.content]);
+    setContent(post.content ?? "");
+    setTitle(post.title ?? "");
+  }, [post]);
 
   return (
-    <div className="flex-1 relative flex flex-col overflow-auto bg-white  ">
-      {isSaving && <div className="  shimmer-reverse"></div>}
-      <Suspense fallback={null}>
-        <div className="flex flex-col  flex-1 w-full  gap-4 items-center border-t-neutral-200">
-          <div className=" w-full border-b  h-12 p-2 flex items-center ">
-            <div className="flex-1 flex items-center gap-2">
-              <h5 className=" font-semibold text-sm  ">{post.title}</h5>
-              {/* <Button className="p-0" variant="ghost" size="sm">
-            <FileScanIcon className="w-5 h-5" />
-            </Button> */}
-            </div>
-            <div className="flex-1 flex justify-end gap-2">
-              {isEditing ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsEditing(null)}
-                >
-                  Cancel
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsEditing(post.id)}
-                >
-                  Edit
-                </Button>
-              )}
+    <div
+      className={`flex justify-center flex-1 lg:border-l  flex-shrink-0 w-full transition-all duration-300 ${selectedPost ? "border-neutral-200" : "border-neutral-200"}`}
+    >
+      <div className="flex-1 relative flex flex-col overflow-auto p-4 pt-0 ">
+        <div className=" w-full h-16   flex-shrink-0 px-2 flex items-center  gap-2">
+          <div className="flex  item-center gap-6 flex-1 text-primary-700 ">
+            <Button
+              className="p-0"
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedPost(null)}
+            >
+              <ArrowRightFromLine className="min-w-5 min-h-5 " />
+            </Button>
+          </div>
+          <div className="flex justify-end item-center gap-0.5 text-neutral-700 flex-1">
+            {isTemporary ? (
+              <></>
+            ) : (
+              <>
+                <h2 className=" font-medium text-sm ">Post #{post.id}</h2>
+                <span>
+                  <DotIcon className="opacity-50 min-w-5 min-h-5 " />
+                </span>
+                <h2 className=" font-medium text-sm ">
+                  {post.applied_at &&
+                    getRelativeTimeString(
+                      new Date(post.applied_at).getTime(),
+                      "en",
+                      30,
+                    )}
+                </h2>
+              </>
+            )}
+          </div>
+        </div>
 
-              {isEditing && (
-                <Button
-                  variant={`${isEditing ? "solid" : "outline"}`}
-                  onClick={handleClick}
-                  disabled={isSaving || content === oldContent}
-                  size="sm"
-                >
-                  Save
-                </Button>
-              )}
+        {isSaving && <div className="shimmer-reverse"></div>}
+        <Suspense fallback={null}>
+          <PostTextEditor
+            post={post}
+            title={title}
+            content={content}
+            setTitle={setTitle}
+            setContent={setContent}
+            handleSave={handleSaveAction}
+          />
+        </Suspense>
+        {/* {!isTemporary && (
+          <div className="flex flex-col font-semibold gap-4 p-4">
+            <div className="flex flex-col gap-2">
+              <h4>Comments</h4>
             </div>
           </div>
-          <div className="flex max-w-[900px] w-full flex-col gap-2">
-            <EditorComponent
-              markdown={content}
-              onMarkdownChange={setContent}
-              editable={isEditing === post.id}
-            />
-          </div>
-        </div>
-      </Suspense>
-      {/* <div className="flex flex-col gap-4 p-4 border-t border-t-neutral-200">
-        <div className="flex flex-col gap-2">
-          <h4>Comments</h4>
-        </div>
-      </div> */}
+        )} */}
+      </div>
     </div>
   );
 }

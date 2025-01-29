@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-const colourPalette = {
+export const colourPalette = {
   neutral: {
     50: "#FAFAFA",
     100: "#F5f5f5",
@@ -38,8 +38,13 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-quicksand)", "var(--font-figtree)", "sans-serif"],
-        title: ["var(--font-quicksand)"],
-        body: ["var(--font-source-sans)"],
+        title: ["var(--font-title)"],
+        body: ["var(--font-body)"],
+        quicksand: ["var(--font-quicksand)", "sans-serif"],
+        "space-grotesk": ["var(--font-space-grotesk)", "sans-serif"],
+        inter: ["var(--font-inter)", "sans-serif"],
+        "playfair-display": ["var(--font-playfair-display)", "serif"],
+        "roboto-mono": ["var(--font-roboto-mono)", "monospace"],
       },
       keyframes: {
         shimmer: {
@@ -60,36 +65,57 @@ const config: Config = {
         "4xl": ["3rem", { lineHeight: "1" }], // 48px
       },
       colors: {
-        // ... your existing colors config
-        background: colourPalette.neutral[50],
-        foreground: colourPalette.neutral[900],
+        background: "var(--neutral-50)",
+        foreground: "var(--neutral-900)",
         card: {
-          DEFAULT: "hsl(var(--neutral-1))",
-          foreground: "hsl(var(--neutral-12))",
+          DEFAULT: "var(--neutral-50)",
+          foreground: "var(--neutral-900)",
         },
         popover: {
-          DEFAULT: "hsl(var(--neutral-1))",
-          foreground: "hsl(var(--neutral-12))",
+          DEFAULT: "var(--neutral-50)",
+          foreground: "var(--neutral-900)",
         },
         primary: {
-          DEFAULT: colourPalette.jade[600],
-          foreground: colourPalette.neutral[50],
-          ...colourPalette.jade,
+          DEFAULT: "var(--primary-600)",
+          foreground: "var(--neutral-50)",
+          50: "var(--primary-50)",
+          100: "var(--primary-100)",
+          200: "var(--primary-200)",
+          300: "var(--primary-300)",
+          400: "var(--primary-400)",
+          500: "var(--primary-500)",
+          600: "var(--primary-600)",
+          700: "var(--primary-700)",
+          800: "var(--primary-800)",
+          900: "var(--primary-900)",
+          950: "var(--primary-950)",
+        },
+        neutral: {
+          50: "var(--neutral-50)",
+          100: "var(--neutral-100)",
+          200: "var(--neutral-200)",
+          300: "var(--neutral-300)",
+          400: "var(--neutral-400)",
+          500: "var(--neutral-500)",
+          600: "var(--neutral-600)",
+          700: "var(--neutral-700)",
+          800: "var(--neutral-800)",
+          900: "var(--neutral-900)",
+          950: "var(--neutral-950)",
         },
         muted: {
-          DEFAULT: colourPalette.neutral[200],
-          foreground: colourPalette.neutral[700],
+          DEFAULT: "var(--neutral-200)",
+          foreground: "var(--neutral-700)",
         },
+        border: {
+          DEFAULT: "var(--primary-600)",
+        },
+        input: "var(--neutral-100)",
+        ring: "var(--primary-500)",
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
-        ...colourPalette,
-        border: {
-          DEFAULT: colourPalette.jade[600],
-        },
-        input: "hsl(var(--neutral-6))",
-        ring: "hsl(var(--primary-9))",
       },
 
       typography: ({ theme }) => ({

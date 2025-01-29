@@ -11,7 +11,7 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: { segment: string[] };
 }>) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
 
   if (!data.user || error) {

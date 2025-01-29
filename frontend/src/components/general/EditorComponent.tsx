@@ -23,6 +23,9 @@ import Table from "@tiptap/extension-table";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import TableRow from "@tiptap/extension-table-row";
+import Placeholder from "@tiptap/extension-placeholder";
+import Link from "@tiptap/extension-link";
+import MathExtension from "@aarkue/tiptap-math-extension";
 
 import { FC, useEffect } from "react";
 
@@ -33,9 +36,33 @@ lowlight.register("css", css);
 lowlight.register("js", js);
 lowlight.register("ts", ts);
 
+const editorClasses = cn(
+  "w-full h-full flex flex-col",
+  "prose",
+  "[&_.ProseMirror]:w-full",
+  "[&_.ProseMirror]:h-full",
+  "[&_.ProseMirror]:p-0",
+  "[&_.ProseMirror]:outline-none",
+  "[&_.ProseMirror_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)]",
+  "[&_.ProseMirror_p.is-editor-empty:first-child]:before:text-neutral-400",
+  "[&_.ProseMirror_p.is-editor-empty:first-child]:before:float-left",
+  "[&_.ProseMirror_p.is-editor-empty:first-child]:before:h-0",
+  "[&_.ProseMirror_p.is-editor-empty:first-child]:before:pointer-events-none",
+  "[&_.ProseMirror_p]:my-4",
+  "[&_.ProseMirror_h1]:mt-8 [&_.ProseMirror_h1]:mb-4",
+  "[&_.ProseMirror_h2]:mt-6 [&_.ProseMirror_h2]:mb-4",
+  "[&_.ProseMirror_h3]:mt-4 [&_.ProseMirror_h3]:mb-2",
+  "[&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:border-primary-400 [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:my-4",
+  "[&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:my-4",
+  "[&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ol]:my-4",
+  "[&_.ProseMirror_li]:marker:text-neutral-900",
+  "[&_.ProseMirror_li]:pl-2",
+  "[&_.ProseMirror_li>p]:inline-block",
+  "[&_.ProseMirror_li>p]:my-0",
+);
+
 interface EditorProps {
   markdown: string;
-  // editorRef?: React.MutableRefObject<any>;
   editable: boolean;
   className?: string;
   onMarkdownChange: (markdown: string) => void;
@@ -48,8 +75,25 @@ const Editor: FC<EditorProps> = ({
   onMarkdownChange,
 }) => {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
+      Placeholder.configure({
+        placeholder: ({ node }) => {
+          console.log(node);
+          if (node.isText && (!node.text || node.text?.length <= 0)) {
+            return "...";
+          }
+          if (node.type.name === "heading") {
+            return "What’s the title?";
+          }
+
+          return "Write here....";
+        },
+      }),
       Document,
+      Link.configure({
+        protocols: ["ftp", "mailto"],
+      }),
       Paragraph,
       Text,
       Heading.configure({
@@ -61,6 +105,12 @@ const Editor: FC<EditorProps> = ({
       ListItem,
       Blockquote,
       History,
+      MathExtension.configure({
+        evaluation: true,
+        katexOptions: {
+          output: "mathml",
+        },
+      }),
       Table.configure({
         resizable: true,
       }),
@@ -81,6 +131,12 @@ const Editor: FC<EditorProps> = ({
       const html = editor.getHTML();
       onMarkdownChange(html);
     },
+
+    // editorProps: {
+    //   attributes: {
+    //     className: "p-0"
+    //   }
+    // }
   });
 
   useEffect(() => {
@@ -98,24 +154,7 @@ const Editor: FC<EditorProps> = ({
   return (
     <div
       className={cn(
-        "w-full h-full flex flex-col",
-        "prose",
-        "[&_.ProseMirror]:w-full",
-        "[&_.ProseMirror]:h-full",
-        "[&_.ProseMirror]:p-8",
-        "[&_.ProseMirror]:outline-none",
-        "[&_.ProseMirror_p]:my-4",
-        "[&_.ProseMirror_h1]:mt-8 [&_.ProseMirror_h1]:mb-4",
-        "[&_.ProseMirror_h2]:mt-6 [&_.ProseMirror_h2]:mb-4",
-        "[&_.ProseMirror_h3]:mt-4 [&_.ProseMirror_h3]:mb-2",
-        "[&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:border-jade-400 [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:my-4",
-        "[&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:my-4",
-        "[&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ol]:my-4",
-        // Add these new styles
-        "[&_.ProseMirror_li]:marker:text-neutral-900", // Style the marker
-        "[&_.ProseMirror_li]:pl-2", // Add spacing after marker
-        "[&_.ProseMirror_li>p]:inline-block", // Keep text inline but handle wrapping better
-        "[&_.ProseMirror_li>p]:my-0", // Remove vertical margins inside list items
+        editorClasses, // Remove vertical margins inside list items
         className,
       )}
     >
