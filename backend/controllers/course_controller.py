@@ -5,7 +5,7 @@ from uuid import UUID
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import desc
-from models.all import Course, CourseRole, CourseUserRole, Profile, user_courses
+from models.all import Tag, Course, Profile, user_courses
 from models.db import get_db
 from models.schemas.course_schema import (
     BasicCourseRoleInformation,
@@ -13,6 +13,7 @@ from models.schemas.course_schema import (
     CreateCourseReq,
     CreateCourseResponse,
     CreateCourseRoleRequest,
+    CourseTagsResponse
 )
 from pydantic import ValidationError
 
@@ -75,6 +76,7 @@ def get_course(c_id: Optional[str], name: Optional[str]) -> CourseResponse:
             if not course:
                 raise HTTPException(status_code=404, detail="Course not found")
             return CourseResponse.model_validate(course)
+        
 
     if name:
         with get_db() as db:
@@ -156,7 +158,8 @@ def get_course_members(c_id: str) -> List[Dict[str, str]]:
                 {"id": str(user.id), "name": user.first_name + " " + user.last_name}
             )
         return members
-
+    
+'''
 def get_course_roles_for_user(c_id: str, u_id: str) -> List[BasicCourseRoleInformation]:
     with get_db() as db:
         c_uuid = UUID(c_id)
@@ -237,3 +240,17 @@ def unassign_user_course_role(u_id: str, r_id: str) -> bool:
             db.rollback()
             raise e
     return True
+'''
+
+def get_all_tags(course_id: str) -> CourseTagsResponse:
+    with get_db() as db:
+        c_uuid = UUID(course_id)
+        roles: CourseTagsResponse = (db.query(Tag)
+                                     .with_entities(Tag.id,
+                                                    Tag.name, 
+                                                    Tag.visibility, 
+                                                    Tag.course_id, 
+                                                    Tag.parent_tag_id, 
+                                                    Tag.created_by,
+                                                    Tag.properties).filter(Tag.course_id == c_uuid).all())
+    return roles

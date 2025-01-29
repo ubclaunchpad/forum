@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from enum import Enum
 from typing import Dict, List, Optional
 from uuid import UUID
 
@@ -57,8 +58,24 @@ class BasicCourseRoleInformation(BaseModel):
     name: str
     description: Optional[str]
 
+class VisibilityEnum(str, Enum):
+    public = "public"
+    private = "private"
+
+class CourseTagInformation(BaseModel):
+    id: UUID
+    name: str
+    visibility: VisibilityEnum
+    course_id: Optional[UUID] = None
+    parent_tag_id: Optional[UUID] = None
+    created_by: UUID
+    properties: dict
+
 class CourseRolesResponse(BaseModel):
     roles: List[BasicCourseRoleInformation]
+
+class CourseTagsResponse(BaseModel):
+    tags: List[CourseTagInformation]
 
 class CreateCourseRoleRequest(BaseModel):
     name: str

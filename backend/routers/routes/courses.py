@@ -1,6 +1,6 @@
 from controllers import course_controller
 from fastapi import APIRouter, HTTPException, Request
-from models.all import CourseRole
+#from models.all import CourseRole
 from models.schemas.course_schema import (
     AssignRoleRequest,
     CourseMembersResponse,
@@ -11,6 +11,7 @@ from models.schemas.course_schema import (
     CreateCourseResponse,
     CreateCourseRoleRequest,
     GetCoursesResponse,
+    CourseTagsResponse
 )
 from models.schemas.general_schema import GeneralResponse
 
@@ -79,7 +80,7 @@ async def get_roles_for_user(c_id: str, u_id: str):
     return res
 
 # ----------------- Course Roles -----------------#
-
+'''
 @course_router.get("/{c_id}/roles", response_model=CourseRolesResponse)
 async def get_course_roles(c_id: str):
     res = course_controller.get_basic_course_roles(c_id)
@@ -132,3 +133,13 @@ async def assign_user_role(assignReq: AssignRoleRequest, req: Request):
 async def unassign_user_role(assignReq: AssignRoleRequest):
     res = course_controller.unassign_user_course_role(str(assignReq.user_id), str(assignReq.role_id))
     return GeneralResponse(msg=f"Unassigned role")
+'''
+# ----------------- Course Tags -----------------#
+@course_router.get("/{course_id}/tags")
+async def get_course_tags(course_id: str):
+    res = course_controller.get_all_tags(course_id)
+    if not res:
+        raise HTTPException(
+            status_code=400, detail="Failed to get course roles"
+        )
+    return CourseTagsResponse(tags=res)
