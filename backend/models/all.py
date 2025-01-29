@@ -160,14 +160,31 @@ class Course(Base):
 
 class Post(Base):
     __tablename__ = "posts"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    course_id = Column(PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"))
+    # Primary UUID
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+
+    # Course-specific sequential ID
+    local_id = Column(Integer, nullable=False)
+    course_id = Column(
+        PUUID,
+        ForeignKey(
+            "public.courses.id", ondelete="CASCADE", name="posts_course_id_fkey"
+        ),
+        nullable=False,
+    )
+
+    # Regular fields
     title = Column(Text)
     content = Column(Text)
-    parent_id = Column(Integer)
+    status = Column("status", Enum("poststatus", schema="public"), nullable=True)
     applied_at = Column(DateTime(timezone=True), server_default=func.now())
-    created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
+    created_by = Column(
+        PUUID,
+        ForeignKey("public.profiles.id", name="posts_created_by_fkey"),
+        nullable=False,
+    )
 
+    # Relationships
     creator = relationship("Profile", back_populates="posts", foreign_keys=[created_by])
     edits = relationship(
         "PostEdit", back_populates="post", cascade="all, delete-orphan"
@@ -179,6 +196,11 @@ class Post(Base):
         primaryjoin="and_(Post.id==Embedding.entity_id, Embedding.entity_type=='post')",
         cascade="all, delete-orphan",
         back_populates="post",
+    )
+
+    __table_args__ = (
+        UniqueConstraint("course_id", "local_id", name="uq_posts_course_local_id"),
+        {"schema": "public"},
     )
 
 

@@ -8,6 +8,7 @@ from models.schemas.post_schema import (
     CreateUserPostEventRequest,
     GetPostResponse,
     GetPostsResponse,
+    PostEmbeddingMetadata,
     PostResponse,
 )
 
@@ -66,3 +67,17 @@ async def like_post(c_id: str, post_id: int, request: Request):
     user_id = request.state.user_id
     post_controller.like_post(c_id, user_id, post_id)
     return {"msg": "Post liked"}
+
+
+@post_router.post("/{post_id}/embeddings", response_model=GeneralResponse)
+async def update_embeddings(c_id: str, post_id: int, request: Request):
+    user_id = request.state.user_id
+    return post_controller.update_embeddings(c_id, user_id, post_id)
+
+
+@post_router.get(
+    "/{local_id}/embeddings/metadata", response_model=PostEmbeddingMetadata
+)
+async def get_embedding_metadata(c_id: str, local_id: int, request: Request):
+    user_id = request.state.user_id
+    return post_controller.get_embedding_metadata(c_id, user_id, local_id)
