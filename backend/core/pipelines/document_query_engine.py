@@ -9,7 +9,7 @@ from uuid import UUID
 
 from controllers.documents import document_manager
 from core.processors.embedding_processor import EmbeddingProcessor
-from models.all import Chunk, Document
+from models.all import Document, Embedding
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
 from sqlalchemy import text
@@ -55,7 +55,7 @@ class DocumentQueryEngine:
             raise FileNotFoundError("Required default.txt template not found")
         return templates
 
-    def _find_relevant_chunks(
+    def _find_relevant_document_chunks(
         self,
         question_embedding: List[float],
         threshold: float = 0.0,
@@ -67,18 +67,19 @@ class DocumentQueryEngine:
 
             query_str = f"""
                 SELECT 
-                    c.id,
-                    c.content,
-                    c.chunk_metadata as metadata,
+                    e.id,
+                    e.content,
+                    e.chunk_metadata as metadata,
                     d.title as document_title,
-                    (1 - (c.embedding <=> {vector_literal}::vector)) * 0.8 as similarity,
+                    (1 - (e.embedding <=> {vector_literal}::vector)) * 0.8 as similarity,
                     d.id as document_id,
                     d.file_url as document_url
-                FROM public.chunks c
-                JOIN public.documents d ON c.document_id = d.id
+                FROM public.embeddings e
+                JOIN public.documents d ON e.entity_id = d.id
                 JOIN public.course_documents cd ON d.id = cd.document_id
-                WHERE (1 - (c.embedding <=> {vector_literal}::vector)) * 0.8 > :threshold
-                AND c.embedding IS NOT NULL
+                WHERE (1 - (e.embedding <=> {vector_literal}::vector)) * 0.8 > :threshold
+                AND e.embedding IS NOT NULL
+                AND e.entity_type = 'document'
             """
 
             if course_id:
@@ -125,7 +126,7 @@ class DocumentQueryEngine:
             logger.error("Error finding relevant chunks", exc_info=True)
             raise e
 
-    def _find_post_relevant_posts(
+    def _find_relevant_post_chunks(
         self,
         question_embedding: List[float],
         threshold: float = 0.0,
@@ -139,12 +140,14 @@ class DocumentQueryEngine:
                 SELECT 
                     p.id,
                     p.title,
-                    p.content,
+                    e.content,
                     p.course_id,
-                    (1 - (p.embedding <=> {vector_literal}::vector)) * 1.5 as similarity
+                    (1 - (e.embedding <=> {vector_literal}::vector)) * 1.5 as similarity
                 FROM public.posts p
-                WHERE (1 - (p.embedding <=> {vector_literal}::vector)) * 1.5 > :threshold
-                AND p.embedding IS NOT NULL
+                JOIN public.embeddings e ON e.entity_id = CAST(p.id::text AS uuid)
+                WHERE (1 - (e.embedding <=> {vector_literal}::vector)) * 1.5 > :threshold
+                AND e.embedding IS NOT NULL
+                AND e.entity_type = 'post'
             """
 
             if course_id:
@@ -280,7 +283,7 @@ class DocumentQueryEngine:
         contexts: List[Dict[str, Any]],
         template_name: Optional[str] = None,
     ) -> str:
-        """Build the prompt with context and question."""
+        """Build the answer with context and question."""
         context_str = "\n\n".join(
             f"[Source: {'Document: ' + ctx['document_title'] if ctx.get('type') == 'document' else 'Post: ' + ctx.get('title', 'Untitled Post')}, "
             f"Relevance: {ctx['similarity']:.2f}]\n{ctx['content']}"
@@ -304,10 +307,10 @@ class DocumentQueryEngine:
         """Process a query through the RAG pipeline."""
         try:
             question_embedding = self.embedding_processor.generate_embedding(question)
-            relevant_chunks = self._find_relevant_chunks(
+            relevant_chunks = self._find_relevant_document_chunks(
                 question_embedding, threshold=0.0, course_id=course_id
             )
-            relevant_posts = self._find_post_relevant_posts(
+            relevant_posts = self._find_relevant_post_chunks(
                 question_embedding, threshold=0.0, course_id=course_id
             )
 
@@ -319,7 +322,6 @@ class DocumentQueryEngine:
 
             all_contexts = relevant_chunks + relevant_posts
             prompt = self._build_prompt(question, all_contexts, template_name)
-
             try:
                 response = self.client.chat.completions.create(
                     model=self.model,
@@ -351,19 +353,21 @@ class DocumentQueryEngine:
             }
 
     def verify_database(self) -> Dict[str, Any]:
-        """Verify database content and chunk availability."""
+        """Verify database content and embedding availability."""
         try:
             doc_count = self.db.query(Document).count()
-            chunk_count = self.db.query(Chunk).count()
-            sample_chunk = (
-                self.db.query(Chunk).filter(Chunk.embedding.isnot(None)).first()
+            embedding_count = self.db.query(Embedding).count()
+            sample_embedding = (
+                self.db.query(Embedding).filter(Embedding.embedding.isnot(None)).first()
             )
 
             return {
                 "document_count": doc_count,
-                "chunk_count": chunk_count,
-                "has_embeddings": sample_chunk is not None,
-                "sample_chunk_id": str(sample_chunk.id) if sample_chunk else None,
+                "embedding_count": embedding_count,
+                "has_embeddings": sample_embedding is not None,
+                "sample_embedding_id": str(sample_embedding.id)
+                if sample_embedding
+                else None,
             }
         except Exception as e:
             logger.error(f"Database verification error: {e}", exc_info=True)
@@ -373,15 +377,18 @@ class DocumentQueryEngine:
         self,
         question: str,
         course_id: Optional[UUID] = None,
+        history: Optional[Dict[str, str]] = None,
         template_name: Optional[str] = None,
     ) -> AsyncGenerator[str, None]:
         """Process a query through the RAG pipeline with streaming response."""
         try:
+            if history is None:
+                history = []
             question_embedding = self.embedding_processor.generate_embedding(question)
-            relevant_chunks = self._find_relevant_chunks(
+            relevant_chunks = self._find_relevant_document_chunks(
                 question_embedding, threshold=0.0, course_id=course_id
             )
-            relevant_posts = self._find_post_relevant_posts(
+            relevant_posts = self._find_relevant_post_chunks(
                 question_embedding, threshold=0.0, course_id=course_id
             )
 
@@ -399,21 +406,27 @@ class DocumentQueryEngine:
 
             prompt = self._build_prompt(question, all_contexts, template_name)
 
+            sources = None
             try:
                 # Initialize sources first
                 sources = self._format_sources(all_contexts)
                 yield json.dumps({"answer": "", "sources": sources, "done": False})
 
-                # Stream the response
-                stream = self.client.chat.completions.create(
-                    model=self.model,
-                    messages=[
+                messages = (
+                    [
                         {
                             "role": "system",
                             "content": "You are a helpful expert who provides accurate but concise information with source citations.",
-                        },
-                        {"role": "user", "content": prompt},
-                    ],
+                        }
+                    ]
+                    + history
+                    + [{"role": "user", "content": prompt}]
+                )
+
+                # Stream the response
+                stream = self.client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
                     temperature=0.7,
                     stream=True,
                 )
@@ -432,7 +445,6 @@ class DocumentQueryEngine:
                         # No need to send sources again
                     }
                 )
-
             except Exception as e:
                 logger.error(f"OpenAI API error: {e}", exc_info=True)
                 yield json.dumps(

@@ -1,33 +1,30 @@
 "use client";
 
 import { courseContext } from "@/contexts/courseContext";
-import { SmileIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  BugIcon,
+  ClipboardPenIcon,
+  LogOutIcon,
+  Settings2Icon,
+  UserCircleIcon,
+  UserIcon,
+} from "lucide-react";
 import { Fragment, useContext, useState } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { Searchbar } from "./searchBar";
 import { signOut } from "./actions";
+import { cn } from "@/lib/utils";
 
 export function CourseTopbar() {
-  const course = useContext(courseContext);
-  const courseName = `${course.c_group} ${course.code} ${course.name}`;
-
   return (
-    <div className="flex relative justify-between  w-full items-center py-2 px-2 ">
-      <Button
-        variant="outline"
-        size="md"
-        className="border-neutral-200 border h-10 px-4 text-neutral-600"
-      >
-        <Link
-          href="/forum/courses"
-          className="no-underline text-sm font-semibold"
-        >
-          {courseName}
-        </Link>  
-      </Button>
-      <Searchbar />
-      <ProfileButton />
+    <div className="flex relative justify-between w-full items-center py-2 px-2">
+      <CourseButton />
+      <div className="flex flex-1 gap-2 justify-end">
+        <Searchbar />
+        <ProfileButton />
+      </div>
     </div>
   );
 }
@@ -37,21 +34,122 @@ function ProfileButton() {
   return (
     <Fragment>
       {isOpen && (
-        <div className="fixed rounded-lg px-10 top-12 right-4 bg-white p-1 shadow-sm border border-neutral-200">
-          <button
-            className="no-underline hover:text-primary-500"
-            onClick={() => signOut()}
-          >
-            Logout
-          </button>
+        <div className="fixed text-sm flex z-20  flex-col gap-2  rounded-lg top-14 right-4 bg-white  shadow-md border border-neutral-200">
+          <section className="flex flex-col gap-1  ">
+            <ul className="flex flex-col min-w-[200px] divide-y  last:border-b ">
+              <Link
+                href={"/forum/profile"}
+                className="w-full no-underline hover:text-primary-500 p-1 px-2  text-sm flex items-center gap-2 "
+              >
+                <UserCircleIcon className="w-4 min-h-4" />
+                Profile
+              </Link>
+
+              <button
+                className="w-full no-underline hover:text-primary-500 p-1  px-2  text-sm flex items-center gap-2"
+                onClick={() => signOut()}
+              >
+                <LogOutIcon className="w-4 min-h-4" />
+                Logout
+              </button>
+            </ul>
+          </section>
+          <section className="flex flex-col gap-1  pt-2">
+            <label className="font-semibold text-neutral-800 px-2">
+              Feedback
+            </label>
+
+            <ul className="flex flex-col min-w-[200px] divide-y  border-t">
+              {process.env.NEXT_PUBLIC_BUG_FORM_URL && (
+                <Link
+                  href={process.env.NEXT_PUBLIC_BUG_FORM_URL}
+                  target="_blank"
+                  referrerPolicy="no-referrer"
+                  className="w-full no-underline hover:text-primary-500 p-1 px-2  text-sm flex items-center gap-2 "
+                >
+                  <BugIcon className="w-4 min-h-4" />
+                  Report an issue
+                </Link>
+              )}
+              {process.env.NEXT_PUBLIC_FEATURE_FORM_URL && (
+                <Link
+                  href={process.env.NEXT_PUBLIC_FEATURE_FORM_URL}
+                  target="_blank"
+                  referrerPolicy="no-referrer"
+                  className="w-full no-underline hover:text-primary-500 p-1 px-2  text-sm flex items-center gap-2 "
+                >
+                  <ClipboardPenIcon className="w-4 min-h-4" />
+                  Request a feature
+                </Link>
+              )}
+            </ul>
+          </section>
         </div>
       )}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="text-neutral-500 flex border border-neutral-200 justify-center items-center w-10 h-10 rounded-full bg-white gap-2"
+        className={cn(
+          "text-neutral-500 flex border border-neutral-200 justify-center items-center w-10 h-10 rounded-full bg-white gap-2",
+          isOpen ? "shadow-lg" : "shadow-sm",
+        )}
       >
-        <SmileIcon size={24} />
+        <UserIcon size={20} />
       </button>
+    </Fragment>
+  );
+}
+
+function CourseButton() {
+  const [isOpen, setIsOpen] = useState(false);
+  const course = useContext(courseContext);
+  const courseName = `${course.c_group} ${course.code} ${course.name}`;
+
+  return (
+    <Fragment>
+      {isOpen && (
+        <div className="fixed text-sm flex z-20 flex-col gap-2 rounded-lg top-14 left-4 bg-white shadow-md border border-neutral-200">
+          <section className="flex flex-col gap-1">
+            <ul className="flex flex-col min-w-[200px] divide-y last:border-b">
+              <Link
+                href="/forum/courses"
+                className="w-full no-underline hover:text-primary-500 p-1 px-2 text-sm flex items-center gap-2"
+              >
+                <ArrowLeftIcon className="w-4 min-h-4" />
+                Back to All Courses
+              </Link>
+              <Link
+                href={`/forum/courses/${course.id}/settings`}
+                className="w-full no-underline hover:text-primary-500 p-1 px-2 text-sm flex items-center gap-2"
+              >
+                <Settings2Icon className="w-4 min-h-4" />
+                Course Settings
+              </Link>
+              <button
+                disabled
+                className="w-full text-neutral-400 disabled:hover:text-neutral-400 cursor-not-allowed no-underline hover:text-primary-500 p-1 px-2 text-sm flex items-center gap-2"
+                onClick={() => {
+                  // Add leave course functionality here
+                  console.log("Leave course clicked");
+                }}
+              >
+                <LogOutIcon className="w-4 min-h-4" />
+                Leave Course
+              </button>
+            </ul>
+          </section>
+        </div>
+      )}
+      <Button
+        variant="outline"
+        size="md"
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "border-neutral-200 border h-10 px-4 text-neutral-600",
+          isOpen ? "shadow-lg" : "shadow-sm",
+        )}
+      >
+        {courseName}
+      </Button>
     </Fragment>
   );
 }

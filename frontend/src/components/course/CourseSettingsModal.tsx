@@ -19,10 +19,15 @@ interface CourseConfig {
   font?: string;
 }
 
-export function CourseSettingsModal({ isOpen, onClose, course, onSave }: CourseSettingsModalProps) {
+export function CourseSettingsModal({
+  isOpen,
+  onClose,
+  course,
+  onSave,
+}: CourseSettingsModalProps) {
   const [config, setConfig] = useState<CourseConfig>({
     theme_colour: course?.config?.theme_colour ?? "#000000",
-    font: course?.config?.font ?? "default"
+    font: course?.config?.font ?? "default",
   });
 
   const handleSave = () => {
@@ -31,11 +36,7 @@ export function CourseSettingsModal({ isOpen, onClose, course, onSave }: CourseS
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Course Settings"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title="Course Settings">
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="theme_colour">Theme Color</Label>
@@ -43,19 +44,39 @@ export function CourseSettingsModal({ isOpen, onClose, course, onSave }: CourseS
             id="theme_colour"
             type="color"
             value={config.theme_colour}
-            onChange={(e) => setConfig(prev => ({ ...prev, theme_colour: e.target.value }))}
+            onChange={(e) =>
+              setConfig((prev) => ({ ...prev, theme_colour: e.target.value }))
+            }
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="font" className="text-primary-min">Font</Label>
+          <Label htmlFor="font" className="text-primary-min">
+            Font
+          </Label>
           <div className={`flex gap-2`}>
-            {["default", "space-grotesk", "inter", "playfair-display", "roboto-mono"].map((font) => (
+            {[
+              "default",
+              "space-grotesk",
+              "inter",
+              "playfair-display",
+              "roboto-mono",
+            ].map((font) => (
               <Button
                 key={font}
                 variant={config.font === font ? "solid" : "outline"}
-                onClick={() => setConfig(prev => ({ ...prev, font }))}
-                className={font === "default" ? "font-quicksand" : font === "space-grotesk" ? "font-space-grotesk" : font === "inter" ? "font-inter" : font === "playfair-display" ? "font-playfair-display" : "font-roboto-mono"}
+                onClick={() => setConfig((prev) => ({ ...prev, font }))}
+                className={
+                  font === "default"
+                    ? "font-quicksand"
+                    : font === "space-grotesk"
+                      ? "font-space-grotesk"
+                      : font === "inter"
+                        ? "font-inter"
+                        : font === "playfair-display"
+                          ? "font-playfair-display"
+                          : "font-roboto-mono"
+                }
               >
                 {font}
               </Button>
@@ -74,4 +95,4 @@ export function CourseSettingsModal({ isOpen, onClose, course, onSave }: CourseS
       </div>
     </Modal>
   );
-} 
+}

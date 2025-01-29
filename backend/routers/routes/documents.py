@@ -6,6 +6,10 @@ from typing import AsyncGenerator, Dict, Optional, Tuple
 from uuid import UUID
 
 from controllers.documents import document_manager
+from controllers.query_history_controller import (
+    add_query_to_history,
+    get_open_ai_context,
+)
 from core.pipelines.document_query_engine import DocumentQueryEngine
 from core.util import file_storage
 from fastapi import APIRouter, Form, HTTPException, Request, UploadFile
@@ -20,6 +24,7 @@ from models.schemas.document_schema import (
 from models.schemas.general_schema import GeneralResponse
 from pydantic import BaseModel
 
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 document_router = APIRouter()
 
 logger = logging.getLogger(__name__)
@@ -184,6 +189,9 @@ async def query_documents_stream(
     query: DocumentQuery,
     request: Request,
 ):
+    context = get_open_ai_context(c_id, request.state.user_id)
+    query_builder = {"question": query.question, "sources": []}
+
     async def stream_response() -> AsyncGenerator[str, None]:
         try:
             with get_db() as db:
@@ -195,8 +203,21 @@ async def query_documents_stream(
                 async for chunk in query_engine.stream_query(
                     question=query.question,
                     course_id=c_id,
+                    history=context,
                     template_name=query.template_name,
                 ):
+                    answer_json = json.loads(chunk)
+                    if not answer_json["done"]:
+                        query_builder["answer"] = answer_json["answer"]
+                        if "sources" in answer_json and isinstance(
+                            answer_json["sources"], list
+                        ):
+                            query_builder["sources"] += answer_json["sources"]
+                    else:
+                        query_builder["timestamp"] = datetime.now().strftime(
+                            DATE_FORMAT
+                        )
+                        add_query_to_history(c_id, request.state.user_id, query_builder)
                     # Format as SSE
                     yield f"data: {chunk}\n\n"
         except Exception as e:
