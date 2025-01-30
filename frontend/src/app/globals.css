@@ -319,3 +319,8 @@ dialog {
   padding-right: 2px;
   height: fit-content;
 }
+
+* {
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}

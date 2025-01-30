@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -16,6 +16,7 @@ from models.schemas.course_schema import (
     CreateCourseRoleRequest,
     CourseTagsResponse
 )
+from models.schemas.user_schema import SocialLinks, UserProfile
 from pydantic import ValidationError
 
 
@@ -34,11 +35,10 @@ def create_course(
         )
 
         try:
-            # Add course first
             db.add(course)
             db.flush()
             course_id = UUID(str(course.id))
-            # Insert into user_courses association table
+
             stmt = user_courses.insert().values(user_id=user_id, course_id=course_id)
             db.execute(stmt)
 
@@ -146,135 +146,57 @@ def remove_user_from_course(c_id: str, u_id: str) -> CourseResponse:
         return CourseResponse.model_validate(course)
 
 
-def get_course_members(c_id: str) -> List[Dict[str, str]]:
+def get_course_members(c_id: str) -> List[UserProfile]:
+    """Get all members of a course with their full profiles."""
     with get_db() as db:
         c_uuid = UUID(c_id)
-        course = db.query(Course).filter(Course.id == c_uuid).first()
-        if not course:
-            raise HTTPException(status_code=404, detail="Course not found")
-        members = []
-        users: List[Profile] = course.users
-        for user in course.users:
-            members.append(
-                {"id": str(user.id), "name": user.first_name + " " + user.last_name}
-            )
-        return members
-    
-'''
-def get_course_roles_for_user(c_id: str, u_id: str) -> List[BasicCourseRoleInformation]:
-    with get_db() as db:
-        c_uuid = UUID(c_id)
-        u_uuid = UUID(u_id)
-        roles = db.query(CourseRole).join(CourseUserRole, CourseRole.id == CourseUserRole.course_role_id).filter(CourseUserRole.user_id == u_uuid, CourseRole.course_id == c_uuid).all()
-        basic_roles = []
-        for role in roles:
-            basic_role = BasicCourseRoleInformation(
-                role_id=str(role.id),
-                name=str(role.name),
-                description=str(role.description)
-            )
-            basic_roles.append(basic_role)
-    return basic_roles
-
-def get_basic_course_roles(c_id: str) -> List[BasicCourseRoleInformation]:
-    with get_db() as db:
-        c_uuid = UUID(c_id)
-        roles: List[CourseRole] = db.query(CourseRole).filter(CourseRole.course_id == c_uuid).all()
-        basic_roles = []
-        for role in roles:
-            basic_role = BasicCourseRoleInformation(
-                role_id=str(role.id),
-                name=str(role.name),
-                description=str(role.description)
-            )
-            basic_roles.append(basic_role)
-    return basic_roles
-
-def get_course_role(c_id: str, r_id: str) -> CourseRole:
-    with get_db() as db:
-        course_role = db.query(CourseRole).filter(CourseRole.course_id == UUID(c_id), CourseRole.id == UUID(r_id)).first()
-        if not course_role:
-            raise HTTPException(status_code=404, detail="Course role not found")
-        return course_role
-
-def create_course_role(c_id: str, req: CreateCourseRoleRequest, u_id: str) -> bool:
-    with get_db() as db:
-        course_role = CourseRole(
-            course_id=UUID(c_id),
-            name=req.name,
-            description=req.description,
-            visibility=req.visibility,
-            # created_by=UUID(u_id),
-            created_at=datetime.now(),
-            updated_at=datetime.now()
-        )
-        try:
-            db.add(course_role)
-            db.commit()
-        except Exception as e:
-            db.rollback()
-            raise e
-    return True
-
-def assign_user_course_role(u_id: str, r_id: str, a_id: str) -> bool:
-    with get_db() as db:
-        course_user_role = CourseUserRole(
-            course_role_id=UUID(r_id),
-            user_id=UUID(u_id),
-            # assigned_by=UUID(a_id),
-            created_at=datetime.now()
-        )
-        try:
-            db.add(course_user_role)
-            db.commit()
-        except Exception as e:
-            db.rollback()
-            raise e
-    return True
-
-def unassign_user_course_role(u_id: str, r_id: str) -> bool:
-    with get_db() as db:
-        try:
-            db.query(CourseUserRole).filter(CourseUserRole.course_role_id == r_id, CourseUserRole.user_id == u_id).delete()
-            db.commit()
-        except Exception as e:
-            db.rollback()
-            raise e
-    return True
-'''
-
-def get_all_tags(course_id: str) -> CourseTagsResponse:
-    with get_db() as db:
-        c_uuid = UUID(course_id)
-        roles: CourseTagsResponse = (db.query(Tag)
-                                     .with_entities(Tag.id,
-                                                    Tag.name, 
-                                                    Tag.visibility, 
-                                                    Tag.course_id, 
-                                                    Tag.parent_tag_id, 
-                                                    Tag.created_by,
-                                                    Tag.properties).filter(Tag.course_id == c_uuid).all())
-    return roles
-
-
-def update_course(create_course_req: UpdateCourseReq, c_id: str):
-    with get_db() as db:
-        c_uuid = UUID(c_id)
-
         course = db.query(Course).filter(Course.id == c_uuid).first()
 
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
 
-        course.c_group = create_course_req.c_group
-        course.code = create_course_req.code
-        course.section = create_course_req.section
-        course.name = create_course_req.name
-        course.config = jsonable_encoder(create_course_req.config)
-        course.start_date = create_course_req.start_date
-        course.end_date = create_course_req.end_date
+        return [
+            UserProfile(
+                id=UUID(str(user.id)),
+                email=getattr(user, "email"),
+                first_name=getattr(user, "first_name", None),
+                last_name=getattr(user, "last_name", None),
+                pronouns=getattr(user, "pronouns", None),
+                username=getattr(user, "username", None),
+                bio=getattr(user, "bio", None),
+                socials=SocialLinks(**getattr(user, "socials"))
+                if getattr(user, "socials")
+                else None,
+                timezone=getattr(user, "timezone", None),
+                display_name=getattr(user, "display_name", None),
+                icon_url=getattr(user, "icon_url", None),
+                status=getattr(user, "status", None),
+            )
+            for user in course.users
+        ]
 
-        db.commit()
-        db.refresh(course)
 
-        return course
+def update_course(create_course_req: UpdateCourseReq, c_id: str) -> Course:
+    with get_db() as db:
+        try:
+            c_uuid = UUID(c_id)
+            course = db.query(Course).filter(Course.id == c_uuid).first()
+            if not course:
+                raise HTTPException(status_code=404, detail="Course not found")
+
+            update_dict = create_course_req.model_dump(exclude_unset=True)
+
+            if "config" in update_dict:
+                update_dict["config"] = jsonable_encoder(update_dict["config"])
+
+            for key, value in update_dict.items():
+                setattr(course, key, value)
+
+            db.commit()
+            return course
+
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500, detail=f"Failed to update course: {str(e)}"
+            )

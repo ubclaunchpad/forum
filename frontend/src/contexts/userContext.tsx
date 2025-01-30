@@ -9,10 +9,11 @@ import {
 } from "react";
 import { User } from "@supabase/auth-js";
 import { getApiUrl } from "@/utils/helpers";
+import { Profile } from "@/lib/types/profiles";
 
 type Account = {
   user: User;
-  profile: Record<string, unknown>;
+  profile: Profile;
   token: string;
 };
 

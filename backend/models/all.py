@@ -19,6 +19,7 @@ from sqlalchemy import (
     ForeignKeyConstraint,
     Index,
     Integer,
+    Nullable,
     String,
     Table,
     Text,
@@ -142,6 +143,14 @@ class Profile(Base):
     first_name = Column(Text)
     last_name = Column(Text)
     email = Column(Text)
+    pronouns = Column(Text, nullable=True)
+    username = Column(Text, unique=True, nullable=True)
+    bio = Column(Text, nullable=True)
+    socials = Column(JSONB, default=dict)
+    timezone = Column(Text, nullable=True)
+    display_name = Column(Text, nullable=True)
+    icon_url = Column(Text, nullable=True)
+    status = Column(Text, nullable=True)
 
     # Relationships
     courses = relationship("Course", secondary=user_courses, back_populates="users")
@@ -150,6 +159,8 @@ class Profile(Base):
     )
     post_edits = relationship("PostEdit", back_populates="editor")
     documents = relationship("Document", back_populates="creators")
+
+    __table_args__ = ({"schema": "public"},)
 
 
 class Course(Base):
@@ -178,13 +189,31 @@ class Course(Base):
 
 class Post(Base):
     __tablename__ = "posts"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    course_id = Column(PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"))
+    # Primary UUID
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+
+    # Course-specific sequential ID
+    local_id = Column(Integer, nullable=False)
+    course_id = Column(
+        PUUID,
+        ForeignKey(
+            "public.courses.id", ondelete="CASCADE", name="posts_course_id_fkey"
+        ),
+        nullable=False,
+    )
+
+    # Regular fields
     title = Column(Text)
     content = Column(Text)
+    status = Column("status", Enum("poststatus", schema="public"), nullable=True)
     applied_at = Column(DateTime(timezone=True), server_default=func.now())
-    created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
+    created_by = Column(
+        PUUID,
+        ForeignKey("public.profiles.id", name="posts_created_by_fkey"),
+        nullable=False,
+    )
 
+    # Relationships
     creator = relationship("Profile", back_populates="posts", foreign_keys=[created_by])
     edits = relationship(
         "PostEdit", back_populates="post", cascade="all, delete-orphan"
@@ -199,6 +228,11 @@ class Post(Base):
     )
     tags = relationship(
         "Tag", secondary=post_tags, back_populates="posts"
+    )
+
+    __table_args__ = (
+        UniqueConstraint("course_id", "local_id", name="uq_posts_course_local_id"),
+        {"schema": "public"},
     )
 
 

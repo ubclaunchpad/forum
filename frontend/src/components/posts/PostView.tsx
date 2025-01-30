@@ -9,6 +9,7 @@ import { ArrowRightFromLine, DotIcon } from "lucide-react";
 import { getRelativeTimeString, isIDTemporary } from "@/lib/utils";
 import { forumPostsContext } from "@/contexts/PostsContext";
 import PostTextEditor from "./PostTextEditor";
+import PostEmbeddingPopoverChip from "./PostEmbeddingPopoverChip";
 
 export default function PostView<T extends PostType>({
   post,
@@ -141,7 +142,7 @@ export default function PostView<T extends PostType>({
       });
     }
     const res = await fetch(
-      `${getApiUrl()}/courses/${course.id as string}/posts/${post.id}`,
+      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}`,
       {
         method: "PATCH",
         headers: {
@@ -208,7 +209,7 @@ export default function PostView<T extends PostType>({
               <></>
             ) : (
               <>
-                <h2 className=" font-medium text-sm ">Post #{post.id}</h2>
+                <h2 className=" font-medium text-sm ">Post #{post.local_id}</h2>
                 <span>
                   <DotIcon className="opacity-50 min-w-5 min-h-5 " />
                 </span>
@@ -236,13 +237,11 @@ export default function PostView<T extends PostType>({
             handleSave={handleSaveAction}
           />
         </Suspense>
-        {/* {!isTemporary && (
-          <div className="flex flex-col font-semibold gap-4 p-4">
-            <div className="flex flex-col gap-2">
-              <h4>Comments</h4>
-            </div>
+        {!isTemporary && (
+          <div className="flex w-full justify-end p-2">
+            <PostEmbeddingPopoverChip post={post as Post} />
           </div>
-        )} */}
+        )}
       </div>
     </div>
   );

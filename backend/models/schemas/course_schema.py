@@ -1,9 +1,10 @@
 from datetime import date, datetime
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from models.schemas.user_schema import UserProfile
+from pydantic import BaseModel
 
 from models.all import VisibilityEnum
 
@@ -52,7 +53,7 @@ class GetCoursesResponse(BaseModel):
 
 
 class CourseMembersResponse(BaseModel):
-    members: List[Dict[str, str]]
+    members: List[UserProfile]
 
 class AssignRoleRequest(BaseModel):
     user_id: UUID
