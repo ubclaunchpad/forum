@@ -184,7 +184,7 @@ class Course(Base):
         {"schema": "public"},
     )
 
-    roles = relationship("CourseRole", back_populates = "course")
+    # roles = relationship("CourseRole", back_populates = "course")
 
 
 class Post(Base):
