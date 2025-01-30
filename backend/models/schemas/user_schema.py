@@ -26,6 +26,7 @@ class CreateUserResponse(BaseModel):
     id: UUID
     email: str
 
+
 class SocialLinks(BaseModel):
     linkedin: Optional[str] = None
     instagram: Optional[str] = None
@@ -37,6 +38,7 @@ class SocialLinks(BaseModel):
     website: Optional[str] = None
     reddit: Optional[str] = None
 
+
 class UpdateUserRequest(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -46,6 +48,7 @@ class UpdateUserRequest(BaseModel):
     socials: Optional[SocialLinks] = None
     timezone: Optional[str] = None
     display_name: Optional[str] = None
+
 
 class UserProfile(BaseModel):
     id: UUID
@@ -58,6 +61,7 @@ class UserProfile(BaseModel):
     socials: Optional[SocialLinks] = None
     timezone: Optional[str] = None
     display_name: Optional[str] = None
-    
+
+
 class GetUserProfileResponse(BaseModel):
     profile: UserProfile

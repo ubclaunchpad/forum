@@ -67,12 +67,14 @@ async def create_user(create_user_request: CreateUserBaseRequest):
 
 @user_router.patch("/me", response_model=UserProfile)
 async def update_profile(request: Request, update_data: UpdateUserRequest):
-   """Update the current user's profile."""
-   try:
-       user_id = request.state.user_id
-       updated_profile = user_controller.update_user_profile(user_id, update_data)
-       return updated_profile
-   except HTTPException as e:
-       raise e
-   except Exception as e:
-       raise HTTPException(status_code=500, detail=f"Failed to update profile: {str(e)}")
+    """Update the current user's profile."""
+    try:
+        user_id = request.state.user_id
+        updated_profile = user_controller.update_user_profile(user_id, update_data)
+        return updated_profile
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to update profile: {str(e)}"
+        )

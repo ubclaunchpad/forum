@@ -5,14 +5,30 @@ from uuid import UUID
 
 from httpx import post
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import (ARRAY, DDL, Boolean, CheckConstraint, Column, Date,
-                        DateTime, Enum, Float, ForeignKey,
-                        ForeignKeyConstraint, Index, Integer, String, Table,
-                        Text, UniqueConstraint, event, text)
+from sqlalchemy import (
+    ARRAY,
+    DDL,
+    Boolean,
+    CheckConstraint,
+    Column,
+    Date,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    ForeignKeyConstraint,
+    Index,
+    Integer,
+    String,
+    Table,
+    Text,
+    UniqueConstraint,
+    event,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PUUID
-from sqlalchemy.orm import (backref, declarative_base, declared_attr,
-                            relationship)
+from sqlalchemy.orm import backref, declarative_base, declared_attr, relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import VARCHAR, TypeDecorator
 
@@ -123,8 +139,9 @@ class Profile(Base):
     )
     post_edits = relationship("PostEdit", back_populates="editor")
     documents = relationship("Document", back_populates="creators")
-    
+
     __table_args__ = ({"schema": "public"},)
+
 
 class Course(Base):
     __tablename__ = "courses"
