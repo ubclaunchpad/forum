@@ -1,8 +1,8 @@
 """added_postTags_documentTags
 
-Revision ID: aca945e7af9b
+Revision ID: 2b1b4561f610
 Revises: 57f694383a69
-Create Date: 2025-01-29 22:03:47.441907
+Create Date: 2025-01-29 22:38:15.188528
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import pgvector
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'aca945e7af9b'
+revision: str = '2b1b4561f610'
 down_revision: Union[str, None] = '57f694383a69'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -32,7 +32,7 @@ def upgrade() -> None:
     schema='public'
     )
     op.create_table('post_tags',
-    sa.Column('post_id', sa.Integer(), nullable=False),
+    sa.Column('post_id', sa.UUID(), nullable=False),
     sa.Column('tag_id', sa.UUID(), nullable=False),
     sa.Column('created_by', sa.UUID(), nullable=True),
     sa.ForeignKeyConstraint(['created_by'], ['auth.users.id'], ondelete='SET NULL'),
@@ -41,22 +41,33 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('post_id', 'tag_id'),
     schema='public'
     )
-    op.create_foreign_key(None, 'course_documents', 'documents', ['document_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'course_documents', 'courses', ['course_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
+    op.create_foreign_key(None, 'course_documents', 'documents', ['document_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'documents', 'profiles', ['created_by'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'embeddings', 'embeddings', ['parent_chunk_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
-    op.create_foreign_key(None, 'post_edits', 'posts', ['post_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
+    op.alter_column('post_edits', 'post_id',
+               existing_type=sa.UUID(),
+               type_=sa.Integer(),
+               existing_nullable=False)
     op.create_foreign_key(None, 'post_edits', 'profiles', ['edited_by'], ['id'], source_schema='public', referent_schema='public')
-    op.create_foreign_key(None, 'posts', 'courses', ['course_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
-    op.create_foreign_key(None, 'posts', 'profiles', ['created_by'], ['id'], source_schema='public', referent_schema='public')
+    op.create_foreign_key(None, 'post_edits', 'posts', ['post_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
+    op.alter_column('posts', 'course_id',
+               existing_type=sa.UUID(),
+               nullable=False)
+    op.create_foreign_key('posts_course_id_fkey', 'posts', 'courses', ['course_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
+    op.create_foreign_key('posts_created_by_fkey', 'posts', 'profiles', ['created_by'], ['id'], source_schema='public', referent_schema='public')
     op.create_foreign_key(None, 'profiles', 'users', ['id'], ['id'], source_schema='public', referent_schema='auth', ondelete='CASCADE')
-    op.create_foreign_key(None, 'tags', 'courses', ['course_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
-    op.create_foreign_key(None, 'tags', 'tags', ['parent_tag_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'tags', 'users', ['created_by'], ['id'], source_schema='public', referent_schema='auth', ondelete='SET NULL')
+    op.create_foreign_key(None, 'tags', 'tags', ['parent_tag_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
+    op.create_foreign_key(None, 'tags', 'courses', ['course_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'user_courses', 'profiles', ['user_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     op.create_foreign_key(None, 'user_courses', 'courses', ['course_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
-    op.create_foreign_key(None, 'user_post_events', 'posts', ['post_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
+    op.alter_column('user_post_events', 'post_id',
+               existing_type=sa.UUID(),
+               type_=sa.Integer(),
+               existing_nullable=False)
     op.create_foreign_key(None, 'user_post_events', 'profiles', ['user_id'], ['id'], source_schema='public', referent_schema='public')
+    op.create_foreign_key(None, 'user_post_events', 'posts', ['post_id'], ['id'], source_schema='public', referent_schema='public', ondelete='CASCADE')
     # ### end Alembic commands ###
 
 
@@ -64,16 +75,27 @@ def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_constraint(None, 'user_post_events', schema='public', type_='foreignkey')
     op.drop_constraint(None, 'user_post_events', schema='public', type_='foreignkey')
+    op.alter_column('user_post_events', 'post_id',
+               existing_type=sa.Integer(),
+               type_=sa.UUID(),
+               existing_nullable=False)
     op.drop_constraint(None, 'user_courses', schema='public', type_='foreignkey')
     op.drop_constraint(None, 'user_courses', schema='public', type_='foreignkey')
     op.drop_constraint(None, 'tags', schema='public', type_='foreignkey')
     op.drop_constraint(None, 'tags', schema='public', type_='foreignkey')
     op.drop_constraint(None, 'tags', schema='public', type_='foreignkey')
     op.drop_constraint(None, 'profiles', schema='public', type_='foreignkey')
-    op.drop_constraint(None, 'posts', schema='public', type_='foreignkey')
-    op.drop_constraint(None, 'posts', schema='public', type_='foreignkey')
+    op.drop_constraint('posts_created_by_fkey', 'posts', schema='public', type_='foreignkey')
+    op.drop_constraint('posts_course_id_fkey', 'posts', schema='public', type_='foreignkey')
+    op.alter_column('posts', 'course_id',
+               existing_type=sa.UUID(),
+               nullable=True)
     op.drop_constraint(None, 'post_edits', schema='public', type_='foreignkey')
     op.drop_constraint(None, 'post_edits', schema='public', type_='foreignkey')
+    op.alter_column('post_edits', 'post_id',
+               existing_type=sa.Integer(),
+               type_=sa.UUID(),
+               existing_nullable=False)
     op.drop_constraint(None, 'embeddings', schema='public', type_='foreignkey')
     op.drop_constraint(None, 'documents', schema='public', type_='foreignkey')
     op.drop_constraint(None, 'course_documents', schema='public', type_='foreignkey')

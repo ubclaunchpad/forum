@@ -129,7 +129,7 @@ document_tags = Table(
 post_tags = Table(
     "post_tags",
     Base.metadata,
-    Column("post_id", Integer, ForeignKey('public.posts.id', ondelete="CASCADE"), primary_key=True),
+    Column("post_id", PUUID, ForeignKey('public.posts.id', ondelete="CASCADE"), primary_key=True),
     Column("tag_id", PUUID, ForeignKey('public.tags.id', ondelete="CASCADE"), primary_key=True),
     Column("created_by", PUUID, ForeignKey('auth.users.id', ondelete="SET NULL")),
     schema="public",
