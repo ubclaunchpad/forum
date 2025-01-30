@@ -14,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {  DeleteIcon, LinkIcon, MoreHorizontal } from "lucide-react";
+import { DeleteIcon, LinkIcon, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { courseContext } from "@/contexts/courseContext";
 import { userContext } from "@/contexts/userContext";

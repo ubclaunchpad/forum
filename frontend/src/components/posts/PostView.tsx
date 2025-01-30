@@ -5,10 +5,7 @@ import { getApiUrl } from "@/utils/helpers";
 import { courseContext } from "@/contexts/courseContext";
 import { useToast } from "@/hooks/use-toast";
 import { userContext } from "@/contexts/userContext";
-import {
-  ArrowRightFromLine,
-  DotIcon,
-} from "lucide-react";
+import { ArrowRightFromLine, DotIcon } from "lucide-react";
 import { getRelativeTimeString, isIDTemporary } from "@/lib/utils";
 import { forumPostsContext } from "@/contexts/PostsContext";
 import PostTextEditor from "./PostTextEditor";

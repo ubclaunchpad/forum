@@ -8,7 +8,6 @@ import {
   LogOutIcon,
   Settings2Icon,
   UserCircleIcon,
-  UserIcon,
 } from "lucide-react";
 import { Fragment, useContext, useState } from "react";
 import { Button } from "../ui/button";
@@ -16,6 +15,8 @@ import Link from "next/link";
 import { Searchbar } from "./searchBar";
 import { signOut } from "./actions";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { userContext } from "@/contexts/userContext";
 
 export function CourseTopbar() {
   return (
@@ -31,6 +32,7 @@ export function CourseTopbar() {
 
 function ProfileButton() {
   const [isOpen, setIsOpen] = useState(false);
+  const { profile } = useContext(userContext);
   return (
     <Fragment>
       {isOpen && (
@@ -89,11 +91,17 @@ function ProfileButton() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "text-neutral-500 flex border border-neutral-200 justify-center items-center w-10 h-10 rounded-full bg-white gap-2",
-          isOpen ? "shadow-lg" : "shadow-sm",
+          "text-neutral-500 flex p-0.5 border border-neutral-200  justify-center items-center  rounded-full bg-neutral-50 gap-2",
+          isOpen ? "shadow-lg" : "shadow-md",
         )}
       >
-        <UserIcon size={20} />
+        <Avatar className="w-9 h-9">
+          <AvatarImage src={profile.icon_url} className="object-cover" />
+          <AvatarFallback>
+            {profile.first_name[0]}
+            {profile.last_name[0]}
+          </AvatarFallback>
+        </Avatar>
       </button>
     </Fragment>
   );
