@@ -1,9 +1,13 @@
 from controllers import course_controller
 from fastapi import APIRouter, HTTPException, Request
-from models.schemas.course_schema import (CourseMembersResponse,
-                                          CourseResponse, CreateCourseReq,
-                                          CreateCourseResponse,
-                                          GetCoursesResponse, UpdateCourseReq)
+from models.schemas.course_schema import (
+    CourseMembersResponse,
+    CourseResponse,
+    CreateCourseReq,
+    CreateCourseResponse,
+    GetCoursesResponse,
+    UpdateCourseReq,
+)
 from models.schemas.general_schema import GeneralResponse
 
 course_router = APIRouter()

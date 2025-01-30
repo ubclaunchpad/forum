@@ -1,12 +1,15 @@
 import os
 
 from controllers import user_controller
-from fastapi import (APIRouter, File, HTTPException, Request, Response,
-                     UploadFile)
+from fastapi import APIRouter, File, HTTPException, Request, Response, UploadFile
 from models.schemas.general_schema import GeneralResponse
-from models.schemas.user_schema import (CreateUserBaseRequest,
-                                        CreateUserResponse, GetUsersResponse,
-                                        UpdateUserRequest, UserProfile)
+from models.schemas.user_schema import (
+    CreateUserBaseRequest,
+    CreateUserResponse,
+    GetUsersResponse,
+    UpdateUserRequest,
+    UserProfile,
+)
 
 user_router = APIRouter()
 

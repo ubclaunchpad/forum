@@ -93,7 +93,9 @@ class FileStorage:
     def _create_bucket(self) -> None:
         try:
             if self.bucket_name in self.PUBLIC_BUCKETS:
-                self.supabase.storage.create_bucket(self.bucket_name, self.bucket_name,  options={"public": True} )
+                self.supabase.storage.create_bucket(
+                    self.bucket_name, self.bucket_name, options={"public": True}
+                )
             else:
                 self.supabase.storage.create_bucket(self.bucket_name, self.bucket_name)
 
@@ -123,7 +125,7 @@ class FileStorage:
             elif self.conflict_resolution == ConflictResolution.IGNORE:
                 if self._file_exists(storage, filename):
                     return f"documents/{filename}"
-                    
+
             file_path = f"documents/{filename}"
             print(file_path)
             response = storage.upload(
@@ -183,9 +185,7 @@ class FileStorage:
             raise HTTPException(status_code=500, detail="Failed to list files")
 
     def format_public_file_url(self, file_path: str) -> str:
-        return (
-            f"{url}/storage/v1/object/public/{self.bucket_name}/{file_path}"
-        )
+        return f"{url}/storage/v1/object/public/{self.bucket_name}/{file_path}"
 
     def get_file_signed_url(self, file_path: str) -> dict[str, str]:
         try:
