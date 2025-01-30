@@ -25,3 +25,39 @@ class CreateUserBaseRequest(BaseModel):
 class CreateUserResponse(BaseModel):
     id: UUID
     email: str
+
+class SocialLinks(BaseModel):
+    linkedin: Optional[str] = None
+    instagram: Optional[str] = None
+    github: Optional[str] = None
+    facebook: Optional[str] = None
+    X: Optional[str] = None
+    discord: Optional[str] = None
+    youtube: Optional[str] = None
+    website: Optional[str] = None
+    reddit: Optional[str] = None
+
+class UpdateUserRequest(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    pronouns: Optional[str] = None
+    username: Optional[str] = None
+    bio: Optional[str] = None
+    socials: Optional[SocialLinks] = None
+    timezone: Optional[str] = None
+    display_name: Optional[str] = None
+
+class UserProfile(BaseModel):
+    id: UUID
+    email: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    pronouns: Optional[str] = None
+    username: Optional[str] = None
+    bio: Optional[str] = None
+    socials: Optional[SocialLinks] = None
+    timezone: Optional[str] = None
+    display_name: Optional[str] = None
+    
+class GetUserProfileResponse(BaseModel):
+    profile: UserProfile

@@ -4,6 +4,8 @@ from models.schemas.user_schema import (
     CreateUserBaseRequest,
     CreateUserResponse,
     GetUsersResponse,
+    UpdateUserRequest,
+    UserProfile,
 )
 
 user_router = APIRouter()
@@ -61,3 +63,16 @@ async def create_user(create_user_request: CreateUserBaseRequest):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=400, detail="Failed to create user.")
+
+
+@user_router.patch("/me", response_model=UserProfile)
+async def update_profile(request: Request, update_data: UpdateUserRequest):
+   """Update the current user's profile."""
+   try:
+       user_id = request.state.user_id
+       updated_profile = user_controller.update_user_profile(user_id, update_data)
+       return updated_profile
+   except HTTPException as e:
+       raise e
+   except Exception as e:
+       raise HTTPException(status_code=500, detail=f"Failed to update profile: {str(e)}")
