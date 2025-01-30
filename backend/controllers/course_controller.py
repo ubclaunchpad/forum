@@ -200,3 +200,16 @@ def update_course(create_course_req: UpdateCourseReq, c_id: str) -> Course:
             raise HTTPException(
                 status_code=500, detail=f"Failed to update course: {str(e)}"
             )
+
+def get_all_tags(course_id: str) -> CourseTagsResponse:
+    with get_db() as db:
+        c_uuid = UUID(course_id)
+        roles: CourseTagsResponse = (db.query(Tag)
+                                     .with_entities(Tag.id,
+                                                    Tag.name, 
+                                                    Tag.visibility, 
+                                                    Tag.course_id, 
+                                                    Tag.parent_tag_id, 
+                                                    Tag.created_by,
+                                                    Tag.properties).filter(Tag.course_id == c_uuid).all())
+    return roles
