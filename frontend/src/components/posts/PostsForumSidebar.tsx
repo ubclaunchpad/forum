@@ -1,7 +1,7 @@
 "use client";
 import { cn, generateTempId } from "@/lib/utils";
 import { PostCard } from "./PostCard";
-import { useContext } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import { forumPostsContext } from "@/contexts/PostsContext";
 import { Button } from "../ui/button";
 import { PostWithRequiredId } from "@/lib/types/posts";
@@ -15,6 +15,23 @@ export default function PostsForumSidebar() {
     listofPosts: posts,
     setDrafts: setListOfDrafts,
   } = useContext(forumPostsContext);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollPositionRef = useRef(0);
+
+  useEffect(() => {
+    const savedScroll = sessionStorage.getItem("forumlist");
+    if (savedScroll && scrollRef.current) {
+      scrollRef.current.scrollTop = parseInt(savedScroll);
+    }
+  }, []);
+
+  // Track current scroll position in ref
+  const handleScroll = useCallback(() => {
+    if (scrollRef.current) {
+      scrollPositionRef.current = scrollRef.current.scrollTop;
+    }
+  }, []);
 
   return (
     <>
@@ -48,6 +65,9 @@ export default function PostsForumSidebar() {
         )}
       >
         <section
+          ref={scrollRef}
+          onScroll={handleScroll}
+          style={{ scrollBehavior: "auto" }}
           className={cn("flex relative flex-col h-full overflow-y-auto")}
         >
           <div className="flex justify-center h-16 flex-shrink-0 border-b py-2 w-full gap-2">

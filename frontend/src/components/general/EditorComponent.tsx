@@ -79,7 +79,6 @@ const Editor: FC<EditorProps> = ({
     extensions: [
       Placeholder.configure({
         placeholder: ({ node }) => {
-          console.log(node);
           if (node.isText && (!node.text || node.text?.length <= 0)) {
             return "...";
           }

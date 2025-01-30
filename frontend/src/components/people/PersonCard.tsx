@@ -1,11 +1,9 @@
 "use client";
 import { cn, getDisplayname } from "@/lib/utils";
-
-import Image from "next/image";
 import { Profile } from "@/lib/types/profiles";
 import { useRouter, usePathname } from "next/navigation";
 import { Dispatch, SetStateAction } from "react";
-import { User2Icon } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export const PersonCard = ({
   profile,
@@ -59,16 +57,13 @@ export const PersonCard = ({
               : "border-neutral-200",
           )}
         >
-          {profile.icon_url ? (
-            <Image
-              fill
-              className="object-cover border rounded-full"
-              src={profile.icon_url}
-              alt={`${profile.first_name}profile image`}
-            />
-          ) : (
-            <User2Icon />
-          )}
+          <Avatar className="w-12 h-12 bg-neutral-50 border">
+            <AvatarImage src={profile.icon_url} className="object-cover" />
+            <AvatarFallback className="bg-neutral-50">
+              {profile.first_name[0]}
+              {profile.last_name[0]}
+            </AvatarFallback>
+          </Avatar>
         </div>
         <div className="flex  gap-2 flex-col">
           <p className="text-sm font-semibold">{getDisplayname(profile)}</p>

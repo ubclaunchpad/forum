@@ -100,9 +100,13 @@ export function ForumContextProvider({
 
     if (!["local", "pending"].includes(getIdType(post.id))) {
       if (selectedPost) {
-        router.push(`/forum/courses/${course.id}/forum/${post.local_id}`);
+        router.push(`/forum/courses/${course.id}/forum/${post.local_id}`, {
+          scroll: false,
+        });
       } else {
-        router.push(`/forum/courses/${course.id}/forum/${post.local_id}`);
+        router.push(`/forum/courses/${course.id}/forum/${post.local_id}`, {
+          scroll: false,
+        });
       }
     }
     setSelectedPost(post as Post);
