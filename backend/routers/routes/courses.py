@@ -12,6 +12,7 @@ from models.schemas.course_schema import (
     CreateCourseRoleRequest,
     GetCoursesResponse,
     CourseTagsResponse,
+    TagRequest,
     UpdateCourseReq
 )
 from models.schemas.general_schema import GeneralResponse
@@ -151,3 +152,15 @@ async def get_course_tags(course_id: str):
             status_code=400, detail="Failed to get course roles"
         )
     return CourseTagsResponse(tags=res)
+
+@course_router.post("/{course_id}/tags")
+async def create_tag(course_id: str, req: Request, tagReq: TagRequest):
+    print(course_id)
+    # author_id = req.state.user_id
+    author_id = ""
+    res = course_controller.create_tag(course_id, tagReq, author_id)
+    if not res:
+        raise HTTPException(
+            status_code=400, detail="Failed to create tag"
+        )
+    return GeneralResponse(msg="Created tag succesfully")

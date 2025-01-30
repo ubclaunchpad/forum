@@ -98,3 +98,12 @@ class CourseRoleBase(BaseModel):
     created_by: UUID
     created_at: datetime
     updated_at: datetime
+
+class TagProperties(BaseModel):
+    temp: Optional[str]
+
+class TagRequest(BaseModel):
+    name: str
+    visibility: VisibilityEnum
+    parent_tag_id: Optional[UUID]
+    properties: Optional[TagProperties]

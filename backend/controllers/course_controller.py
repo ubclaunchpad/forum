@@ -12,6 +12,7 @@ from models.schemas.course_schema import (
     CourseResponse,
     CreateCourseReq,
     CreateCourseResponse,
+    TagRequest,
     UpdateCourseReq,
     CreateCourseRoleRequest,
     CourseTagsResponse
@@ -201,10 +202,90 @@ def update_course(create_course_req: UpdateCourseReq, c_id: str) -> Course:
                 status_code=500, detail=f"Failed to update course: {str(e)}"
             )
 
+'''
+def get_course_roles_for_user(c_id: str, u_id: str) -> List[BasicCourseRoleInformation]:
+    with get_db() as db:
+        c_uuid = UUID(c_id)
+        u_uuid = UUID(u_id)
+        roles = db.query(CourseRole).join(CourseUserRole, CourseRole.id == CourseUserRole.course_role_id).filter(CourseUserRole.user_id == u_uuid, CourseRole.course_id == c_uuid).all()
+        basic_roles = []
+        for role in roles:
+            basic_role = BasicCourseRoleInformation(
+                role_id=str(role.id),
+                name=str(role.name),
+                description=str(role.description)
+            )
+            basic_roles.append(basic_role)
+    return basic_roles
+
+def get_basic_course_roles(c_id: str) -> List[BasicCourseRoleInformation]:
+    with get_db() as db:
+        c_uuid = UUID(c_id)
+        roles: List[CourseRole] = db.query(CourseRole).filter(CourseRole.course_id == c_uuid).all()
+        basic_roles = []
+        for role in roles:
+            basic_role = BasicCourseRoleInformation(
+                role_id=str(role.id),
+                name=str(role.name),
+                description=str(role.description)
+            basic_roles.append(basic_role)
+    return basic_roles
+
+def get_course_role(c_id: str, r_id: str) -> CourseRole:
+    with get_db() as db:
+        course_role = db.query(CourseRole).filter(CourseRole.course_id == UUID(c_id), CourseRole.id == UUID(r_id)).first()
+        if not course_role:
+            raise HTTPException(status_code=404, detail="Course role not found")
+        return course_role
+def create_course_role(c_id: str, req: CreateCourseRoleRequest, u_id: str) -> bool:
+    with get_db() as db:
+        course_role = CourseRole(
+            course_id=UUID(c_id),
+            name=req.name,
+            description=req.description,
+            visibility=req.visibility,
+            # created_by=UUID(u_id),
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        try:
+            db.add(course_role)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise e
+    return True
+def assign_user_course_role(u_id: str, r_id: str, a_id: str) -> bool:
+    with get_db() as db:
+        course_user_role = CourseUserRole(
+            course_role_id=UUID(r_id),
+            user_id=UUID(u_id),
+            # assigned_by=UUID(a_id),
+            created_at=datetime.now()
+        )
+        try:
+            db.add(course_user_role)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise e
+    return True
+
+def unassign_user_course_role(u_id: str, r_id: str) -> bool:
+    with get_db() as db:
+        try:
+            db.query(CourseUserRole).filter(CourseUserRole.course_role_id == r_id, CourseUserRole.user_id == u_id).delete()
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise e
+    return True
+'''
+
 def get_all_tags(course_id: str) -> CourseTagsResponse:
     with get_db() as db:
         c_uuid = UUID(course_id)
-        roles: CourseTagsResponse = (db.query(Tag)
+        tags: CourseTagsResponse = (db.query(Tag)
                                      .with_entities(Tag.id,
                                                     Tag.name, 
                                                     Tag.visibility, 
@@ -212,4 +293,25 @@ def get_all_tags(course_id: str) -> CourseTagsResponse:
                                                     Tag.parent_tag_id, 
                                                     Tag.created_by,
                                                     Tag.properties).filter(Tag.course_id == c_uuid).all())
-    return roles
+    return tags
+
+def create_tag(course_id: str, tagReq: TagRequest, author_id: str) -> bool:
+    with get_db() as db:
+        c_uuid = UUID(course_id)
+        p_uuid = UUID(tagReq.parent_tag_id) if tagReq.parent_tag_id else None
+        tag = Tag(
+            name=tagReq.name,
+            course_id=c_uuid,
+            visibility=tagReq.visibility,
+            parent_tag_id=p_uuid,
+            # created_by=UUID(author_id),
+            properties=tagReq.properties
+        )
+        try:
+            db.add(tag)
+            db.commit()
+        except Exception as e:
+            print("db fail")
+            raise e
+
+    return True
