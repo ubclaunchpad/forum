@@ -19,6 +19,7 @@ from sqlalchemy import (
     ForeignKeyConstraint,
     Index,
     Integer,
+    Nullable,
     String,
     Table,
     Text,
@@ -125,6 +126,14 @@ class Profile(Base):
     first_name = Column(Text)
     last_name = Column(Text)
     email = Column(Text)
+    pronouns = Column(Text, nullable=True)
+    username = Column(Text, unique=True, nullable=True)
+    bio = Column(Text, nullable=True)
+    socials = Column(JSONB, default=dict)
+    timezone = Column(Text, nullable=True)
+    display_name = Column(Text, nullable=True)
+    icon_url = Column(Text, nullable=True)
+    status = Column(Text, nullable=True)
 
     # Relationships
     courses = relationship("Course", secondary=user_courses, back_populates="users")
@@ -133,6 +142,8 @@ class Profile(Base):
     )
     post_edits = relationship("PostEdit", back_populates="editor")
     documents = relationship("Document", back_populates="creators")
+
+    __table_args__ = ({"schema": "public"},)
 
 
 class Course(Base):

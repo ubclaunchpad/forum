@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -11,6 +11,7 @@ from models.schemas.course_schema import (
     CreateCourseResponse,
     UpdateCourseReq,
 )
+from models.schemas.user_schema import SocialLinks, UserProfile
 from pydantic import ValidationError
 
 
@@ -29,11 +30,10 @@ def create_course(
         )
 
         try:
-            # Add course first
             db.add(course)
             db.flush()
             course_id = UUID(str(course.id))
-            # Insert into user_courses association table
+
             stmt = user_courses.insert().values(user_id=user_id, course_id=course_id)
             db.execute(stmt)
 
@@ -140,39 +140,57 @@ def remove_user_from_course(c_id: str, u_id: str) -> CourseResponse:
         return CourseResponse.model_validate(course)
 
 
-def get_course_members(c_id: str) -> List[Dict[str, str]]:
+def get_course_members(c_id: str) -> List[UserProfile]:
+    """Get all members of a course with their full profiles."""
     with get_db() as db:
         c_uuid = UUID(c_id)
         course = db.query(Course).filter(Course.id == c_uuid).first()
+
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
-        members = []
-        users: List[Profile] = course.users
-        for user in course.users:
-            members.append(
-                {"id": str(user.id), "name": user.first_name + " " + user.last_name}
+
+        return [
+            UserProfile(
+                id=UUID(str(user.id)),
+                email=getattr(user, "email"),
+                first_name=getattr(user, "first_name", None),
+                last_name=getattr(user, "last_name", None),
+                pronouns=getattr(user, "pronouns", None),
+                username=getattr(user, "username", None),
+                bio=getattr(user, "bio", None),
+                socials=SocialLinks(**getattr(user, "socials"))
+                if getattr(user, "socials")
+                else None,
+                timezone=getattr(user, "timezone", None),
+                display_name=getattr(user, "display_name", None),
+                icon_url=getattr(user, "icon_url", None),
+                status=getattr(user, "status", None),
             )
-        return members
+            for user in course.users
+        ]
 
 
-def update_course(create_course_req: UpdateCourseReq, c_id: str):
+def update_course(create_course_req: UpdateCourseReq, c_id: str) -> Course:
     with get_db() as db:
-        c_uuid = UUID(c_id)
+        try:
+            c_uuid = UUID(c_id)
+            course = db.query(Course).filter(Course.id == c_uuid).first()
+            if not course:
+                raise HTTPException(status_code=404, detail="Course not found")
 
-        course = db.query(Course).filter(Course.id == c_uuid).first()
+            update_dict = create_course_req.model_dump(exclude_unset=True)
 
-        if not course:
-            raise HTTPException(status_code=404, detail="Course not found")
+            if "config" in update_dict:
+                update_dict["config"] = jsonable_encoder(update_dict["config"])
 
-        course.c_group = create_course_req.c_group
-        course.code = create_course_req.code
-        course.section = create_course_req.section
-        course.name = create_course_req.name
-        course.config = jsonable_encoder(create_course_req.config)
-        course.start_date = create_course_req.start_date
-        course.end_date = create_course_req.end_date
+            for key, value in update_dict.items():
+                setattr(course, key, value)
 
-        db.commit()
-        db.refresh(course)
+            db.commit()
+            return course
 
-        return course
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500, detail=f"Failed to update course: {str(e)}"
+            )

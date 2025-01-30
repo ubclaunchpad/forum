@@ -14,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {  DeleteIcon, LinkIcon, MoreHorizontal } from "lucide-react";
+import { DeleteIcon, LinkIcon, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { courseContext } from "@/contexts/courseContext";
 import { userContext } from "@/contexts/userContext";
@@ -84,7 +84,13 @@ export const PostCard = <T extends PostType>({
     <div
       role="button"
       tabIndex={0}
-      onClick={() => setSelectedPost(post)}
+      onClick={(e) => {
+        const container = e.currentTarget.closest('[class*="overflow-y-auto"]');
+        if (container instanceof HTMLElement) {
+          sessionStorage.setItem("forumlist", container.scrollTop.toString());
+        }
+        setSelectedPost(post);
+      }}
       className={cn(
         "text-left relative border transition-all duration-500   rounded-lg flex flex-col w-full",
         isSelected

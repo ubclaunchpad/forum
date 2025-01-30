@@ -24,7 +24,7 @@ export default function SettingsLayout({
         <div className="p-4 border-b border-neutral-200">
           <Link
             href={`/forum/courses/${id}`}
-            className="flex items-center text-sm text-neutral-600 hover:text-neutral-900"
+            className="flex items-center text-sm text-neutral-600 font-semibold font-title hover:text-neutral-900"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Forum
@@ -48,7 +48,7 @@ export default function SettingsLayout({
                       className={cn(
                         "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                         "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900",
-                        "data-[active=true]:bg-neutral-100 data-[active=true]:text-neutral-900",
+                        "data-[active=true]:bg-primary-100 data-[active=true]:text-primary-900",
                       )}
                       data-active={item.id === currentSection}
                     >

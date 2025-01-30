@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { Profile } from "./types/profiles";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -155,4 +156,12 @@ export function generatePalette(colour: string): Palette {
     900: `hsl(${colorHSL.h}, ${colorHSL.s * 1.1}%, 15%)`,
     950: `hsl(${colorHSL.h}, ${colorHSL.s * 1.2}%, 7%)`,
   };
+}
+
+export function getDisplayname(profile: Profile) {
+  if (profile.display_name) {
+    return profile.display_name;
+  }
+
+  return `${profile.first_name} ${profile.last_name}`;
 }
