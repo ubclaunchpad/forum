@@ -311,7 +311,46 @@ def create_tag(course_id: str, tagReq: TagRequest, author_id: str) -> bool:
             db.add(tag)
             db.commit()
         except Exception as e:
-            print("db fail")
-            raise e
+            db.rollback()
+            raise HTTPException(
+                status_code=500, detail="Failed to create tag"
+            )
+    return True
 
+def delete_tag(c_id: str, t_id: str) -> bool:
+    with get_db() as db:
+        c_uuid = UUID(c_id)
+        t_uuid = UUID(t_id)
+        try:
+            db.query(Tag).where(Course.id == c_uuid, Tag.id == t_uuid).delete()
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500, detail="Failed to delete tag"
+            )
+
+    return True
+
+def update_tag(c_id: str, t_id: str, tagReq: TagRequest) -> bool:
+    with get_db() as db:
+        try:
+            c_uuid = UUID(c_id)
+            t_uuid = UUID(t_id)
+            tag = db.query(Tag).where(Tag.id == t_uuid, Course.id == c_uuid).first()
+
+            if not tag:
+                raise Exception("Tag not found")
+            
+            tag.name = tagReq.name if tagReq.name else tag.name
+            tag.visibility = tagReq.visibility if tagReq.visibility else tag.visibility
+            tag.parent_tag_id = tagReq.parent_tag_id if tagReq.parent_tag_id else tag.parent_tag_id
+            tag.properties = tagReq.properties if tagReq.properties else tag.properties
+
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500, detail="Failed to update tag"
+            )
     return True
