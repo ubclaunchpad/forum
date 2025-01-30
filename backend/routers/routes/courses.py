@@ -77,14 +77,14 @@ async def unregister_user(c_id: str, u_id: str):
         )
     return GeneralResponse(msg=f"User {u_id} unregistered from course {c_id}")
 
-@course_router.get("/{c_id}/members/{u_id}/roles")
-async def get_roles_for_user(c_id: str, u_id: str):
-    res = course_controller.get_course_roles_for_user(c_id, u_id)
-    if not res:
-        raise HTTPException(
-            status_code=400, detail="Failed to get course roles for {u_id}"
-        )
-    return res
+# @course_router.get("/{c_id}/members/{u_id}/roles")
+# async def get_roles_for_user(c_id: str, u_id: str):
+#     res = course_controller.get_course_roles_for_user(c_id, u_id)
+#     if not res:
+#         raise HTTPException(
+#             status_code=400, detail="Failed to get course roles for {u_id}"
+#         )
+#     return res
 
 # ----------------- Course Roles -----------------#
 '''
