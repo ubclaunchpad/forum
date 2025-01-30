@@ -116,6 +116,23 @@ course_documents = Table(
     schema="public",
 )
 
+document_tags = Table(
+    "document_tags",
+    Base.metadata,
+    Column("doc_id", PUUID, ForeignKey('public.documents.id', ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", PUUID, ForeignKey('public.tags.id', ondelete="CASCADE"), primary_key=True),
+    Column("created_by", PUUID, ForeignKey('auth.users.id', ondelete="SET NULL")),
+    schema="public",
+)
+
+post_tags = Table(
+    "post_tags",
+    Base.metadata,
+    Column("post_id", Integer, ForeignKey('public.posts.id', ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", PUUID, ForeignKey('public.tags.id', ondelete="CASCADE"), primary_key=True),
+    Column("created_by", PUUID, ForeignKey('auth.users.id', ondelete="SET NULL")),
+    schema="public",
+)
 
 class Profile(Base):
     __tablename__ = "profiles"
@@ -151,7 +168,6 @@ class Course(Base):
     documents = relationship(
         "Document", secondary=course_documents, back_populates="courses"
     )  # Use table object instead of string
-
     __table_args__ = (
         UniqueConstraint("c_group", "code", "section"),
         {"schema": "public"},
@@ -166,7 +182,6 @@ class Post(Base):
     course_id = Column(PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"))
     title = Column(Text)
     content = Column(Text)
-    parent_id = Column(PUUID)
     applied_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
 
@@ -181,6 +196,9 @@ class Post(Base):
         primaryjoin="and_(Post.id==Embedding.entity_id, Embedding.entity_type=='post')",
         cascade="all, delete-orphan",
         back_populates="post",
+    )
+    tags = relationship(
+        "Tag", secondary=post_tags, back_populates="posts"
     )
 
 
@@ -246,6 +264,9 @@ class Document(Base):
         "Embedding.entity_type=='document')",
         cascade="all, delete-orphan",
         back_populates="document",
+    )
+    tags = relationship(
+        "Tag", secondary=document_tags, back_populates="documents"
     )
 
     __table_args__ = (
@@ -335,40 +356,6 @@ class Embedding(Base):
         {"schema": "public"},
     )
 
-
-class ChunkRelation(Base):
-    __tablename__ = "chunk_relations"
-
-    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-    source_chunk_id = Column(
-        PUUID, ForeignKey("public.chunks.id", ondelete="CASCADE"), nullable=False
-    )
-    target_chunk_id = Column(
-        PUUID, ForeignKey("public.chunks.id", ondelete="CASCADE"), nullable=False
-    )
-    relation_type = Column(String(50), nullable=False)
-    properties = Column(JSONB)
-    created_at = Column(
-        DateTime, server_default=func.current_timestamp(), nullable=False
-    )
-
-    # Relationships
-    source_chunk = relationship(
-        "Chunk", foreign_keys=[source_chunk_id], back_populates="outgoing_relations"
-    )
-    target_chunk = relationship(
-        "Chunk", foreign_keys=[target_chunk_id], back_populates="incoming_relations"
-    )
-
-    __table_args__ = (
-        CheckConstraint(
-            "relation_type IN ('contains', 'references', 'similar_to', 'continuation_of')",
-            name="valid_relation_type",
-        ),
-        CheckConstraint("jsonb_typeof(properties) = 'object'", name="valid_metadata"),
-        {"schema": "public"},
-    )
-
 class VisibilityEnum(enum.Enum):
     public = "public"
     private = "private"
@@ -442,6 +429,8 @@ class Tag(Base):
 
     course = relationship("Course")
     parent_tag = relationship("Tag", remote_side=[id])
+    documents = relationship("Document", secondary=document_tags, back_populates="tags")
+    posts = relationship("Post", secondary=post_tags, back_populates="tags")
     # user = relationship("Users")
 
 '''
