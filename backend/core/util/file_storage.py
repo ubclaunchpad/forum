@@ -88,6 +88,7 @@ class FileStorage:
             buckets = self.supabase.storage.list_buckets()
             if self.bucket_name in [bucket.name for bucket in buckets]:
                 return True
+            return False
         except Exception as e:
             return False
 

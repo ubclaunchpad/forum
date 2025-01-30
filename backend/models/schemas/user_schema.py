@@ -1,6 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 
+from fastapi import UploadFile
 from pydantic import BaseModel
 
 
@@ -48,6 +49,7 @@ class UpdateUserRequest(BaseModel):
     socials: Optional[SocialLinks] = None
     timezone: Optional[str] = None
     display_name: Optional[str] = None
+    status: Optional[str] = None
 
 
 class UserProfile(BaseModel):
@@ -61,7 +63,13 @@ class UserProfile(BaseModel):
     socials: Optional[SocialLinks] = None
     timezone: Optional[str] = None
     display_name: Optional[str] = None
+    icon_url: Optional[str] = None
+    status: Optional[str] = None
 
 
 class GetUserProfileResponse(BaseModel):
     profile: UserProfile
+
+
+class UserProfilePhotoRequest(BaseModel):
+    file: UploadFile

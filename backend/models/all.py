@@ -19,6 +19,7 @@ from sqlalchemy import (
     ForeignKeyConstraint,
     Index,
     Integer,
+    Nullable,
     String,
     Table,
     Text,
@@ -131,6 +132,8 @@ class Profile(Base):
     socials = Column(JSONB, default=dict)
     timezone = Column(Text, nullable=True)
     display_name = Column(Text, nullable=True)
+    icon_url = Column(Text, nullable=True)
+    status = Column(Text, nullable=True)
 
     # Relationships
     courses = relationship("Course", secondary=user_courses, back_populates="users")

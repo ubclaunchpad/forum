@@ -1,10 +1,13 @@
+import os
 from typing import List, Optional
 from uuid import UUID
 
 import supabase
 from fastapi import HTTPException
+from core.util.file_storage import ConflictResolution, FileStorage
 from models.all import Course, Profile
 from models.db import get_db, supabase
+from models.schemas.general_schema import GeneralResponse
 from models.schemas.user_schema import (
     CreateUserBaseRequest,
     CreateUserResponse,
@@ -172,4 +175,67 @@ def update_user_profile(user_id: str, update_data: UpdateUserRequest) -> UserPro
             db.rollback()
             raise HTTPException(
                 status_code=500, detail=f"Failed to update profile: {str(e)}"
+            )
+
+
+def update_profile_photo(
+    user_id: str, file_content: bytes, filename: str
+) -> GeneralResponse:
+    """Update user's profile photo."""
+    with get_db() as db:
+        try:
+            user = db.query(Profile).filter(Profile.id == user_id).first()
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
+
+            # Initialize storage
+            storage = FileStorage(
+                bucket_name="profiles", conflict_resolution=ConflictResolution.OVERWRITE
+            )
+
+            # Store file with user_id as prefix
+            file_ext = os.path.splitext(filename)[1]
+            storage_path = f"{user_id}{file_ext}"
+            file_path = storage.store_file(file_content, storage_path)
+
+            # Update user's icon_url
+            icon_url = storage.format_file_url(file_path)
+            setattr(user, "icon_url", icon_url)
+            db.commit()
+
+            return GeneralResponse(
+                msg="Profile photo updated successfully",
+                properties={"icon_url": icon_url},
+            )
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500, detail=f"Failed to update profile photo: {str(e)}"
+            )
+
+
+def delete_profile_photo(user_id: str) -> GeneralResponse:
+    """Remove user's profile photo."""
+    with get_db() as db:
+        try:
+            user = db.query(Profile).filter(Profile.id == user_id).first()
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
+
+            if getattr(user, "icon_url"):
+                storage = FileStorage(bucket_name="profiles")
+
+                # Extract filename from URL
+                file_path = user.icon_url.split("/")[-1]
+                storage.delete_file(file_path)
+
+                setattr(user, "icon_url", None)
+                db.commit()
+
+            return GeneralResponse(msg="Profile photo removed successfully")
+
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500, detail=f"Failed to delete profile photo: {str(e)}"
             )
