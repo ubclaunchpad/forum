@@ -5,12 +5,9 @@ from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from models.all import Course, Profile, user_courses
 from models.db import get_db
-from models.schemas.course_schema import (
-    CourseResponse,
-    CreateCourseReq,
-    CreateCourseResponse,
-    UpdateCourseReq,
-)
+from models.schemas.course_schema import (CourseResponse, CreateCourseReq,
+                                          CreateCourseResponse,
+                                          UpdateCourseReq)
 from models.schemas.user_schema import SocialLinks, UserProfile
 from pydantic import ValidationError
 
@@ -163,6 +160,9 @@ def get_course_members(c_id: str) -> List[UserProfile]:
                 else None,
                 timezone=getattr(user, "timezone", None),
                 display_name=getattr(user, "display_name", None),
+                icon_url=getattr(user, "icon_url", None),
+                status=getattr(user, "status", None),
+                
             )
             for user in course.users
         ]

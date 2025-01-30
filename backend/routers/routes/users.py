@@ -1,14 +1,12 @@
 import os
+
 from controllers import user_controller
-from fastapi import APIRouter, File, HTTPException, Request, Response, UploadFile
+from fastapi import (APIRouter, File, HTTPException, Request, Response,
+                     UploadFile)
 from models.schemas.general_schema import GeneralResponse
-from models.schemas.user_schema import (
-    CreateUserBaseRequest,
-    CreateUserResponse,
-    GetUsersResponse,
-    UpdateUserRequest,
-    UserProfile,
-)
+from models.schemas.user_schema import (CreateUserBaseRequest,
+                                        CreateUserResponse, GetUsersResponse,
+                                        UpdateUserRequest, UserProfile)
 
 user_router = APIRouter()
 
@@ -67,10 +65,11 @@ async def create_user(create_user_request: CreateUserBaseRequest):
         raise HTTPException(status_code=400, detail="Failed to create user.")
 
 
-@user_router.patch("/me", response_model=UserProfile)
+@user_router.put("/me", response_model=UserProfile)
 async def update_profile(request: Request, update_data: UpdateUserRequest):
     """Update the current user's profile."""
     try:
+        print("s")
         user_id = request.state.user_id
         updated_profile = user_controller.update_user_profile(user_id, update_data)
         return updated_profile

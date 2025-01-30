@@ -1,13 +1,9 @@
 from controllers import course_controller
 from fastapi import APIRouter, HTTPException, Request
-from models.schemas.course_schema import (
-    CourseMembersResponse,
-    CourseResponse,
-    CreateCourseReq,
-    CreateCourseResponse,
-    GetCoursesResponse,
-    UpdateCourseReq,
-)
+from models.schemas.course_schema import (CourseMembersResponse,
+                                          CourseResponse, CreateCourseReq,
+                                          CreateCourseResponse,
+                                          GetCoursesResponse, UpdateCourseReq)
 from models.schemas.general_schema import GeneralResponse
 
 course_router = APIRouter()
@@ -50,6 +46,7 @@ async def update_course(create_course_req: UpdateCourseReq, c_id: str):
 @course_router.get("/{c_id}/members", response_model=CourseMembersResponse)
 async def get_course_members(c_id: str):
     members = course_controller.get_course_members(c_id)
+    print(members[0])
     return {"members": members}
 
 

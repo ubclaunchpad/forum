@@ -3,18 +3,14 @@ from typing import List, Optional
 from uuid import UUID
 
 import supabase
-from fastapi import HTTPException
 from core.util.file_storage import ConflictResolution, FileStorage
+from fastapi import HTTPException
 from models.all import Course, Profile
 from models.db import get_db, supabase
 from models.schemas.general_schema import GeneralResponse
-from models.schemas.user_schema import (
-    CreateUserBaseRequest,
-    CreateUserResponse,
-    SocialLinks,
-    UpdateUserRequest,
-    UserProfile,
-)
+from models.schemas.user_schema import (CreateUserBaseRequest,
+                                        CreateUserResponse, SocialLinks,
+                                        UpdateUserRequest, UserProfile)
 from sqlalchemy.orm import joinedload
 
 
@@ -37,6 +33,7 @@ def get_all_users() -> List[UserProfile]:
                 else None,
                 timezone=getattr(user, "timezone", None),
                 display_name=getattr(user, "display_name", None),
+                icon_url=getattr(user, "icon_url", None),
             )
             for user in users
         ]
@@ -69,6 +66,8 @@ def get_user_by_id(user_id: str) -> Optional[UserProfile]:
             socials=social_links,
             timezone=getattr(user, "timezone", None),
             display_name=getattr(user, "display_name", None),
+            icon_url=getattr(user, "icon_url", None),
+
         )
 
 
@@ -188,19 +187,26 @@ def update_profile_photo(
             if not user:
                 raise HTTPException(status_code=404, detail="User not found")
 
+            old_id = getattr(user, "icon_url")
+                
             # Initialize storage
             storage = FileStorage(
-                bucket_name="profiles", conflict_resolution=ConflictResolution.OVERWRITE
+                bucket_name="profiles", conflict_resolution=ConflictResolution.APPEND_TIMESTAMP
             )
-
+            
             # Store file with user_id as prefix
             file_ext = os.path.splitext(filename)[1]
             storage_path = f"{user_id}{file_ext}"
             file_path = storage.store_file(file_content, storage_path)
 
             # Update user's icon_url
-            icon_url = storage.format_file_url(file_path)
+            icon_url = storage.format_public_file_url(file_path)
+            
+            storage.delete_file(old_id)
             setattr(user, "icon_url", icon_url)
+            
+            
+                
             db.commit()
 
             return GeneralResponse(
@@ -208,6 +214,7 @@ def update_profile_photo(
                 properties={"icon_url": icon_url},
             )
         except Exception as e:
+            print(e)
             db.rollback()
             raise HTTPException(
                 status_code=500, detail=f"Failed to update profile photo: {str(e)}"
