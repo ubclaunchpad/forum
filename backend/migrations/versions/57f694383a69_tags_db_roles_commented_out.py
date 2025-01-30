@@ -1,7 +1,7 @@
 """tags db, roles commented out
 
 Revision ID: 57f694383a69
-Revises: 990400c7ca82
+Revises: 09db37a849a4
 Create Date: 2025-01-28 10:32:14.365514
 
 """
@@ -14,7 +14,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = '57f694383a69'
-down_revision: Union[str, None] = '990400c7ca82'
+down_revision: Union[str, None] = '09db37a849a4'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
