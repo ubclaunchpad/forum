@@ -390,6 +390,19 @@ class Embedding(Base):
         {"schema": "public"},
     )
 
+class QueryHistory(Base):
+    __tablename__ = "query_history"
+    user_id = Column(
+        PUUID,
+        ForeignKey("auth.users.id", ondelete="CASCADE"),
+        nullable=True,
+        primary_key=True,
+    )
+    course_id = Column(
+        PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"), primary_key=True
+    )
+    messages = Column(JSONB)
+
 class VisibilityEnum(enum.Enum):
     public = "public"
     private = "private"
