@@ -12,7 +12,7 @@ from models.schemas.course_schema import (
     CourseResponse,
     CreateCourseReq,
     CreateCourseResponse,
-    TagRequest,
+    CourseTagRequest,
     UpdateCourseReq,
     CreateCourseRoleRequest,
     CourseTagsResponse
@@ -295,7 +295,7 @@ def get_all_tags(course_id: str) -> CourseTagsResponse:
                                                     Tag.properties).filter(Tag.course_id == c_uuid).all())
     return tags
 
-def create_tag(course_id: str, tagReq: TagRequest, author_id: str) -> bool:
+def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool:
     with get_db() as db:
         c_uuid = UUID(course_id)
         p_uuid = UUID(tagReq.parent_tag_id) if tagReq.parent_tag_id else None
@@ -332,7 +332,7 @@ def delete_tag(c_id: str, t_id: str) -> bool:
 
     return True
 
-def update_tag(c_id: str, t_id: str, tagReq: TagRequest) -> bool:
+def update_tag(c_id: str, t_id: str, tagReq: CourseTagRequest) -> bool:
     with get_db() as db:
         try:
             c_uuid = UUID(c_id)

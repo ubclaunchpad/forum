@@ -99,11 +99,11 @@ class CourseRoleBase(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-class TagProperties(BaseModel):
+class CourseTagProperties(BaseModel):
     temp: Optional[str] = None
 
-class TagRequest(BaseModel):
+class CourseTagRequest(BaseModel):
     name: Optional[str] = None
     visibility: Optional[VisibilityEnum] = None
     parent_tag_id: Optional[UUID] = None
-    properties: Optional[TagProperties] = None
+    properties: Optional[CourseTagProperties] = None

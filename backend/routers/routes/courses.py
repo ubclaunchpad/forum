@@ -12,7 +12,7 @@ from models.schemas.course_schema import (
     CreateCourseRoleRequest,
     GetCoursesResponse,
     CourseTagsResponse,
-    TagRequest,
+    CourseTagRequest,
     UpdateCourseReq
 )
 from models.schemas.general_schema import GeneralResponse
@@ -154,9 +154,9 @@ async def get_course_tags(course_id: str):
     return CourseTagsResponse(tags=res)
 
 @course_router.post("/{course_id}/tags")
-async def create_tag(course_id: str, req: Request, tagReq: TagRequest):
-    # author_id = req.state.user_id
+async def create_course_tag(course_id: str, req: Request, tagReq: CourseTagRequest):
     author_id = ""
+    # author_id = req.state.user_id
     res = course_controller.create_tag(course_id, tagReq, author_id)
     if not res:
         raise HTTPException(
@@ -165,7 +165,7 @@ async def create_tag(course_id: str, req: Request, tagReq: TagRequest):
     return GeneralResponse(msg="Created tag succesfully")
 
 @course_router.patch("/{course_id}/tags/{tag_id}")
-async def update_tag(course_id: str, tag_id: str, tagReq: TagRequest):
+async def update_course_tag(course_id: str, tag_id: str, tagReq: CourseTagRequest):
     res = course_controller.update_tag(course_id, tag_id, tagReq)
     if not res:
         raise HTTPException(
@@ -174,7 +174,7 @@ async def update_tag(course_id: str, tag_id: str, tagReq: TagRequest):
     return GeneralResponse(msg="Updated tag successfully")#probs should return updated tag
 
 @course_router.delete("/{course_id}/tags/{tag_id}")
-async def create_tag(course_id: str, tag_id: str):
+async def delete_course_tag(course_id: str, tag_id: str):
     res = course_controller.delete_tag(course_id, tag_id)
     if not res:
         raise HTTPException(
