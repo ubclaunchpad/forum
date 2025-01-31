@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from typing import AsyncGenerator, Dict, Optional, Tuple
 from uuid import UUID
 
+from controllers import document_controller
 from controllers.documents import document_manager
 from controllers.query_history_controller import (
     add_query_to_history,
@@ -15,7 +16,7 @@ from core.util import file_storage
 from fastapi import APIRouter, Form, HTTPException, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from models.db import get_db
-from models.schemas.course_schema import CreateCourseResponse
+from models.schemas.course_schema import CourseTagsResponse, CreateCourseResponse
 from models.schemas.document_schema import (
     CreateDocumentRequest,
     CreateDocumentResponse,
@@ -225,3 +226,30 @@ async def query_documents_stream(
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
     return StreamingResponse(stream_response(), media_type="text/event-stream")
+
+@document_router.get("/{document_id}/tags", response_model=CourseTagsResponse)
+async def get_document_tags(document_id: str):
+    res = document_controller.get_document_tags(document_id)
+    if not res:
+        raise HTTPException(
+            status_code=400, detail="Failed to get document tags"
+        )
+    return res
+
+@document_router.post("/{document_id}/tags/{tag_id}", response_model=GeneralResponse)
+async def add_document_tag(document_id: str, tag_id: str):
+    res = document_controller.add_document_tag(document_id, tag_id)
+    if not res:
+        raise HTTPException(
+            status_code=400, detail="Failed to add document tag"
+        )
+    return res
+
+@document_router.delete("/{document_id}/tags/{tag_id}", response_model=GeneralResponse)
+async def remove_document_tag(document_id: str, tag_id: str):
+    res = document_controller.remove_document_tag(document_id, tag_id)
+    if not res:
+        raise HTTPException(
+            status_code=400, detail="Failed to remove document tag"
+        )
+    return res

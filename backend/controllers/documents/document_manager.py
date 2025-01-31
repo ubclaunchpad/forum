@@ -1,5 +1,6 @@
 """Document management operations with logging."""
 
+from curses.ascii import HT
 import logging
 import time
 from typing import Dict, Optional
@@ -9,6 +10,7 @@ from core.processors.document_processor import DocumentProcessor
 from core.util.file_storage import FileStorage
 from models.all import Course, Document
 from models.db import get_db
+from models.schemas.course_schema import CourseTagInformation
 from models.schemas.document_schema import DocumentFileUpload
 
 # Configure logging

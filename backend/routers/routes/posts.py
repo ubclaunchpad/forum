@@ -93,20 +93,20 @@ async def get_post_tags(post_id: str):
     return res
 
 @post_router.post("/{post_id}/tags/{tag_id}")
-async def assign_post_tags(post_id: str, tag_id: str):
-    res = post_controller.assign_post_tag(post_id, tag_id)
+async def add_post_tag(post_id: str, tag_id: str):
+    res = post_controller.add_post_tag(post_id, tag_id)
     if not res:
         raise HTTPException(
-            status_code=400, detail="Failed to get post tags"
+            status_code=400, detail="Failed to get post tag"
         )
     return res
 
 @post_router.delete("/{post_id}/tags/{tag_id}")
-async def unassign_post_tags(post_id: str, tag_id: str):
-    res = post_controller.unassign_post_tag(post_id, tag_id)
+async def remove_post_tag(post_id: str, tag_id: str):
+    res = post_controller.remove_post_tag(post_id, tag_id)
     if not res:
         raise HTTPException(
-            status_code=400, detail="Failed to delete post tags"
+            status_code=400, detail="Failed to remove post tag"
         )
     return res
 

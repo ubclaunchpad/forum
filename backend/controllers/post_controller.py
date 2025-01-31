@@ -348,7 +348,7 @@ def get_post_tags(post_id: str) -> CourseTagsResponse:
             )
     return CourseTagsResponse(tags=tags)
 
-def assign_post_tag(post_id: str, tag_id: str) -> GeneralResponse:
+def add_post_tag(post_id: str, tag_id: str) -> GeneralResponse:
     with get_db() as db:
         try:
             post = db.query(Post).filter(Post.id == UUID(post_id)).first()
@@ -367,7 +367,7 @@ def assign_post_tag(post_id: str, tag_id: str) -> GeneralResponse:
     
     return GeneralResponse(msg="Tag assigned to post successfully")
 
-def unassign_post_tag(post_id: str, tag_id: str) -> GeneralResponse:
+def remove_post_tag(post_id: str, tag_id: str) -> GeneralResponse:
     with get_db() as db:
         try:
             post = db.query(Post).filter(Post.id == UUID(post_id)).first()
