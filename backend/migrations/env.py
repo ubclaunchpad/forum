@@ -5,6 +5,11 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL is None or DATABASE_URL == "":
+    raise ValueError("DATABASE_URL environment variable is not set")
+
+USED_DB_URL: str = DATABASE_URL
+
 
 
 # this is the Alembic Config object, which provides
@@ -37,11 +42,11 @@ def include_object(object, name, type_, reflected, compare_to):
         return object.schema == "public"
 
     # For objects without schema, check their parent
-    if hasattr(object, "table") and hasattr(object.table, "schema"):
-        return object.table.schema == "public"
+    # if hasattr(object, "table") and hasattr(object.table, "schema"):
+    #     return object.table.schema == "public"
 
     # Default to True for objects where we can't determine schema
-    return True
+    return False
 
 
 def run_migrations_offline() -> None:
@@ -75,8 +80,8 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    config_var = config.get_section(config.config_ini_section)
-    config_var["sqlalchemy.url"] = DATABASE_URL
+    config_var = config.get_section(config.config_ini_section) or {}
+    config_var["sqlalchemy.url"] = USED_DB_URL
     connectable = engine_from_config(
         config_var,
         prefix="sqlalchemy.",
@@ -87,8 +92,9 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            # Add the migration-specific parameters here instead
             include_object=include_object,
+            compare_type=True,
+            compare_server_default=True,
             include_schemas=True,
             version_table_schema="public",
         )

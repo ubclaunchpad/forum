@@ -5,8 +5,8 @@ from uuid import UUID
 
 from httpx import post
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import (ARRAY, DDL, Boolean, CheckConstraint, Column, Date,
-                        DateTime, Enum, Float, ForeignKey,
+from sqlalchemy import (ARRAY, DDL, INT, Boolean, CheckConstraint, Column,
+                        Date, DateTime, Enum, Float, ForeignKey,
                         ForeignKeyConstraint, Index, Integer, Nullable, String,
                         Table, Text, UniqueConstraint, event, text)
 from sqlalchemy.dialects.postgresql import JSONB
@@ -433,3 +433,8 @@ class QueryHistory(Base):
         primary_key=True
     )
     messages = Column(JSONB)
+    
+    
+class AA(Base):
+    __tablename__ = "A"
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
