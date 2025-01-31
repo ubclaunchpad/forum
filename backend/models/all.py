@@ -336,8 +336,8 @@ class ChunkRelation(Base):
     )
 
 
-class jobs(Base):
-    __tablename__ = "jobs"
+class Job(Base):
+    __tablename__ = "job"
     
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
     params = Column(JSONB)
@@ -359,7 +359,7 @@ class jobs(Base):
     recurring_end_date = Column(DateTime, nullable=True)
 
 
-class jobsSpecification(Base):
+class JobSpecification(Base):
     __tablename__ = "jobs_specification"
     
     id = Column(
