@@ -185,7 +185,9 @@ class Course(Base):
     )
 
     # roles = relationship("CourseRole", back_populates = "course")
-
+class PostStatus(enum.Enum):
+    public = "active"
+    private = "deleted"
 
 class Post(Base):
     __tablename__ = "posts"
@@ -197,7 +199,7 @@ class Post(Base):
     course_id = Column(
         PUUID,
         ForeignKey(
-            "public.courses.id", ondelete="CASCADE", name="posts_course_id_fkey"
+            "public.courses.id", ondelete="CASCADE"
         ),
         nullable=False,
     )
@@ -205,11 +207,11 @@ class Post(Base):
     # Regular fields
     title = Column(Text)
     content = Column(Text)
-    status = Column("status", Enum("poststatus", schema="public"), nullable=True)
+    status = Column("status", Enum(PostStatus, name="poststatus", schema="public"), nullable=True)
     applied_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(
         PUUID,
-        ForeignKey("public.profiles.id", name="posts_created_by_fkey"),
+        ForeignKey("public.profiles.id"),
         nullable=False,
     )
 
@@ -240,7 +242,7 @@ class PostEdit(Base):
     __tablename__ = "post_edits"
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
     post_id = Column(
-        Integer, ForeignKey("public.posts.id", ondelete="CASCADE"), nullable=False
+        PUUID, ForeignKey("public.posts.id", ondelete="CASCADE"), nullable=False
     )
     edited_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
     previous_content = Column(Text)
@@ -262,7 +264,7 @@ class UserPostEvent(Base):
     liked = Column(Boolean)
     user_id = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
     post_id = Column(
-        Integer, ForeignKey("public.posts.id", ondelete="CASCADE"), nullable=False
+        PUUID, ForeignKey("public.posts.id", ondelete="CASCADE"), nullable=False
     )
 
     # Relationships
@@ -395,7 +397,6 @@ class QueryHistory(Base):
     user_id = Column(
         PUUID,
         ForeignKey("auth.users.id", ondelete="CASCADE"),
-        nullable=True,
         primary_key=True,
     )
     course_id = Column(
