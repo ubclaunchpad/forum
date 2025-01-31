@@ -7,8 +7,9 @@ from core.processors.embedding_processor import EmbeddingProcessor
 from core.processors.post_processor import PostProcessor
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from models.all import Embedding, Post, PostEdit, Profile, UserPostEvent
+from models.all import Embedding, Post, PostEdit, Profile, Tag, UserPostEvent
 from models.db import get_db
+from models.schemas.course_schema import CourseTagsResponse
 from models.schemas.general_schema import GeneralResponse
 from models.schemas.post_schema import (
     CreatePostEditRequest,
@@ -319,3 +320,49 @@ def get_embedding_metadata(
         raise HTTPException(
             status_code=500, detail=f"Failed to get post embedding metadata: {str(e)}"
         )
+
+def get_post_tags(post_id: str) -> CourseTagsResponse:
+    with get_db() as db:
+        post = db.query(Post).filter(Post.id == UUID(post_id)).first()
+        if not post:
+            raise HTTPException(status_code=404, detail="Post not found")
+        
+    return CourseTagsResponse(tags=post.tags)
+
+def assign_post_tag(post_id: str, tag_id: str) -> GeneralResponse:
+    with get_db() as db:
+        try:
+            post = db.query(Post).filter(Post.id == UUID(post_id)).first()
+            if not post:
+                raise HTTPException(status_code=404, detail="Post not found")
+            
+            tag = db.query(Tag).filter(Tag.id == UUID(tag_id)).first()
+            if not tag:
+                raise HTTPException(status_code=404, detail="Tag not found")
+            
+            post.tags.append(tag)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=f"Failed to assign tag to post: {str(e)}")
+    
+    return GeneralResponse(msg="Tag assigned to post successfully")
+
+def unassign_post_tag(post_id: str, tag_id: str) -> GeneralResponse:
+    with get_db() as db:
+        try:
+            post = db.query(Post).filter(Post.id == UUID(post_id)).first()
+            if not post:
+                raise HTTPException(status_code=404, detail="Post not found")
+            
+            tag = db.query(Tag).filter(Tag.id == UUID(tag_id)).first()
+            if not tag:
+                raise HTTPException(status_code=404, detail="Tag not found")
+            
+            post.tags.remove(tag)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=f"Failed to unassign tag from post: {str(e)}")
+    
+    return GeneralResponse(msg="Tag unassigned from post successfully")
