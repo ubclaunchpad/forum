@@ -11,7 +11,6 @@ if DATABASE_URL is None or DATABASE_URL == "":
 USED_DB_URL: str = DATABASE_URL
 
 
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

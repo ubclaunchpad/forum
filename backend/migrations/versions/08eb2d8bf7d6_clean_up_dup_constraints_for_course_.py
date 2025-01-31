@@ -5,6 +5,7 @@ Revises: 09db37a849a4
 Create Date: 2025-01-31 11:57:50.711217
 
 """
+
 from typing import Sequence, Union
 
 import pgvector
@@ -12,8 +13,8 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = '08eb2d8bf7d6'
-down_revision: Union[str, None] = '09db37a849a4'
+revision: str = "08eb2d8bf7d6"
+down_revision: Union[str, None] = "09db37a849a4"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -25,7 +26,9 @@ def upgrade() -> None:
             ALTER TABLE public.course_documents 
             DROP CONSTRAINT IF EXISTS course_documents_course_id_fkey{i}
         """)
-    op.execute("ALTER TABLE public.course_documents DROP CONSTRAINT IF EXISTS course_documents_course_id_fkey")
+    op.execute(
+        "ALTER TABLE public.course_documents DROP CONSTRAINT IF EXISTS course_documents_course_id_fkey"
+    )
 
     # Drop all numbered variations of document_id foreign keys (1-14 and unnumbered)
     for i in range(1, 15):
@@ -33,7 +36,9 @@ def upgrade() -> None:
             ALTER TABLE public.course_documents 
             DROP CONSTRAINT IF EXISTS course_documents_document_id_fkey{i}
         """)
-    op.execute("ALTER TABLE public.course_documents DROP CONSTRAINT IF EXISTS course_documents_document_id_fkey")
+    op.execute(
+        "ALTER TABLE public.course_documents DROP CONSTRAINT IF EXISTS course_documents_document_id_fkey"
+    )
 
     # Create single clean constraints
     op.execute("""
@@ -52,7 +57,18 @@ def upgrade() -> None:
         ON DELETE CASCADE
     """)
 
+
 def downgrade() -> None:
     # In downgrade we just ensure one clean constraint exists
-    op.drop_constraint('course_documents_course_id_fkey', 'course_documents', type_='foreignkey', schema='public')
-    op.drop_constraint('course_documents_document_id_fkey', 'course_documents', type_='foreignkey', schema='public')
+    op.drop_constraint(
+        "course_documents_course_id_fkey",
+        "course_documents",
+        type_="foreignkey",
+        schema="public",
+    )
+    op.drop_constraint(
+        "course_documents_document_id_fkey",
+        "course_documents",
+        type_="foreignkey",
+        schema="public",
+    )

@@ -50,8 +50,10 @@ def upgrade() -> None:
         ),
         sa.Column("parent_chunk_id", sa.UUID(), nullable=True),
         sa.Column(
-            "embedding", pgvector.sqlalchemy.vector.VECTOR(dim=1536), nullable=False # type: ignore
-        ), 
+            "embedding",
+            pgvector.sqlalchemy.vector.VECTOR(dim=1536),  # type: ignore
+            nullable=False, 
+        ),
         sa.Column(
             "created_at",
             sa.DateTime(),
@@ -220,9 +222,9 @@ def downgrade() -> None:
     )
     op.drop_constraint(None, "post_edits", schema="public", type_="foreignkey")  # type: ignore
     op.drop_constraint(None, "post_edits", schema="public", type_="foreignkey")  # type: ignore
-    op.drop_constraint(None, "documents", schema="public", type_="foreignkey")# type: ignore
-    op.drop_constraint(None, "course_documents", schema="public", type_="foreignkey")# type: ignore
-    op.drop_constraint(None, "course_documents", schema="public", type_="foreignkey")# type: ignore
+    op.drop_constraint(None, "documents", schema="public", type_="foreignkey")  # type: ignore
+    op.drop_constraint(None, "course_documents", schema="public", type_="foreignkey")  # type: ignore
+    op.drop_constraint(None, "course_documents", schema="public", type_="foreignkey")  # type: ignore
     op.drop_index(
         "embeddings_vector_idx",
         table_name="embeddings",

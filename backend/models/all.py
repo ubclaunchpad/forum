@@ -5,14 +5,32 @@ from uuid import UUID
 
 from httpx import post
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import (ARRAY, DDL, INT, Boolean, CheckConstraint, Column,
-                        Date, DateTime, Enum, Float, ForeignKey,
-                        ForeignKeyConstraint, Index, Integer, Nullable, String,
-                        Table, Text, UniqueConstraint, event, text)
+from sqlalchemy import (
+    ARRAY,
+    DDL,
+    INT,
+    Boolean,
+    CheckConstraint,
+    Column,
+    Date,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    ForeignKeyConstraint,
+    Index,
+    Integer,
+    Nullable,
+    String,
+    Table,
+    Text,
+    UniqueConstraint,
+    event,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PUUID
-from sqlalchemy.orm import (backref, declarative_base, declared_attr,
-                            relationship)
+from sqlalchemy.orm import backref, declarative_base, declared_attr, relationship
 from sqlalchemy.sql import func
 from sqlalchemy.types import VARCHAR, TypeDecorator
 
@@ -42,6 +60,7 @@ event.listen(
 event.listen(
     Base.metadata, "before_create", DDL("CREATE EXTENSION IF NOT EXISTS pg_cron")
 )
+
 
 class PostStatus(PyEnum):
     DRAFT = "draft"
@@ -77,9 +96,9 @@ course_documents = Table(
         "course_id",
         PUUID,
         ForeignKey(
-            "public.courses.id", 
+            "public.courses.id",
             ondelete="CASCADE",
-            name="course_documents_course_id_fkey"
+            name="course_documents_course_id_fkey",
         ),
         primary_key=True,
     ),
@@ -87,9 +106,9 @@ course_documents = Table(
         "document_id",
         PUUID,
         ForeignKey(
-            "public.documents.id", 
+            "public.documents.id",
             ondelete="CASCADE",
-            name="course_documents_document_id_fkey"
+            name="course_documents_document_id_fkey",
         ),
         primary_key=True,
     ),
@@ -103,9 +122,7 @@ user_courses = Table(
         "user_id",
         PUUID,
         ForeignKey(
-            "public.profiles.id", 
-            ondelete="CASCADE",
-            name="user_courses_user_id_fkey"
+            "public.profiles.id", ondelete="CASCADE", name="user_courses_user_id_fkey"
         ),
         primary_key=True,
     ),
@@ -113,25 +130,24 @@ user_courses = Table(
         "course_id",
         PUUID,
         ForeignKey(
-            "public.courses.id", 
-            ondelete="CASCADE",
-            name="user_courses_course_id_fkey"
+            "public.courses.id", ondelete="CASCADE", name="user_courses_course_id_fkey"
         ),
         primary_key=True,
     ),
     schema="public",
 )
 
+
 class Profile(Base):
     __tablename__ = "profiles"
     id = Column(
-        PUUID, 
+        PUUID,
         ForeignKey(
-            "auth.users.id", 
+            "auth.users.id",
             ondelete="CASCADE",
-            name="profiles_id_users_fkey"  # Added name
-        ), 
-        primary_key=True
+            name="profiles_id_users_fkey",  # Added name
+        ),
+        primary_key=True,
     )
     first_name = Column(Text)
     last_name = Column(Text)
@@ -198,9 +214,8 @@ class Post(Base):
     title = Column(Text)
     content = Column(Text)
     status = Column(
-            Enum(PostStatus, name="post_status", schema="public"),
-            nullable=True
-        )
+        Enum(PostStatus, name="post_status", schema="public"), nullable=True
+    )
     applied_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(
         PUUID,
@@ -234,19 +249,14 @@ class PostEdit(Base):
     post_id = Column(
         PUUID,
         ForeignKey(
-            "public.posts.id", 
-            ondelete="CASCADE",
-            name="post_edits_post_id_fkey"
+            "public.posts.id", ondelete="CASCADE", name="post_edits_post_id_fkey"
         ),
-        nullable=False
+        nullable=False,
     )
     edited_by = Column(
-        PUUID, 
-        ForeignKey(
-            "public.profiles.id",
-            name="post_edits_edited_by_fkey"
-        ), 
-        nullable=False
+        PUUID,
+        ForeignKey("public.profiles.id", name="post_edits_edited_by_fkey"),
+        nullable=False,
     )
     previous_content = Column(Text)
     new_content = Column(Text)
@@ -264,21 +274,16 @@ class UserPostEvent(Base):
     viewed = Column(Boolean)
     liked = Column(Boolean)
     user_id = Column(
-        PUUID, 
-        ForeignKey(
-            "public.profiles.id",
-            name="user_post_events_user_id_fkey"
-        ), 
-        nullable=False
+        PUUID,
+        ForeignKey("public.profiles.id", name="user_post_events_user_id_fkey"),
+        nullable=False,
     )
     post_id = Column(
         PUUID,
         ForeignKey(
-            "public.posts.id", 
-            ondelete="CASCADE",
-            name="user_post_events_post_id_fkey"
+            "public.posts.id", ondelete="CASCADE", name="user_post_events_post_id_fkey"
         ),
-        nullable=False
+        nullable=False,
     )
     # Relationships
     post = relationship("Post", back_populates="events")
@@ -292,13 +297,11 @@ class Document(Base):
         DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
     )
     created_by = Column(
-        PUUID, 
+        PUUID,
         ForeignKey(
-            "public.profiles.id", 
-            ondelete="CASCADE",
-            name="documents_created_by_fkey"
-        ), 
-        nullable=False
+            "public.profiles.id", ondelete="CASCADE", name="documents_created_by_fkey"
+        ),
+        nullable=False,
     )
     updated_at = Column(
         DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
@@ -363,9 +366,9 @@ class Embedding(Base):
     parent_chunk_id = Column(
         PUUID,
         ForeignKey(
-            "public.embeddings.id", 
+            "public.embeddings.id",
             ondelete="CASCADE",
-            name="embeddings_parent_chunk_id_fkey"  # Added name
+            name="embeddings_parent_chunk_id_fkey",  # Added name
         ),
         nullable=True,
     )
@@ -411,30 +414,31 @@ class Embedding(Base):
         {"schema": "public"},
     )
 
+
 class QueryHistory(Base):
     __tablename__ = "query_history"
     user_id = Column(
         PUUID,
         ForeignKey(
-            "auth.users.id", 
+            "auth.users.id",
             ondelete="CASCADE",
-            name="query_history_user_id_fkey"  # Match existing constraint name
+            name="query_history_user_id_fkey",  # Match existing constraint name
         ),
         nullable=False,  # Changed to match your DB
         primary_key=True,
     )
     course_id = Column(
-        PUUID, 
+        PUUID,
         ForeignKey(
-            "public.courses.id", 
+            "public.courses.id",
             ondelete="CASCADE",
-            name="query_history_course_id_fkey"  # Match existing constraint name
-        ), 
-        primary_key=True
+            name="query_history_course_id_fkey",  # Match existing constraint name
+        ),
+        primary_key=True,
     )
     messages = Column(JSONB)
-    
-    
+
+
 class AA(Base):
     __tablename__ = "A"
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
