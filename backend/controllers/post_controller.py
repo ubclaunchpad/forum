@@ -2,6 +2,7 @@ import logging
 import stat
 from typing import List, Optional
 from uuid import UUID
+from sqlalchemy.orm import joinedload
 
 from core.processors.embedding_processor import EmbeddingProcessor
 from core.processors.post_processor import PostProcessor
@@ -9,7 +10,7 @@ from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from models.all import Embedding, Post, PostEdit, Profile, Tag, UserPostEvent
 from models.db import get_db
-from models.schemas.course_schema import CourseTagsResponse
+from models.schemas.course_schema import CourseTagInformation, CourseTagsResponse
 from models.schemas.general_schema import GeneralResponse
 from models.schemas.post_schema import (
     CreatePostEditRequest,
@@ -323,11 +324,29 @@ def get_embedding_metadata(
 
 def get_post_tags(post_id: str) -> CourseTagsResponse:
     with get_db() as db:
-        post = db.query(Post).filter(Post.id == UUID(post_id)).first()
+        post = (
+            db
+            .query(Post)
+            .options(joinedload(Post.tags))
+            .filter(Post.id == UUID(post_id))
+            .first()
+        )
         if not post:
             raise HTTPException(status_code=404, detail="Post not found")
-        
-    return CourseTagsResponse(tags=post.tags)
+        tags = []
+        for tag in post.tags:
+            tags.append(
+                CourseTagInformation(
+                    id=tag.id,
+                    name=tag.name,
+                    visibility=tag.visibility,
+                    course_id=tag.course_id,
+                    parent_tag_id=tag.parent_tag_id,
+                    created_by=tag.created_by,
+                    properties=tag.properties,
+                )
+            )
+    return CourseTagsResponse(tags=tags)
 
 def assign_post_tag(post_id: str, tag_id: str) -> GeneralResponse:
     with get_db() as db:

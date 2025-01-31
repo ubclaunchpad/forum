@@ -74,8 +74,8 @@ class CourseTagInformation(BaseModel):
     visibility: VisibilityEnum
     course_id: Optional[UUID] = None
     parent_tag_id: Optional[UUID] = None
-    created_by: UUID
-    properties: dict
+    created_by: Optional[UUID] = None
+    properties: Optional[dict] = None
 
 class CourseRolesResponse(BaseModel):
     roles: List[BasicCourseRoleInformation]
@@ -99,11 +99,8 @@ class CourseRoleBase(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-class CourseTagProperties(BaseModel):
-    temp: Optional[str] = None
-
 class CourseTagRequest(BaseModel):
     name: Optional[str] = None
     visibility: Optional[VisibilityEnum] = None
     parent_tag_id: Optional[UUID] = None
-    properties: Optional[CourseTagProperties] = None
+    properties: Optional[dict] = None
