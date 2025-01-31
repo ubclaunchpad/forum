@@ -1,17 +1,10 @@
 "use client";
 
-import { MessagesSquare, FileText } from "lucide-react";
+import { MessagesSquare, FileText, UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const tabs = [
-  // {
-  //   name: "announcements",
-  //   icon: Megaphone,
-  //   label: "Announcements",
-  //   href: "announcements",
-  //   disabled: true,
-  // },
   {
     name: "forum",
     icon: MessagesSquare,
@@ -26,18 +19,26 @@ const tabs = [
     href: "resources",
     disabled: false,
   },
+  {
+    name: "people",
+    icon: UsersIcon,
+    label: "People",
+    href: "people",
+    disabled: false,
+  },
 ];
 
 export default function CourseNavbar() {
   const pathname = usePathname();
   const path = pathname.split("/");
   if (
-    !["forum", "announcements", "resources"].includes(path[path.length - 1])
+    path.length < 5 &&
+    !["forum", "announcements", "resources", "people"].includes(path[4])
   ) {
     path.push("forum");
   }
-  const tab = path[path.length - 1];
-  const courseid = path[path.length - 2];
+  const tab = path[4];
+  const courseid = path[3];
   const isSelected = (currentTab: string) => tab === currentTab;
 
   return (

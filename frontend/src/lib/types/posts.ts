@@ -3,7 +3,11 @@ export type Post = {
   content: string;
   created_by: string | null;
   id: string;
+  local_id: number;
+  applied_at: string;
 };
+
+export type PostWithRequiredId = { id: string } & Partial<Omit<Post, "id">>;
 
 type OptimisticOperation = {
   operation: "optimistic";
@@ -18,3 +22,5 @@ type RealOperation = {
 };
 
 export type AppendOperation = OptimisticOperation | RealOperation;
+
+export type PostType = "draft" | "published";

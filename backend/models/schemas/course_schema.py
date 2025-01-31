@@ -1,8 +1,14 @@
 from datetime import date
-from typing import Dict, List, Optional
+from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from models.schemas.user_schema import UserProfile
+from pydantic import BaseModel
+
+
+class CourseConfig(BaseModel):
+    theme_colour: Optional[str] = None
+    font: Optional[str] = None
 
 
 class CourseBase(BaseModel):
@@ -10,7 +16,7 @@ class CourseBase(BaseModel):
     code: int
     section: int
     name: Optional[str] = None
-    config: Optional[Dict] = None
+    config: Optional[CourseConfig] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
 
@@ -28,10 +34,10 @@ class CreateCourseResponse(BaseModel):
 
 class UpdateCourseReq(BaseModel):
     c_group: Optional[str] = None
-    code: Optional[str] = None
-    section: Optional[str] = None
+    code: Optional[int] = None
+    section: Optional[int] = None
     name: Optional[str] = None
-    config: Optional[Dict] = None
+    config: Optional[CourseConfig] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
 
@@ -45,4 +51,4 @@ class GetCoursesResponse(BaseModel):
 
 
 class CourseMembersResponse(BaseModel):
-    members: List[Dict[str, str]]
+    members: List[UserProfile]

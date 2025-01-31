@@ -148,7 +148,7 @@ export default function SignUp() {
       </form>
       <div className="w-full pl-2 flex-1 pt-4 text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link className="underline" href="/login">
+        <Link className="underline" href="/auth/signin">
           Sign in
         </Link>
       </div>

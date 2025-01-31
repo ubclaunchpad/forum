@@ -8,6 +8,7 @@ from models.schemas.post_schema import (
     CreateUserPostEventRequest,
     GetPostResponse,
     GetPostsResponse,
+    PostEmbeddingMetadata,
     PostResponse,
 )
 
@@ -30,17 +31,18 @@ async def get_posts(c_id: str):
 
 
 @post_router.get("/{post_id}", response_model=GetPostResponse)
-async def get_post(c_id: str, post_id: int):
-    post = post_controller.get_post(c_id, p_id)
-    return {"post": post}
+async def get_post(c_id: str, post_id: int, request: Request):
+    user_id = request.state.user_id
+    post = post_controller.get_post(user_id, c_id, post_id)
+    return post
 
 
-@post_router.patch("/{p_id}", response_model=GeneralResponse)
+@post_router.patch("/{post_id}", response_model=GeneralResponse)
 async def update_post(
-    c_id: str, p_id: str, request: Request, post_edit_info: CreatePostEditRequest
+    c_id: str, post_id: int, request: Request, post_edit_info: CreatePostEditRequest
 ):
     user_id = request.state.user_id
-    post_controller.update_post(c_id, user_id, p_id, post_edit_info)
+    post_controller.update_post(c_id, user_id, post_id, post_edit_info)
 
     return {"msg": "Post edited successfully"}
 
@@ -65,3 +67,17 @@ async def like_post(c_id: str, post_id: int, request: Request):
     user_id = request.state.user_id
     post_controller.like_post(c_id, user_id, post_id)
     return {"msg": "Post liked"}
+
+
+@post_router.post("/{post_id}/embeddings", response_model=GeneralResponse)
+async def update_embeddings(c_id: str, post_id: int, request: Request):
+    user_id = request.state.user_id
+    return post_controller.update_embeddings(c_id, user_id, post_id)
+
+
+@post_router.get(
+    "/{local_id}/embeddings/metadata", response_model=PostEmbeddingMetadata
+)
+async def get_embedding_metadata(c_id: str, local_id: int, request: Request):
+    user_id = request.state.user_id
+    return post_controller.get_embedding_metadata(c_id, user_id, local_id)

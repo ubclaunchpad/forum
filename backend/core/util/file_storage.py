@@ -45,6 +45,7 @@ class ConflictResolution(Enum):
 
 class FileStorage:
     MAX_SIZE_MB = 15
+    PUBLIC_BUCKETS = ["profiles"]
 
     def __init__(
         self,
@@ -76,9 +77,6 @@ class FileStorage:
             return False
 
     def _handle_filename_conflict(self, storage, filename: str) -> str:
-        if not self._file_exists(storage, filename):
-            return filename
-
         base_name, extension = os.path.splitext(filename)
         timestamp = dt.now().strftime("%Y%m%d_%H%M%S")
         return f"{base_name}_{timestamp}{extension}"
@@ -88,12 +86,19 @@ class FileStorage:
             buckets = self.supabase.storage.list_buckets()
             if self.bucket_name in [bucket.name for bucket in buckets]:
                 return True
+            return False
         except Exception as e:
             return False
 
     def _create_bucket(self) -> None:
         try:
-            self.supabase.storage.create_bucket(self.bucket_name)
+            if self.bucket_name in self.PUBLIC_BUCKETS:
+                self.supabase.storage.create_bucket(
+                    self.bucket_name, self.bucket_name, options={"public": True}
+                )
+            else:
+                self.supabase.storage.create_bucket(self.bucket_name, self.bucket_name)
+
         except Exception as e:
             raise e
 
@@ -122,6 +127,7 @@ class FileStorage:
                     return f"documents/{filename}"
 
             file_path = f"documents/{filename}"
+            print(file_path)
             response = storage.upload(
                 file=file_content,  # Pass bytes directly
                 path=file_path,
@@ -178,10 +184,8 @@ class FileStorage:
             # logger.error(f"Error listing files: {e}")
             raise HTTPException(status_code=500, detail="Failed to list files")
 
-    def format_file_url(self, file_path: str) -> str:
-        return (
-            f"{url}/storage/v1/object/public/{self.bucket_name}/documents/{file_path}"
-        )
+    def format_public_file_url(self, file_path: str) -> str:
+        return f"{url}/storage/v1/object/public/{self.bucket_name}/{file_path}"
 
     def get_file_signed_url(self, file_path: str) -> dict[str, str]:
         try:

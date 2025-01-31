@@ -91,21 +91,21 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
 
             # Process document content
             process_start = time.time()
-            # with DocumentProcessor(db) as processor:
-            #     processor.process_document(
-            #         document_id=document_id,
-            #         file_content=create_document.file,
-            #         strategy_type="pdf",
-            #     )
+            with DocumentProcessor(db) as processor:
+                processor.process_document(
+                    document_id=document_id,
+                    file_content=create_document.file,
+                    strategy_type="pdf",
+                )
 
-            # logger.info(
-            #     "Document processing completed",
-            #     extra={
-            #         "document_id": str(document_id),
-            #         "processing_time": f"{time.time() - process_start:.2f}s",
-            #         "total_time": f"{time.time() - start_time:.2f}s",
-            #     },
-            # )
+            logger.info(
+                "Document processing completed",
+                extra={
+                    "document_id": str(document_id),
+                    "processing_time": f"{time.time() - process_start:.2f}s",
+                    "total_time": f"{time.time() - start_time:.2f}s",
+                },
+            )
 
             return document_id
 
