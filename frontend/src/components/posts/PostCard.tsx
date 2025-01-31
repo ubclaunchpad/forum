@@ -14,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CopyIcon, DeleteIcon, MoreHorizontal } from "lucide-react";
+import { DeleteIcon, LinkIcon, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { courseContext } from "@/contexts/courseContext";
 import { userContext } from "@/contexts/userContext";
@@ -54,7 +54,7 @@ export const PostCard = <T extends PostType>({
       setSelectedPost(null);
     }
     const res = await fetch(
-      `${getApiUrl()}/courses/${course.id as string}/posts/${post.id}`,
+      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}`,
       {
         method: "DELETE",
         headers: {
@@ -84,7 +84,13 @@ export const PostCard = <T extends PostType>({
     <div
       role="button"
       tabIndex={0}
-      onClick={() => setSelectedPost(post)}
+      onClick={(e) => {
+        const container = e.currentTarget.closest('[class*="overflow-y-auto"]');
+        if (container instanceof HTMLElement) {
+          sessionStorage.setItem("forumlist", container.scrollTop.toString());
+        }
+        setSelectedPost(post);
+      }}
       className={cn(
         "text-left relative border transition-all duration-500   rounded-lg flex flex-col w-full",
         isSelected
@@ -105,7 +111,7 @@ export const PostCard = <T extends PostType>({
           {post.title}
         </p>
 
-        <h2 className=" font-medium text-xs ">
+        <h2 className=" font-medium text-xs flex-shrink-0 ">
           {post.applied_at &&
             getRelativeTimeString(
               new Date(post.applied_at).getTime(),
@@ -145,15 +151,17 @@ export const PostCard = <T extends PostType>({
                     <button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText(post.id);
+                        navigator.clipboard.writeText(
+                          `${window.location.origin}/forum/courses/${course.id}/forum/${post.local_id}`,
+                        );
                         toast({
-                          title: "Copied ID",
+                          title: "Copied link to post",
                         });
                       }}
                       className=" flex gap-6 font-medium items-center border-b text-sm p-4 py-1 w-full "
                     >
-                      <CopyIcon className="h-4 w-4 " />
-                      <span>Copy ID</span>
+                      <LinkIcon className="h-4 w-4 " />
+                      <span>Copy link to post</span>
                     </button>
                   </li>
                 )}

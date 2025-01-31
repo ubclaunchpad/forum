@@ -88,16 +88,20 @@ export default function PostTextEditor({
               </Button>
             )}
           </div>
-          <input
-            className={cn(
-              "w-full p-2 max-w-4xl disabled:bg-transparent rounded-lg outline-none font-semibold text-lg text-primary-600 ",
-              isEditing ? "bg-neutral-50" : "",
-            )}
-            placeholder="Post Title"
-            value={title}
-            disabled={isEditing !== post.id}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+          {isEditing === post.id ? (
+            <input
+              className={cn(
+                "w-full p-2 max-w-4xl rounded-lg outline-none font-semibold text-lg text-primary-600 bg-neutral-50",
+              )}
+              placeholder="Post Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          ) : (
+            <p className="w-full p-2 max-w-4xl font-semibold text-lg text-primary-600 whitespace-pre-line">
+              {title}
+            </p>
+          )}
         </div>
       </div>
       <div className="flex max-w-4xl flex-1 p-2 px-6  w-full flex-col gap-2">

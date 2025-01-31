@@ -8,28 +8,27 @@ from pydantic import BaseModel, Field
 class PostBase(BaseModel):
     title: str
     content: str
-    parent_id: Optional[int] = None
     created_by: UUID
 
 
 class CreatePostRequest(BaseModel):
     title: str
     content: str
-    parent_id: Optional[int] = None
 
 
 class CreatePostResponse(PostBase):
-    id: int
+    id: UUID
+    local_id: int
     applied_at: Any
 
 
 class PostResponse(PostBase):
-    id: int
+    id: UUID
+    local_id: int
     course_id: UUID
 
 
 class PostEditBase(BaseModel):
-    # post_id: UUID
     new_content: str
     edit_reason: str
     applied_at: datetime = Field(default_factory=datetime.now)
@@ -40,15 +39,16 @@ class CreatePostEditRequest(PostEditBase):
 
 
 class PostEditResponse(PostEditBase):
-    id: int
+    id: UUID
     edited_by: UUID
+    post_id: UUID
 
 
 class UserPostEventBase(BaseModel):
     viewed: bool
     liked: bool
     user_id: UUID
-    post_id: int
+    post_id: UUID
 
 
 class CreateUserPostEventRequest(UserPostEventBase):
@@ -56,12 +56,14 @@ class CreateUserPostEventRequest(UserPostEventBase):
 
 
 class UserPostEventResponse(UserPostEventBase):
-    id: int
+    id: UUID
 
 
 class GetPost(PostBase):
-    id: int
+    id: UUID
+    local_id: int
     applied_at: datetime = Field(default_factory=datetime.now)
+    status: Optional[str] = None
 
 
 class GetPostsResponse(BaseModel):
@@ -72,3 +74,9 @@ class GetPostResponse(BaseModel):
     post: PostResponse
     stats: dict
     user_interactions: dict
+
+
+class PostEmbeddingMetadata(BaseModel):
+    last_updated: Optional[datetime] = None
+    chunk_count: int = 0
+    has_embeddings: bool = False

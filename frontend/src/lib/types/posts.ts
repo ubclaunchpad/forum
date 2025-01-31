@@ -3,6 +3,7 @@ export type Post = {
   content: string;
   created_by: string | null;
   id: string;
+  local_id: number;
   applied_at: string;
 };
 

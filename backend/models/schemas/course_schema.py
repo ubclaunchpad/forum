@@ -1,8 +1,9 @@
 from datetime import date
-from typing import Dict, List, Optional
+from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from models.schemas.user_schema import UserProfile
+from pydantic import BaseModel
 
 
 class CourseConfig(BaseModel):
@@ -50,4 +51,4 @@ class GetCoursesResponse(BaseModel):
 
 
 class CourseMembersResponse(BaseModel):
-    members: List[Dict[str, str]]
+    members: List[UserProfile]

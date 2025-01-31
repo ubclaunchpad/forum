@@ -69,6 +69,7 @@ dependencies = [
     "pillow>=11.0.0",
     "pymupdf>=1.25.0",
     "libmagic>=1.0",
+    "tiktoken>=0.8.0",
 ]
 
 
