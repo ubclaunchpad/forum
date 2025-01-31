@@ -358,6 +358,11 @@ class Job(Base):
     recurring_interval = Column(Integer, nullable=False) # measured in seconds
     recurring_end_date = Column(DateTime, nullable=True)
 
+    __table_args__ = (
+        Index('idx_status_priority', 'status', 'priority'),
+        {"schema": "public"}
+    )
+
 
 class JobSpecification(Base):
     __tablename__ = "jobs_specification"
