@@ -380,7 +380,6 @@ class QueryHistory(Base):
     )
     messages = Column(JSONB)
 
-
 class Job(Base):
     __tablename__ = "job"
     
@@ -408,9 +407,8 @@ class Job(Base):
         {"schema": "public"}
     )
 
-
 class JobSpecification(Base):
-    __tablename__ = "jobs_specification"
+    __tablename__ = "job_specification"
     
     id = Column(
         PUUID, server_default=text("gen_random_uuid()"), primary_key=True
