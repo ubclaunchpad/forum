@@ -342,7 +342,7 @@ class jobs(Base):
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
     params = Column(JSONB)
     status = Column(
-        Enum("not started" "running", "success", "failed", name="job_status"), nullable=False
+        Enum("not started", "running", "success", "failed", name="job_status"), nullable=False
     )
     retry_count = Column(Integer, nullable=False)
     created_at = Column(
@@ -355,7 +355,7 @@ class jobs(Base):
         Enum("low", "medium", "high", name="job_priority"), nullable=False
     )
     recurring = Column(Boolean, nullable=False)
-    recurring_interval = Column(Integer, nullable=True) # measured in seconds
+    recurring_interval = Column(Integer, nullable=False) # measured in seconds
     recurring_end_date = Column(DateTime, nullable=True)
 
 
@@ -370,7 +370,7 @@ class jobsSpecification(Base):
     )
     description = Column(Text, nullable=False)
     action_name = Column(Text, nullable=False)
-    timeout = Column(Integer, nullable=False)
+    timeout = Column(Integer, nullable=False) # measured in seconds
     failure_strategy = Column(
         Enum("retry", "abort", name="job_failure_strategy"), nullable=False
     )
