@@ -414,7 +414,7 @@ class JobSpecification(Base):
         PUUID, server_default=text("gen_random_uuid()"), primary_key=True
     )
     job_id = Column(
-        PUUID, ForeignKey("public.jobs.id", ondelete="CASCADE"), nullable=False
+        PUUID, ForeignKey("public.job.id", ondelete="CASCADE"), nullable=False
     )
     description = Column(Text, nullable=False)
     action_name = Column(Text, nullable=False)

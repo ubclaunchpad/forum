@@ -44,7 +44,7 @@ def upgrade() -> None:
     sa.Column('failure_strategy', sa.Enum('retry', 'abort', name='job_failure_strategy'), nullable=False),
     sa.Column('cleanup_action', sa.Text(), nullable=True),
     sa.Column('job_file', sa.String(), nullable=False),
-    sa.ForeignKeyConstraint(['job_id'], ['public.jobs.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['job_id'], ['public.job.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     schema='public'
     )
