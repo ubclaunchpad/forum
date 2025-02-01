@@ -237,8 +237,9 @@ async def get_document_tags(document_id: str):
     return res
 
 @document_router.post("/{document_id}/tags/{tag_id}", response_model=GeneralResponse)
-async def add_document_tag(document_id: str, tag_id: str):
-    res = document_controller.add_document_tag(document_id, tag_id)
+async def add_document_tag(document_id: str, tag_id: str, req: Request):
+    author_id = req.state.user_id
+    res = document_controller.add_document_tag(document_id, tag_id, author_id)
     if not res:
         raise HTTPException(
             status_code=400, detail="Failed to add document tag"

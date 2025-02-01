@@ -155,8 +155,7 @@ async def get_course_tags(course_id: str):
 
 @course_router.post("/{course_id}/tags")
 async def create_course_tag(course_id: str, req: Request, tagReq: CourseTagRequest):
-    author_id = ""
-    # author_id = req.state.user_id
+    author_id = req.state.user_id
     res = course_controller.create_tag(course_id, tagReq, author_id)
     if not res:
         raise HTTPException(

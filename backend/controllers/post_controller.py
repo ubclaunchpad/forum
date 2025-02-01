@@ -348,7 +348,7 @@ def get_post_tags(post_id: str) -> CourseTagsResponse:
             )
     return CourseTagsResponse(tags=tags)
 
-def add_post_tag(post_id: str, tag_id: str) -> GeneralResponse:
+def add_post_tag(post_id: str, tag_id: str, author_id: str) -> GeneralResponse:
     with get_db() as db:
         try:
             post = db.query(Post).filter(Post.id == UUID(post_id)).first()
@@ -358,7 +358,7 @@ def add_post_tag(post_id: str, tag_id: str) -> GeneralResponse:
             tag = db.query(Tag).filter(Tag.id == UUID(tag_id)).first()
             if not tag:
                 raise HTTPException(status_code=404, detail="Tag not found")
-            
+            tag.created_by = UUID(author_id)
             post.tags.append(tag)
             db.commit()
         except Exception as e:

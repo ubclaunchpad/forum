@@ -37,7 +37,7 @@ def get_document_tags(document_id: str) -> CourseTagsResponse:
             )
     return CourseTagsResponse(tags=tags)
 
-def add_document_tag(document_id: str, tag_id: str) -> GeneralResponse:
+def add_document_tag(document_id: str, tag_id: str, author_id: str) -> GeneralResponse:
     """Add a tag to a document."""
     with get_db() as db:
         try:
@@ -47,6 +47,7 @@ def add_document_tag(document_id: str, tag_id: str) -> GeneralResponse:
             tag = db.query(Tag).filter(Tag.id == UUID(tag_id)).first()
             if not tag:
                 raise HTTPException(status_code=404, detail="Tag not found")
+            tag.created_by = UUID(author_id)
             document.tags.append(tag)
             db.commit()
         except Exception as e:

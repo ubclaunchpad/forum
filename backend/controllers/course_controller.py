@@ -304,7 +304,7 @@ def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool
             course_id=c_uuid,
             visibility=tagReq.visibility,
             parent_tag_id=p_uuid,
-            # created_by=UUID(author_id),
+            created_by=UUID(author_id),
             properties=tagReq.properties
         )
         try:
@@ -313,7 +313,7 @@ def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool
         except Exception as e:
             db.rollback()
             raise HTTPException(
-                status_code=500, detail="Failed to create tag"
+                status_code=500, detail=f"Failed to create tag: {str(e)}"
             )
     return True
 
@@ -327,7 +327,7 @@ def delete_tag(c_id: str, t_id: str) -> bool:
         except Exception as e:
             db.rollback()
             raise HTTPException(
-                status_code=500, detail="Failed to delete tag"
+                status_code=500, detail=f"Failed to delete tag: {str(e)}"
             )
 
     return True
@@ -351,6 +351,6 @@ def update_tag(c_id: str, t_id: str, tagReq: CourseTagRequest) -> bool:
         except Exception as e:
             db.rollback()
             raise HTTPException(
-                status_code=500, detail="Failed to update tag"
+                status_code=500, detail=f"Failed to update tag: {str(e)}"
             )
     return True
