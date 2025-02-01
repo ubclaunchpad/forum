@@ -379,3 +379,48 @@ class QueryHistory(Base):
         PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"), primary_key=True
     )
     messages = Column(JSONB)
+
+class Job(Base):
+    __tablename__ = "job"
+    
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    params = Column(JSONB)
+    status = Column(
+        Enum("not started", "running", "success", "failed", name="job_status"), nullable=False
+    )
+    retry_count = Column(Integer, nullable=False)
+    created_at = Column(
+        DateTime, server_default=func.current_timestamp(), nullable=False
+    )
+    updated_at = Column(
+        DateTime, server_default=func.current_timestamp(), nullable=False
+    )
+    priority = Column(
+        Enum("low", "medium", "high", name="job_priority"), nullable=False
+    )
+    recurring = Column(Boolean, nullable=False)
+    recurring_interval = Column(Integer, nullable=False) # measured in seconds
+    recurring_end_date = Column(DateTime, nullable=True)
+
+    __table_args__ = (
+        Index('idx_status_priority', 'status', 'priority'),
+        {"schema": "public"}
+    )
+
+class JobSpecification(Base):
+    __tablename__ = "job_specification"
+    
+    id = Column(
+        PUUID, server_default=text("gen_random_uuid()"), primary_key=True
+    )
+    job_id = Column(
+        PUUID, ForeignKey("public.job.id", ondelete="CASCADE"), nullable=False
+    )
+    description = Column(Text, nullable=False)
+    action_name = Column(Text, nullable=False)
+    timeout = Column(Integer, nullable=False) # measured in seconds
+    failure_strategy = Column(
+        Enum("retry", "abort", name="job_failure_strategy"), nullable=False
+    )
+    cleanup_action = Column(Text, nullable=True)
+    job_file = Column(String, nullable=False)
