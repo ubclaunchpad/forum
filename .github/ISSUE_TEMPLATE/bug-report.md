@@ -1,0 +1,14 @@
+---
+name: Bug Report
+about: Use this form to report any bugs/issues encountered while using Forum
+title: ''
+labels: bug
+assignees: ''
+
+---
+
+**Describe the bug**
+Include a description of what the bug is.
+
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
