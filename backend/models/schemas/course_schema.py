@@ -61,7 +61,7 @@ class CourseTagInformation(BaseModel):
     id: UUID
     name: str
     visibility: VisibilityEnum
-    course_id: Optional[UUID] = None
+    course_id: UUID
     parent_tag_id: Optional[UUID] = None
     created_by: Optional[UUID] = None
     properties: Optional[dict] = None
