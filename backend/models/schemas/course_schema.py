@@ -6,8 +6,6 @@ from uuid import UUID
 from models.schemas.user_schema import UserProfile
 from pydantic import BaseModel
 
-from models.all import VisibilityEnum
-
 class CourseConfig(BaseModel):
     theme_colour: Optional[str] = None
     font: Optional[str] = None

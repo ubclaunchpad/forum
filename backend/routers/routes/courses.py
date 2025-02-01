@@ -1,15 +1,10 @@
 from controllers import course_controller
 from fastapi import APIRouter, HTTPException, Request
-#from models.all import CourseRole
 from models.schemas.course_schema import (
-    AssignRoleRequest,
     CourseMembersResponse,
     CourseResponse,
-    CourseRoleBase,
-    CourseRolesResponse,
     CreateCourseReq,
     CreateCourseResponse,
-    CreateCourseRoleRequest,
     GetCoursesResponse,
     CourseTagsResponse,
     CourseTagRequest,

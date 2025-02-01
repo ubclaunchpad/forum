@@ -8,13 +8,11 @@ from sqlalchemy import desc
 from models.all import Tag, Course, Profile, user_courses
 from models.db import get_db
 from models.schemas.course_schema import (
-    BasicCourseRoleInformation,
     CourseResponse,
     CreateCourseReq,
     CreateCourseResponse,
     CourseTagRequest,
     UpdateCourseReq,
-    CreateCourseRoleRequest,
     CourseTagsResponse
 )
 from models.schemas.user_schema import SocialLinks, UserProfile
