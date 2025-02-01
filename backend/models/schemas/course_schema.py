@@ -55,15 +55,6 @@ class GetCoursesResponse(BaseModel):
 class CourseMembersResponse(BaseModel):
     members: List[UserProfile]
 
-class AssignRoleRequest(BaseModel):
-    user_id: UUID
-    role_id: UUID
-
-class BasicCourseRoleInformation(BaseModel):
-    role_id: str
-    name: str
-    description: Optional[str]
-
 class VisibilityEnum(str, Enum):
     public = "public"
     private = "private"
@@ -77,27 +68,8 @@ class CourseTagInformation(BaseModel):
     created_by: Optional[UUID] = None
     properties: Optional[dict] = None
 
-class CourseRolesResponse(BaseModel):
-    roles: List[BasicCourseRoleInformation]
-
 class CourseTagsResponse(BaseModel):
     tags: List[CourseTagInformation]
-
-class CreateCourseRoleRequest(BaseModel):
-    name: str
-    description: Optional[str] = None
-    permissions: List[UUID]
-    visibility: VisibilityEnum
-
-class CourseRoleBase(BaseModel):
-    id: UUID
-    course_id: UUID
-    name: str
-    description: Optional[str] = None
-    visibility: VisibilityEnum
-    created_by: UUID
-    created_at: datetime
-    updated_at: datetime
 
 class CourseTagRequest(BaseModel):
     name: Optional[str] = None

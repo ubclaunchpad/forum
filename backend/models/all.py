@@ -408,36 +408,6 @@ class VisibilityEnum(enum.Enum):
     public = "public"
     private = "private"
 
-'''
-class CourseRole(Base):
-    __tablename__ = 'course_roles'
-
-    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-    course_id = Column(PUUID, ForeignKey('public.courses.id', ondelete = "CASCADE"), nullable = False)
-    name = Column(String(255), nullable=False)  # 'owner', 'admin', 'user', 'viewer'
-    description = Column(Text)  # Optional description
-    visibility = Column(Enum(VisibilityEnum, native_enum = True), nullable=False)
-    created_by = Column(PUUID, ForeignKey('auth.users.id'), nullable = False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-    course = relationship("Course", back_populates = "roles")
-    # user = relationship("Users")
-
-
-class CourseUserRole(Base):
-    __tablename__ = 'course_user_roles'
-
-    course_role_id = Column(PUUID, ForeignKey('public.course_roles.id', ondelete="CASCADE"), primary_key=True)
-    user_id = Column(PUUID, ForeignKey('auth.users.id', ondelete="CASCADE"), primary_key=True)
-    assigned_by = Column(PUUID, ForeignKey('auth.users.id', ondelete="SET NULL"))
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    course_role = relationship("CourseRole")
-    # user = relationship("Users", foreign_keys=[user_id])
-    # assigned_by_user = relationship("Users", foreign_keys=[assigned_by])
-'''
-
 class PermissionTypeEnum(enum.Enum):
     Self = "Self"
     Others = "Others"
@@ -450,17 +420,6 @@ class Permission(Base):
     type = Column(Enum(PermissionTypeEnum, native_enum = True), nullable=False)
     access = Column(String(255), nullable=False)  # 'read', 'write', 'delete', etc.
     description = Column(Text)
-'''
-class CourseRolePermission(Base):
-    __tablename__ = 'course_role_permissions'
-
-    course_role_id = Column(PUUID, ForeignKey('public.course_roles.id', ondelete="CASCADE"), primary_key=True)
-    permission_id = Column(PUUID, ForeignKey('public.permissions.id', ondelete="CASCADE"), primary_key=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    course_role = relationship("CourseRole")
-    permission = relationship("Permission")
-'''
 
 class Tag(Base):
     __tablename__ = 'tags'
@@ -480,16 +439,3 @@ class Tag(Base):
     documents = relationship("Document", secondary=document_tags, back_populates="tags")
     posts = relationship("Post", secondary=post_tags, back_populates="tags")
     # user = relationship("Users")
-
-'''
-class RoleTagAssociation(Base):
-    __tablename__ = 'role_tag_associations'
-
-    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-    role_id = Column(PUUID, ForeignKey('public.course_roles.id', ondelete="CASCADE"))
-    tag_id = Column(PUUID, ForeignKey('public.tags.id', ondelete="CASCADE"))
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    course_role = relationship("CourseRole")
-    tag = relationship("Tag")
-'''
