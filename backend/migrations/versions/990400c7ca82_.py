@@ -15,7 +15,7 @@ import pgvector
 
 # revision identifiers, used by Alembic.
 revision: str = "990400c7ca82"
-down_revision: Union[str, None] = ("e3869e18cc7d", "f462eb503bac")
+down_revision: Union[str, None] = ("e3869e18cc7d", "f462eb503bac")  # type: ignore
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
