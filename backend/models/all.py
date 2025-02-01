@@ -184,11 +184,6 @@ class Course(Base):
         {"schema": "public"},
     )
 
-    # roles = relationship("CourseRole", back_populates = "course")
-class PostStatus(enum.Enum):
-    public = "active"
-    private = "deleted"
-
 class Post(Base):
     __tablename__ = "posts"
     # Primary UUID
@@ -199,7 +194,7 @@ class Post(Base):
     course_id = Column(
         PUUID,
         ForeignKey(
-            "public.courses.id", ondelete="CASCADE"
+            "public.courses.id", ondelete="CASCADE", name="posts_course_id_fkey"
         ),
         nullable=False,
     )
@@ -207,11 +202,11 @@ class Post(Base):
     # Regular fields
     title = Column(Text)
     content = Column(Text)
-    status = Column("status", Enum(PostStatus, name="poststatus", schema="public"), nullable=True)
+    status = Column("status", Enum("poststatus", schema="public"), nullable=True)
     applied_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(
         PUUID,
-        ForeignKey("public.profiles.id"),
+        ForeignKey("public.profiles.id", name="posts_created_by_fkey"),
         nullable=False,
     )
 
@@ -404,29 +399,12 @@ class QueryHistory(Base):
     )
     messages = Column(JSONB)
 
-class VisibilityEnum(enum.Enum):
-    public = "public"
-    private = "private"
-
-class PermissionTypeEnum(enum.Enum):
-    Self = "Self"
-    Others = "Others"
-
-class Permission(Base):
-    __tablename__ = 'permissions'
-
-    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-    area = Column(String(255), nullable=False)  # 'post', 'comment', etc.
-    type = Column(Enum(PermissionTypeEnum, native_enum = True), nullable=False)
-    access = Column(String(255), nullable=False)  # 'read', 'write', 'delete', etc.
-    description = Column(Text)
-
 class Tag(Base):
     __tablename__ = 'tags'
 
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
     name = Column(String(255), nullable=False)
-    visibility = Column(Enum(VisibilityEnum), nullable=False)
+    visibility = Column(Enum("visibilityenum"), nullable=False)
     course_id = Column(PUUID, ForeignKey('public.courses.id', ondelete="CASCADE"))
     parent_tag_id = Column(PUUID, ForeignKey('public.tags.id', ondelete="CASCADE"))
     created_by = Column(PUUID, ForeignKey('auth.users.id', ondelete="SET NULL"))
@@ -438,4 +416,3 @@ class Tag(Base):
     parent_tag = relationship("Tag", remote_side=[id])
     documents = relationship("Document", secondary=document_tags, back_populates="tags")
     posts = relationship("Post", secondary=post_tags, back_populates="tags")
-    # user = relationship("Users")
