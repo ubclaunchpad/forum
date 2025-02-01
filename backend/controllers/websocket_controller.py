@@ -1,4 +1,7 @@
-from models.all import Message, UserChannel
+from typing import List
+from uuid import UUID
+
+from models.all import Channel, Message, UserChannel
 from models.db import get_db
 from sqlalchemy import exists
 
@@ -15,6 +18,47 @@ def sendMessage(data : str, user_id : str):
             return message
         except Exception as e:
             raise e
+        
+def getMessageHistory(channel_id):
+    with get_db() as db:
+        try:
+            messages = db.query(Message).filter_by(channel_id=channel_id).all()
+            return messages
+        except Exception as e:
+            raise e
+    return
+
+def getUserChannels(user_id: str):
+    with get_db() as db:
+        try:
+            channels = db.query(UserChannel).filter_by(user_id=user_id).all()
+            return channels
+        except Exception as e:
+            raise e
+
+def createChannel(user_id: str, users: List[str]):
+    with get_db() as db:
+        try:
+            channel = Channel(
+                name="This is a temp thing, rmbr to change it",
+                created_by=UUID(user_id)
+            )
+
+            db.add(channel)
+            db.flush()
+
+            channel_id : str = channel.id
+
+            user_channels = [
+                UserChannel(user_id=user, channel_id=channel_id) for user in users
+            ]
+
+            db.add_all(user_channels)
+
+            return {"success" : True}
+        except Exception as e:
+            raise e
+    return
     
 
 def verifyUserChannel(user_id: str, channel_id: str):

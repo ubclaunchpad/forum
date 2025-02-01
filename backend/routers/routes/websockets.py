@@ -1,8 +1,15 @@
 import json
+from typing import List
 
 from controllers import websocket_controller
-from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Query, Request, WebSocket, WebSocketDisconnect
 from models.schemas import message_schema
+from pydantic import BaseModel
+
+
+class Item(BaseModel):
+    user_id : str
+    users: List[str]
 
 
 class ConnectionManager:
@@ -27,11 +34,27 @@ web_router = APIRouter()
 manager = ConnectionManager()
 
 
+@web_router.get("/chat/userChannels")
+async def getUserChannels(user_id: str):
+    channels = websocket_controller.getUserChannels(user_id)
+    return [channel.channel_id for channel in channels]
+
+
+@web_router.get("/chat/{channel_id}/history")
+async def getMessageHistory(channel_id: str):
+    messages = websocket_controller.getMessageHistory(channel_id)
+    return messages
+
+@web_router.post("/chat/userChannels")
+async def createNewChannel(item: Item, request: Request):
+    print(request.state)
+    res = websocket_controller.createChannel(item.user_id, item.users)
+    return res
+
+
 @web_router.websocket("/ws/chat/{channel_id}")
 async def websocket_endpoint(websocket: WebSocket, channel_id: str, id : str = Query(None)):
-
     if not websocket_controller.verifyUserChannel(id, channel_id):
-        print('this is lit')
         return
 
     await manager.connect(websocket)
