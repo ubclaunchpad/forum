@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Use this form to report any bugs/issues encountered while using Forum
+about: Report any bugs/issues encountered
 title: ''
 labels: bug
 assignees: ''
