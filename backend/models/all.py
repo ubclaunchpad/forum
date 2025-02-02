@@ -471,5 +471,3 @@ class UserChannel(Base):
     channel_id = Column(
         PUUID, ForeignKey("public.channels.id", ondelete="CASCADE"), nullable=False
     )
-
-
