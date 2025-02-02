@@ -23,10 +23,11 @@ export default function Terms() {
             </h2>
             <ul className="mt-2 list-disc pl-6 text-sm text-gray-600 md:text-base">
               <li>
-                You're responsible for maintaining the security of your account.
+                You&apos;re responsible for maintaining the security of your
+                account.
               </li>
               <li>
-                You're responsible for all activities that occur under your
+                You&apos;re responsible for all activities that occur under your
                 account.
               </li>
               <li>
@@ -68,8 +69,8 @@ export default function Terms() {
               <li>You retain all rights to your Notion content.</li>
               <li>We only process content you explicitly choose to upload.</li>
               <li>
-                You're responsible for ensuring you have the right to upload and
-                use the content.
+                You&apos;re responsible for ensuring you have the right to
+                upload and use the content.
               </li>
             </ul>
           </section>
@@ -78,8 +79,8 @@ export default function Terms() {
               Changes to Terms
             </h2>
             <p className="text-sm text-gray-600 md:text-base">
-              We may update these terms from time to time. We'll notify you of
-              any significant changes.
+              We may update these terms from time to time. We&apos;ll notify you
+              of any significant changes.
             </p>
           </section>
         </div>
