@@ -37,7 +37,11 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (request.nextUrl.pathname.startsWith("/playground")) {
+  if (
+    request.nextUrl.pathname.startsWith("/playground") ||
+    request.nextUrl.pathname.startsWith("/terms") ||
+    request.nextUrl.pathname.startsWith("/privacy")
+  ) {
     return supabaseResponse;
   }
 
