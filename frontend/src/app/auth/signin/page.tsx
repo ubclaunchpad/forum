@@ -39,7 +39,7 @@ export default function SignIn() {
       <CardHeader className="pl-0">
         <h2 className="text-2xl pl-0 pb-2">Sign In</h2>
       </CardHeader>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="space-y-0">
           <div className="">
             <Label htmlFor="email">Email</Label>
@@ -50,9 +50,9 @@ export default function SignIn() {
               {...register("email")}
               aria-invalid={errors.email ? "true" : "false"}
             />
-            <div className="h-6 pl-2 w-full">
+            <div className="mt-1 h-6 pl-2 w-full">
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+                <p className="text-xs text-red-500">{errors.email.message}</p>
               )}
             </div>
           </div>
@@ -66,9 +66,9 @@ export default function SignIn() {
               {...register("password")}
               aria-invalid={errors.password ? "true" : "false"}
             />
-            <div className="h-6 pl-2 w-full">
+            <div className="mt-1 h-6 pl-2 w-full">
               {errors.password && (
-                <p className="text-sm text-red-500">
+                <p className="text-xs text-red-500">
                   {errors.password.message}
                 </p>
               )}
@@ -84,8 +84,8 @@ export default function SignIn() {
           {isLoading ? "Signing in..." : "Sign In"}
         </Button>
       </form>
-      <div className="w-full pl-2 flex-1 h-full   items-end flex pt-4 text-sm text-muted-foreground">
-        {"Don't have an account? "}
+      <div className="w-full pl-2 flex-1 pt-4 text-sm text-muted-foreground">
+        Don&apos;t have an account?{" "}
         <Link className="underline" href="/auth/signup">
           Sign up
         </Link>
