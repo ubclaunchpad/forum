@@ -448,7 +448,6 @@ class Message(Base):
         DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
     )
 
-
 class Channel(Base):
     __tablename__ = "channels"
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
@@ -469,4 +468,5 @@ class UserChannel(Base):
     channel_id = Column(
         PUUID, ForeignKey("public.channels.id", ondelete="CASCADE"), nullable=False
     )
+
 
