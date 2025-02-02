@@ -68,6 +68,9 @@ class PostStatus(PyEnum):
     ARCHIVED = "archived"
     DELETED = "deleted"
 
+class Visibility(PyEnum):
+    public = "public"
+    private = "private"
 
 # Create VECTOR type
 class VECTOR(TypeDecorator):
@@ -467,7 +470,7 @@ class Tag(Base):
 
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
     name = Column(String(255), nullable=False)
-    visibility = Column(Enum("visibilityenum"), nullable=False)
+    visibility = Column(Enum(Visibility, name="visibility", schema="public"), nullable=False)
     course_id = Column(PUUID, ForeignKey('public.courses.id', ondelete="CASCADE"))
     parent_tag_id = Column(PUUID, ForeignKey('public.tags.id', ondelete="CASCADE"))
     created_by = Column(PUUID, ForeignKey('auth.users.id', ondelete="SET NULL"))

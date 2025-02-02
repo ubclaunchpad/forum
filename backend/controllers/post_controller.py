@@ -2,13 +2,14 @@ import logging
 import stat
 from typing import List, Optional
 from uuid import UUID
+from sqlalchemy import insert
 from sqlalchemy.orm import joinedload
 
 from core.processors.embedding_processor import EmbeddingProcessor
 from core.processors.post_processor import PostProcessor
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from models.all import Embedding, Post, PostEdit, Profile, Tag, UserPostEvent
+from models.all import Embedding, Post, PostEdit, post_tags, Tag, UserPostEvent
 from models.db import get_db
 from models.schemas.course_schema import CourseTagInformation, CourseTagsResponse
 from models.schemas.general_schema import GeneralResponse
@@ -358,8 +359,12 @@ def add_post_tag(post_id: str, tag_id: str, author_id: str) -> GeneralResponse:
             tag = db.query(Tag).filter(Tag.id == UUID(tag_id)).first()
             if not tag:
                 raise HTTPException(status_code=404, detail="Tag not found")
-            tag.created_by = UUID(author_id)
-            post.tags.append(tag)
+            exec = insert(post_tags).values(
+                post_id=post.id, 
+                tag_id=tag.id,
+                created_by = UUID(author_id)
+            )
+            db.execute(exec)
             db.commit()
         except Exception as e:
             db.rollback()

@@ -1,9 +1,10 @@
 import logging
+from sqlalchemy import insert
 from sqlalchemy.orm import joinedload
 from uuid import UUID
 from fastapi import HTTPException
 
-from models.all import Document, Tag
+from models.all import Document, Tag, document_tags
 from models.db import get_db
 from models.schemas.course_schema import CourseTagInformation, CourseTagsResponse
 from models.schemas.general_schema import GeneralResponse
@@ -47,11 +48,16 @@ def add_document_tag(document_id: str, tag_id: str, author_id: str) -> GeneralRe
             tag = db.query(Tag).filter(Tag.id == UUID(tag_id)).first()
             if not tag:
                 raise HTTPException(status_code=404, detail="Tag not found")
-            tag.created_by = UUID(author_id)
-            document.tags.append(tag)
+            exec = insert(document_tags).values(
+                doc_id=document.id, 
+                tag_id=tag.id,
+                created_by = UUID(author_id)
+            )
+            db.execute(exec)
             db.commit()
         except Exception as e:
             db.rollback()
+            print(str(e))
             raise HTTPException(status_code=500, detail=f"Error adding tag to document: {str(e)}")
         
     return GeneralResponse(msg="Tag added to document")
