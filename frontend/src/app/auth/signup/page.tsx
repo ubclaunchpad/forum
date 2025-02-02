@@ -44,11 +44,11 @@ export default function SignUp() {
 
   return (
     <Card className="w-full max-w-lg px-12 py-3 bg-neutral-50 rounded-xl [&_label]:pl-1">
-      <CardHeader className=" pl-0">
-        <h2 className="text-2xl pl-0 pb-2 ">Sign Up</h2>
+      <CardHeader className="pl-0">
+        <h2 className="text-2xl pl-0">Sign Up</h2>
       </CardHeader>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
-        <div className="space-y-0">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="space-y-2">
           <div className="flex items-center gap-4">
             <div className=" w-full">
               <Label htmlFor="email">First Name</Label>
@@ -59,9 +59,9 @@ export default function SignUp() {
                 {...register("firstName")}
                 aria-invalid={errors.firstName ? "true" : "false"}
               />
-              <div className="h-6 pl-2 w-full">
+              <div className="mt-1 h-6 pl-2 w-full">
                 {errors.firstName && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-xs text-red-500">
                     {errors.firstName.message}
                   </p>
                 )}
@@ -76,9 +76,9 @@ export default function SignUp() {
                 {...register("lastName")}
                 aria-invalid={errors.email ? "true" : "false"}
               />
-              <div className="h-6 pl-2 w-full">
+              <div className="mt-1 h-6 pl-2 w-full">
                 {errors.lastName && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-xs text-red-500">
                     {errors.lastName.message}
                   </p>
                 )}
@@ -94,9 +94,9 @@ export default function SignUp() {
               {...register("email")}
               aria-invalid={errors.email ? "true" : "false"}
             />
-            <div className="h-6 pl-2 w-full">
+            <div className="mt-1 h-6 pl-2 w-full">
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+                <p className="text-xs text-red-500">{errors.email.message}</p>
               )}
             </div>
           </div>
@@ -110,9 +110,9 @@ export default function SignUp() {
               {...register("password")}
               aria-invalid={errors.password ? "true" : "false"}
             />
-            <div className="h-6 pl-2 w-full">
+            <div className="mt-1 h-6 pl-2 w-full">
               {errors.password && (
-                <p className="text-sm text-red-500">
+                <p className="text-xs text-red-500">
                   {errors.password.message}
                 </p>
               )}
@@ -130,7 +130,7 @@ export default function SignUp() {
             />
             <div className="h-6 pl-2 w-full">
               {errors.confirmPassword && (
-                <p className="text-sm text-red-500">
+                <p className="text-xs text-red-500">
                   {errors.confirmPassword.message}
                 </p>
               )}
