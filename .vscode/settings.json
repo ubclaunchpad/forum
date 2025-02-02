@@ -16,7 +16,10 @@
   "files.exclude": {
     "**/__pycache__": true,
     "**/.pytest_cache": true,
-    "**/*.pyc": true
+    "**/*.pyc": true,
+    "**/backend/.ruff_cache": true,
+    
+
   },
   "python.analysis.typeCheckingMode": "standard",
   "python.terminal.activateEnvironment": true,
