@@ -1,7 +1,3 @@
-import ProfileFullView from "@/components/people/ProfileFullView";
-import { ArrowLeftCircleIcon } from "lucide-react";
-import Link from "next/link";
-
 export default function Privacy() {
   return (
     <div className="flex w-full flex-col ">
