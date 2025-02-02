@@ -11,7 +11,7 @@ export default function Privacy() {
               What We Collect
             </h2>
             <p className="text-sm text-gray-600 md:text-base">
-              We only collect information that&apos;s necessary for ForumAI
+              We only collect information that is necessary for ForumAI
             </p>
             <ul className="mt-2 list-disc pl-6 text-sm text-gray-600 md:text-base">
               <li>Your email address for account management.</li>
@@ -25,7 +25,7 @@ export default function Privacy() {
             </h2>
             <p className="text-sm text-gray-600 md:text-base">
               We use Supabase for store user and course related data. All data
-              is stored securely and we only keep what&apos;s necessary for the
+              is stored securely and we only keep what is necessary for the
               service to function.
             </p>
           </section>
@@ -50,7 +50,7 @@ export default function Privacy() {
               Data Sharing
             </h2>
             <p className="text-sm text-gray-600 md:text-base">
-              We don&apos;t sell or share your data with third parties. We only
+              We do not sell or share your data with third parties. We only
               access uploaded content that you explicitly choose to share.
             </p>
           </section>

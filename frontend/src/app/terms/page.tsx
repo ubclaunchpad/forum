@@ -23,11 +23,11 @@ export default function Terms() {
             </h2>
             <ul className="mt-2 list-disc pl-6 text-sm text-gray-600 md:text-base">
               <li>
-                You&apos;re responsible for maintaining the security of your
+                You are responsible for maintaining the security of your
                 account.
               </li>
               <li>
-                You&apos;re responsible for all activities that occur under your
+                You are responsible for all activities that occur under your
                 account.
               </li>
               <li>
@@ -57,7 +57,6 @@ export default function Terms() {
             <ul className="mt-2 list-disc pl-6 text-sm text-gray-600 md:text-base">
               <li>Abuse or misuse our service.</li>
               <li>Violate these terms.</li>
-              <li>Have unpaid premium fees.</li>
               <li>Engage in fraudulent activity.</li>
             </ul>
           </section>
@@ -66,11 +65,11 @@ export default function Terms() {
               Your Content
             </h2>
             <ul className="mt-2 list-disc pl-6 text-sm text-gray-600 md:text-base">
-              <li>You retain all rights to your Notion content.</li>
+              <li>You retain all rights to your content that you post.</li>
               <li>We only process content you explicitly choose to upload.</li>
               <li>
-                You&apos;re responsible for ensuring you have the right to
-                upload and use the content.
+                You are responsible for ensuring you have the right to upload
+                and use the content.
               </li>
             </ul>
           </section>
@@ -79,8 +78,8 @@ export default function Terms() {
               Changes to Terms
             </h2>
             <p className="text-sm text-gray-600 md:text-base">
-              We may update these terms from time to time. We&apos;ll notify you
-              of any significant changes.
+              We may update these terms from time to time. We will notify you of
+              any significant changes.
             </p>
           </section>
         </div>
