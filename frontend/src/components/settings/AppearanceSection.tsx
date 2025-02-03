@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { courseContext } from "@/contexts/courseContext";
+import { courseContext, setTheme } from "@/contexts/courseContext";
 import { userContext } from "@/contexts/userContext";
 import { getApiUrl } from "@/utils/helpers";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 
 export function AppearanceSection() {
   const course = useContext(courseContext);
@@ -15,6 +15,19 @@ export function AppearanceSection() {
     theme_colour: course.config?.theme_colour || "#000000",
     font: course.config?.font || "default",
   });
+
+  // Track whether changes have been saved
+  const [savedConfig, setSavedConfig] = useState(config);
+
+  // Apply theme changes immediately for preview
+  useEffect(() => {
+    setTheme(config.theme_colour, config.font);
+    
+    // Cleanup: revert to saved theme when unmounting
+    return () => {
+      setTheme(savedConfig.theme_colour, savedConfig.font);
+    };
+  }, [config, savedConfig]);
 
   const fontOptions = [
     { value: "default", className: "font-quicksand" },
@@ -37,16 +50,23 @@ export function AppearanceSection() {
         },
         body: JSON.stringify({
           name: course.name,
-          code: course.code,
           c_group: course.c_group,
+          code: course.code,
           section: course.section,
-          config: config,
-          //   start_date: course.start_date,
-          //   end_date: course.end_date
+          config: {
+            theme_colour: config.theme_colour,
+            font: config.font
+          }
         }),
       });
 
       if (!response.ok) throw new Error("Failed to update appearance");
+
+      // Invalidate the cache
+      await fetch(`/api/revalidate?tag=course-${course.id}`);
+
+      // Update the saved configuration
+      setSavedConfig(config);
 
       toast({
         title: "Success",
@@ -54,12 +74,15 @@ export function AppearanceSection() {
       });
     } catch (error) {
       console.error(error);
-
       toast({
         title: "Error",
         description: "Failed to update appearance",
         variant: "destructive",
       });
+      
+      // Revert to saved config on error
+      setConfig(savedConfig);
+      setTheme(savedConfig.theme_colour, savedConfig.font);
     } finally {
       setIsLoading(false);
     }
