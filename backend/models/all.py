@@ -5,32 +5,14 @@ from uuid import UUID
 
 from httpx import post
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import (
-    ARRAY,
-    DDL,
-    INT,
-    Boolean,
-    CheckConstraint,
-    Column,
-    Date,
-    DateTime,
-    Enum,
-    Float,
-    ForeignKey,
-    ForeignKeyConstraint,
-    Index,
-    Integer,
-    Nullable,
-    String,
-    Table,
-    Text,
-    UniqueConstraint,
-    event,
-    text,
-)
+from sqlalchemy import (ARRAY, DDL, INT, Boolean, CheckConstraint, Column,
+                        Date, DateTime, Enum, Float, ForeignKey,
+                        ForeignKeyConstraint, Index, Integer, Nullable, String,
+                        Table, Text, UniqueConstraint, event, text)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PUUID
-from sqlalchemy.orm import backref, declarative_base, declared_attr, relationship
+from sqlalchemy.orm import (backref, declarative_base, declared_attr,
+                            relationship)
 from sqlalchemy.sql import func
 from sqlalchemy.types import VARCHAR, TypeDecorator
 
@@ -68,9 +50,6 @@ class PostStatus(PyEnum):
     ARCHIVED = "archived"
     DELETED = "deleted"
 
-class Visibility(PyEnum):
-    public = "public"
-    private = "private"
 
 # Create VECTOR type
 class VECTOR(TypeDecorator):
@@ -140,6 +119,9 @@ user_courses = Table(
     schema="public",
 )
 
+
+
+
 document_tags = Table(
     "document_tags",
     Base.metadata,
@@ -157,6 +139,9 @@ post_tags = Table(
     Column("created_by", PUUID, ForeignKey('auth.users.id', ondelete="SET NULL")),
     schema="public",
 )
+
+
+
 
 class Profile(Base):
     __tablename__ = "profiles"
@@ -208,10 +193,14 @@ class Course(Base):
     documents = relationship(
         "Document", secondary=course_documents, back_populates="courses"
     )  # Use table object instead of string
+
     __table_args__ = (
         UniqueConstraint("c_group", "code", "section"),
         {"schema": "public"},
     )
+
+    roles = relationship("CourseRoles", back_populates = "course")
+
 
 class Post(Base):
     __tablename__ = "posts"
@@ -438,6 +427,7 @@ class Embedding(Base):
         {"schema": "public"},
     )
 
+
 class QueryHistory(Base):
     __tablename__ = "query_history"
     user_id = Column(
@@ -505,10 +495,12 @@ class JobSpecification(Base):
     )
     cleanup_action = Column(Text, nullable=True)
     job_file = Column(String, nullable=False)
-    
-class AA(Base):
-    __tablename__ = "A"
-    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+
+
+class Visibility(PyEnum):
+    public = "public"
+    private = "private"
+
 
 class Tag(Base):
     __tablename__ = 'tags'
@@ -527,3 +519,4 @@ class Tag(Base):
     parent_tag = relationship("Tag", remote_side=[id])
     documents = relationship("Document", secondary=document_tags, back_populates="tags")
     posts = relationship("Post", secondary=post_tags, back_populates="tags")
+
