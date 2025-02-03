@@ -1,13 +1,15 @@
+from csv import Error
+
 from controllers import course_controller
 from fastapi import APIRouter, HTTPException, Request
 from models.schemas.course_schema import (
     CourseMembersResponse,
     CourseResponse,
+    CourseTagRequest,
+    CourseTagsResponse,
     CreateCourseReq,
     CreateCourseResponse,
     GetCoursesResponse,
-    CourseTagsResponse,
-    CourseTagRequest,
     UpdateCourseReq,
 )
 from models.schemas.general_schema import GeneralResponse
@@ -78,10 +80,11 @@ async def unregister_user(c_id: str, u_id: str):
 # ----------------- Course Tags -----------------#
 @course_router.get("/{c_id}/tags", response_model=CourseTagsResponse)
 async def get_course_tags(c_id: str):
-    res = course_controller.get_all_tags(c_id)
-    if not res:
-        raise HTTPException(status_code=400, detail="Failed to get course roles")
-    return CourseTagsResponse(tags=res)
+    try:
+        return course_controller.get_all_tags(c_id)
+    except Error as e:
+        raise HTTPException(status_code=404, detail="Item not found")
+        # return HTTPException(status_code=500, detail={"msg": str(e)})
 
 
 @course_router.post("/{c_id}/tags", response_model=GeneralResponse)

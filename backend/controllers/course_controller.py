@@ -1,22 +1,25 @@
+import logging
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import desc
-from models.all import Tag, Course, Profile, user_courses
+from models.all import Course, Profile, Tag, user_courses
 from models.db import get_db
 from models.schemas.course_schema import (
     CourseResponse,
+    CourseTagRequest,
+    CourseTagsResponse,
     CreateCourseReq,
     CreateCourseResponse,
-    CourseTagRequest,
     UpdateCourseReq,
-    CourseTagsResponse,
 )
 from models.schemas.user_schema import SocialLinks, UserProfile
 from pydantic import ValidationError
+from sqlalchemy import desc
+
+logger = logging.getLogger(__name__)
 
 
 def create_course(
@@ -203,27 +206,19 @@ def update_course(create_course_req: UpdateCourseReq, c_id: str) -> Course:
 def get_all_tags(course_id: str) -> CourseTagsResponse:
     with get_db() as db:
         c_uuid = UUID(course_id)
-        tags: CourseTagsResponse = (
-            db.query(Tag)
-            .with_entities(
-                Tag.id,
-                Tag.name,
-                Tag.visibility,
-                Tag.course_id,
-                Tag.parent_tag_id,
-                Tag.created_by,
-                Tag.properties,
-            )
-            .filter(Tag.course_id == c_uuid)
-            .all()
-        )
-    return tags
+        tags = db.query(Tag).filter(Tag.course_id == c_uuid).all()
+        try:
+            tags_list = CourseTagsResponse.model_validate({"tags": tags})
+            return tags_list
+        except ValidationError:
+            logger.error("TAGS gotten from DB does not match schema - fix ASAP")
+            raise Exception("Could not get tags")
 
 
 def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool:
     with get_db() as db:
         c_uuid = UUID(course_id)
-        p_uuid = UUID(tagReq.parent_tag_id) if tagReq.parent_tag_id else None
+        p_uuid = UUID(str(tagReq.parent_tag_id)) if tagReq.parent_tag_id else None
         tag = Tag(
             name=tagReq.name,
             course_id=c_uuid,
@@ -269,12 +264,10 @@ def update_tag(c_id: str, t_id: str, tagReq: CourseTagRequest) -> bool:
             if not tag:
                 raise Exception("Tag not found")
 
-            tag.name = tagReq.name if tagReq.name else tag.name
-            tag.visibility = tagReq.visibility if tagReq.visibility else tag.visibility
-            tag.parent_tag_id = (
-                tagReq.parent_tag_id if tagReq.parent_tag_id else tag.parent_tag_id
-            )
-            tag.properties = tagReq.properties if tagReq.properties else tag.properties
+            update_dict = tagReq.model_dump(exclude_unset=True)
+
+            for key, value in update_dict.items():
+                setattr(tag, key, value)
 
             db.commit()
         except Exception as e:

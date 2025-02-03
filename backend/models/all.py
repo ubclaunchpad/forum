@@ -233,8 +233,6 @@ class Course(Base):
         {"schema": "public"},
     )
 
-    roles = relationship("CourseRoles", back_populates="course")
-
 
 class Post(Base):
     __tablename__ = "posts"

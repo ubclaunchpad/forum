@@ -69,6 +69,9 @@ class CourseTagInformation(BaseModel):
     created_by: Optional[UUID] = None
     properties: Optional[dict] = None
 
+    class Config:
+        from_attributes = True
+
 
 class CourseTagsResponse(BaseModel):
     tags: List[CourseTagInformation]
