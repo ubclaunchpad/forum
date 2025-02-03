@@ -37,7 +37,7 @@ def upgrade() -> None:
         sa.Column(
             "embedding",
             pgvector.sqlalchemy.vector.VECTOR(dim=1536),  # type: ignore
-            nullable=True, 
+            nullable=True,
         ),
         sa.Column("parent_chunk_id", sa.UUID(), nullable=True),
         sa.Column(

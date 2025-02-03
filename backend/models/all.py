@@ -138,6 +138,45 @@ user_courses = Table(
 )
 
 
+document_tags = Table(
+    "document_tags",
+    Base.metadata,
+    Column(
+        "doc_id",
+        PUUID,
+        ForeignKey("public.documents.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "tag_id",
+        PUUID,
+        ForeignKey("public.tags.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column("created_by", PUUID, ForeignKey("auth.users.id", ondelete="SET NULL")),
+    schema="public",
+)
+
+post_tags = Table(
+    "post_tags",
+    Base.metadata,
+    Column(
+        "post_id",
+        PUUID,
+        ForeignKey("public.posts.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "tag_id",
+        PUUID,
+        ForeignKey("public.tags.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column("created_by", PUUID, ForeignKey("auth.users.id", ondelete="SET NULL")),
+    schema="public",
+)
+
+
 class Profile(Base):
     __tablename__ = "profiles"
     id = Column(
@@ -236,6 +275,7 @@ class Post(Base):
         cascade="all, delete-orphan",
         back_populates="post",
     )
+    tags = relationship("Tag", secondary=post_tags, back_populates="posts")
 
     __table_args__ = (
         UniqueConstraint("course_id", "local_id", name="uq_posts_course_local_id"),
@@ -323,6 +363,7 @@ class Document(Base):
         cascade="all, delete-orphan",
         back_populates="document",
     )
+    tags = relationship("Tag", secondary=document_tags, back_populates="documents")
 
     __table_args__ = (
         CheckConstraint(
@@ -451,6 +492,32 @@ class Message(Base):
         PUUID, ForeignKey("public.channels.id", ondelete="CASCADE"), nullable=False
     )
 
+
+class Job(Base):
+    __tablename__ = "job"
+
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    params = Column(JSONB)
+    status = Column(
+        Enum("not started", "running", "success", "failed", name="job_status"),
+        nullable=False,
+    )
+    retry_count = Column(Integer, nullable=False)
+    updated_at = Column(
+        DateTime, server_default=func.current_timestamp(), nullable=False
+    )
+    priority = Column(
+        Enum("low", "medium", "high", name="job_priority"), nullable=False
+    )
+    recurring = Column(Boolean, nullable=False)
+    recurring_interval = Column(Integer, nullable=False)  # measured in seconds
+    recurring_end_date = Column(DateTime, nullable=True)
+
+    __table_args__ = (
+        Index("idx_status_priority", "status", "priority"),
+        {"schema": "public"},
+    )
+    
 class Channel(Base):
     __tablename__ = "channels"
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
@@ -471,3 +538,47 @@ class UserChannel(Base):
     channel_id = Column(
         PUUID, ForeignKey("public.channels.id", ondelete="CASCADE"), nullable=False
     )
+
+class JobSpecification(Base):
+    __tablename__ = "job_specification"
+
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    job_id = Column(
+        PUUID, ForeignKey("public.job.id", ondelete="CASCADE"), nullable=False
+    )
+    description = Column(Text, nullable=False)
+    action_name = Column(Text, nullable=False)
+    timeout = Column(Integer, nullable=False)  # measured in seconds
+    failure_strategy = Column(
+        Enum("retry", "abort", name="job_failure_strategy"), nullable=False
+    )
+    cleanup_action = Column(Text, nullable=True)
+    job_file = Column(String, nullable=False)
+
+
+class Visibility(PyEnum):
+    public = "public"
+    private = "private"
+
+
+class Tag(Base):
+    __tablename__ = "tags"
+
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    name = Column(String(255), nullable=False)
+    visibility = Column(
+        Enum(Visibility, name="visibility", schema="public"), nullable=False
+    )
+    course_id = Column(PUUID, ForeignKey("public.courses.id", ondelete="CASCADE"))
+    parent_tag_id = Column(PUUID, ForeignKey("public.tags.id", ondelete="CASCADE"))
+    created_by = Column(PUUID, ForeignKey("auth.users.id", ondelete="SET NULL"))
+    properties = Column(JSONB)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    course = relationship("Course")
+    parent_tag = relationship("Tag", remote_side=[id])
+    documents = relationship("Document", secondary=document_tags, back_populates="tags")
+    posts = relationship("Post", secondary=post_tags, back_populates="tags")

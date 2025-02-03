@@ -115,8 +115,8 @@ def upgrade() -> None:
         "posts",
         sa.Column(
             "embedding",
-            pgvector.sqlalchemy.vector.VECTOR(dim=1536), # type: ignore
-            nullable=True,  
+            pgvector.sqlalchemy.vector.VECTOR(dim=1536),  # type: ignore
+            nullable=True,
         ),
     )
     op.create_foreign_key(
