@@ -1,18 +1,25 @@
+import logging
+from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from models.all import Course, Profile, user_courses
+from models.all import Course, Profile, Tag, user_courses
 from models.db import get_db
 from models.schemas.course_schema import (
     CourseResponse,
+    CourseTagRequest,
+    CourseTagsResponse,
     CreateCourseReq,
     CreateCourseResponse,
     UpdateCourseReq,
 )
 from models.schemas.user_schema import SocialLinks, UserProfile
 from pydantic import ValidationError
+from sqlalchemy import desc
+
+logger = logging.getLogger(__name__)
 
 
 def create_course(
@@ -194,3 +201,78 @@ def update_course(create_course_req: UpdateCourseReq, c_id: str) -> Course:
             raise HTTPException(
                 status_code=500, detail=f"Failed to update course: {str(e)}"
             )
+
+
+def get_all_tags(course_id: str) -> CourseTagsResponse:
+    with get_db() as db:
+        c_uuid = UUID(course_id)
+        tags = db.query(Tag).filter(Tag.course_id == c_uuid).all()
+        try:
+            tags_list = CourseTagsResponse.model_validate({"tags": tags})
+            return tags_list
+        except ValidationError:
+            logger.error("TAGS gotten from DB does not match schema - fix ASAP")
+            raise Exception("Could not get tags")
+
+
+def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool:
+    with get_db() as db:
+        c_uuid = UUID(course_id)
+        p_uuid = UUID(str(tagReq.parent_tag_id)) if tagReq.parent_tag_id else None
+        tag = Tag(
+            name=tagReq.name,
+            course_id=c_uuid,
+            visibility=tagReq.visibility,
+            parent_tag_id=p_uuid,
+            created_by=UUID(author_id),
+            properties=tagReq.properties,
+        )
+        try:
+            db.add(tag)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500, detail=f"Failed to create tag: {str(e)}"
+            )
+    return True
+
+
+def delete_tag(c_id: str, t_id: str) -> bool:
+    with get_db() as db:
+        c_uuid = UUID(c_id)
+        t_uuid = UUID(t_id)
+        try:
+            db.query(Tag).where(Course.id == c_uuid, Tag.id == t_uuid).delete()
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500, detail=f"Failed to delete tag: {str(e)}"
+            )
+
+    return True
+
+
+def update_tag(c_id: str, t_id: str, tagReq: CourseTagRequest) -> bool:
+    with get_db() as db:
+        try:
+            c_uuid = UUID(c_id)
+            t_uuid = UUID(t_id)
+            tag = db.query(Tag).where(Tag.id == t_uuid, Course.id == c_uuid).first()
+
+            if not tag:
+                raise Exception("Tag not found")
+
+            update_dict = tagReq.model_dump(exclude_unset=True)
+
+            for key, value in update_dict.items():
+                setattr(tag, key, value)
+
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500, detail=f"Failed to update tag: {str(e)}"
+            )
+    return True

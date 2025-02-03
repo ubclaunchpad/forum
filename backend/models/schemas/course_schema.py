@@ -1,4 +1,5 @@
-from datetime import date
+from datetime import date, datetime
+from enum import Enum
 from typing import List, Optional
 from uuid import UUID
 
@@ -52,3 +53,32 @@ class GetCoursesResponse(BaseModel):
 
 class CourseMembersResponse(BaseModel):
     members: List[UserProfile]
+
+
+class VisibilityEnum(str, Enum):
+    public = "public"
+    private = "private"
+
+
+class CourseTagInformation(BaseModel):
+    id: UUID
+    name: str
+    visibility: VisibilityEnum
+    course_id: UUID
+    parent_tag_id: Optional[UUID] = None
+    created_by: Optional[UUID] = None
+    properties: Optional[dict] = None
+
+    class Config:
+        from_attributes = True
+
+
+class CourseTagsResponse(BaseModel):
+    tags: List[CourseTagInformation]
+
+
+class CourseTagRequest(BaseModel):
+    name: Optional[str] = None
+    visibility: Optional[VisibilityEnum] = None
+    parent_tag_id: Optional[UUID] = None
+    properties: Optional[dict] = None

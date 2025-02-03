@@ -1,5 +1,6 @@
 from controllers import post_controller
 from fastapi import APIRouter, HTTPException, Request
+from models.schemas.course_schema import CourseTagsResponse
 from models.schemas.general_schema import GeneralResponse
 from models.schemas.post_schema import (
     CreatePostEditRequest,
@@ -81,3 +82,28 @@ async def update_embeddings(c_id: str, post_id: int, request: Request):
 async def get_embedding_metadata(c_id: str, local_id: int, request: Request):
     user_id = request.state.user_id
     return post_controller.get_embedding_metadata(c_id, user_id, local_id)
+
+
+@post_router.get("/{post_id}/tags", response_model=CourseTagsResponse)
+async def get_post_tags(post_id: str):
+    res = post_controller.get_post_tags(post_id)
+    if not res:
+        raise HTTPException(status_code=400, detail="Failed to get post tags")
+    return res
+
+
+@post_router.post("/{post_id}/tags/{tag_id}", response_model=GeneralResponse)
+async def add_post_tag(post_id: str, tag_id: str, req: Request):
+    author_id = req.state.user_id
+    res = post_controller.add_post_tag(post_id, tag_id, author_id)
+    if not res:
+        raise HTTPException(status_code=400, detail="Failed to get post tag")
+    return res
+
+
+@post_router.delete("/{post_id}/tags/{tag_id}", response_model=GeneralResponse)
+async def remove_post_tag(post_id: str, tag_id: str):
+    res = post_controller.remove_post_tag(post_id, tag_id)
+    if not res:
+        raise HTTPException(status_code=400, detail="Failed to remove post tag")
+    return res

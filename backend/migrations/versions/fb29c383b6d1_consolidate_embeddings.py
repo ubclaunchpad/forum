@@ -52,7 +52,7 @@ def upgrade() -> None:
         sa.Column(
             "embedding",
             pgvector.sqlalchemy.vector.VECTOR(dim=1536),  # type: ignore
-            nullable=False, 
+            nullable=False,
         ),
         sa.Column(
             "created_at",
