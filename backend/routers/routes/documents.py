@@ -227,30 +227,27 @@ async def query_documents_stream(
 
     return StreamingResponse(stream_response(), media_type="text/event-stream")
 
+
 @document_router.get("/{document_id}/tags", response_model=CourseTagsResponse)
 async def get_document_tags(document_id: str):
     res = document_controller.get_document_tags(document_id)
     if not res:
-        raise HTTPException(
-            status_code=400, detail="Failed to get document tags"
-        )
+        raise HTTPException(status_code=400, detail="Failed to get document tags")
     return res
+
 
 @document_router.post("/{document_id}/tags/{tag_id}", response_model=GeneralResponse)
 async def add_document_tag(document_id: str, tag_id: str, req: Request):
     author_id = req.state.user_id
     res = document_controller.add_document_tag(document_id, tag_id, author_id)
     if not res:
-        raise HTTPException(
-            status_code=400, detail="Failed to add document tag"
-        )
+        raise HTTPException(status_code=400, detail="Failed to add document tag")
     return res
+
 
 @document_router.delete("/{document_id}/tags/{tag_id}", response_model=GeneralResponse)
 async def remove_document_tag(document_id: str, tag_id: str):
     res = document_controller.remove_document_tag(document_id, tag_id)
     if not res:
-        raise HTTPException(
-            status_code=400, detail="Failed to remove document tag"
-        )
+        raise HTTPException(status_code=400, detail="Failed to remove document tag")
     return res

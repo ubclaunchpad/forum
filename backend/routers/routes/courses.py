@@ -8,7 +8,7 @@ from models.schemas.course_schema import (
     GetCoursesResponse,
     CourseTagsResponse,
     CourseTagRequest,
-    UpdateCourseReq
+    UpdateCourseReq,
 )
 from models.schemas.general_schema import GeneralResponse
 
@@ -74,40 +74,36 @@ async def unregister_user(c_id: str, u_id: str):
         )
     return GeneralResponse(msg=f"User {u_id} unregistered from course {c_id}")
 
+
 # ----------------- Course Tags -----------------#
 @course_router.get("/{c_id}/tags", response_model=CourseTagsResponse)
 async def get_course_tags(c_id: str):
     res = course_controller.get_all_tags(c_id)
     if not res:
-        raise HTTPException(
-            status_code=400, detail="Failed to get course roles"
-        )
+        raise HTTPException(status_code=400, detail="Failed to get course roles")
     return CourseTagsResponse(tags=res)
+
 
 @course_router.post("/{c_id}/tags", response_model=GeneralResponse)
 async def create_course_tag(c_id: str, req: Request, tagReq: CourseTagRequest):
     author_id = req.state.user_id
     res = course_controller.create_tag(c_id, tagReq, author_id)
     if not res:
-        raise HTTPException(
-            status_code=400, detail="Failed to create tag"
-        )
+        raise HTTPException(status_code=400, detail="Failed to create tag")
     return GeneralResponse(msg="Created tag succesfully")
+
 
 @course_router.patch("/{c_id}/tags/{t_id}", response_model=GeneralResponse)
 async def update_course_tag(c_id: str, t_id: str, tagReq: CourseTagRequest):
     res = course_controller.update_tag(c_id, t_id, tagReq)
     if not res:
-        raise HTTPException(
-            status_code=400, detail="Failed to update tag"
-        )
+        raise HTTPException(status_code=400, detail="Failed to update tag")
     return GeneralResponse(msg="Updated tag successfully")
+
 
 @course_router.delete("/{c_id}/tags/{t_id}", response_model=GeneralResponse)
 async def delete_course_tag(c_id: str, t_id: str):
     res = course_controller.delete_tag(c_id, t_id)
     if not res:
-        raise HTTPException(
-            status_code=400, detail="Failed to delete tag"
-        )
+        raise HTTPException(status_code=400, detail="Failed to delete tag")
     return GeneralResponse(msg="Deleted tag succesfully")

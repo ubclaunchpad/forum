@@ -13,7 +13,7 @@ from models.schemas.course_schema import (
     CreateCourseResponse,
     CourseTagRequest,
     UpdateCourseReq,
-    CourseTagsResponse
+    CourseTagsResponse,
 )
 from models.schemas.user_schema import SocialLinks, UserProfile
 from pydantic import ValidationError
@@ -76,7 +76,6 @@ def get_course(c_id: Optional[str], name: Optional[str]) -> CourseResponse:
             if not course:
                 raise HTTPException(status_code=404, detail="Course not found")
             return CourseResponse.model_validate(course)
-        
 
     if name:
         with get_db() as db:
@@ -200,18 +199,26 @@ def update_course(create_course_req: UpdateCourseReq, c_id: str) -> Course:
                 status_code=500, detail=f"Failed to update course: {str(e)}"
             )
 
+
 def get_all_tags(course_id: str) -> CourseTagsResponse:
     with get_db() as db:
         c_uuid = UUID(course_id)
-        tags: CourseTagsResponse = (db.query(Tag)
-                                     .with_entities(Tag.id,
-                                                    Tag.name, 
-                                                    Tag.visibility, 
-                                                    Tag.course_id, 
-                                                    Tag.parent_tag_id, 
-                                                    Tag.created_by,
-                                                    Tag.properties).filter(Tag.course_id == c_uuid).all())
+        tags: CourseTagsResponse = (
+            db.query(Tag)
+            .with_entities(
+                Tag.id,
+                Tag.name,
+                Tag.visibility,
+                Tag.course_id,
+                Tag.parent_tag_id,
+                Tag.created_by,
+                Tag.properties,
+            )
+            .filter(Tag.course_id == c_uuid)
+            .all()
+        )
     return tags
+
 
 def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool:
     with get_db() as db:
@@ -223,7 +230,7 @@ def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool
             visibility=tagReq.visibility,
             parent_tag_id=p_uuid,
             created_by=UUID(author_id),
-            properties=tagReq.properties
+            properties=tagReq.properties,
         )
         try:
             db.add(tag)
@@ -234,6 +241,7 @@ def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool
                 status_code=500, detail=f"Failed to create tag: {str(e)}"
             )
     return True
+
 
 def delete_tag(c_id: str, t_id: str) -> bool:
     with get_db() as db:
@@ -250,6 +258,7 @@ def delete_tag(c_id: str, t_id: str) -> bool:
 
     return True
 
+
 def update_tag(c_id: str, t_id: str, tagReq: CourseTagRequest) -> bool:
     with get_db() as db:
         try:
@@ -259,10 +268,12 @@ def update_tag(c_id: str, t_id: str, tagReq: CourseTagRequest) -> bool:
 
             if not tag:
                 raise Exception("Tag not found")
-            
+
             tag.name = tagReq.name if tagReq.name else tag.name
             tag.visibility = tagReq.visibility if tagReq.visibility else tag.visibility
-            tag.parent_tag_id = tagReq.parent_tag_id if tagReq.parent_tag_id else tag.parent_tag_id
+            tag.parent_tag_id = (
+                tagReq.parent_tag_id if tagReq.parent_tag_id else tag.parent_tag_id
+            )
             tag.properties = tagReq.properties if tagReq.properties else tag.properties
 
             db.commit()

@@ -6,6 +6,7 @@ from uuid import UUID
 from models.schemas.user_schema import UserProfile
 from pydantic import BaseModel
 
+
 class CourseConfig(BaseModel):
     theme_colour: Optional[str] = None
     font: Optional[str] = None
@@ -53,9 +54,11 @@ class GetCoursesResponse(BaseModel):
 class CourseMembersResponse(BaseModel):
     members: List[UserProfile]
 
+
 class VisibilityEnum(str, Enum):
     public = "public"
     private = "private"
+
 
 class CourseTagInformation(BaseModel):
     id: UUID
@@ -66,8 +69,10 @@ class CourseTagInformation(BaseModel):
     created_by: Optional[UUID] = None
     properties: Optional[dict] = None
 
+
 class CourseTagsResponse(BaseModel):
     tags: List[CourseTagInformation]
+
 
 class CourseTagRequest(BaseModel):
     name: Optional[str] = None

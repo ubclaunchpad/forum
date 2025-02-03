@@ -323,11 +323,11 @@ def get_embedding_metadata(
             status_code=500, detail=f"Failed to get post embedding metadata: {str(e)}"
         )
 
+
 def get_post_tags(post_id: str) -> CourseTagsResponse:
     with get_db() as db:
         post = (
-            db
-            .query(Post)
+            db.query(Post)
             .options(joinedload(Post.tags))
             .filter(Post.id == UUID(post_id))
             .first()
@@ -349,28 +349,30 @@ def get_post_tags(post_id: str) -> CourseTagsResponse:
             )
     return CourseTagsResponse(tags=tags)
 
+
 def add_post_tag(post_id: str, tag_id: str, author_id: str) -> GeneralResponse:
     with get_db() as db:
         try:
             post = db.query(Post).filter(Post.id == UUID(post_id)).first()
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
-            
+
             tag = db.query(Tag).filter(Tag.id == UUID(tag_id)).first()
             if not tag:
                 raise HTTPException(status_code=404, detail="Tag not found")
             exec = insert(post_tags).values(
-                post_id=post.id, 
-                tag_id=tag.id,
-                created_by = UUID(author_id)
+                post_id=post.id, tag_id=tag.id, created_by=UUID(author_id)
             )
             db.execute(exec)
             db.commit()
         except Exception as e:
             db.rollback()
-            raise HTTPException(status_code=500, detail=f"Failed to assign tag to post: {str(e)}")
-    
+            raise HTTPException(
+                status_code=500, detail=f"Failed to assign tag to post: {str(e)}"
+            )
+
     return GeneralResponse(msg="Tag assigned to post successfully")
+
 
 def remove_post_tag(post_id: str, tag_id: str) -> GeneralResponse:
     with get_db() as db:
@@ -378,15 +380,17 @@ def remove_post_tag(post_id: str, tag_id: str) -> GeneralResponse:
             post = db.query(Post).filter(Post.id == UUID(post_id)).first()
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")
-            
+
             tag = db.query(Tag).filter(Tag.id == UUID(tag_id)).first()
             if not tag:
                 raise HTTPException(status_code=404, detail="Tag not found")
-            
+
             post.tags.remove(tag)
             db.commit()
         except Exception as e:
             db.rollback()
-            raise HTTPException(status_code=500, detail=f"Failed to unassign tag from post: {str(e)}")
-    
+            raise HTTPException(
+                status_code=500, detail=f"Failed to unassign tag from post: {str(e)}"
+            )
+
     return GeneralResponse(msg="Tag unassigned from post successfully")
