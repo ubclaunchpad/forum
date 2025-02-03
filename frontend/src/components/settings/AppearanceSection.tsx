@@ -22,7 +22,7 @@ export function AppearanceSection() {
   // Apply theme changes immediately for preview
   useEffect(() => {
     setTheme(config.theme_colour, config.font);
-    
+
     // Cleanup: revert to saved theme when unmounting
     return () => {
       setTheme(savedConfig.theme_colour, savedConfig.font);
@@ -55,8 +55,8 @@ export function AppearanceSection() {
           section: course.section,
           config: {
             theme_colour: config.theme_colour,
-            font: config.font
-          }
+            font: config.font,
+          },
         }),
       });
 
@@ -79,7 +79,7 @@ export function AppearanceSection() {
         description: "Failed to update appearance",
         variant: "destructive",
       });
-      
+
       // Revert to saved config on error
       setConfig(savedConfig);
       setTheme(savedConfig.theme_colour, savedConfig.font);
