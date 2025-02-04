@@ -2,7 +2,8 @@
 name: Bug Report
 about: Report any bugs/issues encountered
 title: ''
-labels: bug
+labels: Bug
+type: bug
 assignees: ''
 
 ---
