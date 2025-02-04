@@ -6,7 +6,7 @@ import { useContext, useState } from "react";
 
 export default function CourseSection() {
   const course = useContext(courseContext);
-    const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState({
     name: course.name || "",
     code: course.code || "",
     c_group: course.c_group || "",
@@ -48,7 +48,6 @@ export default function CourseSection() {
             </div>
           ))}
         </div>
-
       </form>
     </div>
   );

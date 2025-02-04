@@ -1,11 +1,11 @@
-import { 
-  Layout, 
-  Users, 
-  Shield, 
-  LucideIcon, 
-  SparklesIcon, 
-  BrainIcon, 
-  Settings2Icon, 
+import {
+  Layout,
+  Users,
+  Shield,
+  LucideIcon,
+  SparklesIcon,
+  BrainIcon,
+  Settings2Icon,
   UserIcon,
   BookOpenIcon,
   FileTextIcon,
@@ -20,7 +20,7 @@ import {
   LockKeyholeIcon,
   BookIcon,
   PaintBucketIcon,
-  SlidersVerticalIcon
+  SlidersVerticalIcon,
 } from "lucide-react";
 
 export const courseSettingsConfig = {
@@ -91,7 +91,7 @@ export const courseSettingsConfig = {
           id: "admin-course",
           label: "Course",
           path: "admin/course",
-          icon: ShieldAlertIcon
+          icon: ShieldAlertIcon,
         },
       ],
     },

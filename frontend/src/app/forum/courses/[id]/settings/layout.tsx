@@ -13,9 +13,7 @@ export default function SettingsLayout({
       <div className="flex h-dvh  select-none w-full">
         <SettingsSidebar courseId={params.id} />
         <main className="flex-1 p-8 flex flex-col overflow-auto items-center bg-white w-full">
-          <div className="container max-w-4xl py-8">
-            {children}
-          </div>
+          <div className="container max-w-4xl py-8">{children}</div>
         </main>
       </div>
     </SidebarProvider>

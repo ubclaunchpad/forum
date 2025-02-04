@@ -110,7 +110,11 @@ export default function AISUsageSettingsSection() {
     },
   });
 
-  const handleQuotaChange = (role: string, type: "questions" | "tokens", value: number) => {
+  const handleQuotaChange = (
+    role: string,
+    type: "questions" | "tokens",
+    value: number,
+  ) => {
     setRoleSettings((prev) => ({
       ...prev,
       [role]: {
