@@ -447,6 +447,9 @@ class Message(Base):
     created_at = Column(
         DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
     )
+    channel_id = Column(
+        PUUID, ForeignKey("public.channels.id", ondelete="CASCADE"), nullable=False
+    )
 
 class Channel(Base):
     __tablename__ = "channels"

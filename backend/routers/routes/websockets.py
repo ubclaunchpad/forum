@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 
 class Item(BaseModel):
+    name : str
     user_id : str
     users: List[str]
 
@@ -48,7 +49,7 @@ async def getMessageHistory(channel_id: str):
 @web_router.post("/chat/userChannels")
 async def createNewChannel(item: Item, request: Request):
     print(request.state)
-    res = websocket_controller.createChannel(item.user_id, item.users)
+    res = websocket_controller.createChannel(item.user_id, item.users, item.name)
     return res
 
 
@@ -61,7 +62,7 @@ async def websocket_endpoint(websocket: WebSocket, channel_id: str, id : str = Q
     try:
         while True:
             data = await websocket.receive_text()
-            websocket_controller.sendMessage(data, id)
+            websocket_controller.sendMessage(data, id, channel_id)
             await manager.send_personal_message(f"You wrote: {data}", websocket)
             await manager.broadcast(f"Client #{channel_id} says: {data}")
     except WebSocketDisconnect:

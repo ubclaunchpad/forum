@@ -6,20 +6,20 @@ from models.db import get_db
 from sqlalchemy import exists
 
 
-def sendMessage(data : str, user_id : str):
+def sendMessage(data : str, user_id : str, channel_id : str):
     with get_db() as db:
         try:
             message = Message(
                 content=data,
-                created_by=user_id
+                created_by=user_id,
+                channel_id=channel_id
             )
             db.add(message)
             db.flush()
-            return message
         except Exception as e:
             raise e
         
-def getMessageHistory(channel_id):
+def getMessageHistory(channel_id : str):
     with get_db() as db:
         try:
             messages = db.query(Message).filter_by(channel_id=channel_id).all()
@@ -36,11 +36,11 @@ def getUserChannels(user_id: str):
         except Exception as e:
             raise e
 
-def createChannel(user_id: str, users: List[str]):
+def createChannel(user_id: str, users: List[str], name):
     with get_db() as db:
         try:
             channel = Channel(
-                name="This is a temp thing, rmbr to change it",
+                name=name,
                 created_by=UUID(user_id)
             )
 
@@ -48,6 +48,8 @@ def createChannel(user_id: str, users: List[str]):
             db.flush()
 
             channel_id : str = channel.id
+
+            users.append(user_id)
 
             user_channels = [
                 UserChannel(user_id=user, channel_id=channel_id) for user in users
