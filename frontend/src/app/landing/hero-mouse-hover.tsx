@@ -24,9 +24,9 @@ export default function HeroMouseEffect() {
       />
       {/* Additional subtle static gradient accents based on our color scheme */}
       <div className="pointer-events-none absolute inset-0 z-[-1]">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary-950 via-primary-950/90 to-primary-950" />
-        <div className="absolute right-0 top-0 h-[500px] w-[500px] bg-primary-600/10 blur-[100px]" />
-        <div className="absolute bottom-0 left-0 h-[500px] w-[500px] bg-primary-400/10 blur-[100px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary-200 via-primary-200/90 to-primary-200" />
+        <div className="absolute right-0 top-0 h-[500px] w-[500px] bg-primary-100/10 blur-[100px]" />
+        <div className="absolute bottom-0 left-0 h-[500px] w-[500px] bg-primary-100/10 blur-[100px]" />
       </div>
     </>
   )
