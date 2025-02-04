@@ -13,7 +13,7 @@ export function Header() {
       <div className="container mx-auto flex h-14 items-center">
         <Link 
           href="/"
-          className="flex items-center space-x-2 mr-8"
+          className="flex items-center space-x-2 mr-8 ml-4 xs:ml-0"
           onClick={(e) => {
             e.preventDefault();
               window.scrollTo({ top: 0, behavior: "smooth" });
@@ -66,7 +66,7 @@ export function Header() {
               <Link href="/auth/signin">Get Started</Link>
             </Button>
             <Button variant="ghost" size="icon" className="sm:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMenuOpen ? <X className="h-5 w-5 text-primary-50" /> : <Menu className="h-5 w-5 text-primary-50" />}
             </Button>
           </div>
         </div>
@@ -90,11 +90,11 @@ export function Header() {
             >
               How It Works
             </Link>
-            <Link href="/login" className="text-primary-300 transition hover:text-primary-100">
+            <Link href="/auth/signin" className="text-primary-300 transition hover:text-primary-100">
               Get Started
             </Link>
             <Link
-              href="https://github.com/forum-ai/repo"
+              href="https://github.com/ubclaunchpad/forum"
               target="_blank"
               rel="noreferrer"
               className="text-primary-300 transition hover:text-primary-100"
