@@ -1,51 +1,109 @@
-import { Layout, Users, Shield, LucideIcon } from "lucide-react";
+import { 
+  Layout, 
+  Users, 
+  Shield, 
+  LucideIcon, 
+  SparklesIcon, 
+  BrainIcon, 
+  Settings2Icon, 
+  UserIcon,
+  BookOpenIcon,
+  FileTextIcon,
+  DatabaseIcon,
+  BookCopyIcon,
+  ShieldAlertIcon,
+  UsersIcon,
+  WalletIcon,
+  CogIcon,
+  SearchIcon,
+  ShieldIcon,
+  LockKeyholeIcon,
+  BookIcon,
+  PaintBucketIcon,
+  SlidersVerticalIcon
+} from "lucide-react";
 
 export const courseSettingsConfig = {
   sections: [
     {
-      id: "admin",
-      label: "Admin",
+      icon: CogIcon,
+
+      id: "general",
+      label: "General",
       items: [
         {
           id: "course",
           label: "Course",
-          path: "course",
-          icon: Layout,
+          path: "general/course",
+          icon: BookIcon,
         },
         {
           id: "appearance",
-          label: "Look and Feel",
-          path: "appearance",
-          icon: Layout,
+          label: "Appearance",
+          path: "general/appearance",
+          icon: PaintBucketIcon,
         },
       ],
     },
     {
-      id: "access",
-      label: "Access",
+      icon: SearchIcon,
+      id: "ai",
+      label: "AI and Search",
       items: [
         {
-          id: "members",
+          id: "ai-usage",
+          label: "Configurations",
+          path: "ai/usage",
+          icon: SlidersVerticalIcon,
+        },
+        {
+          id: "ai-context",
+          label: "Memory",
+          path: "ai/context",
+          icon: BookCopyIcon,
+        },
+        {
+          id: "ai-advanced",
+          label: "Billing",
+          path: "ai/billing",
+          icon: WalletIcon,
+        },
+      ],
+    },
+    {
+      icon: ShieldIcon,
+      id: "admin",
+      label: "Admin",
+      items: [
+        {
+          id: "admin-members",
           label: "Members",
-          path: "members",
+          path: "admin/members",
           icon: Users,
         },
         {
-          id: "permissions",
+          id: "admin-permissions",
           label: "Permissions",
-          path: "permissions",
-          icon: Shield,
+          path: "admin/permissions",
+          icon: LockKeyholeIcon,
+        },
+        {
+          id: "admin-course",
+          label: "Course",
+          path: "admin/course",
+          icon: ShieldAlertIcon
         },
       ],
     },
   ],
 } as const;
 
-// Types can be in the same file since they're tightly coupled to the config
+// Types
 export interface SettingsSection {
   id: string;
   label: string;
   items: SettingsItem[];
+  icon: LucideIcon;
 }
 
 export interface SettingsItem {

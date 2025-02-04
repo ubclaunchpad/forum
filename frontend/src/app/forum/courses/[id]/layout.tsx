@@ -52,7 +52,7 @@ export default async function CoursePage({
 
   return (
     <CourseContextProvider course={course}>
-      <div className="course flex flex-col max-h-dvh h-dvh w-dvw overflow-hidden">
+      <div className="course  flex flex-col max-h-dvh h-dvh w-dvw overflow-hidden">
         <ClientWrapper>{children}</ClientWrapper>
       </div>
     </CourseContextProvider>

@@ -9,7 +9,6 @@ import { DeleteCourseButton } from "./DeleteCourseButton";
 
 export function CourseSection() {
   const course = useContext(courseContext);
-  console.log(course);
   const { token } = useContext(userContext);
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
