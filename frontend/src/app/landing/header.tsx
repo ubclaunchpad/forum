@@ -93,7 +93,7 @@ export function Header() {
               className="text-primary-800 transition hover:text-primary-600"
               onClick={(e) => {
                 e.preventDefault();
-                const targetElement = document.getElementById("how-it-works");
+                const targetElement = document.getElementById("features");
                 if (targetElement) {
                   targetElement.scrollIntoView({ behavior: "smooth" });
                 }
