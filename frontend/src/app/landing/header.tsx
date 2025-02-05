@@ -25,19 +25,6 @@ export function Header() {
         </Link>
         <div className="flex flex-1 items-center justify-end space-x-4 sm:justify-between">
           <nav className="hidden sm:flex items-center space-x-6 text-sm">
-            <Link 
-              href="#features"
-              className="text-primary-800 transition hover:text-primary-600"
-              onClick={(e) => {
-                e.preventDefault();
-                const targetElement = document.getElementById("features");
-                if (targetElement) {
-                  targetElement.scrollIntoView({ behavior: "smooth" });
-                }
-              }}
-            >
-              Features
-            </Link>
             <Link
               href="#how-it-works"
               onClick={(e) => {
@@ -50,6 +37,19 @@ export function Header() {
               className="text-primary-800 transition hover:text-primary-600"
             >
               How It Works
+            </Link>
+            <Link 
+              href="#features"
+              className="text-primary-800 transition hover:text-primary-600"
+              onClick={(e) => {
+                e.preventDefault();
+                const targetElement = document.getElementById("features");
+                if (targetElement) {
+                  targetElement.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+            >
+              Features
             </Link>
           </nav>
           <div className="flex items-center space-x-4">
@@ -75,9 +75,6 @@ export function Header() {
       {isMenuOpen && (
         <div className="sm:hidden">
           <nav className="flex flex-col space-y-4 p-4 bg-white border-t border-gray-300">
-            <Link href="#features" className="text-primary-800 transition hover:text-primary-600">
-              Features
-            </Link>
             <Link
               href="#how-it-works"
               onClick={(e) => {
@@ -90,6 +87,19 @@ export function Header() {
               className="text-primary-800 transition hover:text-primary-600"
             >
               How It Works
+            </Link>
+            <Link 
+              href="#features"
+              className="text-primary-800 transition hover:text-primary-600"
+              onClick={(e) => {
+                e.preventDefault();
+                const targetElement = document.getElementById("features");
+                if (targetElement) {
+                  targetElement.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+            >
+              Features
             </Link>
             <Link href="/auth/signin" className="text-primary-800 transition hover:text-primary-600">
               Get Started
