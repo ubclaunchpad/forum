@@ -63,7 +63,7 @@ export function Header() {
                 <span className="sr-only">GitHub</span>
               </Button>
             </Link>
-            <Button asChild className="hidden sm:flex px-4 bg-primary-600 hover:bg-primary-700 text-white">
+            <Button asChild className="hidden sm:flex px-4 bg-primary-600 hover:bg-primary-700 text-white rounded-lg">
               <Link href="/auth/signin">Get Started</Link>
             </Button>
             <Button variant="ghost" size="icon" className="sm:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
