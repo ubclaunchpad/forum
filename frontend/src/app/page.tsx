@@ -29,7 +29,7 @@ export default function Home() {
         <div className="flex flex-col gap-4 sm:flex-row relative z-10">
           <Button
             size="lg"
-            className="h-10 px-6 sm:h-11 sm:px-8 bg-primary-600 hover:bg-primary-700 text-white"
+            className="h-10 px-6 sm:h-11 sm:px-8 bg-primary-600 hover:bg-primary-700 text-white rounded-lg"
             onClick={() => window.open("https://forumai.me/auth/signin", "_blank", "noopener,noreferrer")}
           >
             Get Started
@@ -37,7 +37,7 @@ export default function Home() {
           <Button
             size="lg"
             variant="outline"
-            className="h-10 px-6 sm:h-11 sm:px-8 border-primary-600 text-gray-200 bg-gray-800 hover:bg-gray-700 hover:cursor-pointer"
+            className="h-10 px-6 sm:h-11 sm:px-8 border-primary-600 text-gray-200 bg-gray-800 hover:bg-gray-700 hover:cursor-pointer rounded-lg"
             onClick={() => window.open("https://github.com/ubclaunchpad/forum", "_blank", "noopener,noreferrer")}
           >
             View on GitHub
@@ -216,7 +216,7 @@ export default function Home() {
               </p>
               <Button
                 size="lg"
-                className="h-10 px-8 sm:h-11 bg-primary-800 hover:bg-primary-700 text-white"
+                className="h-10 px-8 sm:h-11 bg-primary-800 hover:bg-primary-700 text-white rounded-lg"
                 onClick={() =>
                   window.open("https://forumai.me/auth/signin", "_blank", "noopener,noreferrer")
                 }
