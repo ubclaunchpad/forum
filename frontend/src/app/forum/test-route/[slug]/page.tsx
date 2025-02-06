@@ -33,7 +33,7 @@ export default function Chat() {
           `${getApiUrl()}/chat/${dynamic}/history/`,
           {
             headers: {
-              Authorization: `Bearer ${user.token}`, // Add authentication if needed
+              Authorization: `Bearer ${user.token}`,
             },
           },
         );
@@ -42,8 +42,7 @@ export default function Chat() {
           throw new Error("Failed to fetch message history");
         }
         const data = await response.json();
-        console.log(data);
-        setMessages(data); // Set the fetched messages
+        setMessages(data);
       } catch (error) {
         console.error("Error fetching message history:", error);
       }
@@ -52,40 +51,30 @@ export default function Chat() {
     fetchMessageHistory();
   }, [dynamic, user]);
 
-  // Subscribe to Supabase Realtime for new messages
   useEffect(() => {
     const channel = supabase
-      .channel("messages") // Unique channel name
+      .channel("messages")
       .on(
         "postgres_changes",
         {
-          event: "INSERT", // Listen for new rows
+          event: "INSERT",
           schema: "public",
-          table: "messages", // Your messages table
-          filter: `channel_id=eq.${dynamic}`, // Filter by channel ID
+          table: "messages",
+          filter: `channel_id=eq.${dynamic}`,
         },
         (payload) => {
-          console.log("New message received:", payload.new);
-          setMessages((prev) => [...prev, payload.new as Message]); // Append the new message
+          setMessages((prev) => [...prev, payload.new as Message]);
         },
       )
       .subscribe();
 
-    // Cleanup subscription on component unmount
     return () => {
       supabase.removeChannel(channel);
     };
   }, [dynamic]);
 
   useEffect(() => {
-    const socket = new WebSocket(WS_URL + dynamic + `?id=${user.user.id}`);
-
-    console.log(socket);
-
-    socket.onopen = () => console.log("Connected to WebSocket");
-
-    socket.onclose = () => console.log("WebSocket Disconnected");
-
+    const socket = new WebSocket(WS_URL + dynamic + `?token=${user.token}`);
     setWs(socket);
 
     return () => socket.close();
@@ -94,11 +83,9 @@ export default function Chat() {
   const sendMessage = () => {
     if (ws && message.trim()) {
       ws.send(message);
-      setMessage(""); // Clear input
+      setMessage("");
     }
   };
-
-  console.log(messages);
 
   return (
     <div className="p-4">
@@ -106,8 +93,10 @@ export default function Chat() {
       <div className="border p-4 h-64 overflow-auto">
         {messages &&
           messages.map((msg, idx) => (
-            <div key={idx} className="p-1 border-b">
-              {msg.content}
+            <div key={idx} className="p-1 border-b flex flex-row gap-4">
+              <div>{msg.created_by}</div>
+              <div>{msg.content}</div>
+              <div>{new Date(msg.created_at).toLocaleString()}</div>
             </div>
           ))}
       </div>

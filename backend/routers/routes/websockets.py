@@ -1,8 +1,18 @@
 import json
-from typing import List
+from typing import Annotated, List
 
 from controllers import websocket_controller
-from fastapi import APIRouter, Query, Request, WebSocket, WebSocketDisconnect
+from fastapi import (
+    APIRouter,
+    Cookie,
+    Depends,
+    Query,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+    WebSocketException,
+    status,
+)
 from models.schemas import message_schema
 from pydantic import BaseModel
 
@@ -34,7 +44,6 @@ class ConnectionManager:
 web_router = APIRouter()
 manager = ConnectionManager()
 
-
 @web_router.get("/chat/userChannels")
 async def getUserChannels(user_id: str):
     channels = websocket_controller.getUserChannels(user_id)
@@ -52,11 +61,26 @@ async def createNewChannel(item: Item, request: Request):
     res = websocket_controller.createChannel(item.user_id, item.users, item.name)
     return res
 
+async def get_token(
+    websocket: WebSocket,
+    token: Annotated[str | None, Query()] = None,
+):
+    if token is None:
+        raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION)
+    
+    return token
+
 
 @web_router.websocket("/ws/chat/{channel_id}")
-async def websocket_endpoint(websocket: WebSocket, channel_id: str, id : str = Query(None)):
+async def websocket_endpoint(
+    *, websocket: WebSocket, 
+    channel_id: str, 
+    q: int | None = None, 
+    token: Annotated[str, Depends(get_token)]):
+
+    id = await websocket_controller.verifyToken(token)
     if not websocket_controller.verifyUserChannel(id, channel_id):
-        return
+        raise Exception("This sucks")
 
     await manager.connect(websocket)
     try:

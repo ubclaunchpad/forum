@@ -2,7 +2,7 @@ from typing import List
 from uuid import UUID
 
 from models.all import Channel, Message, UserChannel
-from models.db import get_db
+from models.db import get_db, supabase
 from sqlalchemy import exists
 
 
@@ -22,7 +22,8 @@ def sendMessage(data : str, user_id : str, channel_id : str):
 def getMessageHistory(channel_id : str):
     with get_db() as db:
         try:
-            messages = db.query(Message).filter_by(channel_id=channel_id).all()
+            messages = (db.query(Message).filter_by(channel_id=channel_id).
+                        order_by(Message.created_at.asc()).all())
             return messages
         except Exception as e:
             raise e
@@ -47,7 +48,7 @@ def createChannel(user_id: str, users: List[str], name):
             db.add(channel)
             db.flush()
 
-            channel_id : str = channel.id
+            channel_id = getattr(channel, "id")
 
             users.append(user_id)
 
@@ -61,6 +62,15 @@ def createChannel(user_id: str, users: List[str], name):
         except Exception as e:
             raise e
     return
+
+
+
+async def verifyToken(token : str):
+    user = supabase.auth.get_user(token)
+    if not user or not user.user:
+        raise Exception()
+
+    return str(user.user.id)
     
 
 def verifyUserChannel(user_id: str, channel_id: str):
