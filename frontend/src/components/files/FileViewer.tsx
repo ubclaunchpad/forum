@@ -1,5 +1,4 @@
 "use client";
-import { courseContext } from "@/contexts/courseContext";
 import { userContext } from "@/contexts/userContext";
 import { useToast } from "@/hooks/use-toast";
 import { DocumentInterface } from "@/lib/types/documents";
@@ -10,6 +9,7 @@ import { Document, Page } from "react-pdf";
 
 import { pdfjs } from "react-pdf";
 import { IsLoadingView } from "../general/IsLoadingView";
+import { useCourseStore } from "@/providers/courseStoreProvider";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.mjs",
@@ -30,7 +30,7 @@ export default function FileViewer({
   const [doc, setDoc] = useState<DocumentViewerInterface | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const course = useContext(courseContext);
+  const course = useCourseStore((state) => state.course);
 
   useEffect(() => {
     async function fetchDocumentContent() {

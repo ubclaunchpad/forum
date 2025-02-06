@@ -2,7 +2,6 @@ import { Post, PostType, PostWithRequiredId } from "@/lib/types/posts";
 import { Suspense, useContext, useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { getApiUrl } from "@/utils/helpers";
-import { courseContext } from "@/contexts/courseContext";
 import { useToast } from "@/hooks/use-toast";
 import { userContext } from "@/contexts/userContext";
 import { ArrowRightFromLine, DotIcon } from "lucide-react";
@@ -10,6 +9,7 @@ import { getRelativeTimeString, isIDTemporary } from "@/lib/utils";
 import { forumPostsContext } from "@/contexts/PostsContext";
 import PostTextEditor from "./PostTextEditor";
 import PostEmbeddingPopoverChip from "./PostEmbeddingPopoverChip";
+import { useCourseStore } from "@/providers/courseStoreProvider";
 
 export default function PostView<T extends PostType>({
   post,
@@ -24,7 +24,7 @@ export default function PostView<T extends PostType>({
     setIsEditing,
   } = useContext(forumPostsContext);
 
-  const course = useContext(courseContext);
+  const course = useCourseStore((state) => state.course);
   const user = useContext(userContext);
 
   const oldContent = post?.content;
