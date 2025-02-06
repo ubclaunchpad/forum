@@ -165,3 +165,53 @@ export function getDisplayname(profile: Profile) {
 
   return `${profile.first_name} ${profile.last_name}`;
 }
+
+type DeepEqualType =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | { [key: string]: DeepEqualType }
+  | DeepEqualType[];
+
+export function isDeepEqual<T extends DeepEqualType>(x: T, y: T): boolean {
+  if (x === y) {
+    return true;
+  }
+
+  if (
+    typeof x !== "object" ||
+    x === null ||
+    typeof y !== "object" ||
+    y === null
+  ) {
+    return false;
+  }
+
+  // Handle arrays
+  if (Array.isArray(x) && Array.isArray(y)) {
+    if (x.length !== y.length) return false;
+    return x.every((item, index) => isDeepEqual(item, y[index]));
+  }
+
+  // Handle objects (not arrays)
+  if (!Array.isArray(x) && !Array.isArray(y)) {
+    const xKeys = Object.keys(x);
+    const yKeys = Object.keys(y as object);
+
+    if (xKeys.length !== yKeys.length) return false;
+
+    return xKeys.every((key) => {
+      return (
+        Object.prototype.hasOwnProperty.call(y, key) &&
+        isDeepEqual(
+          (x as { [key: string]: DeepEqualType })[key],
+          (y as { [key: string]: DeepEqualType })[key],
+        )
+      );
+    });
+  }
+
+  return false;
+}

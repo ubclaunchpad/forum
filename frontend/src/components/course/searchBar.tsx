@@ -15,7 +15,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import { courseContext } from "@/contexts/courseContext";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Input } from "../ui/input";
@@ -23,6 +22,7 @@ import Link from "next/link";
 import { userContext } from "@/contexts/userContext";
 import useDocumentQuery from "@/hooks/useDocumentQuery";
 import EditorComponent from "../general/EditorComponent";
+import { useCourseStore } from "@/providers/courseStoreProvider";
 
 const MIN_SEARCH_LENGTH = 5;
 const MAX_SEARCH_LENGTH = 1000;
@@ -77,7 +77,7 @@ const SourceMetadata = ({ source }) => {
 
 export function Searchbar() {
   const { token } = useContext(userContext);
-  const course = useContext(courseContext);
+  const course = useCourseStore((state) => state.course);
   const [search, setSearch] = useState("");
 
   const { queryDocuments, response, isLoading } = useDocumentQuery({
