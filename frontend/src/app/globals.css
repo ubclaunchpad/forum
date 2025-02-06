@@ -22,6 +22,10 @@
     --font-inter: "Inter", sans-serif;
     --font-playfair-display: "Playfair Display", serif;
     --font-roboto-mono: "Roboto Mono", monospace;
+    --font-nunito: "Nunito", sans-serif;
+    --font-lato: "Lato", sans-serif;
+    --font-fira-code: "Fira Code", monospace;
+    --font-roboto: "Roboto", sans-serif;
 
     --font-title: var(--font-quicksand);
     --font-body: var(--font-source-sans);

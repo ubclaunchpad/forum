@@ -1,5 +1,6 @@
 "use client";
 
+import { themeContext } from "@/contexts/ThemeProvider";
 import {
   CourseState,
   CourseStore,
@@ -24,10 +25,13 @@ export const CourseStoreProvider = ({
   children,
 }: CounterStoreProviderProps) => {
   const storeRef = useRef<CourseStoreApi>(null);
+  const { updateTheme } = useContext(themeContext);
 
   if (!storeRef.current) {
     storeRef.current = createCourseStore(initState);
   }
+
+  updateTheme(initState.course.config);
 
   return (
     <CourseStoreContext.Provider value={storeRef.current}>
@@ -40,7 +44,7 @@ export const useCourseStore = <T,>(selector: (store: CourseStore) => T): T => {
   const counterStoreContext = useContext(CourseStoreContext);
 
   if (!counterStoreContext) {
-    throw new Error(`useCounterStore must be used within CounterStoreProvider`);
+    throw new Error(`useCourseStore must be used within CounterStoreProvider`);
   }
 
   return useStore(counterStoreContext, selector);

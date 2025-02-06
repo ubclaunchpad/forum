@@ -1,4 +1,3 @@
-import { CourseContextProvider } from "@/contexts/courseContext";
 import ClientWrapper from "./(core)/resources/wrapper";
 import { getApiUrl } from "@/utils/helpers";
 import { Course } from "@/lib/types/course";
@@ -58,11 +57,9 @@ export default async function CoursePage({
 
   return (
     <CourseStoreProvider initState={store}>
-      <CourseContextProvider course={course}>
-        <div className="course  flex flex-col h-dvh w-dvw overflow-hidden">
-          <ClientWrapper>{children}</ClientWrapper>
-        </div>
-      </CourseContextProvider>
+      <div className="course  flex flex-col h-dvh w-dvw overflow-hidden">
+        <ClientWrapper>{children}</ClientWrapper>
+      </div>
     </CourseStoreProvider>
   );
 }

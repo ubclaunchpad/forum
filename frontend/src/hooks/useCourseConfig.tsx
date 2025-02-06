@@ -3,6 +3,7 @@ import { useCourseStore } from "@/providers/courseStoreProvider";
 import { getApiUrl } from "@/utils/helpers";
 import { useContext, useState } from "react";
 import { useToast } from "./use-toast";
+import { themeContext } from "@/contexts/ThemeProvider";
 
 export default function useCourseConfig() {
   const { toast } = useToast();
@@ -11,6 +12,7 @@ export default function useCourseConfig() {
 
   const { token } = useContext(userContext);
   const course = useCourseStore((state) => state.course);
+  const { updateTheme } = useContext(themeContext);
   const pendingCourse = useCourseStore((state) => state.pendingCourse);
   const saveCourseChanges = useCourseStore((state) => state.saveCourseChanges);
 
@@ -30,17 +32,18 @@ export default function useCourseConfig() {
       fetch(`/api/revalidate?tag=course-${course.id}`);
 
       saveCourseChanges();
+      updateTheme(pendingCourse.config);
 
       toast({
         title: "Success",
-        description: "Course appearance updated successfully",
+        description: "Course updated successfully",
       });
     } catch (error) {
       console.error(error);
       setError(error as Error);
       toast({
         title: "Error",
-        description: "Failed to update appearance",
+        description: "Failed to update course settings",
         variant: "destructive",
       });
     } finally {
