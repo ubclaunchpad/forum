@@ -5,6 +5,7 @@ import { useCallback, useContext, useEffect, useRef } from "react";
 import { forumPostsContext } from "@/contexts/PostsContext";
 import { Button } from "../ui/button";
 import { PostWithRequiredId } from "@/lib/types/posts";
+import { TagsSidebar } from "../tags/TagsSidebar";
 
 export default function PostsForumSidebar() {
   const {
@@ -56,6 +57,7 @@ export default function PostsForumSidebar() {
             New Post
           </Button>
         </div>
+        <TagsSidebar/>
       </div>
       <div
         className={cn(
