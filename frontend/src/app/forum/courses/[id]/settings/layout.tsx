@@ -1,4 +1,5 @@
 import { SettingsSidebar } from "@/components/settings/settingsSidebar";
+import SettingsTopBar from "@/components/settings/settingsTopbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 export default function SettingsLayout({
@@ -12,8 +13,9 @@ export default function SettingsLayout({
     <SidebarProvider>
       <div className="flex h-dvh  select-none w-full">
         <SettingsSidebar courseId={params.id} />
-        <main className="flex-1 p-8 flex flex-col overflow-auto items-center bg-white w-full">
-          <div className="container max-w-4xl py-8">{children}</div>
+        <main className="flex-1 py-8 px-8 relative flex flex-col overflow-auto items-center bg-white w-full">
+          <SettingsTopBar />
+          <div className="container max-w-4xl ">{children}</div>
         </main>
       </div>
     </SidebarProvider>

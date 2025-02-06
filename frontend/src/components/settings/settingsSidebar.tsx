@@ -40,7 +40,7 @@ export function SettingsSidebar({ courseId }: { courseId: string }) {
       <SidebarContent className="">
         <SidebarMenu className="gap-4">
           {courseSettingsConfig.sections.map((section) => {
-            const isActive = pathname.includes(`/settings/${section.id}`);
+            // const isActive = pathname.includes(`/settings/${section.id}`);
             const SectionIcon = section.icon || ChevronDown;
 
             return (

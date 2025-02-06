@@ -340,7 +340,7 @@ export default function AISUsageSettingsSection() {
                 <h2 className="text-lg font-semibold py-2">System Prompt</h2>
                 <div className="py-4 space-y-4">
                   <p className="text-sm text-neutral-600">
-                    Customize the AI's base behavior and knowledge for this
+                    Customize the AI&apos;s base behavior and knowledge for this
                     role.
                   </p>
                   <Textarea
