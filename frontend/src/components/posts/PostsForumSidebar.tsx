@@ -57,7 +57,7 @@ export default function PostsForumSidebar() {
             New Post
           </Button>
         </div>
-        <TagsSidebar/>
+        <TagsSidebar />
       </div>
       <div
         className={cn(

@@ -70,7 +70,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         {...props}
       />
     );
-  }
+  },
 );
 IconButton.displayName = "IconButton";
 
