@@ -3,6 +3,7 @@ name: Bug Report
 about: Report any bugs/issues encountered
 title: ''
 labels: bug
+type: Bug
 assignees: ''
 
 ---

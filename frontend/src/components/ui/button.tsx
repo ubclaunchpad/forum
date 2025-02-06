@@ -19,6 +19,7 @@ const buttonVariants = cva(
         sm: "h-9 px-8 py-2 text-sm [&>svg]:w-4 [&>svg]:h-4",
         md: "h-11 px-12 py-3 text-base [&>svg]:w-5 [&>svg]:h-5",
         lg: "h-14 px-[60px] py-4 text-lg [&>svg]:w-6 [&>svg]:h-6",
+        icon: "h-11 w-11 rounded-lg"
       },
       icon: {
         visible: "flex-row",
@@ -54,4 +55,21 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = "Button";
 
-export { Button, buttonVariants };
+// IconButton Component: A button intended solely for icons.
+// It extends the ButtonProps but omits the "size" prop to ensure it remains the "icon" size.
+export type IconButtonProps = Omit<ButtonProps, "size">;
+const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
+  ({ className, ...props }, ref) => {
+    return (
+      <Button
+        ref={ref}
+        // Apply the "icon" size by default
+        className={cn(buttonVariants({ size: "icon" }), className)}
+        {...props}
+      />
+    );
+  }
+);
+IconButton.displayName = "IconButton";
+
+export { Button, buttonVariants, IconButton };
