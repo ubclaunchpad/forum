@@ -1,6 +1,5 @@
 "use client";
 
-import { courseContext } from "@/contexts/courseContext";
 import {
   ArrowLeftIcon,
   BugIcon,
@@ -17,6 +16,7 @@ import { signOut } from "./actions";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { userContext } from "@/contexts/userContext";
+import { useCourseStore } from "@/providers/courseStoreProvider";
 
 export function CourseTopbar() {
   return (
@@ -109,7 +109,7 @@ function ProfileButton() {
 
 function CourseButton() {
   const [isOpen, setIsOpen] = useState(false);
-  const course = useContext(courseContext);
+  const course = useCourseStore((state) => state.course);
   const courseName = `${course.c_group} ${course.code} ${course.name}`;
 
   return (

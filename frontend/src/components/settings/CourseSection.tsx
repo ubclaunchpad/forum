@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { courseContext } from "@/contexts/courseContext";
 import { userContext } from "@/contexts/userContext";
 import { getApiUrl } from "@/utils/helpers";
 import { useContext, useState } from "react";
 import { DeleteCourseButton } from "./DeleteCourseButton";
+import { useCourseStore } from "@/providers/courseStoreProvider";
 
 export function CourseSection() {
-  const course = useContext(courseContext);
+  const course = useCourseStore((state) => state.course);
   const { token } = useContext(userContext);
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);

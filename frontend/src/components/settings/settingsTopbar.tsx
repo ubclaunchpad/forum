@@ -3,6 +3,7 @@
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import { Button } from "../ui/button";
 import { isDeepEqual } from "@/lib/utils";
+import useCourseConfig from "@/hooks/useCourseConfig";
 
 export default function SettingsTopBar() {
   const course = useCourseStore((state) => state.course);
@@ -12,6 +13,8 @@ export default function SettingsTopBar() {
     (state) => state.resetPendingChanges,
   );
 
+  const { updateCourseRequest, isLoading } = useCourseConfig();
+
   return (
     <div className="h-20 fixed top-2 flex-shrink-0 max-w-4xl flex justify-center items-center p-4 w-full">
       {isDifferent && (
@@ -20,12 +23,18 @@ export default function SettingsTopBar() {
             className="shadow-md"
             variant={"outline"}
             type="submit"
+            disabled={isLoading}
             onClick={() => resetPendingChanges()}
           >
             Discard
           </Button>
-          <Button className="shadow-md" type="submit">
-            Save
+          <Button
+            disabled={isLoading}
+            className="shadow-md"
+            type="submit"
+            onClick={updateCourseRequest}
+          >
+            {isLoading ? "Saving" : "Save"}
           </Button>
         </div>
       )}
