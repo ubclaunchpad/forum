@@ -19,8 +19,6 @@ async def create_invite(referrer_id: str = Form(...), email: str = Form(...)):
 async def get_invites():
     return invite_controller.get_invites()
 
-
-
 @invite_router.delete("/{referrer_id}/{email}", response_model=GeneralResponse)
 async def delete_invite(referrer_id: str, email: str):
     invite_controller.delete_invite(referrer_id, email)
