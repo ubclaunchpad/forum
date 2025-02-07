@@ -10,6 +10,7 @@ from routers.middleware.auth import AuthMiddleware
 from routers.routes.chat import chat_router
 from routers.routes.courses import course_router
 from routers.routes.documents import document_router
+from routers.routes.invites import invite_router
 from routers.routes.posts import post_router
 from routers.routes.query_history import query_history_router
 from routers.routes.users import user_router
@@ -33,6 +34,7 @@ app = FastAPI(dependencies=[Depends(get_db)])
 app.include_router(course_router, tags=["Courses"], prefix="/courses")
 app.include_router(user_router, tags=["Users"], prefix="/users")
 app.include_router(chat_router, prefix="/channels")
+app.include_router(invite_router, tags=["Invites"], prefix="/invites")
 course_router.include_router(post_router, tags=["Posts"], prefix="/{c_id}/posts")
 course_router.include_router(
     document_router, tags=["Documents"], prefix="/{c_id}/documents"

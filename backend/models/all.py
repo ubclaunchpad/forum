@@ -176,6 +176,18 @@ post_tags = Table(
     schema="public",
 )
 
+super_users = Table(
+    "super_users",
+    Base.metadata,
+    Column(
+        "id",
+        PUUID,
+        ForeignKey("public.profiles.id", ondelete="CASCADE"),
+        primary_key=True
+    ),
+    schema="public",
+)
+
 
 class Profile(Base):
     __tablename__ = "profiles"
@@ -582,3 +594,11 @@ class Tag(Base):
     parent_tag = relationship("Tag", remote_side=[id])
     documents = relationship("Document", secondary=document_tags, back_populates="tags")
     posts = relationship("Post", secondary=post_tags, back_populates="tags")
+
+
+class Invite(Base):
+    __tablename__ = "invites"
+    referrer_id = Column(PUUID, ForeignKey("public.profiles.id", ondelete="CASCADE"), primary_key=True,)
+    referred_email = Column(Text, primary_key=True)
+    invited_at = Column(DateTime, server_default=func.current_timestamp(), nullable=False)
+    joined_at = Column(DateTime, nullable=True)
