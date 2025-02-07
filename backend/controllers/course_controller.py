@@ -230,18 +230,62 @@ def count_all_tags(course_id: str) -> CourseTagCount:
         total = len(result) 
         post_tags_count = sum(getattr(row, "post_tag_count") for row in result)
         doc_tags_count = sum(getattr(row, "doc_tag_count") for row in result)
-        unassigned = total - post_tags_count - doc_tags_count
         return CourseTagCount(
             posts=post_tags_count,
             documents=doc_tags_count,
-            unassigned=unassigned,
             total=total,
         )
 
+def get_tag_association_counts(tag_id: UUID) -> CourseTagCount:
+    with get_db() as db:
+        doc_count = db.query(func.count()).filter(getattr(document_tags.c, "tag_id") == tag_id).scalar()
+        post_count = db.query(func.count()).filter(getattr(post_tags.c, "tag_id") == tag_id).scalar()
+        return CourseTagCount.model_validate({
+            "posts": post_count,
+            "documents": doc_count,
+            "total": doc_count + post_count
+        })
 
 def build_tag_tree(c_uuid, parent_tag_id = None) -> List[CourseTagInformation]:
     with get_db() as db:
         tags = db.query(Tag).filter(Tag.parent_tag_id == parent_tag_id).all()
+        result = []
+        for tag in tags:
+            tag_counts = get_tag_association_counts(getattr(tag, "id"))
+
+            children = build_tag_tree(c_uuid, tag.id)
+
+            for child in children:
+                count = getattr(child, "count")
+                print(count)
+                print(tag_counts)
+                child_post_count = getattr(count, "posts")
+                child_doc_count = getattr(count, "documents")
+                child_total_count = getattr(count, "total")
+                cur_post_count = getattr(tag_counts, "posts")
+                cur_doc_count = getattr(tag_counts, "documents")
+                cur_total_count = getattr(tag_counts, "total")
+                setattr(tag_counts, "posts", cur_post_count + child_post_count)
+                setattr(tag_counts, "documents", cur_doc_count + child_doc_count)
+                setattr(tag_counts, "total", cur_total_count + child_total_count)
+            
+            result.append(
+                CourseTagInformation.model_validate({
+                    "id": getattr(tag, "id"),
+                    "name": getattr(tag, "name"),
+                    "visibility": getattr(tag, "visibility"),
+                    "course_id": getattr(tag, "course_id"),
+                    "created_by": getattr(tag, "created_by"),
+                    "properties": getattr(tag, "properties"),
+                    "subtags": children,
+                    "count": tag_counts,
+                })
+            )
+        return result
+
+def build_flat_tag_array(c_uuid: UUID) -> List[CourseTagInformation]:
+    with get_db() as db:
+        tags = db.query(Tag).filter(Tag.course_id == c_uuid).all()
         return [
             CourseTagInformation.model_validate({
                 "id": getattr(tag, "id"),
@@ -250,30 +294,24 @@ def build_tag_tree(c_uuid, parent_tag_id = None) -> List[CourseTagInformation]:
                 "course_id": getattr(tag, "course_id"),
                 "created_by": getattr(tag, "created_by"),
                 "properties": getattr(tag, "properties"),
-                "subtags": build_tag_tree(c_uuid, tag.id) 
+                "count": get_tag_association_counts(getattr(tag, "id")),
             })
             for tag in tags
         ]
 
-def build_flat_tag_array(c_uuid: UUID) -> List[Tag]:
-    with get_db() as db:
-        tags = db.query(Tag).filter(Tag.course_id == c_uuid).all()
-        return tags
-
 def get_all_tags(course_id: str, nested: bool = True) -> CourseTagsResponse:
-    with get_db() as db:
-        c_uuid = UUID(course_id)
+    c_uuid = UUID(course_id)
+    try:
         tag_counts = count_all_tags(course_id)
-        try:
-            tags = build_tag_tree(c_uuid) if nested else build_flat_tag_array(c_uuid)
-            tags_list = CourseTagsResponse.model_validate({
-                "tags": tags,
-                "count": tag_counts,
-                })
-            return tags_list
-        except ValidationError:
-            logger.error("TAGS gotten from DB does not match schema - fix ASAP")
-            raise Exception("Could not get tags")
+        tags = build_tag_tree(c_uuid) if nested else build_flat_tag_array(c_uuid)
+        tags_list = CourseTagsResponse.model_validate({
+            "tags": tags,
+            "count": tag_counts,
+            })
+        return tags_list
+    except ValidationError as e:
+        logger.error(f"TAGS gotten from DB does not match schema - fix ASAP {str(e)}")
+        raise Exception("Could not get tags")
 
 def get_tag(course_id: str, tag_id: str):
     with get_db() as db:

@@ -62,7 +62,6 @@ class VisibilityEnum(str, Enum):
 class CourseTagCount(BaseModel):
     posts: int
     documents: int
-    unassigned: int
     total: int
 
 class CourseTagInformation(BaseModel):
@@ -81,8 +80,7 @@ class CourseTagInformation(BaseModel):
 
 class CourseTagsResponse(BaseModel):
     tags: List[CourseTagInformation]
-    count: Optional[CourseTagCount] = None
-
+    
 class CourseTagRequest(BaseModel):
     name: Optional[str] = None
     visibility: Optional[VisibilityEnum] = None
