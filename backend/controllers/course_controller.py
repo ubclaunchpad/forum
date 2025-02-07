@@ -257,8 +257,6 @@ def build_tag_tree(c_uuid, parent_tag_id = None) -> List[CourseTagInformation]:
 
             for child in children:
                 count = getattr(child, "count")
-                print(count)
-                print(tag_counts)
                 child_post_count = getattr(count, "posts")
                 child_doc_count = getattr(count, "documents")
                 child_total_count = getattr(count, "total")
