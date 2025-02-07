@@ -251,6 +251,14 @@ def get_all_tags(course_id: str) -> CourseTagsResponse:
             logger.error("TAGS gotten from DB does not match schema - fix ASAP")
             raise Exception("Could not get tags")
 
+def get_tag(course_id: str, tag_id: str):
+    with get_db() as db:
+        c_uuid = UUID(course_id)
+        t_uuid = UUID(tag_id)
+        tag = db.query(Tag).filter(Tag.course_id == c_uuid, Tag.id == t_uuid).first()
+        if not tag:
+            raise HTTPException(status_code=404, detail="Tag not found")
+        return tag
 
 def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool:
     with get_db() as db:
