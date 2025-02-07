@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import { FileText, MoreHorizontal, CopyIcon, DeleteIcon } from "lucide-react";
 import { useContext } from "react";
 import { userContext } from "@/contexts/userContext";
-import { courseContext } from "@/contexts/courseContext";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
 import {
@@ -11,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useCourseStore } from "@/providers/courseStoreProvider";
 
 export default function DocumentRow({
   document,
@@ -26,7 +26,7 @@ export default function DocumentRow({
   setDocuments: React.Dispatch<React.SetStateAction<DocumentInterface[]>>;
 }) {
   const user = useContext(userContext);
-  const course = useContext(courseContext);
+  const course = useCourseStore((state) => state.course);
   const { toast } = useToast();
 
   const handleMoreClick = (e: React.MouseEvent) => {

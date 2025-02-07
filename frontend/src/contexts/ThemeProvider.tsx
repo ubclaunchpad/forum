@@ -1,40 +1,46 @@
 "use client";
 
-import { createContext, ReactNode, useEffect } from "react";
-import { Course } from "@/lib/types/course";
+import { createContext, ReactNode } from "react";
 import { generatePalette } from "@/lib/utils";
 
 const fonts = {
   default: "var(--font-quicksand)",
   "space-grotesk": "var(--font-space-grotesk)",
   inter: "var(--font-inter)",
-  raleway: "var(--font-raleway)",
   "roboto-mono": "var(--font-roboto-mono)",
   "playfair-display": "var(--font-playfair-display)",
   quicksand: "var(--font-quicksand)",
   "source-sans": "var(--font-source-sans)",
+  nunito: "var(--font-nunito)",
+  lato: "var(--font-lato)",
+  "fira-code": "var(--font-fira-code)",
+  roboto: "var(--font-roboto)",
 } as const;
 
-export const courseContext = createContext({} as Course);
+type ThemeContextType = {
+  updateTheme: (config: ThemeConfig | undefined) => void;
+};
 
-export function CourseContextProvider({
-  children,
-  course,
-}: {
-  children: ReactNode;
-  course: Course;
-}) {
-  // Apply theme when course info changes
-  useEffect(() => {
-    if (!course.config) return;
-    const themeColour = course.config.theme_colour;
-    const font = course.config.font;
+export const themeContext = createContext({} as ThemeContextType);
+
+type ThemeConfig = {
+  theme_colour?: string;
+  font?: string;
+};
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  function updateTheme(config: ThemeConfig | undefined) {
+    if (!config) return;
+    const themeColour = config.theme_colour;
+    const font = config.font;
     setTheme(themeColour, font);
-  }, [course]);
+  }
 
-  return (
-    <courseContext.Provider value={course}>{children}</courseContext.Provider>
-  );
+  const val = {
+    updateTheme,
+  };
+
+  return <themeContext.Provider value={val}>{children}</themeContext.Provider>;
 }
 
 export function setTheme(colour?: string, font?: string) {

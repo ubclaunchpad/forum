@@ -1,143 +1,142 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { courseContext, setTheme } from "@/contexts/courseContext";
-import { userContext } from "@/contexts/userContext";
-import { getApiUrl } from "@/utils/helpers";
-import { useContext, useState, useEffect } from "react";
+"use client";
 
-export function AppearanceSection() {
-  const course = useContext(courseContext);
-  const { token } = useContext(userContext);
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [config, setConfig] = useState({
-    theme_colour: course.config?.theme_colour || "#000000",
-    font: course.config?.font || "default",
-  });
+import { SettingsSubSection } from "@/components/settings/SettingsTitleHeader";
+import { colorOptions, fontOptions } from "@/lib/course-settings";
+import { generatePalette } from "@/lib/utils";
+import { useCourseStore } from "@/providers/courseStoreProvider";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-  // Track whether changes have been saved
-  const [savedConfig, setSavedConfig] = useState(config);
+export default function AppearanceSection() {
+  const course = useCourseStore((state) => state.pendingCourse);
+  const updatePendingCourse = useCourseStore(
+    (state) => state.updatePendingCourse,
+  );
 
-  // Apply theme changes immediately for preview
-  useEffect(() => {
-    setTheme(config.theme_colour, config.font);
-
-    // Cleanup: revert to saved theme when unmounting
-    return () => {
-      setTheme(savedConfig.theme_colour, savedConfig.font);
-    };
-  }, [config, savedConfig]);
-
-  const fontOptions = [
-    { value: "default", className: "font-quicksand" },
-    { value: "space-grotesk", className: "font-space-grotesk" },
-    { value: "inter", className: "font-inter" },
-    { value: "playfair-display", className: "font-playfair-display" },
-    { value: "roboto-mono", className: "font-roboto-mono" },
-  ];
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(`${getApiUrl()}/courses/${course.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          name: course.name,
-          c_group: course.c_group,
-          code: course.code,
-          section: course.section,
-          config: {
-            theme_colour: config.theme_colour,
-            font: config.font,
-          },
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update appearance");
-
-      // Invalidate the cache
-      await fetch(`/api/revalidate?tag=course-${course.id}`);
-
-      // Update the saved configuration
-      setSavedConfig(config);
-
-      toast({
-        title: "Success",
-        description: "Course appearance updated successfully",
-      });
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: "Error",
-        description: "Failed to update appearance",
-        variant: "destructive",
-      });
-
-      // Revert to saved config on error
-      setConfig(savedConfig);
-      setTheme(savedConfig.theme_colour, savedConfig.font);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const selectedColor = course.config?.theme_colour || "#2563EB";
+  const selectedFont = course.config?.font || "default";
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Look and Feel</h1>
-        <p className="text-sm text-neutral-500">
-          Customize your course appearance
-        </p>
+    <SettingsSubSection
+      id="appearance"
+      title="Appearance"
+      description="Customize how your course looks for everyone."
+    >
+      {/* Color Select */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Theme Color</label>
+        <Select
+          value={selectedColor}
+          onValueChange={(value) =>
+            updatePendingCourse({
+              config: {
+                ...course.config,
+                theme_colour: value,
+              },
+            })
+          }
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue>
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-4 h-4 rounded"
+                  style={{ backgroundColor: selectedColor }}
+                />
+                {colorOptions.find((c) => c.value === selectedColor)?.label}
+              </div>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {colorOptions.map((color) => {
+                const palette = generatePalette(color.value);
+                return (
+                  <SelectItem
+                    key={color.value}
+                    value={color.value}
+                    className="py-2 flex items-center flex-row justify-between gap-2 w-full"
+                  >
+                    <div className="space-y-1 gap-2 flex flex-1 justify-between w-full items-center">
+                      <div className="flex items-center w-40 gap-2">
+                        <div
+                          className="w-4 h-4 rounded"
+                          style={{ backgroundColor: color.value }}
+                        />
+                        {color.label}
+                      </div>
+                      <div className="flex w-80 h-10 rounded overflow-hidden">
+                        <div
+                          className="flex-1 flex items-center justify-center text-[10px] text-white"
+                          style={{ backgroundColor: palette[100] }}
+                        />
+                        <div
+                          className="flex-1 flex items-center justify-center text-[10px] text-white"
+                          style={{ backgroundColor: palette[300] }}
+                        />
+                        <div
+                          className="flex-1 flex items-center justify-center text-[10px] text-white"
+                          style={{ backgroundColor: palette[500] }}
+                        />
+                        <div
+                          className="flex-1 flex items-center justify-center text-[10px] text-white"
+                          style={{ backgroundColor: palette[700] }}
+                        >
+                          <div
+                            className="flex-1 flex items-center justify-center text-[10px] text-white"
+                            style={{ backgroundColor: palette[900] }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="space-y-4">
-          <div className="grid gap-2">
-            <label htmlFor="theme_colour" className="text-sm font-medium">
-              Theme Color
-            </label>
-            <Input
-              id="theme_colour"
-              type="color"
-              value={config.theme_colour}
-              onChange={(e) =>
-                setConfig((prev) => ({ ...prev, theme_colour: e.target.value }))
-              }
-              className="w-20 h-10"
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <label className="text-sm font-medium">Font</label>
-            <div className="flex flex-wrap gap-2">
+      {/* Font Select */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Font Family</label>
+        <Select
+          value={selectedFont}
+          onValueChange={(value) =>
+            updatePendingCourse({
+              config: {
+                ...course.config,
+                font: value,
+              },
+            })
+          }
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue>
+              {fontOptions.find((f) => f.value === selectedFont)?.label}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
               {fontOptions.map((font) => (
-                <Button
+                <SelectItem
                   key={font.value}
-                  type="button"
-                  variant={config.font === font.value ? "solid" : "outline"}
-                  onClick={() =>
-                    setConfig((prev) => ({ ...prev, font: font.value }))
-                  }
+                  value={font.value}
                   className={font.className}
                 >
-                  {font.value}
-                </Button>
+                  {font.label}
+                </SelectItem>
               ))}
-            </div>
-          </div>
-        </div>
-
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : "Save changes"}
-        </Button>
-      </form>
-    </div>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+    </SettingsSubSection>
   );
 }
