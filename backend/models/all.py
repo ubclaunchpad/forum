@@ -492,23 +492,15 @@ class QueryHistory(Base):
     messages = Column(JSONB)
 
 
-class Message(Base):
-    __tablename__ = "messages"
-    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-    content = Column(Text, nullable=False)
-    created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
-    created_at = Column(
-        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
-    )
-    channel_id = Column(
-        PUUID, ForeignKey("public.channels.id", ondelete="CASCADE"), nullable=False
-    )
-
-
 class Job(Base):
     __tablename__ = "job"
 
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    specification_id = Column(  # Changed from job_id to specification_id
+        PUUID, 
+        ForeignKey("public.job_specification.id", ondelete="CASCADE"), 
+        nullable=False
+    )
     params = Column(JSONB)
     status = Column(
         Enum("not started", "running", "success", "failed", name="job_status"),
@@ -525,9 +517,38 @@ class Job(Base):
     recurring_interval = Column(Integer, nullable=False)  # measured in seconds
     recurring_end_date = Column(DateTime, nullable=True)
 
+    # Add relationship to job specification
+    specification = relationship("JobSpecification", back_populates="jobs")
+
     __table_args__ = (
         Index("idx_status_priority", "status", "priority"),
         {"schema": "public"},
+    )
+
+class JobSpecification(Base):
+    __tablename__ = "job_specification"
+
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    description = Column(Text, nullable=False)
+    action_name = Column(Text, nullable=False)
+    timeout = Column(Integer, nullable=False)  # measured in seconds
+    failure_strategy = Column(
+        Enum("retry", "abort", name="job_failure_strategy"), nullable=False
+    )
+    job_file = Column(String, nullable=False)
+
+    jobs = relationship("Job", back_populates="specification")
+
+class Message(Base):
+    __tablename__ = "messages"
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    content = Column(Text, nullable=False)
+    created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
+    created_at = Column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
+    )
+    channel_id = Column(
+        PUUID, ForeignKey("public.channels.id", ondelete="CASCADE"), nullable=False
     )
     
 class Channel(Base):
@@ -540,7 +561,6 @@ class Channel(Base):
     created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
 
 
-
 class UserChannel(Base):
     __tablename__ = "user_channels"
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
@@ -550,23 +570,6 @@ class UserChannel(Base):
     channel_id = Column(
         PUUID, ForeignKey("public.channels.id", ondelete="CASCADE"), nullable=False
     )
-
-class JobSpecification(Base):
-    __tablename__ = "job_specification"
-
-    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-    job_id = Column(
-        PUUID, ForeignKey("public.job.id", ondelete="CASCADE"), nullable=False
-    )
-    description = Column(Text, nullable=False)
-    action_name = Column(Text, nullable=False)
-    timeout = Column(Integer, nullable=False)  # measured in seconds
-    failure_strategy = Column(
-        Enum("retry", "abort", name="job_failure_strategy"), nullable=False
-    )
-    cleanup_action = Column(Text, nullable=True)
-    job_file = Column(String, nullable=False)
-
 
 class Visibility(PyEnum):
     public = "public"
