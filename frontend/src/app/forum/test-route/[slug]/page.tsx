@@ -3,18 +3,9 @@ import { userContext } from "@/contexts/userContext";
 import { useContext, useEffect, useState } from "react";
 import { getApiUrl } from "@/utils/helpers";
 import { useParams } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
+import { Message } from "@/lib/types/chat";
 
-const supabase = createClient();
-const WS_URL = `ws://localhost:8000/ws/chat/`;
-
-type Message = {
-  content: string;
-  channel_id: string;
-  created_at: Date;
-  created_by: string;
-  id: string;
-};
+const WS_URL = `ws://localhost:8000/channels/chat/`;
 
 export default function Chat() {
   const params = useParams();
@@ -37,7 +28,7 @@ export default function Chat() {
     const fetchMessageHistory = async () => {
       try {
         const response = await fetch(
-          `${getApiUrl()}/chat/${channelId}/history/`,
+          `${getApiUrl()}/channels/${channelId}/history/`,
           {
             headers: {
               Authorization: `Bearer ${user.token}`,
@@ -56,7 +47,7 @@ export default function Chat() {
     };
 
     fetchMessageHistory();
-  }, []);
+  }, [channelId, user.token]);
 
   // Set up WebSocket connection
   useEffect(() => {
@@ -68,7 +59,6 @@ export default function Chat() {
 
     socket.onmessage = (event) => {
       try {
-        // Assuming the server sends JSON strings
         const parsedData = JSON.parse(event.data) as Message;
         setMessages((prev) => [...prev, parsedData]);
       } catch (error) {
@@ -89,13 +79,10 @@ export default function Chat() {
     return () => {
       socket.close();
     };
-  }, [channelId]);
+  }, [channelId, user.token]);
 
-  // Send message via WebSocket
   const sendMessage = () => {
     if (ws && message.trim()) {
-      // If the server expects JSON, you might send:
-      // ws.send(JSON.stringify({ content: message, channel_id: channelId, ... }));
       ws.send(message);
       setMessage("");
     }

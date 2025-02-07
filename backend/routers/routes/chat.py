@@ -1,8 +1,9 @@
 import datetime
 import json
+import uuid
 from typing import Annotated, List
 
-from controllers import websocket_controller
+from controllers import chat_controller
 from fastapi import (
     APIRouter,
     Cookie,
@@ -14,14 +15,8 @@ from fastapi import (
     WebSocketException,
     status,
 )
-from models.schemas import message_schema
+from models.schemas.chat_schema import CreateChannelRequest
 from pydantic import BaseModel
-
-
-class Item(BaseModel):
-    name : str
-    user_id : str
-    users: List[str]
 
 
 class ConnectionManager:
@@ -42,25 +37,24 @@ class ConnectionManager:
         for connection in self.active_connections:
             await connection.send_text(message)
 
-web_router = APIRouter()
+chat_router = APIRouter()
 manager = ConnectionManager()
 
-@web_router.get("/chat/userChannels")
+@chat_router.get("")
 async def getUserChannels(user_id: str):
-    channels = websocket_controller.getUserChannels(user_id)
+    channels = chat_controller.getUserChannels(user_id)
     return [channel.channel_id for channel in channels]
 
+@chat_router.post("")
+async def createNewChannel(channel_req_info: CreateChannelRequest):
+    res = chat_controller.createChannel(channel_req_info)
+    return res
 
-@web_router.get("/chat/{channel_id}/history")
+@chat_router.get("/{channel_id}/history")
 async def getMessageHistory(channel_id: str):
-    messages = websocket_controller.getMessageHistory(channel_id)
+    messages = chat_controller.getMessageHistory(channel_id)
     return messages
 
-@web_router.post("/chat/userChannels")
-async def createNewChannel(item: Item, request: Request):
-    print(request.state)
-    res = websocket_controller.createChannel(item.user_id, item.users, item.name)
-    return res
 
 async def get_token(
     websocket: WebSocket,
@@ -72,23 +66,22 @@ async def get_token(
     return token
 
 
-@web_router.websocket("/ws/chat/{channel_id}")
+@chat_router.websocket("/chat/{channel_id}")
 async def websocket_endpoint(
     *, websocket: WebSocket, 
     channel_id: str, 
     q: int | None = None, 
     token: Annotated[str, Depends(get_token)]):
 
-    user_id = await websocket_controller.verifyToken(token)
-    if not websocket_controller.verifyUserChannel(user_id, channel_id):
+    user_id = await chat_controller.verifyToken(token)
+    if not chat_controller.verifyUserChannel(user_id, channel_id):
         raise Exception("This sucks")
 
     await manager.connect(websocket)
     try:
         while True:
             data = await websocket.receive_text()
-            message_id = websocket_controller.sendMessage(data, user_id, channel_id)
-
+            message_id = uuid.uuid4()
             payload = {
                 "id" : str(message_id),
                 "created_by": user_id,              # Details about who sent the message
@@ -98,5 +91,7 @@ async def websocket_endpoint(
             }
             json_message = json.dumps(payload)
             await manager.broadcast(json_message)
+            message_id = chat_controller.sendMessage(data, user_id, channel_id, message_id)
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)

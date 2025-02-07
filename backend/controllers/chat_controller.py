@@ -3,21 +3,21 @@ from uuid import UUID
 
 from models.all import Channel, Message, UserChannel
 from models.db import get_db, supabase
+from models.schemas.chat_schema import CreateChannelRequest
 from sqlalchemy import exists
 
 
-def sendMessage(data : str, user_id : str, channel_id : str):
+def sendMessage(data : str, user_id : str, channel_id : str, message_id: UUID):
     with get_db() as db:
         try:
             message = Message(
+                id=message_id,
                 content=data,
                 created_by=user_id,
                 channel_id=channel_id
             )
             db.add(message)
             db.flush()
-
-            return message.id
         except Exception as e:
             raise e
         
@@ -39,9 +39,13 @@ def getUserChannels(user_id: str):
         except Exception as e:
             raise e
 
-def createChannel(user_id: str, users: List[str], name):
+def createChannel(channel_info: CreateChannelRequest):
     with get_db() as db:
         try:
+            name = channel_info.name
+            user_id = channel_info.user_id
+            users = channel_info.users
+            
             channel = Channel(
                 name=name,
                 created_by=UUID(user_id)
