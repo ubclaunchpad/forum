@@ -5,6 +5,7 @@ from uuid import UUID
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
+from httpx import get
 from models.all import (
     Course,
     Profile,
@@ -17,6 +18,7 @@ from models.db import get_db
 from models.schemas.course_schema import (
     CourseResponse,
     CourseTagCount,
+    CourseTagInformation,
     CourseTagRequest,
     CourseTagsResponse,
     CreateCourseReq,
@@ -236,15 +238,37 @@ def count_all_tags(course_id: str) -> CourseTagCount:
             total=total,
         )
 
-def get_all_tags(course_id: str) -> CourseTagsResponse:
+
+def build_tag_tree(c_uuid, parent_tag_id = None) -> List[CourseTagInformation]:
+    with get_db() as db:
+        tags = db.query(Tag).filter(Tag.parent_tag_id == parent_tag_id).all()
+        return [
+            CourseTagInformation.model_validate({
+                "id": getattr(tag, "id"),
+                "name": getattr(tag, "name"),
+                "visibility": getattr(tag, "visibility"),
+                "course_id": getattr(tag, "course_id"),
+                "created_by": getattr(tag, "created_by"),
+                "properties": getattr(tag, "properties"),
+                "subtags": build_tag_tree(c_uuid, tag.id) 
+            })
+            for tag in tags
+        ]
+
+def build_flat_tag_array(c_uuid: UUID) -> List[Tag]:
+    with get_db() as db:
+        tags = db.query(Tag).filter(Tag.course_id == c_uuid).all()
+        return tags
+
+def get_all_tags(course_id: str, nested: bool = True) -> CourseTagsResponse:
     with get_db() as db:
         c_uuid = UUID(course_id)
-        tags = db.query(Tag).filter(Tag.course_id == c_uuid).all()
-
+        tag_counts = count_all_tags(course_id)
         try:
+            tags = build_tag_tree(c_uuid) if nested else build_flat_tag_array(c_uuid)
             tags_list = CourseTagsResponse.model_validate({
                 "tags": tags,
-                "count": count_all_tags(course_id),
+                "count": tag_counts,
                 })
             return tags_list
         except ValidationError:

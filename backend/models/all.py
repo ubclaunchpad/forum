@@ -552,3 +552,8 @@ class Tag(Base):
     parent_tag = relationship("Tag", remote_side=[id])
     documents = relationship("Document", secondary=document_tags, back_populates="tags")
     posts = relationship("Post", secondary=post_tags, back_populates="tags")
+    subtags = relationship(
+        "Tag",
+        backref=backref("parent", remote_side=[id]),
+        lazy="joined",
+    )
