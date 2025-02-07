@@ -1,16 +1,16 @@
 from pydantic import BaseModel
 
-class Print_HiParams(BaseModel):
+class PrintHiParams(BaseModel):
     """Parameters for print_hi job"""
     name: str | None = None
     test_error: bool = False  # Add this to test error handling
     test_timeout: bool = False  # Add this to test timeout handling
 
-def execute(params: Print_HiParams) -> str:
+def execute(params: PrintHiParams) -> str:
     """
     Execute the print_hi job
     Args:
-        params (Print_HiParams): Validated parameters for the job
+        params (PrintHiParams): Validated parameters for the job
     Returns:
         str: Greeting message
     """

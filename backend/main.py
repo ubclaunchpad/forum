@@ -13,7 +13,6 @@ from routers.routes.posts import post_router
 from routers.routes.query_history import query_history_router
 from routers.routes.users import user_router
 from routers.routes.invites import invite_router
-from core.scheduler import init_scheduler
 
 environment = os.getenv("ENV")
 PORT = int(os.getenv("PORT", 8000))

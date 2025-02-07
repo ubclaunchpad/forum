@@ -109,13 +109,14 @@ forum/
 We use SqlAlchemy and Alembic for database migrations. The database is hosted on Supabase.
 
 1. Change the files in `models/` to reflect the changes you want to make to the database
-2. Run the following command to generate a new migration:
+2. Run the following command to generate a new empty migration:
 
 ```bash
-d
+  uv run --env-file .env alembic revision -m "your_migration_description"
 ```
 
-This will create a new migration file in the `migrations/versions/` folder
+This will create a new migration file in the `migrations/versions/` folder.
+Please fill in the upgrade & downgrade rules and edit it directly.
 
 3. Run the following command to apply the migration:
 
