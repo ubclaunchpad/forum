@@ -35,7 +35,6 @@ OPENAI_API_KEY=your_key_here
 DATABASE_URL=your_database_url
 SUPABASE_URL=your_supabase_url
 SUPABASE_KEY=your_supabase_key
-
 AUTH_MIDDLEWARE_ENABLED=true # or false
 DEV_USER_EMAIL=your_email_here
 DEV_USER_PASSWORD=your_password_here
@@ -63,6 +62,12 @@ Where to find these?
    uv run --env-file .env -m main
 ```
 
+### 5. Running the Job Scheduler (In Development)
+
+- With the virtual environment activated, run the following command:
+```bash
+    uv run --env-file .env python3 run_scheduler.py
+```
 ## Managing Dependencies
 
 - Install new packages using `uv add <package_name>`
@@ -107,7 +112,7 @@ We use SqlAlchemy and Alembic for database migrations. The database is hosted on
 2. Run the following command to generate a new migration:
 
 ```bash
-uv run --env-file .env alembic revision --autogenerate -m "migration message"
+d
 ```
 
 This will create a new migration file in the `migrations/versions/` folder
