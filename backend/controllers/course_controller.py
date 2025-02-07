@@ -16,6 +16,7 @@ from models.all import (
 from models.db import get_db
 from models.schemas.course_schema import (
     CourseResponse,
+    CourseTagCount,
     CourseTagRequest,
     CourseTagsResponse,
     CreateCourseReq,
@@ -208,12 +209,10 @@ def update_course(create_course_req: UpdateCourseReq, c_id: str) -> Course:
             raise HTTPException(
                 status_code=500, detail=f"Failed to update course: {str(e)}"
             )
-
-
-def get_all_tags(course_id: str) -> CourseTagsResponse:
+        
+def count_all_tags(course_id: str) -> CourseTagCount:
     with get_db() as db:
         c_uuid = UUID(course_id)
-        tags = db.query(Tag).filter(Tag.course_id == c_uuid).all()
         query = (
             db.query(
                 Tag,
@@ -230,15 +229,22 @@ def get_all_tags(course_id: str) -> CourseTagsResponse:
         post_tags_count = sum(getattr(row, "post_tag_count") for row in result)
         doc_tags_count = sum(getattr(row, "doc_tag_count") for row in result)
         unassigned = total - post_tags_count - doc_tags_count
+        return CourseTagCount(
+            posts=post_tags_count,
+            documents=doc_tags_count,
+            unassigned=unassigned,
+            total=total,
+        )
+
+def get_all_tags(course_id: str) -> CourseTagsResponse:
+    with get_db() as db:
+        c_uuid = UUID(course_id)
+        tags = db.query(Tag).filter(Tag.course_id == c_uuid).all()
+
         try:
             tags_list = CourseTagsResponse.model_validate({
                 "tags": tags,
-                "count": {
-                    "posts": post_tags_count,
-                    "documents": doc_tags_count,
-                    "unassigned": unassigned,
-                    "total": total
-                    }
+                "count": count_all_tags(course_id),
                 })
             return tags_list
         except ValidationError:
