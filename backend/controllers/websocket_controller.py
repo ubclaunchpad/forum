@@ -16,6 +16,8 @@ def sendMessage(data : str, user_id : str, channel_id : str):
             )
             db.add(message)
             db.flush()
+
+            return message.id
         except Exception as e:
             raise e
         

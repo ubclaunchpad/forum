@@ -1,3 +1,4 @@
+import datetime
 import json
 from typing import Annotated, List
 
@@ -78,17 +79,24 @@ async def websocket_endpoint(
     q: int | None = None, 
     token: Annotated[str, Depends(get_token)]):
 
-    id = await websocket_controller.verifyToken(token)
-    if not websocket_controller.verifyUserChannel(id, channel_id):
+    user_id = await websocket_controller.verifyToken(token)
+    if not websocket_controller.verifyUserChannel(user_id, channel_id):
         raise Exception("This sucks")
 
     await manager.connect(websocket)
     try:
         while True:
             data = await websocket.receive_text()
-            websocket_controller.sendMessage(data, id, channel_id)
-            await manager.send_personal_message(f"You wrote: {data}", websocket)
-            await manager.broadcast(f"Client #{channel_id} says: {data}")
+            message_id = websocket_controller.sendMessage(data, user_id, channel_id)
+
+            payload = {
+                "id" : str(message_id),
+                "created_by": user_id,              # Details about who sent the message
+                "channel_id": channel_id,        # The channel the message belongs to
+                "content" : data,
+                "created_at": datetime.datetime.now().isoformat(),  # Optional timestamp
+            }
+            json_message = json.dumps(payload)
+            await manager.broadcast(json_message)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        await manager.broadcast(f"Client #{channel_id} left the chat")

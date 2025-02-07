@@ -17,7 +17,7 @@ export default function Channels() {
   return (
     <div>
       <h1>User Data</h1>
-      <button onClick={handleFetchData}>Fetch User Data</button>
+      <button onClick={handleFetchData}>Fetch Channels</button>
       <div>
         {data.length > 0 ? (
           data.map((item, index) => (
