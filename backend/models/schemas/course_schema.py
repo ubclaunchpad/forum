@@ -80,6 +80,7 @@ class CourseTagInformation(BaseModel):
 
 class CourseTagsResponse(BaseModel):
     tags: List[CourseTagInformation]
+    count: Optional[CourseTagCount] = None
     
 class CourseTagRequest(BaseModel):
     name: Optional[str] = None

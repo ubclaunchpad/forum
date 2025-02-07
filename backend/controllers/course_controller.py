@@ -236,10 +236,25 @@ def count_all_tags(course_id: str) -> CourseTagCount:
             total=total,
         )
 
-def get_tag_association_counts(tag_id: UUID) -> CourseTagCount:
+def get_all_tag_tree_ids(tag_id: UUID) -> List[UUID]:
     with get_db() as db:
-        doc_count = db.query(func.count()).filter(getattr(document_tags.c, "tag_id") == tag_id).scalar()
-        post_count = db.query(func.count()).filter(getattr(post_tags.c, "tag_id") == tag_id).scalar()
+        tags = db.query(Tag).filter(Tag.parent_tag_id == tag_id).all()
+        result = [tag_id]
+        for tag in tags:
+            result.extend(get_all_tag_tree_ids(getattr(tag, "id")))
+        return result
+
+def get_tag_association_counts(tag_id: UUID, all=False) -> CourseTagCount:
+    with get_db() as db:
+        if all:
+            doc_filter = getattr(document_tags.c, "tag_id").in_(get_all_tag_tree_ids(tag_id))
+            post_filter = getattr(post_tags.c, "tag_id").in_(get_all_tag_tree_ids(tag_id))
+        else:
+            doc_filter = getattr(document_tags.c, "tag_id") == tag_id
+            post_filter = getattr(post_tags.c, "tag_id") == tag_id
+        
+        doc_count = db.query(func.count()).filter(doc_filter).scalar()
+        post_count = db.query(func.count()).filter(post_filter).scalar()
         return CourseTagCount.model_validate({
             "posts": post_count,
             "documents": doc_count,
@@ -311,14 +326,27 @@ def get_all_tags(course_id: str, nested: bool = True) -> CourseTagsResponse:
         logger.error(f"TAGS gotten from DB does not match schema - fix ASAP {str(e)}")
         raise Exception("Could not get tags")
 
-def get_tag(course_id: str, tag_id: str):
+def get_tag(course_id: str, tag_id: str) -> CourseTagInformation:
     with get_db() as db:
         c_uuid = UUID(course_id)
         t_uuid = UUID(tag_id)
         tag = db.query(Tag).filter(Tag.course_id == c_uuid, Tag.id == t_uuid).first()
         if not tag:
             raise HTTPException(status_code=404, detail="Tag not found")
-        return tag
+        try:
+            return CourseTagInformation.model_validate({
+                "id": getattr(tag, "id"),
+                "name": getattr(tag, "name"),
+                "visibility": getattr(tag, "visibility"),
+                "course_id": getattr(tag, "course_id"),
+                "created_by": getattr(tag, "created_by"),
+                "properties": getattr(tag, "properties"),
+                "subtags": build_tag_tree(c_uuid, t_uuid),
+                "count": get_tag_association_counts(t_uuid, all=True),
+            })
+        except ValidationError as e:
+            logger.error(f"TAG from DB does not match schema {str(e)}")
+            raise Exception("Could not get tag")
 
 def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool:
     with get_db() as db:

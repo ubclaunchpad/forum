@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Request
 from models.schemas.course_schema import (
     CourseMembersResponse,
     CourseResponse,
+    CourseTagInformation,
     CourseTagRequest,
     CourseTagsResponse,
     CreateCourseReq,
@@ -86,7 +87,7 @@ async def get_course_tags(c_id: str):
         raise HTTPException(status_code=404, detail="Item not found")
         # return HTTPException(status_code=500, detail={"msg": str(e)})
 
-@course_router.get("/{c_id}/tags/{t_id}", response_model=CourseTagRequest)
+@course_router.get("/{c_id}/tags/{t_id}", response_model=CourseTagInformation)
 async def get_course_tag(c_id: str, t_id: str):
     try:
         return course_controller.get_tag(c_id, t_id)
