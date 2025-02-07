@@ -72,10 +72,15 @@ class CourseTagInformation(BaseModel):
     class Config:
         from_attributes = True
 
+class CourseTagCount(BaseModel):
+    posts: int
+    documents: int
+    unassigned: int
+    total: int
 
 class CourseTagsResponse(BaseModel):
     tags: List[CourseTagInformation]
-
+    count: Optional[CourseTagCount] = None
 
 class CourseTagRequest(BaseModel):
     name: Optional[str] = None

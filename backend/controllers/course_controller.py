@@ -5,7 +5,14 @@ from uuid import UUID
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from models.all import Course, Profile, Tag, user_courses
+from models.all import (
+    Course,
+    Profile,
+    Tag,
+    user_courses,
+    post_tags,
+    document_tags,
+)
 from models.db import get_db
 from models.schemas.course_schema import (
     CourseResponse,
@@ -17,7 +24,7 @@ from models.schemas.course_schema import (
 )
 from models.schemas.user_schema import SocialLinks, UserProfile
 from pydantic import ValidationError
-from sqlalchemy import desc
+from sqlalchemy import func
 
 logger = logging.getLogger(__name__)
 
@@ -207,8 +214,32 @@ def get_all_tags(course_id: str) -> CourseTagsResponse:
     with get_db() as db:
         c_uuid = UUID(course_id)
         tags = db.query(Tag).filter(Tag.course_id == c_uuid).all()
+        query = (
+            db.query(
+                Tag,
+                func.count(getattr(post_tags.c, "tag_id")).label("post_tag_count"),
+                func.count(getattr(document_tags.c, "tag_id")).label("doc_tag_count"),
+            )
+            .outerjoin(post_tags, Tag.id == getattr(post_tags.c, "tag_id"))
+            .outerjoin(document_tags, Tag.id == getattr(document_tags.c, "tag_id"))
+            .filter(Tag.course_id == c_uuid)
+            .group_by(Tag.id)
+        )
+        result = db.execute(query).fetchall()
+        total = len(result) 
+        post_tags_count = sum(getattr(row, "post_tag_count") for row in result)
+        doc_tags_count = sum(getattr(row, "doc_tag_count") for row in result)
+        unassigned = total - post_tags_count - doc_tags_count
         try:
-            tags_list = CourseTagsResponse.model_validate({"tags": tags})
+            tags_list = CourseTagsResponse.model_validate({
+                "tags": tags,
+                "count": {
+                    "posts": post_tags_count,
+                    "documents": doc_tags_count,
+                    "unassigned": unassigned,
+                    "total": total
+                    }
+                })
             return tags_list
         except ValidationError:
             logger.error("TAGS gotten from DB does not match schema - fix ASAP")
@@ -220,12 +251,12 @@ def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool
         c_uuid = UUID(course_id)
         p_uuid = UUID(str(tagReq.parent_tag_id)) if tagReq.parent_tag_id else None
         tag = Tag(
-            name=tagReq.name,
+            name=getattr(tagReq, "name"),
             course_id=c_uuid,
-            visibility=tagReq.visibility,
+            visibility=getattr(tagReq, "visibility"),
             parent_tag_id=p_uuid,
             created_by=UUID(author_id),
-            properties=tagReq.properties,
+            properties=getattr(tagReq, "properties"),
         )
         try:
             db.add(tag)
