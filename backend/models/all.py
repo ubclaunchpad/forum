@@ -276,6 +276,12 @@ class Post(Base):
         back_populates="post",
     )
     tags = relationship("Tag", secondary=post_tags, back_populates="posts")
+    view_count = Column(
+        Integer, nullable=False, server_default=text("0")
+    )
+    like_count = Column(
+        Integer, nullable=False, server_default=text("0")
+    )
 
     __table_args__ = (
         UniqueConstraint("course_id", "local_id", name="uq_posts_course_local_id"),

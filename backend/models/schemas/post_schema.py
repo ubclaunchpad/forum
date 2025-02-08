@@ -68,6 +68,7 @@ class GetPost(PostBase):
 
 class GetPostsResponse(BaseModel):
     posts: list[GetPost]
+    has_next_page: bool = False
 
 
 class GetPostResponse(BaseModel):

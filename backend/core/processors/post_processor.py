@@ -1,7 +1,7 @@
 import logging
 import re
 import time
-from typing import Dict, List
+from typing import Callable, Dict, List
 from uuid import UUID
 
 import tiktoken
@@ -11,6 +11,8 @@ from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
+def get_embedding_processor() -> EmbeddingProcessor:
+    return EmbeddingProcessor()
 
 class PostProcessor:
     # Add this as a class constant
@@ -151,7 +153,7 @@ class PostProcessor:
 
         return chunks
 
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, get_embedding_processor: Callable[[], EmbeddingProcessor] = get_embedding_processor):
         """Initialize the PostProcessor."""
         self.db = db
         self.embedding_processor = EmbeddingProcessor()
