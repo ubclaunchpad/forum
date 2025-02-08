@@ -20,16 +20,16 @@ git clone https://github.com/ubclaunchpad/forum.git
 
 ### Frontend
 
-#### Install Node.js
+#### 1. Install Node.js
 - Download and install Node.js from [nodejs.org](https://nodejs.org/en)
 
-#### Go to the frontend directory
+#### 2. Go to the frontend directory
 
 ```bash
 cd forum/frontend
 ```
 
-#### Install dependencies
+#### 3. Install dependencies
 
 ```bash
 yarn install # or npm install
@@ -49,7 +49,7 @@ NEXT_PUBLIC_API_BASE_URL=YOUR_API_BASE_URL
 
 Check [here](#envsetup) for details on how to find your environment variables
 
-#### Running the server
+#### 4. Running the server
 
 ```bash
 yarn dev # or npm run dev
@@ -58,35 +58,27 @@ yarn dev # or npm run dev
 
 ### Backend
 
-#### Install Python
+#### 1. Install Python
 
 - Download and install Python from [python.org](https://www.python.org/downloads/)
 - Ensure Python is added to your system's PATH
 
-#### Install UV
+#### 2. Install UV
 
 - Copy based on your OS: <https://docs.astral.sh/uv/getting-started/installation/>
   - e.g. macOS: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
 
-#### Go to the backend directory
+#### 3. Go to the backend directory
 
 ```bash
 cd forum/backend
 ```
 
-#### Install Dependencies (syncing dependencies)
+#### 4. Install Dependencies (syncing dependencies)
 
 ```bash
 uv sync
-```
-
-#### Syncing the Database
-
-- Run the following command to create the database tables:
-
-```bash
-uv run --env-file .env alembic upgrade head
 ```
 
 ### Environment Variables
@@ -117,13 +109,23 @@ Where to find these?
 - Go on [OpenAI](https://platform.openai.com/) and create a new project (or use an existing one)
   - You do not need this unless you use the OpenAI API
 
-#### Running the Server
+#### 5. Syncing the Database
+
+- Run the following command to create the database tables:
+
+```bash
+uv run --env-file .env alembic upgrade head
+```
+
+#### 6. Running the Server
 
 - With the virtual environment activated, run the following command:
 
 ```bash
 uv run --env-file .env -m main
 ```
+
+For more details on managing migrations and dependencies, go to `/backend/README.md`
 
 
 ## Contributing
@@ -134,4 +136,3 @@ See `CONTRIBUTING.md` for ways to get started.
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
-
