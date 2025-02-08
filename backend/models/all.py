@@ -176,25 +176,6 @@ post_tags = Table(
     schema="public",
 )
 
-post_tags = Table(
-    "post_tags",
-    Base.metadata,
-    Column(
-        "post_id",
-        PUUID,
-        ForeignKey("public.posts.id", ondelete="CASCADE"),
-        primary_key=True,
-    ),
-    Column(
-        "tag_id",
-        PUUID,
-        ForeignKey("public.tags.id", ondelete="CASCADE"),
-        primary_key=True,
-    ),
-    Column("created_by", PUUID, ForeignKey("auth.users.id", ondelete="SET NULL")),
-    schema="public",
-)
-
 super_users = Table(
     "super_users",
     Base.metadata,
