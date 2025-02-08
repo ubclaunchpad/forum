@@ -176,6 +176,25 @@ post_tags = Table(
     schema="public",
 )
 
+post_tags = Table(
+    "post_tags",
+    Base.metadata,
+    Column(
+        "post_id",
+        PUUID,
+        ForeignKey("public.posts.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "tag_id",
+        PUUID,
+        ForeignKey("public.tags.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column("created_by", PUUID, ForeignKey("auth.users.id", ondelete="SET NULL")),
+    schema="public",
+)
+
 super_users = Table(
     "super_users",
     Base.metadata,
@@ -491,6 +510,19 @@ class QueryHistory(Base):
     )
     messages = Column(JSONB)
 
+class JobSpecification(Base):
+    __tablename__ = "job_specification"
+
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    description = Column(Text, nullable=False)
+    action_name = Column(Text, nullable=False)
+    timeout = Column(Integer, nullable=False)  # measured in seconds
+    failure_strategy = Column(
+        Enum("retry", "abort", name="job_failure_strategy"), nullable=False
+    )
+    job_file = Column(String, nullable=False)
+
+    jobs = relationship("Job", back_populates="specification")
 
 class Job(Base):
     __tablename__ = "job"
@@ -524,20 +556,6 @@ class Job(Base):
         Index("idx_status_priority", "status", "priority"),
         {"schema": "public"},
     )
-
-class JobSpecification(Base):
-    __tablename__ = "job_specification"
-
-    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-    description = Column(Text, nullable=False)
-    action_name = Column(Text, nullable=False)
-    timeout = Column(Integer, nullable=False)  # measured in seconds
-    failure_strategy = Column(
-        Enum("retry", "abort", name="job_failure_strategy"), nullable=False
-    )
-    job_file = Column(String, nullable=False)
-
-    jobs = relationship("Job", back_populates="specification")
 
 class Message(Base):
     __tablename__ = "messages"
@@ -592,7 +610,6 @@ class Tag(Base):
     updated_at = Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
-
     course = relationship("Course")
     parent_tag = relationship("Tag", remote_side=[id])
     documents = relationship("Document", secondary=document_tags, back_populates="tags")

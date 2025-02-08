@@ -1,10 +1,10 @@
 ---
 name: Bug Report
 about: Report any bugs/issues encountered
-title: ""
+title: ''
 labels: bug
 type: Bug
-assignees: ""
+assignees: ''
 ---
 
 **Describe the bug**
