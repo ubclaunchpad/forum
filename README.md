@@ -1,111 +1,137 @@
+
 # ForumAI
 
-Welcome to the ForumAI! This is a platform for structured academic community discussions and interactions with AI assistance.
+ForumAI is an online platform which enables AI assistance in structured academic forums, facillutating discussions between students and faculty.
+
 
 ## Features
 
-- User registration and authentication
-- Create and manage discussion threads
-- Reply to existing discussions
-- User profiles
-- Search functionality
+- 24/7 AI assistance to help answer questions about course material, assigments and general logistics
+- Discussions boards and Q&A forums for interaction between students, instructors and teaching assistants
+- Anonoymous posting and messaging for safe and inclusive discussions
 
-## Getting Started
+## Installation
 
-### Prerequisites
-
-- Node.js
-- Supabase
-- Python
-- uv (Python packaging tool)
-- npm or yarn
-
-### Installation
-
-Clone the repository
+Clone the project
 
 ```bash
-git clone https://github.com/yourusername/forum.git
+git clone https://github.com/ubclaunchpad/forum.git
 ```
 
-#### Frontend
+### Frontend
 
-1. Install frontend dependencies
+#### Install Node.js
+- Download and install Node.js from [nodejs.org](https://nodejs.org/en)
+
+#### Go to the frontend directory
 
 ```bash
-cd frontend/
-npm install
+cd forum/frontend
 ```
 
-2. Configure environment variables
+#### Install dependencies
 
 ```bash
-touch .env
+yarn install # or npm install
 ```
-Paste these into your .env file
-```bash
-NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_URL
+
+### Environment Variables
+
+Create a `.env` file with:
+
+```txt
+NEXT_PUBLIC_SUPABASE_URL=YOUR_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-OPENAI_API_KEY=YOUR_OPEN_API_KEY
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 DATABASE_URL=YOUR_DATABASE_URL
-NEXT_PUBLIC_API_BASE_URL=YOUR_API_URL
-
+NEXT_PUBLIC_API_BASE_URL=YOUR_API_BASE_URL
 ```
 
-3. Start the application
+Check [here](#envsetup) for details on how to find your environment variables
+
+#### Running the server
 
 ```bash
-npm run dev
+yarn dev # or npm run dev
 ```
 
 
-#### Backend
+### Backend
 
-1. Create a local Supabase project to use as your development environment
+#### Install Python
 
-2. Install backend dependencies
+- Download and install Python from [python.org](https://www.python.org/downloads/)
+- Ensure Python is added to your system's PATH
+
+#### Install UV
+
+- Copy based on your OS: <https://docs.astral.sh/uv/getting-started/installation/>
+  - e.g. macOS: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+
+
+#### Go to the backend directory
 
 ```bash
-cd backend/
+cd forum/backend
+```
+
+#### Install Dependencies (syncing dependencies)
+
+```bash
 uv sync
 ```
 
-3. Configure environment variables
+#### Syncing the Database
 
-```bash
-touch .env
-```
-Paste these into your .env file
-```bash
-OPENAI_API_KEY=YOUR_KEY_HERE
-DATABASE_URL=YOUR_DATABASE_URL
-SUPABASE_URL=YOUR_SUPABASE_URL
-SUPABASE_KEY=YOUR_SUPABASE_KEY
-AUTH_MIDDLEWARE_ENABLED=true # or false
-DEV_USER_EMAIL=YOUR_EMAIL_HERE
-DEV_USER_PASSWORD=YOUR_DEV_USER_PASSWORD
-DEV_LOGIN=true # or false
-
-ENV=development # or production
-
-```
-
-4. Sync the database
+- Run the following command to create the database tables:
 
 ```bash
 uv run --env-file .env alembic upgrade head
 ```
 
-5. Start the application
+### Environment Variables
+
+Create a `.env` file with:
+
+```txt
+OPENAI_API_KEY=your_key_here
+DATABASE_URL=your_database_url
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_key
+AUTH_MIDDLEWARE_ENABLED=true # or false
+DEV_USER_EMAIL=your_email_here
+DEV_USER_PASSWORD=your_password_here
+DEV_LOGIN=true # or false
+
+ENV=development # or production
+```
+<a name="envsetup"></a>
+Where to find these?
+
+- Go on [Supabase](https://supabase.io/) and create a new project
+- Go to the project settings:
+  - In the API section, you will find the `SUPABASE_URL` and `SUPABASE_KEY`
+  - In the Database section, you will find the `DATABASE_URL` (you want a connection string)
+- For most cases you will need to have the `AUTH_MIDDLEWARE_ENABLED` set to `true` and the `DEV_USER_EMAIL` and `DEV_USER_PASSWORD` set to your email and password
+  - On your Supabase project, go to the `Auth` section and create a new user (you can manually set the email and password); then use these credentials in the `.env` file
+- Go on [OpenAI](https://platform.openai.com/) and create a new project (or use an existing one)
+  - You do not need this unless you use the OpenAI API
+
+#### Running the Server
+
+- With the virtual environment activated, run the following command:
 
 ```bash
 uv run --env-file .env -m main
 ```
 
+
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are always welcome!
 
+See `CONTRIBUTING.md` for ways to get started.
 ## License
 
-This project is licensed under the MIT License - see the LICENSE.md file for details.
+[MIT](https://choosealicense.com/licenses/mit/)
+
