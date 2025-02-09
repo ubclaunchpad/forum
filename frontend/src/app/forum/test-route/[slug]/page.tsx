@@ -9,21 +9,13 @@ const WS_URL = `ws://localhost:8000/channels/chat/`;
 
 export default function Chat() {
   const params = useParams();
-  // Renamed for clarity – assuming slug represents the channel id
   const channelId = params.slug;
 
-  // Initialize messages as an empty array to simplify rendering.
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState("");
   const [ws, setWs] = useState<WebSocket | null>(null);
   const user = useContext(userContext);
 
-  // Guard: if user token or channelId is not available, you might want to render a loading state.
-  if (!user?.token || !channelId) {
-    return <div>Loading...</div>;
-  }
-
-  // Fetch message history
   useEffect(() => {
     const fetchMessageHistory = async () => {
       try {
@@ -49,7 +41,6 @@ export default function Chat() {
     fetchMessageHistory();
   }, [channelId, user.token]);
 
-  // Set up WebSocket connection
   useEffect(() => {
     const socket = new WebSocket(`${WS_URL}${channelId}?token=${user.token}`);
 
@@ -87,6 +78,10 @@ export default function Chat() {
       setMessage("");
     }
   };
+
+  if (!user?.token || !channelId) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="p-4">
