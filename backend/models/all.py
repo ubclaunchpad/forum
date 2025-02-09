@@ -176,6 +176,25 @@ post_tags = Table(
     schema="public",
 )
 
+post_tags = Table(
+    "post_tags",
+    Base.metadata,
+    Column(
+        "post_id",
+        PUUID,
+        ForeignKey("public.posts.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "tag_id",
+        PUUID,
+        ForeignKey("public.tags.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column("created_by", PUUID, ForeignKey("auth.users.id", ondelete="SET NULL")),
+    schema="public",
+)
+
 super_users = Table(
     "super_users",
     Base.metadata,
@@ -491,6 +510,38 @@ class QueryHistory(Base):
     )
     messages = Column(JSONB)
 
+class Message(Base):
+    __tablename__ = "messages"
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    content = Column(Text, nullable=False)
+    created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
+    created_at = Column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
+    )
+    channel_id = Column(
+        PUUID, ForeignKey("public.channels.id", ondelete="CASCADE"), nullable=False
+    )
+
+class Channel(Base):
+    __tablename__ = "channels"
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    name = Column(String, nullable=False)
+    created_at = Column(
+        DateTime, server_default=text("CURRENT_TIMESTAMP"), nullable=False
+    )
+    created_by = Column(PUUID, ForeignKey("public.profiles.id"), nullable=False)
+
+
+
+class UserChannel(Base):
+    __tablename__ = "user_channels"
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    user_id = Column(
+        PUUID, ForeignKey("public.profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    channel_id = Column(
+        PUUID, ForeignKey("public.channels.id", ondelete="CASCADE"), nullable=False
+    )
 
 class JobSpecification(Base):
     __tablename__ = "job_specification"
@@ -505,7 +556,6 @@ class JobSpecification(Base):
     job_file = Column(String, nullable=False)
 
     jobs = relationship("Job", back_populates="specification")
-
 
 class Job(Base):
     __tablename__ = "job"
@@ -522,9 +572,6 @@ class Job(Base):
         nullable=False,
     )
     retry_count = Column(Integer, nullable=False)
-    created_at = Column(
-        DateTime, server_default=func.current_timestamp(), nullable=False
-    )
     updated_at = Column(
         DateTime, server_default=func.current_timestamp(), nullable=False
     )

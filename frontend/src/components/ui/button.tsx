@@ -19,7 +19,7 @@ const buttonVariants = cva(
         sm: "h-9 px-8 py-2 text-sm [&>svg]:w-4 [&>svg]:h-4",
         md: "h-11 px-12 py-3 text-base [&>svg]:w-5 [&>svg]:h-5",
         lg: "h-14 px-[60px] py-4 text-lg [&>svg]:w-6 [&>svg]:h-6",
-        icon: "h-11 w-11 rounded-lg"
+        icon: "h-11 w-11 rounded-lg",
       },
       icon: {
         visible: "flex-row",
@@ -68,7 +68,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         {...props}
       />
     );
-  }
+  },
 );
 IconButton.displayName = "IconButton";
 
