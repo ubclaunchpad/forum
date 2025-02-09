@@ -1,8 +1,6 @@
-
 # ForumAI
 
 ForumAI is an online platform which enables AI assistance in structured academic forums, facillutating discussions between students and faculty.
-
 
 ## Features
 
@@ -21,7 +19,8 @@ git clone https://github.com/ubclaunchpad/forum.git
 ### Frontend
 
 #### 1. Install Node.js
-- Download and install Node.js from [nodejs.org](https://nodejs.org/en)
+
+- Download and install the latest version of Node.js from [nodejs.org](https://nodejs.org/en)
 
 #### 2. Go to the frontend directory
 
@@ -55,7 +54,6 @@ Check [here](#envsetup) for details on how to find your environment variables
 yarn dev # or npm run dev
 ```
 
-
 ### Backend
 
 #### 1. Install Python
@@ -63,11 +61,10 @@ yarn dev # or npm run dev
 - Download and install Python from [python.org](https://www.python.org/downloads/)
 - Ensure Python is added to your system's PATH
 
-#### 2. Install UV
+#### 2. Install uv
 
 - Copy based on your OS: <https://docs.astral.sh/uv/getting-started/installation/>
   - e.g. macOS: `curl -LsSf https://astral.sh/uv/install.sh | sh`
-
 
 #### 3. Go to the backend directory
 
@@ -97,6 +94,7 @@ DEV_LOGIN=true # or false
 
 ENV=development # or production
 ```
+
 <a name="envsetup"></a>
 Where to find these?
 
@@ -127,12 +125,12 @@ uv run --env-file .env -m main
 
 For more details on managing migrations and dependencies, go to `/backend/README.md`
 
-
 ## Contributing
 
 Contributions are always welcome!
 
 See `CONTRIBUTING.md` for ways to get started.
+
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+[GNU](https://choosealicense.com/licenses/gpl-3.0/)
