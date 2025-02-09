@@ -215,7 +215,7 @@ def update_course(create_course_req: UpdateCourseReq, c_id: str) -> Course:
                 status_code=500, detail=f"Failed to update course: {str(e)}"
             )
 
-def get_all_tags(course_id: str, nested: bool = True) -> CourseTagsResponse:
+def get_all_tags(course_id: str, nested: bool) -> CourseTagsResponse:
     c_uuid = UUID(course_id)
     try:
         tag_counts = count_all_tags(course_id)
