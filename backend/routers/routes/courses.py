@@ -79,7 +79,7 @@ async def unregister_user(c_id: str, u_id: str):
 
 
 # ----------------- Course Tags -----------------#
-@course_router.get("/{c_id}/tags/", response_model=CourseTagsResponse)
+@course_router.get("/{c_id}/tags", response_model=CourseTagsResponse)
 async def get_course_tags(c_id: str, nested: bool = True):
     try:
         return course_controller.get_all_tags(c_id, nested)

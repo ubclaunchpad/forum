@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 from uuid import UUID
 
 from sqlalchemy import func
@@ -106,3 +106,19 @@ def build_flat_tag_array(c_uuid: UUID) -> List[CourseTagInformation]:
             })
             for tag in tags
         ]
+    
+def has_cycle(tag_id: UUID, parent_tag_id: UUID) -> bool:
+    if tag_id == parent_tag_id:
+        return True
+    
+    with get_db() as db:
+        all_tags: Dict[UUID, Tag] = {getattr(tag, "id"): tag for tag in db.query(Tag).all()}
+        
+        current_tag = all_tags.get(parent_tag_id)
+
+        while current_tag and current_tag.parent_tag_id is not None:
+            if getattr(current_tag, "parent_tag_id") == tag_id:
+                return True
+            current_tag = all_tags.get(getattr(current_tag, "parent_tag_id"))
+
+    return False
