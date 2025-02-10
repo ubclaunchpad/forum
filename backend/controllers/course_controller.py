@@ -299,6 +299,9 @@ def update_tag(c_id: str, t_id: str, tagReq: CourseTagRequest) -> bool:
 
             if not tag:
                 raise Exception("Tag not found")
+            
+            if tagReq.parent_tag_id and tagReq.parent_tag_id == t_uuid:
+                raise Exception("Tag cannot be parent of itself")
 
             update_dict = tagReq.model_dump(exclude_unset=True)
 
