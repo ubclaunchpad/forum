@@ -5,32 +5,15 @@ from uuid import UUID
 
 from httpx import post
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import (
-    ARRAY,
-    DDL,
-    INT,
-    Boolean,
-    CheckConstraint,
-    Column,
-    Date,
-    DateTime,
-    Enum,
-    Float,
-    ForeignKey,
-    ForeignKeyConstraint,
-    Index,
-    Integer,
-    Nullable,
-    String,
-    Table,
-    Text,
-    UniqueConstraint,
-    event,
-    text,
-)
+from regex import F
+from sqlalchemy import (ARRAY, DDL, INT, Boolean, CheckConstraint, Column,
+                        Date, DateTime, Enum, Float, ForeignKey,
+                        ForeignKeyConstraint, Index, Integer, Nullable, String,
+                        Table, Text, UniqueConstraint, event, text)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.dialects.postgresql import UUID as PUUID
-from sqlalchemy.orm import backref, declarative_base, declared_attr, relationship
+from sqlalchemy.orm import (backref, declarative_base, declared_attr,
+                            relationship)
 from sqlalchemy.sql import func
 from sqlalchemy.types import VARCHAR, TypeDecorator
 
@@ -68,6 +51,11 @@ class PostStatus(PyEnum):
     ARCHIVED = "archived"
     DELETED = "deleted"
 
+class CourseAccess(PyEnum):
+    PUBLIC = "public"
+    OPEN = "open"
+    UNLISTED = "unlisted"
+    PRIVATE = "private"
 
 # Create VECTOR type
 class VECTOR(TypeDecorator):
@@ -233,6 +221,7 @@ class Course(Base):
     config = Column(JSONB)
     start_date = Column(Date, server_default=text("CURRENT_DATE"))
     end_date = Column(Date)
+    access = Column(Enum(CourseAccess, name="course_access", schema="public"), nullable=False, default=CourseAccess.UNLISTED)
 
     # Relationships
     users = relationship("Profile", secondary=user_courses, back_populates="courses")
