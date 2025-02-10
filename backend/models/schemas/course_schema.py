@@ -59,6 +59,10 @@ class VisibilityEnum(str, Enum):
     public = "public"
     private = "private"
 
+class CourseTagCount(BaseModel):
+    posts: int
+    documents: int
+    total: int
 
 class CourseTagInformation(BaseModel):
     id: UUID
@@ -68,15 +72,16 @@ class CourseTagInformation(BaseModel):
     parent_tag_id: Optional[UUID] = None
     created_by: Optional[UUID] = None
     properties: Optional[dict] = None
+    subtags: Optional[List["CourseTagInformation"]] = None
+    count: Optional[CourseTagCount] = None
 
     class Config:
         from_attributes = True
 
-
 class CourseTagsResponse(BaseModel):
     tags: List[CourseTagInformation]
-
-
+    count: Optional[CourseTagCount] = None
+    
 class CourseTagRequest(BaseModel):
     name: Optional[str] = None
     visibility: Optional[VisibilityEnum] = None
