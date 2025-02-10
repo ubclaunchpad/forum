@@ -11,6 +11,11 @@ class CourseConfig(BaseModel):
     theme_colour: Optional[str] = None
     font: Optional[str] = None
 
+class CourseAccessEnum(str, Enum):
+    public = "public"
+    open = "open"
+    unlisted = "unlisted"
+    private = "private"
 
 class CourseBase(BaseModel):
     c_group: str
@@ -20,6 +25,7 @@ class CourseBase(BaseModel):
     config: Optional[CourseConfig] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+    access: str
 
     class Config:
         from_attributes = True

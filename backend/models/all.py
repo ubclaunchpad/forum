@@ -52,10 +52,10 @@ class PostStatus(PyEnum):
     DELETED = "deleted"
 
 class CourseAccess(PyEnum):
-    PUBLIC = "public"
-    OPEN = "open"
-    UNLISTED = "unlisted"
-    PRIVATE = "private"
+    public = "public"
+    open = "open"
+    unlisted = "unlisted"
+    private = "private"
 
 # Create VECTOR type
 class VECTOR(TypeDecorator):
@@ -221,7 +221,7 @@ class Course(Base):
     config = Column(JSONB)
     start_date = Column(Date, server_default=text("CURRENT_DATE"))
     end_date = Column(Date)
-    access = Column(Enum(CourseAccess, name="course_access", schema="public"), nullable=False, default=CourseAccess.UNLISTED)
+    access = Column(Enum(CourseAccess, name="course_access", schema="public"), nullable=False, default=CourseAccess.unlisted)
 
     # Relationships
     users = relationship("Profile", secondary=user_courses, back_populates="courses")
