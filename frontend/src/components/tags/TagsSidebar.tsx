@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useTagsConfig from "@/hooks/useTagConfig";
+import { Tag } from "@/lib/types/tags";
 
 export function TagsSidebar() {
   const [isEditing, setIsEditing] = useState(false);
@@ -42,21 +43,7 @@ export function TagsSidebar() {
               <NewTagMode setIsEditing={setIsEditing} />
             ) : (
               <>
-                <ul className="flex flex-col gap-4 ">
-                  {tags.map((tag) => (
-                    <li
-                      className="w-full flex capitalize gap-4 text-sm items-center"
-                      key={tag.id}
-                    >
-                      <div className="w-4 h-4 bg-primary-100 rounded"></div>
-                      <span className="flex-1 truncate">{tag.name}</span>
-
-                      <span className="text-sm flex-shrink-0 text-neutral-400 h-4 min-w-4 ml-auto">
-                        {0}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <TagList tags={tags} level={1} />
                 <Button
                   onClick={() => setIsEditing(true)}
                   size={"none"}
@@ -122,7 +109,6 @@ function NewTagMode({
           <SelectContent>
             <SelectGroup>
               <SelectItem value="public">Everyone</SelectItem>
-              {/* <SelectItem value="restricted">Restricted</SelectItem> */}
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -153,5 +139,39 @@ function NewTagMode({
         <span className="text-sm">All tags</span>
       </Button>
     </form>
+  );
+}
+
+function TagList({ tags, level }: { tags: Tag[]; level: number }) {
+  return (
+    <ul className="flex flex-col gap-2 *:text-sm *:capitalize">
+      {tags.map((tag) => (
+        <li key={tag.id}>
+          <Collapsible
+            defaultOpen={level == 1}
+            className={`p-0 m-0 min-h-0 w-full group/tl`}
+          >
+            <CollapsibleTrigger className="w-full rounded-none px-0" asChild>
+              <button className="w-full flex gap-4 text-left items-center">
+                {level === 1 && (
+                  <div className="w-2 h-2 bg-primary-100 rounded-[2px]"></div>
+                )}
+                <span className="flex-1 truncate">{tag.name}</span>
+                <span className="text-sm flex-shrink-0 text-neutral-400 h-4 min-w-4 ml-auto ">
+                  {tag.count?.total}
+                </span>
+              </button>
+            </CollapsibleTrigger>
+            {tag.subtags && tag.subtags.length > 0 && (
+              <CollapsibleContent className="pl-1 pt-2">
+                <div className="pl-6 border-l">
+                  <TagList tags={tag.subtags ?? []} level={level + 1} />
+                </div>
+              </CollapsibleContent>
+            )}
+          </Collapsible>
+        </li>
+      ))}
+    </ul>
   );
 }
