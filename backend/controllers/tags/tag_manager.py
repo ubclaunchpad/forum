@@ -106,3 +106,17 @@ def build_flat_tag_array(c_uuid: UUID) -> List[CourseTagInformation]:
             })
             for tag in tags
         ]
+    
+def has_cycle(tag_id: UUID, parent_tag_id: UUID) -> bool:
+    if tag_id == parent_tag_id:
+        return True
+    
+    with get_db() as db:
+        parent = db.query(Tag).filter(Tag.id == parent_tag_id).first()
+        
+        while parent:
+            if getattr(parent, "parent_tag_id") == tag_id:
+                return True
+            parent = db.query(Tag).filter(Tag.id == getattr(parent, "parent_tag_id")).first()
+
+    return False

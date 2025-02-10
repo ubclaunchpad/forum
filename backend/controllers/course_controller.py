@@ -8,7 +8,8 @@ from controllers.tags.tag_manager import (
     build_flat_tag_array,
     build_tag_tree,
     count_all_tags,
-    get_tag_association_counts
+    get_tag_association_counts,
+    has_cycle,
 )
 from models.all import (
     Course,
@@ -300,8 +301,8 @@ def update_tag(c_id: str, t_id: str, tagReq: CourseTagRequest) -> bool:
             if not tag:
                 raise Exception("Tag not found")
             
-            if tagReq.parent_tag_id and tagReq.parent_tag_id == t_uuid:
-                raise Exception("Tag cannot be parent of itself")
+            if tagReq.parent_tag_id and has_cycle(t_uuid, tagReq.parent_tag_id):
+                raise Exception("Tag cannot have a cycle")
 
             update_dict = tagReq.model_dump(exclude_unset=True)
 
