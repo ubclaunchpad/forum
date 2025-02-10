@@ -117,7 +117,7 @@ def has_cycle(tag_id: UUID, parent_tag_id: UUID) -> bool:
         current_tag = all_tags.get(parent_tag_id)
 
         while current_tag and current_tag.parent_tag_id is not None:
-            if getattr(current_tag, "id") == tag_id:
+            if getattr(current_tag, "parent_tag_id") == tag_id:
                 return True
             current_tag = all_tags.get(getattr(current_tag, "parent_tag_id"))
 
