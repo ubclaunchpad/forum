@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Request
 from models.schemas.course_schema import (
     CourseMembersResponse,
     CourseResponse,
+    CourseTagInformation,
     CourseTagRequest,
     CourseTagsResponse,
     CreateCourseReq,
@@ -78,14 +79,19 @@ async def unregister_user(c_id: str, u_id: str):
 
 
 # ----------------- Course Tags -----------------#
-@course_router.get("/{c_id}/tags", response_model=CourseTagsResponse)
-async def get_course_tags(c_id: str):
+@course_router.get("/{c_id}/tags/", response_model=CourseTagsResponse)
+async def get_course_tags(c_id: str, nested: bool = True):
     try:
-        return course_controller.get_all_tags(c_id)
+        return course_controller.get_all_tags(c_id, nested)
     except Error as e:
         raise HTTPException(status_code=404, detail="Item not found")
-        # return HTTPException(status_code=500, detail={"msg": str(e)})
 
+@course_router.get("/{c_id}/tags/{t_id}", response_model=CourseTagInformation)
+async def get_course_tag(c_id: str, t_id: str):
+    try:
+        return course_controller.get_tag(c_id, t_id)
+    except Error as e:
+        raise HTTPException(status_code=404, detail="Tag not found")
 
 @course_router.post("/{c_id}/tags", response_model=GeneralResponse)
 async def create_course_tag(c_id: str, req: Request, tagReq: CourseTagRequest):

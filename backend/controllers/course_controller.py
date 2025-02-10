@@ -1,14 +1,27 @@
 import logging
-from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from models.all import Course, Profile, Tag, user_courses
+from controllers.tags.tag_manager import (
+    build_flat_tag_array,
+    build_tag_tree,
+    count_all_tags,
+    get_tag_association_counts
+)
+from models.all import (
+    Course,
+    Profile,
+    Tag,
+    user_courses,
+    post_tags,
+    document_tags,
+)
 from models.db import get_db
 from models.schemas.course_schema import (
     CourseResponse,
+    CourseTagInformation,
     CourseTagRequest,
     CourseTagsResponse,
     CreateCourseReq,
@@ -17,7 +30,7 @@ from models.schemas.course_schema import (
 )
 from models.schemas.user_schema import SocialLinks, UserProfile
 from pydantic import ValidationError
-from sqlalchemy import desc
+from sqlalchemy import func
 
 logger = logging.getLogger(__name__)
 
@@ -202,30 +215,53 @@ def update_course(create_course_req: UpdateCourseReq, c_id: str) -> Course:
                 status_code=500, detail=f"Failed to update course: {str(e)}"
             )
 
+def get_all_tags(course_id: str, nested: bool) -> CourseTagsResponse:
+    c_uuid = UUID(course_id)
+    try:
+        tag_counts = count_all_tags(course_id)
+        tags = build_tag_tree(c_uuid) if nested else build_flat_tag_array(c_uuid)
+        tags_list = CourseTagsResponse.model_validate({
+            "tags": tags,
+            "count": tag_counts,
+            })
+        return tags_list
+    except ValidationError as e:
+        logger.error(f"TAGS gotten from DB does not match schema - fix ASAP {str(e)}")
+        raise Exception("Could not get tags")
 
-def get_all_tags(course_id: str) -> CourseTagsResponse:
+def get_tag(course_id: str, tag_id: str) -> CourseTagInformation:
     with get_db() as db:
         c_uuid = UUID(course_id)
-        tags = db.query(Tag).filter(Tag.course_id == c_uuid).all()
+        t_uuid = UUID(tag_id)
+        tag = db.query(Tag).filter(Tag.course_id == c_uuid, Tag.id == t_uuid).first()
+        if not tag:
+            raise HTTPException(status_code=404, detail="Tag not found")
         try:
-            tags_list = CourseTagsResponse.model_validate({"tags": tags})
-            return tags_list
-        except ValidationError:
-            logger.error("TAGS gotten from DB does not match schema - fix ASAP")
-            raise Exception("Could not get tags")
-
+            return CourseTagInformation.model_validate({
+                "id": getattr(tag, "id"),
+                "name": getattr(tag, "name"),
+                "visibility": getattr(tag, "visibility"),
+                "course_id": getattr(tag, "course_id"),
+                "created_by": getattr(tag, "created_by"),
+                "properties": getattr(tag, "properties"),
+                "subtags": build_tag_tree(c_uuid, t_uuid),
+                "count": get_tag_association_counts(t_uuid, all=True),
+            })
+        except ValidationError as e:
+            logger.error(f"TAG from DB does not match schema {str(e)}")
+            raise Exception("Could not get tag")
 
 def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool:
     with get_db() as db:
         c_uuid = UUID(course_id)
         p_uuid = UUID(str(tagReq.parent_tag_id)) if tagReq.parent_tag_id else None
         tag = Tag(
-            name=tagReq.name,
+            name=getattr(tagReq, "name"),
             course_id=c_uuid,
-            visibility=tagReq.visibility,
+            visibility=getattr(tagReq, "visibility"),
             parent_tag_id=p_uuid,
             created_by=UUID(author_id),
-            properties=tagReq.properties,
+            properties=getattr(tagReq, "properties"),
         )
         try:
             db.add(tag)
