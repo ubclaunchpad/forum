@@ -112,28 +112,29 @@ function ProfileButton() {
 function CourseButton() {
   const [isOpen, setIsOpen] = useState(false);
   const course = useCourseStore((state) => state.course);
-  const {user, token} = useContext(userContext);
+  const { user, token } = useContext(userContext);
   const courseName = `${course.c_group} ${course.code} ${course.name}`;
   const router = useRouter();
 
-
   async function leaveCourse() {
-   try {
-       const res = await fetch(`${getApiUrl()}/courses/${course.id}/members/${user.id}`, {
-        method: "DELETE",
-         headers: {
+    try {
+      const res = await fetch(
+        `${getApiUrl()}/courses/${course.id}/members/${user.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
-           Authorization: `Bearer ${token}`,
-         },
-       });
-   
-       if (!res.ok) throw new Error("Failed to leave course");
+      if (!res.ok) throw new Error("Failed to leave course");
 
-       router.push("/forum/courses")
-     } catch (error) {
-      console.log(error)
-       return [];
-     }
+      router.push("/forum/courses");
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
   }
 
   return (
@@ -157,7 +158,7 @@ function CourseButton() {
                 Course Settings
               </Link>
               <button
-              disabled={false}
+                disabled={false}
                 className="w-full  disabled:hover:text-neutral-400  hover:text-red-500 p-1 px-2 text-sm flex items-center gap-2"
                 onClick={leaveCourse}
               >

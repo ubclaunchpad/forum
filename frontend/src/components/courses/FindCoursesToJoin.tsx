@@ -13,7 +13,7 @@ export default function FindCoursesToJoin() {
   const [isJoining, setIsJoining] = useState(false);
   const { token, user } = useContext(userContext);
   const { courses, removeCourse } = useGetOpenCourses(token);
-  const {toast} = useToast();
+  const { toast } = useToast();
 
   const handleJoinByInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +29,6 @@ export default function FindCoursesToJoin() {
       });
 
       if (!res.ok) throw new Error("Failed to join course");
-
     } catch (error) {
       console.error("Failed to join course:", error);
     } finally {
@@ -41,13 +40,16 @@ export default function FindCoursesToJoin() {
   const handleJoinCourse = async (courseId: string) => {
     setIsJoining(true);
     try {
-      const res = await fetch(`${getApiUrl()}/courses/${courseId}/members/${user.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        `${getApiUrl()}/courses/${courseId}/members/${user.id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (!res.ok) throw new Error("Failed to join course");
 
@@ -55,9 +57,8 @@ export default function FindCoursesToJoin() {
       removeCourse(courseId);
 
       toast({
-        title: "Joined course"
-      })
-
+        title: "Joined course",
+      });
 
       // Handle successful join
       // You might want to redirect or update UI
@@ -71,23 +72,23 @@ export default function FindCoursesToJoin() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4">
-        <h4 className="font-semibold">Join With Invite Code
-        <span className="px-2 text-left italic text-sm font-normal text-neutral-600">
+        <h4 className="font-semibold">
+          Join With Invite Code
+          <span className="px-2 text-left italic text-sm font-normal text-neutral-600">
             Not supported yet
-        </span>
-
+          </span>
         </h4>
-       
+
         <form onSubmit={handleJoinByInvite} className="flex w-full gap-2">
           <Input
-          disabled
+            disabled
             value={inviteCode}
             onChange={(e) => setInviteCode(e.target.value)}
             placeholder="Enter invite code"
             className="rounded-lg m-0"
           />
           <Button
-          disabled
+            disabled
             type="submit"
             size={"sm"}
             // disabled={!inviteCode || isJoining}
