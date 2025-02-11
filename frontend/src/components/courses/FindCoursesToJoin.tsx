@@ -154,12 +154,13 @@ const getCachedData = (key: string) => {
 
     return data;
   } catch (error) {
+    console.log(error)
     return null;
   }
 };
 
 // Helper to set cached data with timestamp
-const setCachedData = (key: string, data: any) => {
+const setCachedData = (key: string, data: object) => {
   try {
     sessionStorage.setItem(
       key,
