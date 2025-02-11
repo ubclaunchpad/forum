@@ -5,6 +5,7 @@ from uuid import UUID
 
 from httpx import post
 from pgvector.sqlalchemy import Vector
+from regex import F
 from sqlalchemy import (
     ARRAY,
     DDL,
@@ -67,6 +68,13 @@ class PostStatus(PyEnum):
     PUBLISHED = "published"
     ARCHIVED = "archived"
     DELETED = "deleted"
+
+
+class CourseAccess(PyEnum):
+    public = "public"
+    open = "open"
+    unlisted = "unlisted"
+    private = "private"
 
 
 # Create VECTOR type
@@ -183,7 +191,7 @@ super_users = Table(
         "id",
         PUUID,
         ForeignKey("public.profiles.id", ondelete="CASCADE"),
-        primary_key=True
+        primary_key=True,
     ),
     schema="public",
 )
@@ -233,6 +241,11 @@ class Course(Base):
     config = Column(JSONB)
     start_date = Column(Date, server_default=text("CURRENT_DATE"))
     end_date = Column(Date)
+    access = Column(
+        Enum(CourseAccess, name="course_access", schema="public"),
+        nullable=False,
+        default=CourseAccess.unlisted,
+    )
 
     # Relationships
     users = relationship("Profile", secondary=user_courses, back_populates="courses")
@@ -512,9 +525,9 @@ class Job(Base):
 
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
     specification_id = Column(  # Changed from job_id to specification_id
-        PUUID, 
-        ForeignKey("public.job_specification.id", ondelete="CASCADE"), 
-        nullable=False
+        PUUID,
+        ForeignKey("public.job_specification.id", ondelete="CASCADE"),
+        nullable=False,
     )
     params = Column(JSONB)
     status = Column(
@@ -579,7 +592,13 @@ class Tag(Base):
 
 class Invite(Base):
     __tablename__ = "invites"
-    referrer_id = Column(PUUID, ForeignKey("public.profiles.id", ondelete="CASCADE"), primary_key=True,)
+    referrer_id = Column(
+        PUUID,
+        ForeignKey("public.profiles.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
     referred_email = Column(Text, primary_key=True)
-    invited_at = Column(DateTime, server_default=func.current_timestamp(), nullable=False)
+    invited_at = Column(
+        DateTime, server_default=func.current_timestamp(), nullable=False
+    )
     joined_at = Column(DateTime, nullable=True)

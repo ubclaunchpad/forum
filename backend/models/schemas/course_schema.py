@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 from uuid import UUID
 
 from models.schemas.user_schema import UserProfile
@@ -12,14 +12,22 @@ class CourseConfig(BaseModel):
     font: Optional[str] = None
 
 
+class CourseAccessEnum(str, Enum):
+    public = "public"
+    open = "open"
+    unlisted = "unlisted"
+    private = "private"
+
+
 class CourseBase(BaseModel):
     c_group: str
     code: int
-    section: int
+    section: Union[int, str]
     name: Optional[str] = None
     config: Optional[CourseConfig] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+    access: str
 
     class Config:
         from_attributes = True
@@ -59,10 +67,12 @@ class VisibilityEnum(str, Enum):
     public = "public"
     private = "private"
 
+
 class CourseTagCount(BaseModel):
     posts: int
     documents: int
     total: int
+
 
 class CourseTagInformation(BaseModel):
     id: UUID
@@ -78,10 +88,12 @@ class CourseTagInformation(BaseModel):
     class Config:
         from_attributes = True
 
+
 class CourseTagsResponse(BaseModel):
     tags: List[CourseTagInformation]
     count: Optional[CourseTagCount] = None
-    
+
+
 class CourseTagRequest(BaseModel):
     name: Optional[str] = None
     visibility: Optional[VisibilityEnum] = None

@@ -1,8 +1,12 @@
+import logging
 from csv import Error
+from math import log
+from typing import Optional
 
 from controllers import course_controller
 from fastapi import APIRouter, HTTPException, Request
 from models.schemas.course_schema import (
+    CourseAccessEnum,
     CourseMembersResponse,
     CourseResponse,
     CourseTagInformation,
@@ -17,6 +21,8 @@ from models.schemas.general_schema import GeneralResponse
 
 course_router = APIRouter()
 
+logger = logging.getLogger(__name__)
+
 
 @course_router.post("", response_model=CreateCourseResponse)
 async def create_course(create_course_req: CreateCourseReq, request: Request):
@@ -25,9 +31,11 @@ async def create_course(create_course_req: CreateCourseReq, request: Request):
 
 
 @course_router.get("", response_model=GetCoursesResponse)
-async def get_courses_route(request: Request):
+async def get_courses_route(
+    request: Request, access: Optional[CourseAccessEnum] = None
+):
     user_id = request.state.user_id
-    courses = course_controller.get_courses(user_id)
+    courses = course_controller.get_courses(user_id, access)
     return {"courses": courses}
 
 
@@ -86,12 +94,14 @@ async def get_course_tags(c_id: str, nested: bool = True):
     except Error as e:
         raise HTTPException(status_code=404, detail="Item not found")
 
+
 @course_router.get("/{c_id}/tags/{t_id}", response_model=CourseTagInformation)
 async def get_course_tag(c_id: str, t_id: str):
     try:
         return course_controller.get_tag(c_id, t_id)
     except Error as e:
         raise HTTPException(status_code=404, detail="Tag not found")
+
 
 @course_router.post("/{c_id}/tags", response_model=GeneralResponse)
 async def create_course_tag(c_id: str, req: Request, tagReq: CourseTagRequest):

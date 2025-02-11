@@ -13,8 +13,10 @@ class InviteResponse(InviteBase):
     invited_at: datetime
     joined_at: Optional[datetime] = None
 
+
 class GetInvitesResponse(BaseModel):
     invites: list[InviteResponse]
+
 
 class CreateInviteResponse(InviteBase):
     pass

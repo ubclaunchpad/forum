@@ -67,6 +67,7 @@ def root():
     """Root path"""
     return {"message": "ForumAI is running!"}
 
+
 print(f"Running in {environment} environment")
 print(f"Auth middleware enabled: {AUTH_MIDDLEWARE_ENABLED}")
 print(f"Allowed origins: {allowed_origins}")

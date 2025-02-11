@@ -206,6 +206,23 @@ class FileStorage:
                 status_code=500, detail=f"Could not generate signed URL: {e}"
             )
 
+    def get_file_signed_urls(self, file_paths: List[str]) -> List[dict[str, str]]:
+        try:
+            signed_urls = self.supabase.storage.from_(
+                self.bucket_name
+            ).create_signed_urls(file_paths, 3600)
+            if not signed_urls:
+                raise HTTPException(
+                    status_code=500,
+                    detail="Failed to generate signed URLs for files",
+                )
+            return signed_urls
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Could not generate signed URLs: {e}"
+            )
+
 
 # async def get_file_type(file: UploadFile, file_content: bytes) -> str:
 #     """Detect file type using both mime type and magic numbers."""

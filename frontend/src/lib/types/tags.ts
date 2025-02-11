@@ -6,6 +6,6 @@ export type Tag = {
   parent_tag_id: string | null;
   created_by: string;
   properties: object | null;
-  count?: {posts: number,  documents: number, total: number}
-  subtags?: Tag[]
+  count?: { posts: number; documents: number; total: number };
+  subtags?: Tag[];
 };

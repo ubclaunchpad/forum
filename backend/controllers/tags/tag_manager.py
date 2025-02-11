@@ -22,7 +22,7 @@ def count_all_tags(course_id: str) -> CourseTagCount:
             .group_by(Tag.id)
         )
         result = db.execute(query).fetchall()
-        total = len(result) 
+        total = len(result)
         post_tags_count = sum(getattr(row, "post_tag_count") for row in result)
         doc_tags_count = sum(getattr(row, "doc_tag_count") for row in result)
         return CourseTagCount(
@@ -30,6 +30,7 @@ def count_all_tags(course_id: str) -> CourseTagCount:
             documents=doc_tags_count,
             total=total,
         )
+
 
 def get_all_tag_tree_ids(tag_id: UUID) -> List[UUID]:
     with get_db() as db:
@@ -39,24 +40,32 @@ def get_all_tag_tree_ids(tag_id: UUID) -> List[UUID]:
             result.extend(get_all_tag_tree_ids(getattr(tag, "id")))
         return result
 
+
 def get_tag_association_counts(tag_id: UUID, all=False) -> CourseTagCount:
     with get_db() as db:
         if all:
-            doc_filter = getattr(document_tags.c, "tag_id").in_(get_all_tag_tree_ids(tag_id))
-            post_filter = getattr(post_tags.c, "tag_id").in_(get_all_tag_tree_ids(tag_id))
+            doc_filter = getattr(document_tags.c, "tag_id").in_(
+                get_all_tag_tree_ids(tag_id)
+            )
+            post_filter = getattr(post_tags.c, "tag_id").in_(
+                get_all_tag_tree_ids(tag_id)
+            )
         else:
             doc_filter = getattr(document_tags.c, "tag_id") == tag_id
             post_filter = getattr(post_tags.c, "tag_id") == tag_id
-        
+
         doc_count = db.query(func.count()).filter(doc_filter).scalar()
         post_count = db.query(func.count()).filter(post_filter).scalar()
-        return CourseTagCount.model_validate({
-            "posts": post_count,
-            "documents": doc_count,
-            "total": doc_count + post_count
-        })
+        return CourseTagCount.model_validate(
+            {
+                "posts": post_count,
+                "documents": doc_count,
+                "total": doc_count + post_count,
+            }
+        )
 
-def build_tag_tree(c_uuid, parent_tag_id = None) -> List[CourseTagInformation]:
+
+def build_tag_tree(c_uuid, parent_tag_id=None) -> List[CourseTagInformation]:
     with get_db() as db:
         tags = db.query(Tag).filter(Tag.parent_tag_id == parent_tag_id).all()
         result = []
@@ -76,44 +85,52 @@ def build_tag_tree(c_uuid, parent_tag_id = None) -> List[CourseTagInformation]:
                 setattr(tag_counts, "posts", cur_post_count + child_post_count)
                 setattr(tag_counts, "documents", cur_doc_count + child_doc_count)
                 setattr(tag_counts, "total", cur_total_count + child_total_count)
-            
+
             result.append(
-                CourseTagInformation.model_validate({
+                CourseTagInformation.model_validate(
+                    {
+                        "id": getattr(tag, "id"),
+                        "name": getattr(tag, "name"),
+                        "visibility": getattr(tag, "visibility"),
+                        "course_id": getattr(tag, "course_id"),
+                        "created_by": getattr(tag, "created_by"),
+                        "properties": getattr(tag, "properties"),
+                        "subtags": children,
+                        "count": tag_counts,
+                    }
+                )
+            )
+        return result
+
+
+def build_flat_tag_array(c_uuid: UUID) -> List[CourseTagInformation]:
+    with get_db() as db:
+        tags = db.query(Tag).filter(Tag.course_id == c_uuid).all()
+        return [
+            CourseTagInformation.model_validate(
+                {
                     "id": getattr(tag, "id"),
                     "name": getattr(tag, "name"),
                     "visibility": getattr(tag, "visibility"),
                     "course_id": getattr(tag, "course_id"),
                     "created_by": getattr(tag, "created_by"),
                     "properties": getattr(tag, "properties"),
-                    "subtags": children,
-                    "count": tag_counts,
-                })
+                    "count": get_tag_association_counts(getattr(tag, "id")),
+                }
             )
-        return result
-
-def build_flat_tag_array(c_uuid: UUID) -> List[CourseTagInformation]:
-    with get_db() as db:
-        tags = db.query(Tag).filter(Tag.course_id == c_uuid).all()
-        return [
-            CourseTagInformation.model_validate({
-                "id": getattr(tag, "id"),
-                "name": getattr(tag, "name"),
-                "visibility": getattr(tag, "visibility"),
-                "course_id": getattr(tag, "course_id"),
-                "created_by": getattr(tag, "created_by"),
-                "properties": getattr(tag, "properties"),
-                "count": get_tag_association_counts(getattr(tag, "id")),
-            })
             for tag in tags
         ]
-    
+
+
 def has_cycle(tag_id: UUID, parent_tag_id: UUID) -> bool:
     if tag_id == parent_tag_id:
         return True
-    
+
     with get_db() as db:
-        all_tags: Dict[UUID, Tag] = {getattr(tag, "id"): tag for tag in db.query(Tag).all()}
-        
+        all_tags: Dict[UUID, Tag] = {
+            getattr(tag, "id"): tag for tag in db.query(Tag).all()
+        }
+
         current_tag = all_tags.get(parent_tag_id)
 
         while current_tag and current_tag.parent_tag_id is not None:

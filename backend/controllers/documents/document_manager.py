@@ -250,3 +250,48 @@ def get_signed_document_url(course_id: UUID, document_id: str) -> Dict[str, str]
                 exc_info=True,
             )
             raise e
+
+
+def get_signed_document_urls(
+    course_id: UUID, document_ids: list[str]
+) -> Dict[str, str]:
+    """Get signed URLs for multiple documents.
+
+    Args:
+        course_id: Course ID
+        document_ids: List of document IDs
+
+    Returns:
+        Dict mapping document IDs to signed URLs
+    """
+    logger.info("Getting signed URLs", extra={"document_ids": ", ".join(document_ids)})
+
+    with get_db() as db:
+        try:
+            documents = db.query(Document).filter(Document.id.in_(document_ids)).all()
+            if not documents:
+                logger.error("No documents found", extra={"document_ids": document_ids})
+                raise ValueError("No documents found")
+
+            file_paths = [str(doc.file_url) for doc in documents]
+            file_storage = FileStorage(
+                bucket_name=f"course-{str(course_id)}", create_bucket_if_not_found=False
+            )
+
+            signed_urls = file_storage.get_file_signed_urls(file_paths)
+
+            # Map document IDs to their signed URLs
+            id_to_url = {}
+            for doc, signed_url in zip(documents, signed_urls):
+                id_to_url[str(doc.id)] = signed_url["signedURL"]
+
+            logger.info("Signed URLs generated", extra={"count": len(id_to_url)})
+            return id_to_url
+
+        except Exception as e:
+            logger.error(
+                "Error getting signed URLs",
+                extra={"document_ids": document_ids, "error": str(e)},
+                exc_info=True,
+            )
+            raise e

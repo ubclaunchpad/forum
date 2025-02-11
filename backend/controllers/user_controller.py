@@ -107,10 +107,14 @@ def create_user(create_user_request: CreateUserBaseRequest) -> CreateUserRespons
         if db.query(Profile).filter(Profile.email == create_user_request.email).first():
             raise ValueError("User already exists.")
 
-        invite = db.query(Invite).filter(Invite.referred_email == create_user_request.email).first()
+        invite = (
+            db.query(Invite)
+            .filter(Invite.referred_email == create_user_request.email)
+            .first()
+        )
         if invite == None:
             raise ValueError("Email has not been invited")
-        
+
         auth_response = supabase.auth.sign_up(
             {
                 "email": create_user_request.email,

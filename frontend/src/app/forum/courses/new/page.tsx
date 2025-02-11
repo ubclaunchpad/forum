@@ -3,33 +3,95 @@ import { z } from "zod";
 import { useState, useRef, useContext } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, PlusCircleIcon, UsersIcon } from "lucide-react";
 import { getApiUrl } from "@/utils/helpers";
 import { userContext } from "@/contexts/userContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { courseSchema, CourseAccessOptions } from "@/lib/types/course";
+import FindCoursesToJoin from "@/components/courses/FindCoursesToJoin";
 
 const inputStyle =
   "rounded-full w-full px-3 py-4 h-12 border border-neutral-200 focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
 
-const formSchema = z.object({
+const formSchema = courseSchema.omit({ id: true, config: true }).extend({
   name: z.string().min(4, {
     message: "Course name must be at least 4 characters long",
   }),
-  code: z.coerce.number().int().positive(),
-  c_group: z.string(),
-  section: z.coerce.number().int().positive(),
 });
 
-// Add these constants at the top of the file
 const DEFAULT_CONFIG = {
   theme_colour: "#347370",
   font: "default",
+  feature_flags: {
+    posts_enabled: true,
+    documents_enabled: true,
+    chat_enabled: false,
+    ai_enabled: true,
+    directory_enabled: true,
+    dark_mode_enabled: false,
+  },
 };
 
-export default function CoursesNewPage() {
-  const { token } = useContext(userContext);
+export default function CoursesPage() {
+  return (
+    <div className="flex flex-col w-dvw h-dvh overflow-hidden bg-neutral-100 items-center justify-center">
+      <section className="max-w-3xl flex flex-col  w-full">
+        <Link
+          className="flex flex-row items-center gap-2 py-2 hover:text-primary-500"
+          href={"/forum/courses"}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to your courses
+        </Link>
+        <Tabs
+          defaultValue="join"
+          className="w-full border rounded-xl flex flex-col flex-1 min-h-[60dvh] overflow-y-scroll bg-neutral-50"
+        >
+          <TabsList className="grid w-full  rounded-b-none rounded-t-xl min-h-12 grid-cols-2">
+            <TabsTrigger
+              value="join"
+              className="flex items-center h-full gap-2"
+            >
+              <UsersIcon className="w-4 h-4" />
+              Join
+            </TabsTrigger>
+            <TabsTrigger
+              value="create"
+              className="flex items-center h-full gap-2"
+            >
+              <PlusCircleIcon className="w-4 h-4" />
+              Create
+            </TabsTrigger>
+          </TabsList>
 
+          <TabsContent value="join" className="p-8">
+            <FindCoursesToJoin />
+          </TabsContent>
+
+          <TabsContent value="create" className="p-8  flex flex-col flex-1">
+            <CoursesNewPage />
+          </TabsContent>
+        </Tabs>
+      </section>
+    </div>
+  );
+}
+
+function CoursesNewPage() {
+  const { token } = useContext(userContext);
   const [loading, setLoading] = useState(false);
+  const [access, setAccess] = useState<string>(
+    CourseAccessOptions.unlisted.value,
+  );
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
@@ -41,10 +103,13 @@ export default function CoursesNewPage() {
     const formData = new FormData(e.currentTarget);
 
     try {
-      const dataToValidate = Object.fromEntries(formData.entries());
+      const dataToValidate = {
+        ...Object.fromEntries(formData.entries()),
+        access: access,
+      };
+
       const validatedData = formSchema.parse(dataToValidate);
 
-      // Add the default config to the request body
       const requestBody = {
         ...validatedData,
         config: DEFAULT_CONFIG,
@@ -78,6 +143,7 @@ export default function CoursesNewPage() {
       });
 
       formRef.current?.reset();
+      setAccess(CourseAccessOptions.unlisted.value);
     } catch (e) {
       if (e instanceof z.ZodError) {
         toast({
@@ -99,66 +165,97 @@ export default function CoursesNewPage() {
   };
 
   return (
-    <div className="flex flex-col w-dvw h-dvh bg-neutral-100 items-center justify-center">
-      <section className="max-w-xl bg-neutral-50 flex flex-col w-full border rounded-lg gap-10 shadow p-8">
-        <h3 className="font-semibold">New Course</h3>
-        <form
-          ref={formRef}
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-4"
-        >
-          <div className="flex flex-col gap-1">
-            <label htmlFor="name" className="text-sm font-medium">
-              Name
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              className={inputStyle}
-              placeholder="Course name e.g. Introduction to AI"
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="code" className="text-sm font-medium">
-              Code
-            </label>
-            <input
-              id="code"
-              name="code"
-              type="number"
-              className={inputStyle}
-              placeholder="Course code e.g. 123"
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="c_group" className="text-sm font-medium">
-              Course Group
-            </label>
-            <input
-              id="c_group"
-              name="c_group"
-              type="text"
-              className={inputStyle}
-              placeholder="Course group e.g. CPSC"
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="section" className="text-sm font-medium">
-              Section
-            </label>
-            <input
-              id="section"
-              name="section"
-              type="number"
-              className={inputStyle}
-              placeholder="Course section e.g. 1"
-              required
-            />
-          </div>
+    <div className="flex flex-col flex-1  gap-10">
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4 flex-1  "
+      >
+        <div className="flex flex-col  gap-1">
+          <label htmlFor="name" className="text-sm font-medium">
+            Name
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            className={inputStyle}
+            placeholder="Course name e.g. Introduction to AI"
+            required
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="code" className="text-sm font-medium">
+            Code
+          </label>
+          <input
+            id="code"
+            name="code"
+            type="number"
+            className={inputStyle}
+            placeholder="Course code e.g. 123"
+            required
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="c_group" className="text-sm font-medium">
+            Course Group
+          </label>
+          <input
+            id="c_group"
+            name="c_group"
+            type="text"
+            className={inputStyle}
+            placeholder="Course group e.g. CPSC"
+            required
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="section" className="text-sm font-medium">
+            Section
+          </label>
+          <input
+            id="section"
+            name="section"
+            type="text"
+            className={inputStyle}
+            placeholder="Course section e.g. 1 or ALL"
+            required
+          />
+        </div>
+        <div className="flex flex-col flex-1 pt-4 border-t gap-1">
+          <label htmlFor="access" className="text-sm font-medium">
+            Access Level
+          </label>
+          <Select value={access} onValueChange={setAccess}>
+            <SelectTrigger className={inputStyle}>
+              <SelectValue>
+                {
+                  CourseAccessOptions[
+                    access as keyof typeof CourseAccessOptions
+                  ].label
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {Object.values(CourseAccessOptions).map((option) => (
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                  className={`${access === option.value ? "bg-primary/10" : ""}`}
+                >
+                  <div className="flex flex-col gap-1">
+                    <div className="font-medium">{option.label}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {option.description}
+                    </div>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-col justify-end   flex-1">
           <button
             type="submit"
             disabled={loading}
@@ -166,8 +263,8 @@ export default function CoursesNewPage() {
           >
             {loading ? "Creating..." : "Create Course"}
           </button>
-        </form>
-      </section>
+        </div>
+      </form>
     </div>
   );
 }

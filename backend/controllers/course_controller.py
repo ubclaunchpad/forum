@@ -2,8 +2,6 @@ import logging
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import HTTPException
-from fastapi.encoders import jsonable_encoder
 from controllers.tags.tag_manager import (
     build_flat_tag_array,
     build_tag_tree,
@@ -11,16 +9,12 @@ from controllers.tags.tag_manager import (
     get_tag_association_counts,
     has_cycle,
 )
-from models.all import (
-    Course,
-    Profile,
-    Tag,
-    user_courses,
-    post_tags,
-    document_tags,
-)
+from fastapi import HTTPException
+from fastapi.encoders import jsonable_encoder
+from models.all import Course, Profile, Tag, document_tags, post_tags, user_courses
 from models.db import get_db
 from models.schemas.course_schema import (
+    CourseAccessEnum,
     CourseResponse,
     CourseTagInformation,
     CourseTagRequest,
@@ -31,7 +25,7 @@ from models.schemas.course_schema import (
 )
 from models.schemas.user_schema import SocialLinks, UserProfile
 from pydantic import ValidationError
-from sqlalchemy import func
+from sqlalchemy import exists, func
 
 logger = logging.getLogger(__name__)
 
@@ -65,10 +59,26 @@ def create_course(
             raise e
 
 
-def get_courses(user_id) -> List[CourseResponse]:
+def get_courses(
+    user_id, access: Optional[CourseAccessEnum] = None
+) -> List[CourseResponse]:
     try:
         with get_db() as db:
-            courses = db.query(Course).filter(Course.users.any(id=user_id)).all()
+            courses = []
+            if access is not None:
+                courses = (
+                    db.query(Course)
+                    .filter(
+                        ~exists().where(
+                            user_courses.c.course_id == Course.id,
+                            user_courses.c.user_id == user_id,
+                        ),
+                        Course.access == access,
+                    )
+                    .all()
+                )
+            else:
+                courses = db.query(Course).filter(Course.users.any(id=user_id)).all()
             pydantic_courses = []
 
             for course in courses:
@@ -122,6 +132,10 @@ def add_user_to_course(c_id: str, u_id: str) -> bool:
         course = db.query(Course).filter(Course.id == c_uuid).first()
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
+
+        print("S")
+        if course.access.value == CourseAccessEnum.private:
+            raise HTTPException(status_code=403, detail="Cannot join a private course")
 
         user = db.query(Profile).filter(Profile.id == u_uuid).first()
         if not user:
@@ -216,19 +230,23 @@ def update_course(create_course_req: UpdateCourseReq, c_id: str) -> Course:
                 status_code=500, detail=f"Failed to update course: {str(e)}"
             )
 
+
 def get_all_tags(course_id: str, nested: bool) -> CourseTagsResponse:
     c_uuid = UUID(course_id)
     try:
         tag_counts = count_all_tags(course_id)
         tags = build_tag_tree(c_uuid) if nested else build_flat_tag_array(c_uuid)
-        tags_list = CourseTagsResponse.model_validate({
-            "tags": tags,
-            "count": tag_counts,
-            })
+        tags_list = CourseTagsResponse.model_validate(
+            {
+                "tags": tags,
+                "count": tag_counts,
+            }
+        )
         return tags_list
     except ValidationError as e:
         logger.error(f"TAGS gotten from DB does not match schema - fix ASAP {str(e)}")
         raise Exception("Could not get tags")
+
 
 def get_tag(course_id: str, tag_id: str) -> CourseTagInformation:
     with get_db() as db:
@@ -238,19 +256,22 @@ def get_tag(course_id: str, tag_id: str) -> CourseTagInformation:
         if not tag:
             raise HTTPException(status_code=404, detail="Tag not found")
         try:
-            return CourseTagInformation.model_validate({
-                "id": getattr(tag, "id"),
-                "name": getattr(tag, "name"),
-                "visibility": getattr(tag, "visibility"),
-                "course_id": getattr(tag, "course_id"),
-                "created_by": getattr(tag, "created_by"),
-                "properties": getattr(tag, "properties"),
-                "subtags": build_tag_tree(c_uuid, t_uuid),
-                "count": get_tag_association_counts(t_uuid, all=True),
-            })
+            return CourseTagInformation.model_validate(
+                {
+                    "id": getattr(tag, "id"),
+                    "name": getattr(tag, "name"),
+                    "visibility": getattr(tag, "visibility"),
+                    "course_id": getattr(tag, "course_id"),
+                    "created_by": getattr(tag, "created_by"),
+                    "properties": getattr(tag, "properties"),
+                    "subtags": build_tag_tree(c_uuid, t_uuid),
+                    "count": get_tag_association_counts(t_uuid, all=True),
+                }
+            )
         except ValidationError as e:
             logger.error(f"TAG from DB does not match schema {str(e)}")
             raise Exception("Could not get tag")
+
 
 def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool:
     with get_db() as db:
@@ -300,7 +321,7 @@ def update_tag(c_id: str, t_id: str, tagReq: CourseTagRequest) -> bool:
 
             if not tag:
                 raise Exception("Tag not found")
-            
+
             if tagReq.parent_tag_id and has_cycle(t_uuid, tagReq.parent_tag_id):
                 raise Exception("Tag cannot have a cycle")
 
