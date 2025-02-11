@@ -70,7 +70,7 @@ export default function PostsForumSidebar() {
           style={{ scrollBehavior: "auto" }}
           className={cn("flex relative flex-col h-full overflow-y-auto")}
         >
-          <div className="flex justify-center h-16 flex-shrink-0 border-b py-2 w-full gap-2">
+          <div className="flex justify-center items-center h-16 flex-shrink-0 border-b py-2 w-full gap-2">
             <Button
               className="flex md:hidden w-full max-w-[150px] min-h-none h-fit py-2"
               onClick={() => {

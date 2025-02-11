@@ -7,7 +7,8 @@ import type {
 } from "@/lib/types/documents";
 import { Dispatch, Fragment, SetStateAction, useEffect } from "react";
 import FileUpload from "@/components/files/NewFileUpload";
-import { generateTempId, isPendingId } from "@/lib/utils";
+import { cn, generateTempId, isPendingId } from "@/lib/utils";
+import { Button } from "../ui/button";
 
 export const DocumentListSidebar = ({
   files,
@@ -48,27 +49,50 @@ export const DocumentListSidebar = ({
   }, [files, selectedFile, setSelectedFile]);
 
   return (
-    <Fragment>
-      <section className="flex relative vt flex-col h-full  overflow-y-auto overflow-x-hidden min-w-[500px] max-w-[500px] border-r">
-        <div className="flex justify-center h-12 flex-shrink-0 border-b w-full gap-2"></div>
-        <ul className="flex flex-col gap-2 p-2">
-          {files.map((doc) => (
-            <li key={doc.id} className="w-full flex items-center">
-              <DocumentRow
-                setDocuments={setFiles}
-                disabled={isPendingId(doc.id)}
-                document={doc}
-                isSelected={selectedFile?.id === doc.id}
-                onClick={() => setSelectedFile(doc)}
-              />
-            </li>
-          ))}
-        </ul>
-        <FileUpload
-          appendToFiles={appendToFiles}
-          onUploadSuccess={onUploadSuccess}
-        />
-      </section>
-    </Fragment>
+    <>
+    <div
+        className={cn(
+          "relative flex flex-col",
+          "hidden md:block md:min-w-[min(280px,100%)] w-full max-w-0 lg:max-w-[280px]",
+          selectedFile ? "hidden xl:block" : "",
+        )}
+      >
+        <div className="flex flex-row justify-center items-center w-full h-16 px-2">
+          <FileUpload
+            styles="w-full max-w-[150px] min-h-none h-fit py-2"
+            appendToFiles={appendToFiles}
+            onUploadSuccess={onUploadSuccess}
+          />
+        </div>
+      </div>
+      <div className={cn(
+          "relative flex flex-1 flex-col",
+          "min-w-[min(500px,100%)] w-full xl:max-w-[500px] border-l border-b border-neutral-200",
+          selectedFile ? "hidden xl:block" : "",
+        )}>
+        <section className={cn("flex relative flex-col h-full overflow-y-auto")}> 
+          <div className="flex items-center h-16 flex-shrink-0 border-b py-2 w-full gap-2">
+            <FileUpload
+              styles="flex justify-center md:hidden w-full max-w-[150px] min-h-none h-fit py-2"
+              appendToFiles={appendToFiles}
+              onUploadSuccess={onUploadSuccess}
+            />
+          </div>
+          <ul className="flex flex-col gap-2 p-2">
+            {files.map((doc) => (
+              <li key={doc.id} className="w-full flex items-center">
+                <DocumentRow
+                  setDocuments={setFiles}
+                  disabled={isPendingId(doc.id)}
+                  document={doc}
+                  isSelected={selectedFile?.id === doc.id}
+                  onClick={() => setSelectedFile(doc)}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </>
   );
 };
