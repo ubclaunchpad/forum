@@ -1,15 +1,18 @@
 import { Course, coursePartialUpdateSchema } from "@/lib/types/course";
+import { Tag } from "@/lib/types/tags";
 import { createStore } from "zustand";
 
 export type CourseState = {
   course: Course;
   pendingCourse: Course;
+  tags: Tag[];
 };
 
 export type CourseActions = {
   updatePendingCourse: (courseDetails: Partial<Course>) => void;
   saveCourseChanges: () => boolean;
   resetPendingChanges: () => void;
+  addTag: (tag: Tag) => void;
 };
 
 export type CourseStore = CourseState & CourseActions;
@@ -41,5 +44,9 @@ export const createCourseStore = (initState: CourseState) => {
       }));
       return true;
     },
+    addTag: (tag: Tag) =>
+      set((state) => ({
+        tags: [...state.tags, tag],
+      })),
   }));
 };
