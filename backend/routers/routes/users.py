@@ -65,7 +65,7 @@ async def create_user(create_user_request: CreateUserBaseRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=400, detail="Failed to create user.")
+        raise HTTPException(status_code=400, detail="Failed to create user." + str(e))
 
 
 @user_router.put("/me", response_model=UserProfile)

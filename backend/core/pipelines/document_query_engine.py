@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import time
 from pathlib import Path
 from typing import Any, AsyncGenerator, Dict, List, Optional, Union
 from uuid import UUID
@@ -12,6 +13,12 @@ from core.processors.embedding_processor import EmbeddingProcessor
 from models.all import Document, Embedding
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
+from openai.types.chat.chat_completion_system_message_param import (
+    ChatCompletionSystemMessageParam,
+)
+from openai.types.chat.chat_completion_user_message_param import (
+    ChatCompletionUserMessageParam,
+)
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -102,6 +109,13 @@ class DocumentQueryEngine:
             result = self.db.execute(statement=query, params=params)
             chunks = result.fetchall()
             logger.debug(f"Found {len(chunks)} relevant chunks")
+            # Get document IDs for signed URL lookup
+            doc_ids = [str(chunk.document_id) for chunk in chunks if chunk is not None]
+            signed_url_map = {}
+            if doc_ids and course_id:
+                signed_url_map = document_manager.get_signed_document_urls(
+                    course_id=course_id, document_ids=doc_ids
+                )
 
             return [
                 {
@@ -111,9 +125,7 @@ class DocumentQueryEngine:
                     "metadata": chunk.metadata or {},
                     "document_title": chunk.document_title or "Unknown Document",
                     "document_id": str(chunk.document_id),
-                    "signed_url": document_manager.get_signed_document_url(
-                        course_id=str(course_id), document_id=str(chunk.document_id)
-                    )["signedURL"],
+                    "signed_url": signed_url_map.get(str(chunk.document_id), ""),
                     "similarity": float(chunk.similarity)
                     if chunk.similarity is not None
                     else 0.0,
@@ -377,19 +389,32 @@ class DocumentQueryEngine:
         self,
         question: str,
         course_id: Optional[UUID] = None,
-        history: Optional[Dict[str, str]] = None,
+        history: Optional[
+            List[
+                Union[ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam]
+            ]
+        ] = None,
         template_name: Optional[str] = None,
     ) -> AsyncGenerator[str, None]:
         """Process a query through the RAG pipeline with streaming response."""
+        start_time = time.time()
+
         try:
             if history is None:
                 history = []
             question_embedding = self.embedding_processor.generate_embedding(question)
+
+            chunk_time = time.time()
+
             relevant_chunks = self._find_relevant_document_chunks(
-                question_embedding, threshold=0.0, course_id=course_id
+                question_embedding, threshold=0.45, course_id=course_id
             )
             relevant_posts = self._find_relevant_post_chunks(
-                question_embedding, threshold=0.0, course_id=course_id
+                question_embedding, threshold=0.45, course_id=course_id
+            )
+
+            logger.debug(
+                f"Finding relevant chunks took: {time.time() - chunk_time:.2f}s"
             )
 
             all_contexts = relevant_chunks + relevant_posts
@@ -405,25 +430,22 @@ class DocumentQueryEngine:
                 return
 
             prompt = self._build_prompt(question, all_contexts, template_name)
+            sources = self._format_sources(all_contexts)
 
-            sources = None
             try:
-                # Initialize sources first
-                sources = self._format_sources(all_contexts)
                 yield json.dumps({"answer": "", "sources": sources, "done": False})
+                messages = []
+                if history:
+                    messages.extend(history)  # type: ignore
+                messages.append(
+                    ChatCompletionUserMessageParam(role="user", content=prompt)
+                )  # type: ignore
 
-                messages = (
-                    [
-                        {
-                            "role": "system",
-                            "content": "You are a helpful expert who provides accurate but concise information with source citations.",
-                        }
-                    ]
-                    + history
-                    + [{"role": "user", "content": prompt}]
+                stream_time = time.time()
+                logger.debug(
+                    f"time to get to streaming: {time.time() - start_time:.2f}s"
                 )
 
-                # Stream the response
                 stream = self.client.chat.completions.create(
                     model=self.model,
                     messages=messages,
@@ -431,20 +453,29 @@ class DocumentQueryEngine:
                     stream=True,
                 )
 
+                # Initialize buffers for batching
                 current_answer = ""
+                buffer = ""
+                BATCH_SIZE = 100  # Adjust this value based on your needs
+
                 for chunk in stream:
                     if chunk.choices[0].delta.content is not None:
-                        content = chunk.choices[0].delta.content
-                        current_answer += content
-                        yield json.dumps({"answer": current_answer, "done": False})
+                        buffer += chunk.choices[0].delta.content
+                        # Only yield when buffer reaches batch size
+                        if len(buffer) >= BATCH_SIZE:
+                            current_answer += buffer
+                            yield json.dumps({"answer": current_answer, "done": False})
+                            buffer = ""  # Reset buffer after yielding
 
-                # Send final chunk
-                yield json.dumps(
-                    {
-                        "done": True
-                        # No need to send sources again
-                    }
-                )
+                if buffer:
+                    current_answer += buffer
+                    yield json.dumps({"answer": current_answer, "done": False})
+
+                logger.debug(f"Streaming took: {time.time() - stream_time:.2f}s")
+                logger.debug(f"Total query time: {time.time() - start_time:.2f}s")
+
+                yield json.dumps({"done": True})
+
             except Exception as e:
                 logger.error(f"OpenAI API error: {e}", exc_info=True)
                 yield json.dumps(

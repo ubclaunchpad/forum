@@ -5,9 +5,9 @@ import { PlusIcon, Upload, XIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
-import { courseContext } from "@/contexts/courseContext";
 import { userContext } from "@/contexts/userContext";
 import { DocumentAppendOperation } from "@/lib/types/documents";
+import { useCourseStore } from "@/providers/courseStoreProvider";
 
 export default function FileUpload({
   appendToFiles,
@@ -19,7 +19,7 @@ export default function FileUpload({
   styles: string;
 }) {
   const { token } = useContext(userContext);
-  const course = useContext(courseContext);
+  const course = useCourseStore((state) => state.course);
   const { toast } = useToast();
 
   const [title, setTitle] = useState("");

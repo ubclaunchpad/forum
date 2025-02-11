@@ -3,14 +3,8 @@
 import { Post, PostWithRequiredId } from "@/lib/types/posts";
 import { getIdType } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import {
-  createContext,
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useState,
-} from "react";
-import { courseContext } from "./courseContext";
+import { createContext, Dispatch, SetStateAction, useState } from "react";
+import { useCourseStore } from "@/providers/courseStoreProvider";
 
 type ForumContextType = {
   selectedPost: Post | null;
@@ -35,7 +29,7 @@ export function ForumContextProvider({
   initialPosts: Post[];
   initialSelectedId?: string;
 }) {
-  const course = useContext(courseContext);
+  const course = useCourseStore((state) => state.course);
   const router = useRouter();
   const foundPost = initialSelectedId
     ? initialPosts.find(

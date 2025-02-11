@@ -5,6 +5,7 @@ from uuid import UUID
 
 from httpx import post
 from pgvector.sqlalchemy import Vector
+from regex import F
 from sqlalchemy import (
     ARRAY,
     DDL,
@@ -67,6 +68,13 @@ class PostStatus(PyEnum):
     PUBLISHED = "published"
     ARCHIVED = "archived"
     DELETED = "deleted"
+
+
+class CourseAccess(PyEnum):
+    public = "public"
+    open = "open"
+    unlisted = "unlisted"
+    private = "private"
 
 
 # Create VECTOR type
@@ -176,6 +184,18 @@ post_tags = Table(
     schema="public",
 )
 
+super_users = Table(
+    "super_users",
+    Base.metadata,
+    Column(
+        "id",
+        PUUID,
+        ForeignKey("public.profiles.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    schema="public",
+)
+
 
 class Profile(Base):
     __tablename__ = "profiles"
@@ -221,6 +241,11 @@ class Course(Base):
     config = Column(JSONB)
     start_date = Column(Date, server_default=text("CURRENT_DATE"))
     end_date = Column(Date)
+    access = Column(
+        Enum(CourseAccess, name="course_access", schema="public"),
+        nullable=False,
+        default=CourseAccess.unlisted,
+    )
 
     # Relationships
     users = relationship("Profile", secondary=user_courses, back_populates="courses")
@@ -480,10 +505,30 @@ class QueryHistory(Base):
     messages = Column(JSONB)
 
 
+class JobSpecification(Base):
+    __tablename__ = "job_specification"
+
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    description = Column(Text, nullable=False)
+    action_name = Column(Text, nullable=False)
+    timeout = Column(Integer, nullable=False)  # measured in seconds
+    failure_strategy = Column(
+        Enum("retry", "abort", name="job_failure_strategy"), nullable=False
+    )
+    job_file = Column(String, nullable=False)
+
+    jobs = relationship("Job", back_populates="specification")
+
+
 class Job(Base):
     __tablename__ = "job"
 
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    specification_id = Column(  # Changed from job_id to specification_id
+        PUUID,
+        ForeignKey("public.job_specification.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     params = Column(JSONB)
     status = Column(
         Enum("not started", "running", "success", "failed", name="job_status"),
@@ -503,27 +548,13 @@ class Job(Base):
     recurring_interval = Column(Integer, nullable=False)  # measured in seconds
     recurring_end_date = Column(DateTime, nullable=True)
 
+    # Add relationship to job specification
+    specification = relationship("JobSpecification", back_populates="jobs")
+
     __table_args__ = (
         Index("idx_status_priority", "status", "priority"),
         {"schema": "public"},
     )
-
-
-class JobSpecification(Base):
-    __tablename__ = "job_specification"
-
-    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-    job_id = Column(
-        PUUID, ForeignKey("public.job.id", ondelete="CASCADE"), nullable=False
-    )
-    description = Column(Text, nullable=False)
-    action_name = Column(Text, nullable=False)
-    timeout = Column(Integer, nullable=False)  # measured in seconds
-    failure_strategy = Column(
-        Enum("retry", "abort", name="job_failure_strategy"), nullable=False
-    )
-    cleanup_action = Column(Text, nullable=True)
-    job_file = Column(String, nullable=False)
 
 
 class Visibility(PyEnum):
@@ -552,3 +583,22 @@ class Tag(Base):
     parent_tag = relationship("Tag", remote_side=[id])
     documents = relationship("Document", secondary=document_tags, back_populates="tags")
     posts = relationship("Post", secondary=post_tags, back_populates="tags")
+    subtags = relationship(
+        "Tag",
+        backref=backref("parent", remote_side=[id]),
+        lazy="joined",
+    )
+
+
+class Invite(Base):
+    __tablename__ = "invites"
+    referrer_id = Column(
+        PUUID,
+        ForeignKey("public.profiles.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    referred_email = Column(Text, primary_key=True)
+    invited_at = Column(
+        DateTime, server_default=func.current_timestamp(), nullable=False
+    )
+    joined_at = Column(DateTime, nullable=True)

@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { UserContextProvider } from "@/contexts/userContext";
 import { Suspense } from "react";
+import { ThemeProvider } from "@/contexts/ThemeProvider";
 
 export default async function RootLayout({
   children,
@@ -33,7 +34,7 @@ export default async function RootLayout({
   return (
     <Suspense>
       <UserContextProvider token={token} user={data.user}>
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </UserContextProvider>
     </Suspense>
   );

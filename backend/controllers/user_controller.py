@@ -5,9 +5,11 @@ from uuid import UUID
 import supabase
 from core.util.file_storage import ConflictResolution, FileStorage
 from fastapi import HTTPException
-from models.all import Course, Profile
+from models.all import Course, Profile, Invite
 from models.db import get_db, supabase
 from models.schemas.general_schema import GeneralResponse
+from controllers import invite_controller
+from datetime import datetime
 from models.schemas.user_schema import (
     CreateUserBaseRequest,
     CreateUserResponse,
@@ -104,6 +106,15 @@ def create_user(create_user_request: CreateUserBaseRequest) -> CreateUserRespons
     with get_db() as db:
         if db.query(Profile).filter(Profile.email == create_user_request.email).first():
             raise ValueError("User already exists.")
+
+        invite = (
+            db.query(Invite)
+            .filter(Invite.referred_email == create_user_request.email)
+            .first()
+        )
+        if invite == None:
+            raise ValueError("Email has not been invited")
+
         auth_response = supabase.auth.sign_up(
             {
                 "email": create_user_request.email,
@@ -119,6 +130,7 @@ def create_user(create_user_request: CreateUserBaseRequest) -> CreateUserRespons
             last_name=create_user_request.last_name,
         )
         db.add(user)
+        setattr(invite, "joined_at", datetime.now())
         db.flush()
         return CreateUserResponse(
             id=UUID(auth_response.user.id), email=create_user_request.email

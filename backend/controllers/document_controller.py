@@ -27,13 +27,13 @@ def get_document_tags(document_id: str) -> CourseTagsResponse:
         for tag in post.tags:
             tags.append(
                 CourseTagInformation(
-                    id=tag.id,
-                    name=tag.name,
-                    visibility=tag.visibility,
-                    course_id=tag.course_id,
-                    parent_tag_id=tag.parent_tag_id,
-                    created_by=tag.created_by,
-                    properties=tag.properties,
+                    id=getattr(tag, "id"),
+                    name=getattr(tag, "name"),
+                    visibility=getattr(tag, "visibility"),
+                    course_id=getattr(tag, "course_id"),
+                    parent_tag_id=getattr(tag, "parent_tag_id"),
+                    created_by=getattr(tag, "created_by"),
+                    properties=getattr(tag, "properties"),
                 )
             )
     return CourseTagsResponse(tags=tags)
