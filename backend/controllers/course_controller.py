@@ -2,36 +2,24 @@ import logging
 from typing import List, Optional
 from uuid import UUID
 
+from controllers.tags.tag_manager import (build_flat_tag_array, build_tag_tree,
+                                          count_all_tags,
+                                          get_tag_association_counts,
+                                          has_cycle)
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from controllers.tags.tag_manager import (
-    build_flat_tag_array,
-    build_tag_tree,
-    count_all_tags,
-    get_tag_association_counts,
-    has_cycle,
-)
-from models.all import (
-    Course,
-    Profile,
-    Tag,
-    user_courses,
-    post_tags,
-    document_tags,
-)
+from models.all import (Course, Profile, Tag, document_tags, post_tags,
+                        user_courses)
 from models.db import get_db
-from models.schemas.course_schema import (
-    CourseResponse,
-    CourseTagInformation,
-    CourseTagRequest,
-    CourseTagsResponse,
-    CreateCourseReq,
-    CreateCourseResponse,
-    UpdateCourseReq,
-)
+from models.schemas.course_schema import (CourseAccessEnum, CourseResponse,
+                                          CourseTagInformation,
+                                          CourseTagRequest, CourseTagsResponse,
+                                          CreateCourseReq,
+                                          CreateCourseResponse,
+                                          UpdateCourseReq)
 from models.schemas.user_schema import SocialLinks, UserProfile
 from pydantic import ValidationError
-from sqlalchemy import func
+from sqlalchemy import exists, func
 
 logger = logging.getLogger(__name__)
 
@@ -65,10 +53,22 @@ def create_course(
             raise e
 
 
-def get_courses(user_id) -> List[CourseResponse]:
+def get_courses(user_id, access: Optional[CourseAccessEnum] = None) -> List[CourseResponse]:
     try:
         with get_db() as db:
-            courses = db.query(Course).filter(Course.users.any(id=user_id)).all()
+            courses = []
+            if access is not None:
+                courses = db.query(Course).filter(
+                    ~exists().where(
+                        user_courses.c.course_id == Course.id,
+                        user_courses.c.user_id == user_id
+                    ),
+                    Course.access == access
+                    ).all()
+            else:
+                courses = db.query(Course).filter(
+                    Course.users.any(id=user_id)
+                ).all()
             pydantic_courses = []
 
             for course in courses:
@@ -123,6 +123,10 @@ def add_user_to_course(c_id: str, u_id: str) -> bool:
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
 
+        print("S")
+        if course.access.value == CourseAccessEnum.private:
+            raise HTTPException(status_code=403, detail="Cannot join a private course")
+            
         user = db.query(Profile).filter(Profile.id == u_uuid).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")

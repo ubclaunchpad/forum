@@ -1,21 +1,22 @@
+import logging
 from csv import Error
+from math import log
+from typing import Optional
 
 from controllers import course_controller
 from fastapi import APIRouter, HTTPException, Request
-from models.schemas.course_schema import (
-    CourseMembersResponse,
-    CourseResponse,
-    CourseTagInformation,
-    CourseTagRequest,
-    CourseTagsResponse,
-    CreateCourseReq,
-    CreateCourseResponse,
-    GetCoursesResponse,
-    UpdateCourseReq,
-)
+from models.schemas.course_schema import (CourseAccessEnum,
+                                          CourseMembersResponse,
+                                          CourseResponse, CourseTagInformation,
+                                          CourseTagRequest, CourseTagsResponse,
+                                          CreateCourseReq,
+                                          CreateCourseResponse,
+                                          GetCoursesResponse, UpdateCourseReq)
 from models.schemas.general_schema import GeneralResponse
 
 course_router = APIRouter()
+
+logger = logging.getLogger(__name__)
 
 
 @course_router.post("", response_model=CreateCourseResponse)
@@ -25,9 +26,9 @@ async def create_course(create_course_req: CreateCourseReq, request: Request):
 
 
 @course_router.get("", response_model=GetCoursesResponse)
-async def get_courses_route(request: Request):
+async def get_courses_route(request: Request, access: Optional[CourseAccessEnum] = None):
     user_id = request.state.user_id
-    courses = course_controller.get_courses(user_id)
+    courses = course_controller.get_courses(user_id, access)
     return {"courses": courses}
 
 

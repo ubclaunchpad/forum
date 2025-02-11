@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 from uuid import UUID
 
 from models.schemas.user_schema import UserProfile
@@ -20,7 +20,7 @@ class CourseAccessEnum(str, Enum):
 class CourseBase(BaseModel):
     c_group: str
     code: int
-    section: int
+    section: Union[int, str]
     name: Optional[str] = None
     config: Optional[CourseConfig] = None
     start_date: Optional[date] = None
