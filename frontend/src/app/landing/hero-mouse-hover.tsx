@@ -29,5 +29,5 @@ export default function HeroMouseEffect() {
         <div className="absolute bottom-0 left-0 h-[500px] w-[500px] bg-primary-100/10 blur-[100px]" />
       </div>
     </>
-  )
+  );
 }

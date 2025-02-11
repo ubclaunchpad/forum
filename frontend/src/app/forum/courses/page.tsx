@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { getApiUrl } from "@/utils/helpers";
 import Link from "next/link";
 import { Course } from "@/lib/types/course";
-import { ArrowRightCircleIcon, BookTextIcon } from "lucide-react";
+import { ArrowRightCircleIcon } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { generatePalette, Palette } from "@/lib/utils";
@@ -49,7 +49,7 @@ export default async function CoursesPage() {
 
   return (
     <div className="flex flex-col w-screen h-screen items-center bg-neutral-100 justify-center">
-      <Card className="w-full max-w-2xl rounded-xl  h-full bg-neutral-50 max-h-[600px] ">
+      <Card className="w-full max-w-3xl rounded-xl  h-full bg-neutral-50 max-h-[600px] ">
         <div className="flex items-center p-4 justify-between">
           <h3 className="font-semibold">Your Courses</h3>
           <Link href="/forum/courses/new">
@@ -85,9 +85,6 @@ export default async function CoursesPage() {
 
                 {/* Content (now in a wrapper to ensure it stays above the gradient) */}
                 <div className="relative z-10 flex w-full items-center justify-between gap-4">
-                  <button>
-                    <BookTextIcon size={16} color={"var(--neutral-700)"} />
-                  </button>
                   <span className="w-20">{course.c_group}</span>
                   <span className="w-20">{course.code}</span>
                   <span className="w-20">{course.section}</span>

@@ -44,7 +44,7 @@ const DEFAULT_CONFIG = {
 export default function CoursesPage() {
   return (
     <div className="flex flex-col w-dvw h-dvh overflow-hidden bg-neutral-100 items-center justify-center">
-      <section className="max-w-2xl flex flex-col  w-full">
+      <section className="max-w-3xl flex flex-col  w-full">
         <Link
           className="flex flex-row items-center gap-2 py-2 hover:text-primary-500"
           href={"/forum/courses"}
