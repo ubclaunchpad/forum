@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Fragment, useContext, useState } from "react";
-import { PlusIcon, Upload, XIcon } from "lucide-react";
+import { Upload, XIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";

@@ -8,7 +8,6 @@ import type {
 import { Dispatch, Fragment, SetStateAction, useEffect } from "react";
 import FileUpload from "@/components/files/NewFileUpload";
 import { cn, generateTempId, isPendingId } from "@/lib/utils";
-import { Button } from "../ui/button";
 import { TagsSidebar } from "../tags/TagsSidebar";
 
 export const DocumentListSidebar = ({
