@@ -154,12 +154,12 @@ export function Searchbar() {
 
       <dialog className="bg-transparent top-0" id="dialog">
         <section
-          className={`top-10 left-0 flex flex-col max-w-4xl gap-2 w-full  xl:min-w-[1000px] flex-shrink-0  max-h-[90dvh] overflow-hidden bg-white border-neutral-100 ${
+          className={`top-10 left-0 flex flex-col max-w-4xl gap-2 w-full min-w-[90dvw]  xl:min-w-[1000px] flex-shrink-0  max-h-[90dvh] overflow-hidden bg-white border-neutral-100 ${
             response || isLoading ? "rounded-lg rounded-t-3xl" : "rounded-full"
           }`}
         >
           <div
-            className="flex justify-center gap-1 items-center p-2"
+            className="flex justify-center gap-1 items-center w-full p-2"
             onKeyDown={listenForEnter}
           >
             <Button

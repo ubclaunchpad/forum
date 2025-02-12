@@ -34,7 +34,7 @@ async def get_user_by_id(user_id: str, req: Request):
 @user_router.get("/me")
 async def get_profile(request: Request):
     user_id = request.state.user_id
-    profile = user_controller.get_user_by_id(user_id)
+    profile = user_controller.get_user_by_id(user_id, full=True)
 
     if not profile:
         raise HTTPException(status_code=404, detail="Failed to find profile.")

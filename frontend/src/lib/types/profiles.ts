@@ -12,6 +12,8 @@ export type Profile = {
   bio?: string;
   socials?: SocialLinks;
   status?: string;
+  roles: Role[];
+  permissions: Omit<Permission, "id">[];
 };
 
 export type SocialLinks = {
@@ -24,4 +26,22 @@ export type SocialLinks = {
   youtube?: string;
   website?: string;
   reddit?: string;
+};
+
+export type Role = {
+  id: string;
+  name: string;
+  description: string;
+  created_at: string;
+  permissions: Omit<Permission, "id">[];
+};
+
+export type Permission = {
+  id: string;
+  domain: string | null;
+  subdomain: string | null;
+  scope: string;
+  resource: string;
+  modifier: string;
+  action: string;
 };

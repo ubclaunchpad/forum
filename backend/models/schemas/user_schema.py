@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, List, Optional
 from uuid import UUID
 
 from fastapi import UploadFile
@@ -65,6 +65,11 @@ class UserProfile(BaseModel):
     display_name: Optional[str] = None
     icon_url: Optional[str] = None
     status: Optional[str] = None
+
+
+class FullUserProfile(UserProfile):
+    roles: Any
+    permissions: Any
 
 
 class GetUserProfileResponse(BaseModel):

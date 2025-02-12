@@ -228,6 +228,18 @@ class Profile(Base):
     post_edits = relationship("PostEdit", back_populates="editor")
     documents = relationship("Document", back_populates="creators")
 
+    user_roles = relationship(
+        "UserRole",
+        primaryjoin="Profile.id==foreign(UserRole.user_id)",  # foreign() added
+        backref="user",
+    )
+
+    # user_permissions = relationship(
+    #     "UserPermission",
+    #     primaryjoin="Profile.id==foreign(UserPermission.user_id)",  # foreign() added
+    #     backref="user"
+    # )
+
     __table_args__ = ({"schema": "public"},)
 
 
@@ -602,3 +614,68 @@ class Invite(Base):
         DateTime, server_default=func.current_timestamp(), nullable=False
     )
     joined_at = Column(DateTime, nullable=True)
+
+
+class Permission(Base):
+    __tablename__ = "permissions"
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    scope = Column(String(50), nullable=False)
+    resource = Column(String(50), nullable=False)
+    action = Column(String(50), nullable=False)
+    modifier = Column(String(50), nullable=False)
+    domain = Column(PUUID, ForeignKey("public.courses.id"))
+    subdomain = Column(PUUID, ForeignKey("public.tags.id"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+role_permissions = Table(
+    "role_permissions",
+    Base.metadata,
+    Column("role_id", PUUID, ForeignKey("public.roles.id", ondelete="CASCADE")),
+    Column(
+        "permission_id", PUUID, ForeignKey("public.permissions.id", ondelete="CASCADE")
+    ),
+    schema="public",
+)
+
+
+class Role(Base):
+    __tablename__ = "roles"
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    name = Column(String(100), nullable=False)
+    description = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    permissions = relationship(
+        "Permission",
+        secondary=role_permissions,  # Use the Table object
+        backref="roles",
+    )
+
+
+# class RolePermission(Base):
+#     __tablename__ = "role_permissions"
+#     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+#     role_id = Column(PUUID, ForeignKey("public.roles.id", ondelete="CASCADE"))
+#     permission_id = Column(PUUID, ForeignKey("public.permissions.id", ondelete="CASCADE"))
+#     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class UserRole(Base):
+    __tablename__ = "user_roles"
+    id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+    user_id = Column(PUUID, ForeignKey("auth.users.id", ondelete="CASCADE"))
+    role_id = Column(PUUID, ForeignKey("public.roles.id", ondelete="CASCADE"))
+    domain = Column(PUUID, ForeignKey("public.courses.id"))
+    subdomain = Column(PUUID, ForeignKey("public.tags.id"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+# class UserPermission(Base):
+#     __tablename__ = "user_permissions"
+#     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
+#     user_id = Column(PUUID, ForeignKey("auth.users.id", ondelete="CASCADE"))
+#     permission_id = Column(PUUID, ForeignKey("public.permissions.id", ondelete="CASCADE"))
+#     domain = Column(PUUID, ForeignKey("public.courses.id"))
+#     subdomain = Column(PUUID, ForeignKey("public.tags.id"))
+#     created_at = Column(DateTime(timezone=True), server_default=func.now())

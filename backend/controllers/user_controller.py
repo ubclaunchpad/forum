@@ -1,23 +1,31 @@
 import os
-from typing import List, Optional
+from datetime import datetime
+from time import perf_counter
+from typing import List, Optional, Union
 from uuid import UUID
 
 import supabase
+from controllers import invite_controller
+from controllers.permission_controller import (
+    get_user_roles,
+    get_user_roles_and_permissions,
+)
 from core.util.file_storage import ConflictResolution, FileStorage
 from fastapi import HTTPException
-from models.all import Course, Profile, Invite
+from models.all import Course, Invite, Profile, Role, UserRole
 from models.db import get_db, supabase
 from models.schemas.general_schema import GeneralResponse
-from controllers import invite_controller
-from datetime import datetime
 from models.schemas.user_schema import (
     CreateUserBaseRequest,
     CreateUserResponse,
+    FullUserProfile,
     SocialLinks,
     UpdateUserRequest,
     UserProfile,
 )
+from sqlalchemy import select, text
 from sqlalchemy.orm import joinedload
+from utils.timer import sync_timer
 
 
 def get_all_users() -> List[UserProfile]:
@@ -45,35 +53,45 @@ def get_all_users() -> List[UserProfile]:
         ]
 
 
-def get_user_by_id(user_id: str) -> Optional[UserProfile]:
-    """Get a single user by ID with their profile information."""
+def get_user_by_id(
+    user_id: str, full: bool = False
+) -> Optional[Union[UserProfile, FullUserProfile]]:
+    """
+    Get a single user by ID with their profile information.
+    Returns FullUserProfile if full=True, otherwise returns UserProfile.
+    """
     with get_db() as db:
-        user = (
-            db.query(Profile)
-            .options(joinedload(Profile.courses))
-            .filter(Profile.id == user_id)
-            .first()
-        )
+        stmt = select(Profile).where(Profile.id == user_id)
+        user = db.execute(stmt).scalar_one_or_none()
 
         if not user:
             return None
 
-        social_data = getattr(user, "socials") if getattr(user, "socials") else {}
-        social_links = SocialLinks(**social_data) if social_data else None
+        # Get roles and permissions only if full profile is requested
+        roles = None
+        permissions = None
+        if full:
+            roles, permissions = get_user_roles_and_permissions(user_id, {})
 
-        return UserProfile(
-            id=UUID(str(user.id)),
-            email=getattr(user, "email"),
-            first_name=getattr(user, "first_name", None),
-            last_name=getattr(user, "last_name", None),
-            pronouns=getattr(user, "pronouns", None),
-            username=getattr(user, "username", None),
-            bio=getattr(user, "bio", None),
-            socials=social_links,
-            timezone=getattr(user, "timezone", None),
-            display_name=getattr(user, "display_name", None),
-            icon_url=getattr(user, "icon_url", None),
-        )
+        # Create base profile data
+        profile_data = {
+            "id": UUID(str(user.id)),
+            "email": getattr(user, "email"),
+            "first_name": getattr(user, "first_name", None),
+            "last_name": getattr(user, "last_name", None),
+            "pronouns": getattr(user, "pronouns", None),
+            "username": getattr(user, "username", None),
+            "bio": getattr(user, "bio", None),
+            "timezone": getattr(user, "timezone", None),
+            "display_name": getattr(user, "display_name", None),
+            "icon_url": getattr(user, "icon_url", None),
+        }
+
+        # Return appropriate profile type based on full parameter
+        if full:
+            return FullUserProfile(**profile_data, roles=roles, permissions=permissions)
+        else:
+            return UserProfile(**profile_data)
 
 
 def get_user_courses(user_id: str) -> List[Course]:
