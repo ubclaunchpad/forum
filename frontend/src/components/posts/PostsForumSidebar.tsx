@@ -5,7 +5,8 @@ import { useCallback, useContext, useEffect, useRef } from "react";
 import { forumPostsContext } from "@/contexts/PostsContext";
 import { Button } from "../ui/button";
 import { PostWithRequiredId } from "@/lib/types/posts";
-import { TagsSidebar } from "../tags/TagsSidebar";
+import { MainListPanel, MainSidebar } from "../general/FourmTabs";
+import { PlusIcon } from "lucide-react";
 
 export default function PostsForumSidebar() {
   const {
@@ -36,16 +37,11 @@ export default function PostsForumSidebar() {
 
   return (
     <>
-      <div
-        className={cn(
-          "relative flex flex-col",
-          "hidden md:block md:min-w-[min(280px,100%)] w-full max-w-0 lg:max-w-[280px] border-r",
-          selectedPost ? "hidden xl:block" : "",
-        )}
-      >
+      <MainSidebar className={selectedPost ? "hidden xl:block" : ""}>
         <div className="flex flex-row justify-center items-center w-full h-16 px-2">
           <Button
-            className="w-full max-w-[150px] min-h-none h-fit py-2"
+            size={"sm"}
+            className="w-fit  px-4 min-h-none h-fit py-2"
             onClick={() => {
               const id = generateTempId("local");
               const post: PostWithRequiredId = { id: id, title: "" };
@@ -54,18 +50,12 @@ export default function PostsForumSidebar() {
               setIsEditing(id);
             }}
           >
+            <PlusIcon className="h-4 w-4" />
             New Post
           </Button>
         </div>
-        <TagsSidebar />
-      </div>
-      <div
-        className={cn(
-          "relative flex flex-1 flex-col",
-          "min-w-[min(500px,100%)] w-full xl:max-w-[500px]",
-          selectedPost ? "hidden xl:block" : "",
-        )}
-      >
+      </MainSidebar>
+      <MainListPanel className={selectedPost ? "hidden xl:block" : ""}>
         <section
           ref={scrollRef}
           onScroll={handleScroll}
@@ -105,7 +95,7 @@ export default function PostsForumSidebar() {
             ))}
           </ul>
         </section>
-      </div>
+      </MainListPanel>
     </>
   );
 }

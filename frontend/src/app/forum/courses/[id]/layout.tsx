@@ -4,7 +4,7 @@ import { Course } from "@/lib/types/course";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { CourseStoreProvider } from "@/providers/courseStoreProvider";
-import { getTags } from "@/lib/fetchers/tags";
+// import { getTags } from "@/lib/fetchers/tags";
 
 async function getCourse(id: string, token: string) {
   try {
@@ -45,9 +45,9 @@ export default async function CoursePage({
     redirect("/auth/login");
   }
 
-  const [course, tags] = await Promise.all([
+  const [course] = await Promise.all([
     getCourse(id, token!),
-    getTags(id, token),
+    // getTags(id, token),
   ]);
 
   if (!course) {
@@ -57,7 +57,7 @@ export default async function CoursePage({
   const store = {
     course: course,
     pendingCourse: course,
-    tags: tags,
+    tags: [],
   };
 
   return (

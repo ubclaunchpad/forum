@@ -1,6 +1,6 @@
 "use client";
 import { z } from "zod";
-import { useState, useRef, useContext } from "react";
+import { useState, useRef, useContext, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import {
@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { courseSchema, CourseAccessOptions } from "@/lib/types/course";
 import FindCoursesToJoin from "@/components/courses/FindCoursesToJoin";
+import { hasPermission, PERMISSIONS } from "@/lib/utils";
 
 const inputStyle =
   "rounded-full w-full px-3 py-4 h-12 border border-neutral-200 focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
@@ -42,6 +43,11 @@ const DEFAULT_CONFIG = {
 };
 
 export default function CoursesPage() {
+  const { profile } = useContext(userContext);
+
+  const hasCreatePermission = useMemo(() => {
+    return hasPermission(profile.permissions, PERMISSIONS.CREATE_COURSE);
+  }, [profile]);
   return (
     <div className="flex flex-col w-dvw h-dvh overflow-hidden bg-neutral-100 items-center justify-center">
       <section className="max-w-3xl flex flex-col  w-full">
@@ -56,7 +62,9 @@ export default function CoursesPage() {
           defaultValue="join"
           className="w-full border rounded-xl flex flex-col flex-1 min-h-[60dvh] overflow-y-scroll bg-neutral-50"
         >
-          <TabsList className="grid w-full  rounded-b-none rounded-t-xl min-h-12 grid-cols-2">
+          <TabsList
+            className={`grid w-full  rounded-b-none rounded-t-xl min-h-12 ${hasCreatePermission ? "grid-cols-2" : "grid-cols-1"}`}
+          >
             <TabsTrigger
               value="join"
               className="flex items-center h-full gap-2"
@@ -64,22 +72,27 @@ export default function CoursesPage() {
               <UsersIcon className="w-4 h-4" />
               Join
             </TabsTrigger>
-            <TabsTrigger
-              value="create"
-              className="flex items-center h-full gap-2"
-            >
-              <PlusCircleIcon className="w-4 h-4" />
-              Create
-            </TabsTrigger>
+
+            {hasCreatePermission && (
+              <TabsTrigger
+                value="create"
+                className="flex items-center h-full gap-2"
+              >
+                <PlusCircleIcon className="w-4 h-4" />
+                Create
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="join" className="p-8">
             <FindCoursesToJoin />
           </TabsContent>
 
-          <TabsContent value="create" className="p-8  flex flex-col flex-1">
-            <CoursesNewPage />
-          </TabsContent>
+          {hasCreatePermission && (
+            <TabsContent value="create" className="p-8  flex flex-col flex-1">
+              <CoursesNewPage />
+            </TabsContent>
+          )}
         </Tabs>
       </section>
     </div>

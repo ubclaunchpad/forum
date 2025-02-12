@@ -105,16 +105,23 @@ export default function FileViewer({
 
   // PDF viewer
   if (doc.fileType === "application/pdf") {
-    // const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.signedUrl)}&embedded=true`;
-    // return (
-    //   <div className="w-full h-full overflow-hidden rounded-md">
-    //     <iframe
-    //       src={googleViewerUrl}
-    //       className="w-full h-full border-0"
-    //       title="PDF viewer"
-    //     />
-    //   </div>
-    // );
+    const { isIOS, isAndroid } = isMobileOS();
+
+    // Use native handling for mobile OS
+    if (isIOS || isAndroid) {
+      return (
+        <div className="w-full h-full flex items-center justify-center">
+          <a
+            href={doc.signedUrl}
+            className="px-4 py-2 bg-primary-500 text-white rounded-md"
+          >
+            Open PDF
+          </a>
+        </div>
+      );
+    }
+
+    // Use PDFViewer for desktop
     return (
       <>
         <PDFViewer url={doc.signedUrl} />
@@ -246,24 +253,35 @@ function PDFViewer({ url }: { url: string }) {
   if (!pdfBlob) return <IsLoadingView />;
 
   return (
-    <Document
-      file={pdfBlob}
-      loading={<IsLoadingView />}
-      onError={setError}
-      className="flex flex-1 w-full overflow-x-scroll"
-      error={<IsLoadingView />}
-      onLoadSuccess={onDocumentLoadSuccess}
-    >
-      {Array.from(new Array(numPages), (el, index) => (
-        <Page
-          onError={setError}
-          loading={<IsLoadingView />}
-          renderTextLayer={false}
-          renderAnnotationLayer={false}
-          key={`page_${index + 1}`}
-          pageNumber={index + 1}
-        />
-      ))}
-    </Document>
+    <div className="flex-1 overflow-auto relative">
+      <Document
+        file={pdfBlob}
+        loading={<IsLoadingView />}
+        onError={setError}
+        className="absolute inset-0"
+        error={<IsLoadingView />}
+        onLoadSuccess={onDocumentLoadSuccess}
+      >
+        {Array.from(new Array(numPages), (el, index) => (
+          <Page
+            onError={setError}
+            loading={<IsLoadingView />}
+            renderTextLayer={false}
+            renderAnnotationLayer={false}
+            key={`page_${index + 1}`}
+            pageNumber={index + 1}
+            className="mx-auto mb-4"
+          />
+        ))}
+      </Document>
+    </div>
   );
 }
+
+const isMobileOS = () => {
+  const userAgent = navigator.userAgent.toLowerCase();
+  return {
+    isIOS: /iphone|ipad|ipod/.test(userAgent),
+    isAndroid: /android/.test(userAgent),
+  };
+};

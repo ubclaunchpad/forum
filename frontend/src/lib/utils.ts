@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { Profile } from "./types/profiles";
+import { Permission, Profile } from "./types/profiles";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -215,3 +215,29 @@ export function isDeepEqual<T extends DeepEqualType>(x: T, y: T): boolean {
 
   return false;
 }
+
+export function hasPermission(
+  permissions: Omit<Permission, "id">[],
+  perm: Omit<Permission, "id">,
+) {
+  return permissions.some(
+    (permission) =>
+      permission.action === perm.action &&
+      permission.resource === perm.resource &&
+      permission.domain === perm.domain &&
+      permission.modifier === perm.modifier &&
+      permission.scope === perm.scope &&
+      permission.subdomain === perm.subdomain,
+  );
+}
+
+export const PERMISSIONS = {
+  CREATE_COURSE: {
+    domain: null,
+    subdomain: null,
+    scope: "org",
+    resource: "course",
+    action: "create",
+    modifier: "any",
+  },
+};

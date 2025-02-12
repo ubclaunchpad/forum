@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { userContext } from "@/contexts/userContext";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
+import { Role } from "@/lib/types/profiles";
 
 type ProfileFieldProps = {
   label: string;
@@ -186,13 +187,6 @@ export default function ProfileFullView() {
                 </p>
               </div>
             </div>
-
-            <div className="text-center">
-              <h2 className="text-2xl font-bold">{formData.display_name}</h2>
-              {formData.username && (
-                <p className="text-muted-foreground">@{formData.username}</p>
-              )}
-            </div>
           </div>
 
           <div className="flex flex-col items-center space-y-4">
@@ -204,6 +198,21 @@ export default function ProfileFullView() {
             </div>
           </div>
 
+          {formData.roles && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">Roles</Label>
+              <div className="flex flex-wrap gap-2">
+                {(formData.roles as Role[]).map((role, index) => (
+                  <div
+                    key={index}
+                    className="px-3 py-1 text-sm bg-neutral-100 rounded-full"
+                  >
+                    {role.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ProfileField
               label="First Name"
@@ -263,6 +272,7 @@ export default function ProfileFullView() {
             type="textarea"
             icon={<TextIcon className="w-4 h-4" />}
           />
+
           {formData.socials && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Social Links</h3>
