@@ -36,7 +36,7 @@ export function DocumentsPage({
   };
 
   return (
-    <div className="flex flex-row  w-full relative flex-1">
+    <div className="flex flex-1 overflow-hidden bg-neutral-50 ">
       <DocumentListSidebar
         files={files}
         setFiles={setFiles}
@@ -45,11 +45,9 @@ export function DocumentsPage({
         onUploadSuccess={handleUploadSuccess}
       />
 
-      {/* <h5 className="font-semibold  w-full border-b p-2 flex items-center ">{post.title}</h5> */}
-      <div className="flex flex-col flex-1 overflow-hidden">
-        {selectedFile ? (
-          <>
-            <nav className="flex items-center gap-1 h-12 border-b p-2">
+      {selectedFile ? (
+          <div className="flex flex-col flex-1 overflow-hidden border-l border-neutral-200">
+            <nav className="flex items-center gap-1 h-12 border-b py-8 px-4">
               <Button
                 onClick={() => setSelectedFile(undefined)}
                 variant="ghost"
@@ -75,13 +73,12 @@ export function DocumentsPage({
             <div className="flex-1 overflow-hidden">
               <FileViewer document={selectedFile} />
             </div>
-          </>
+          </div>
         ) : (
-          <div className="flex items-center justify-center h-full text-neutral-500">
+          <div className="xl:flex hidden justify-center flex-1 items-center text-neutral-500 flex-shrink-0 w-full transition-all duration-300 border-l border-neutral-200">
             Select a document to view
           </div>
         )}
-      </div>
     </div>
   );
 }

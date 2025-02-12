@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Fragment, useContext, useState } from "react";
-import { PlusIcon, Upload, XIcon } from "lucide-react";
+import { Upload, XIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
@@ -12,9 +12,11 @@ import { useCourseStore } from "@/providers/courseStoreProvider";
 export default function FileUpload({
   appendToFiles,
   onUploadSuccess,
+  styles,
 }: {
   appendToFiles: (args: DocumentAppendOperation) => string | undefined;
   onUploadSuccess: () => Promise<void>;
+  styles: string;
 }) {
   const { token } = useContext(userContext);
   const course = useCourseStore((state) => state.course);
@@ -121,15 +123,16 @@ export default function FileUpload({
 
   return (
     <Fragment>
-      <Button
-        className="flex items-center gap-2 h-fit w-fit p-2 absolute right-4 bottom-4 shadow-sm cursor-pointer"
-        onClick={openModal}
-      >
-        <PlusIcon className="min-w-10 min-h-10" />
-      </Button>
-
+      <div className="flex flex-row justify-center items-center w-full h-16 px-2">
+        <Button
+          className = {styles}
+          onClick={openModal}
+        >
+          New File
+        </Button>
+      </div>
       <dialog
-        className="min-w-[400px] max-w-full   max-h-[90dvh] border shadow-sm rounded-xl  bg-white top-1/2 transform -translate-y-1/2"
+        className="min-w-[400px] max-w-full max-h-[90dvh] border shadow-sm rounded-xl  bg-white top-1/2 transform -translate-y-1/2"
         id="new-document"
       >
         <div className="flex flex-col flex-1 h-full overflow-hidden">
