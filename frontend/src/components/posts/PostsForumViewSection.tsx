@@ -13,7 +13,7 @@ export const PostsForumViewSection = () => {
     return (
       <>
         <div
-          className={`xl:flex hidden justify-center flex-1 lg:border-l items-center text-neutral-500 flex-shrink-0 w-full transition-all duration-300 ${selectedPost ? "border-neutral-200" : "border-neutral-200"}`}
+          className={`xl:flex hidden justify-center flex-1 lg:border-l items-center text-neutral-500 flex-shrink-0 w-full transition-all duration-300 border-neutral-200`}
         >
           Select a post to view
         </div>

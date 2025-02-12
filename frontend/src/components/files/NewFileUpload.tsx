@@ -37,9 +37,11 @@ const fileSchema = z.object({
 export default function UploadFile({
   appendToFiles,
   onUploadSuccess,
+  styles,
 }: {
   appendToFiles: (args: DocumentAppendOperation) => string | undefined;
   onUploadSuccess: () => Promise<void>;
+  styles: string;
 }) {
   const { token } = useContext(userContext);
   const course = useCourseStore((state) => state.course);

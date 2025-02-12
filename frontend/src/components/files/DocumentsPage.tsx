@@ -84,11 +84,10 @@ export function DocumentsPage({
             <FileViewer document={selectedFile} />
           </>
         ) : (
-          <div className="flex items-center justify-center h-full text-neutral-500">
+          <div className="xl:flex hidden justify-center flex-1 items-center text-neutral-500 flex-shrink-0 w-full transition-all duration-300 border-l border-neutral-200">
             Select a document to view
           </div>
         )}
-      </div>
     </div>
   );
 }
