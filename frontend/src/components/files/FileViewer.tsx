@@ -105,21 +105,21 @@ export default function FileViewer({
 
   // PDF viewer
   if (doc.fileType === "application/pdf") {
-    const { isIOS, isAndroid } = isMobileOS();
+    // const { isIOS, isAndroid } = isMobileOS();
 
-    // Use native handling for mobile OS
-    if (isIOS || isAndroid) {
-      return (
-        <div className="w-full h-full flex items-center justify-center">
-          <a
-            href={doc.signedUrl}
-            className="px-4 py-2 bg-primary-500 text-white rounded-md"
-          >
-            Open PDF
-          </a>
-        </div>
-      );
-    }
+    // // Use native handling for mobile OS
+    // if (isIOS || isAndroid) {
+    //   return (
+    //     <div className="w-full h-full flex items-center justify-center">
+    //       <a
+    //         href={doc.signedUrl}
+    //         className="px-4 py-2 bg-primary-500 text-white rounded-md"
+    //       >
+    //         Open PDF
+    //       </a>
+    //     </div>
+    //   );
+    // }
 
     // Use PDFViewer for desktop
     return (
@@ -278,10 +278,10 @@ function PDFViewer({ url }: { url: string }) {
   );
 }
 
-const isMobileOS = () => {
-  const userAgent = navigator.userAgent.toLowerCase();
-  return {
-    isIOS: /iphone|ipad|ipod/.test(userAgent),
-    isAndroid: /android/.test(userAgent),
-  };
-};
+// const isMobileOS = () => {
+//   const userAgent = navigator.userAgent.toLowerCase();
+//   return {
+//     isIOS: /iphone|ipad|ipod/.test(userAgent),
+//     isAndroid: /android/.test(userAgent),
+//   };
+// };

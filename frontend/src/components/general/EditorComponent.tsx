@@ -3,7 +3,6 @@
 import { cn } from "@/lib/utils";
 import { useEditor, EditorContent } from "@tiptap/react";
 import Document from "@tiptap/extension-document";
-import History from "@tiptap/extension-history";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
@@ -26,6 +25,12 @@ import TableRow from "@tiptap/extension-table-row";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
 import MathExtension from "@aarkue/tiptap-math-extension";
+import StarterKit from "@tiptap/starter-kit";
+import Superscript from "@tiptap/extension-superscript";
+import Subscript from "@tiptap/extension-subscript";
+import TaskItem from "@tiptap/extension-task-item";
+import TaskList from "@tiptap/extension-task-list";
+import Image from "@tiptap/extension-image";
 
 import { FC, useEffect } from "react";
 
@@ -65,7 +70,7 @@ interface EditorProps {
   markdown: string;
   editable: boolean;
   className?: string;
-  onMarkdownChange: (markdown: string) => void;
+  onMarkdownChange?: (markdown: string) => void;
 }
 
 const Editor: FC<EditorProps> = ({
@@ -103,7 +108,6 @@ const Editor: FC<EditorProps> = ({
       OrderedList,
       ListItem,
       Blockquote,
-      History,
       MathExtension.configure({
         evaluation: true,
         katexOptions: {
@@ -124,11 +128,21 @@ const Editor: FC<EditorProps> = ({
         nocookie: true,
         inline: true,
       }),
+      StarterKit,
+      Subscript,
+      Superscript,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
+      Image,
     ],
     content: markdown,
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
-      onMarkdownChange(html);
+      if (onMarkdownChange) {
+        onMarkdownChange(html);
+      }
     },
 
     // editorProps: {
