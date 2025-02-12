@@ -88,6 +88,7 @@ export function DocumentsPage({
             Select a document to view
           </div>
         )}
+      </div>
     </div>
   );
 }
