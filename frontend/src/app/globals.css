@@ -198,9 +198,9 @@ dialog {
   border-radius: 0.925rem;
   background-image: linear-gradient(
     to right,
-    theme("colors.primary.100") 30%,
-    theme("colors.primary.500") 60%,
-    theme("colors.primary.100")
+    theme("colors.primary.50") 30%,
+    theme("colors.primary.100") 60%,
+    theme("colors.primary.50")
   );
   background-size: 200% auto;
   opacity: 0;

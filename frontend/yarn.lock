@@ -508,7 +508,7 @@
   resolved "https://registry.npmjs.org/@radix-ui/react-context/-/react-context-1.1.1.tgz"
   integrity sha512-UASk9zi+crv9WteK/NU4PLvOoL3OuE6BWVKNF6hPRBtYBDXQ2u5iu3O59zUlJiTVvkyuycnqrztsHVJwcK9K+Q==
 
-"@radix-ui/react-dialog@^1.1.5":
+"@radix-ui/react-dialog@^1.1.1", "@radix-ui/react-dialog@^1.1.5":
   version "1.1.6"
   resolved "https://registry.npmjs.org/@radix-ui/react-dialog/-/react-dialog-1.1.6.tgz"
   integrity sha512-/IVhJV5AceX620DUJ4uYVMymzsipdKBzo3edo+omeskCKGm9FRHM0ebIdbPnlQVJqyuHbuBltQUOG2mOTq2IYw==
@@ -1143,6 +1143,11 @@
   resolved "https://registry.npmjs.org/@tiptap/extension-horizontal-rule/-/extension-horizontal-rule-2.11.5.tgz"
   integrity sha512-3up2r1Du8/5/4ZYzTC0DjTwhgPI3dn8jhOCLu73m5F3OGvK/9whcXoeWoX103hYMnGDxBlfOje71yQuN35FL4A==
 
+"@tiptap/extension-image@^2.11.5":
+  version "2.11.5"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-image/-/extension-image-2.11.5.tgz#f16d05c8045dc7d84d85efdbb946a2a8713fb2d3"
+  integrity sha512-HbUq9AL8gb8eSuQfY/QKkvMc66ZFN/b6jvQAILGArNOgalUfGizoC6baKTJShaExMSPjBZlaAHtJiQKPaGRHaA==
+
 "@tiptap/extension-italic@^2.11.5":
   version "2.11.5"
   resolved "https://registry.npmjs.org/@tiptap/extension-italic/-/extension-italic-2.11.5.tgz"
@@ -1180,6 +1185,16 @@
   resolved "https://registry.npmjs.org/@tiptap/extension-strike/-/extension-strike-2.11.5.tgz"
   integrity sha512-PVfUiCqrjvsLpbIoVlegSY8RlkR64F1Rr2RYmiybQfGbg+AkSZXDeO0eIrc03//4gua7D9DfIozHmAKv1KN3ow==
 
+"@tiptap/extension-subscript@^2.11.5":
+  version "2.11.5"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-subscript/-/extension-subscript-2.11.5.tgz#0bdd87c2a87eb99fc548e7a8eaec30f6f6d18acc"
+  integrity sha512-VpaSzxku/Bcvf4SgDB2K5d0E+FNA/56iJHMygg/WXsq2F4tMMUEivQHI/n+17ndUEO4Wybz0wItnM1G2JfRuLQ==
+
+"@tiptap/extension-superscript@^2.11.5":
+  version "2.11.5"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-superscript/-/extension-superscript-2.11.5.tgz#cc3091d3c7f073c0665dbc94fad6fd6f4f79598f"
+  integrity sha512-sK6v2G0zFfGW+j9CmYp2e+tyZ3FTa3dP0xY4kJzefgZcHhMJLlLnjxBRwHCSi/jj5ie6WdZT4KoEooxnPs1Vzw==
+
 "@tiptap/extension-table-cell@^2.11.0":
   version "2.11.5"
   resolved "https://registry.npmjs.org/@tiptap/extension-table-cell/-/extension-table-cell-2.11.5.tgz"
@@ -1199,6 +1214,16 @@
   version "2.11.5"
   resolved "https://registry.npmjs.org/@tiptap/extension-table/-/extension-table-2.11.5.tgz"
   integrity sha512-NKXLhKWdAdURklm98YkCd2ai4fh8jY8HS/+X2s/2QiQt8Z98CU1keCm35fJEEExM234iB/hCqG5vY4JgTc0Tvw==
+
+"@tiptap/extension-task-item@^2.11.5":
+  version "2.11.5"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-task-item/-/extension-task-item-2.11.5.tgz#002bfa065e236cdd2151384fa2aad6fcb13ca485"
+  integrity sha512-Xvvww8cleM6fcNejP916vzhL31yJnAmuBvABsOV0kHGtAqkqUVCSDcN/1qjI4ihVNeIWEJBHDczjDfZzvLy1xA==
+
+"@tiptap/extension-task-list@^2.11.5":
+  version "2.11.5"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-task-list/-/extension-task-list-2.11.5.tgz#051e070f55210f3f76e21a3956060892ce491ec3"
+  integrity sha512-DJpIrBu/bjXYmyYoWQDH2GkpvRmizT9Fvbx5MscFYyfmSsYryD3vRBtCDz08gviwoRII+pFBrG4Ynb0XuQ7DsA==
 
 "@tiptap/extension-text-style@^2.11.5":
   version "2.11.5"
@@ -1250,9 +1275,9 @@
     fast-deep-equal "^3"
     use-sync-external-store "^1"
 
-"@tiptap/starter-kit@^2.11.0":
+"@tiptap/starter-kit@^2.11.5":
   version "2.11.5"
-  resolved "https://registry.npmjs.org/@tiptap/starter-kit/-/starter-kit-2.11.5.tgz"
+  resolved "https://registry.yarnpkg.com/@tiptap/starter-kit/-/starter-kit-2.11.5.tgz#7d1b0b866b10c0f9c98214588639cda204c4f3b4"
   integrity sha512-SLI7Aj2ruU1t//6Mk8f+fqW+18uTqpdfLUJYgwu0CkqBckrkRZYZh6GVLk/02k3H2ki7QkFxiFbZrdbZdng0JA==
   dependencies:
     "@tiptap/core" "^2.11.5"
@@ -5594,6 +5619,13 @@ util-deprecate@^1.0.1, util-deprecate@^1.0.2:
   version "1.0.2"
   resolved "https://registry.npmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
+
+vaul@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/vaul/-/vaul-1.1.2.tgz#c959f8b9dc2ed4f7d99366caee433fbef91f5ba9"
+  integrity sha512-ZFkClGpWyI2WUQjdLJ/BaGuV6AVQiJ3uELGk3OYtP+B6yCO7Cmn9vPFXVJkRaGkOJu3m8bQMgtyzNHixULceQA==
+  dependencies:
+    "@radix-ui/react-dialog" "^1.1.1"
 
 vfile-message@^4.0.0:
   version "4.0.2"
