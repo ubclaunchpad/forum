@@ -9,6 +9,7 @@ import { Dispatch, Fragment, SetStateAction, useEffect } from "react";
 import FileUpload from "@/components/files/NewFileUpload";
 import { cn, generateTempId, isPendingId } from "@/lib/utils";
 import { Button } from "../ui/button";
+import { TagsSidebar } from "../tags/TagsSidebar";
 
 export const DocumentListSidebar = ({
   files,
@@ -64,6 +65,7 @@ export const DocumentListSidebar = ({
             onUploadSuccess={onUploadSuccess}
           />
         </div>
+        <TagsSidebar />
       </div>
       <div className={cn(
           "relative flex flex-1 flex-col",
