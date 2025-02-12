@@ -336,7 +336,7 @@ export function Searchbar() {
         <Drawer open={isOpen} onOpenChange={setIsOpen}>
           <DrawerTitle></DrawerTitle>
 
-          <DrawerContent className="h-[calc(100vh-1.5rem)] course max-h-[calc(100vh-1.5rem)] overflow-hidden">
+          <DrawerContent className="h-[calc(90dvh-1.5rem)] course max-h-[calc(90dvh-1.5rem)] overflow-hidden">
             <DrawerHeader className="p-0"></DrawerHeader>
             <SearchContent
               search={search}
