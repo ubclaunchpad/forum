@@ -1,16 +1,14 @@
-from models.db import get_db
-from models.all import Invite, Profile
-from models.schemas.invite_schema import (
-    InviteBase,
-    InviteResponse,
-    GetInvitesResponse,
-    CreateInviteResponse,
-)
-from fastapi import HTTPException
-from pydantic import ValidationError
-from datetime import datetime
 import logging
 import re
+from datetime import datetime
+
+from fastapi import HTTPException
+from models.all import Invite, Profile
+from models.db import get_db
+from models.schemas.invite_schema import (CreateInviteResponse,
+                                          GetInvitesResponse, InviteBase,
+                                          InviteResponse)
+from pydantic import ValidationError
 
 
 def is_valid_email(email):
@@ -71,11 +69,11 @@ def get_invites() -> GetInvitesResponse:
         )
 
 
-def delete_invite(referrer_id: str, email: str):
+def delete_invite(email: str):
     with get_db() as db:
         invite = (
             db.query(Invite)
-            .filter(Invite.referrer_id == referrer_id, Invite.referred_email == email)
+            .filter(Invite.referred_email == email)
             .first()
         )
         if not invite:

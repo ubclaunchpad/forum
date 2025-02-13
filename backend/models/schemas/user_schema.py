@@ -14,6 +14,8 @@ class UserBase(BaseModel):
 
 class GetUsersResponse(BaseModel):
     users: List[UserBase]
+    
+
 
 
 class CreateUserBaseRequest(BaseModel):
@@ -78,3 +80,6 @@ class GetUserProfileResponse(BaseModel):
 
 class UserProfilePhotoRequest(BaseModel):
     file: UploadFile
+
+class GetAllUsersResponse(BaseModel):
+    users: List[UserProfile]

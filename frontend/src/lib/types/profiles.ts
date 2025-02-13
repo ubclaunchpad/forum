@@ -45,3 +45,10 @@ export type Permission = {
   modifier: string;
   action: string;
 };
+
+export type InvitedUser = {
+  referrer_id: string;
+  referred_email: string;
+  invited_at: string;
+  joined_at: string;
+};

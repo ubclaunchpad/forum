@@ -6,24 +6,18 @@ from uuid import UUID
 
 import supabase
 from controllers import invite_controller
-from controllers.permission_controller import (
-    get_user_roles,
-    get_user_roles_and_permissions,
-)
+from controllers.permission_controller import (get_user_roles,
+                                               get_user_roles_and_permissions)
 from core.util.file_storage import ConflictResolution, FileStorage
 from fastapi import HTTPException
 from models.all import Course, Invite, Profile, Role, UserRole
 from models.db import get_db, supabase
 from models.schemas.general_schema import GeneralResponse
-from models.schemas.user_schema import (
-    CreateUserBaseRequest,
-    CreateUserResponse,
-    FullUserProfile,
-    SocialLinks,
-    UpdateUserRequest,
-    UserProfile,
-)
-from sqlalchemy import select, text
+from models.schemas.user_schema import (CreateUserBaseRequest,
+                                        CreateUserResponse, FullUserProfile,
+                                        SocialLinks, UpdateUserRequest,
+                                        UserProfile)
+from sqlalchemy import delete, select, text
 from sqlalchemy.orm import joinedload
 from utils.timer import sync_timer
 
@@ -112,11 +106,8 @@ def get_user_courses(user_id: str) -> List[Course]:
 
 def delete_user_by_id(user_id):
     with get_db() as db:
-        user = db.query(Profile).filter(Profile.id == user_id).first()
-        if not user:
-            return False
-        db.delete(user)
-        db.flush()
+        stmt = delete(Profile).where(Profile.id == user_id).returning(Profile.id)
+        db.execute(stmt).all()
         return True
 
 

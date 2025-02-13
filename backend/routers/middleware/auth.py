@@ -24,7 +24,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.enabled = enabled
         self.protected_paths = (
-            ["courses/*", "users/*"] if protected_paths is None else protected_paths
+            ["courses/*", "users/*", "invites/*", "admin/*"] if protected_paths is None else protected_paths
         )
         # Normalize paths during initialization
         self.split_protected_paths = [
