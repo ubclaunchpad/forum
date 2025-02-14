@@ -44,13 +44,14 @@ export default function SignUp() {
         description: "Welcome to the Forum Community",
       });
       router.push("/forum/courses");
+    } else {
+      toast({
+        title: "Sign Up Error",
+        description: res.error,
+        variant: "destructive",
+      });
     }
 
-    toast({
-      title: "Sign Up Error",
-      description: res.error,
-      variant: "destructive",
-    });
     setIsLoading(false);
   };
 
