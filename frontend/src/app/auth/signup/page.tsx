@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { signup } from "./actions";
 import { convertObjectToSnakeCase } from "@/utils/helpers";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const signupInputStyle =
   " rounded-full w-full px-3 py-4 h-12 border border-neutral-200   focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
@@ -22,16 +23,21 @@ export default function SignUp() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      acceptTerms: false,
+    },
   });
 
   const onSubmit = async (data: SignUpFormValues) => {
     setIsLoading(true);
     const res = await signup(convertObjectToSnakeCase(data));
+
     if (res.ok) {
       toast({
         title: "Account created",
@@ -39,6 +45,12 @@ export default function SignUp() {
       });
       router.push("/forum/courses");
     }
+
+    toast({
+      title: "Sign Up Error",
+      description: res.error,
+      variant: "destructive",
+    });
     setIsLoading(false);
   };
 
@@ -132,6 +144,40 @@ export default function SignUp() {
               {errors.confirmPassword && (
                 <p className="text-xs text-red-500">
                   {errors.confirmPassword.message}
+                </p>
+              )}
+            </div>
+          </div>
+          <div>
+            <Controller
+              control={control}
+              name="acceptTerms"
+              render={({ field }) => (
+                <div className="flex flex-row gap-2 items-start px-2">
+                  <Checkbox
+                    id="acceptTerms"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="mt-0.5"
+                    aria-invalid={errors.acceptTerms ? "true" : "false"}
+                  />
+                  <p className="text-xs">
+                    By signing up you agree to our{" "}
+                    <Link href="/terms" className="underline">
+                      Terms and Conditions
+                    </Link>{" "}
+                    and acknowledge that you have read our{" "}
+                    <Link href="/privacy" className="underline">
+                      Privacy Policy
+                    </Link>
+                  </p>
+                </div>
+              )}
+            />
+            <div className="mt-1 h-6 pl-2 w-full">
+              {errors.acceptTerms && (
+                <p className="text-xs text-red-500">
+                  {errors.acceptTerms.message}
                 </p>
               )}
             </div>
