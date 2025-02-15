@@ -5,9 +5,12 @@ from datetime import datetime
 from fastapi import HTTPException
 from models.all import Invite, Profile
 from models.db import get_db
-from models.schemas.invite_schema import (CreateInviteResponse,
-                                          GetInvitesResponse, InviteBase,
-                                          InviteResponse)
+from models.schemas.invite_schema import (
+    CreateInviteResponse,
+    GetInvitesResponse,
+    InviteBase,
+    InviteResponse,
+)
 from pydantic import ValidationError
 
 
@@ -21,8 +24,8 @@ logger = logging.getLogger(__name__)
 
 def create_invite(referrer_id: str, email: str) -> CreateInviteResponse:
     with get_db() as db:
-        if not is_valid_email(email):
-            raise HTTPException(status_code=403, detail="Invalid email format")
+        # if not is_valid_email(email):
+        #     raise HTTPException(status_code=403, detail="Invalid email format")
 
         super_user_exists = db.query(Profile).filter(Profile.id == referrer_id).first()
 
@@ -37,7 +40,6 @@ def create_invite(referrer_id: str, email: str) -> CreateInviteResponse:
         invite = Invite(
             referrer_id=referrer_id,
             referred_email=email,
-            invited_at=datetime.now(),
         )
 
         try:
@@ -71,11 +73,7 @@ def get_invites() -> GetInvitesResponse:
 
 def delete_invite(email: str):
     with get_db() as db:
-        invite = (
-            db.query(Invite)
-            .filter(Invite.referred_email == email)
-            .first()
-        )
+        invite = db.query(Invite).filter(Invite.referred_email == email).first()
         if not invite:
             raise HTTPException(status_code=404, detail="Invite not found")
         db.delete(invite)

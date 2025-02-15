@@ -9,12 +9,21 @@ import {
   User,
   Globe,
   TextIcon,
+  MoreHorizontal,
+  DeleteIcon,
+  LinkIcon,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useContext } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { usePathname, useRouter } from "next/navigation";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { useToast } from "@/hooks/use-toast";
+import { useCourseStore } from "@/providers/courseStoreProvider";
+import { getApiUrl } from "@/utils/helpers";
+import { userContext } from "@/contexts/userContext";
+import { checkPermissionInDomain, PERMISSIONS } from "@/lib/utils";
 
 type ReadonlyProfileFieldProps = {
   label: string;
@@ -50,6 +59,15 @@ export default function ProfileView({
   const router = useRouter();
   const pathname = usePathname();
 
+  const course = useCourseStore((state) => state.course);
+
+  function closePersonTab() {
+    setSelected(undefined);
+    router.push(pathname.replace(/\/[^/]+$/, ""), {
+      scroll: false,
+    });
+  }
+
   return (
     <div
       className={`flex justify-center select-none flex-1 lg:border-l flex-shrink-0 w-full transition-all duration-300 ${
@@ -63,15 +81,15 @@ export default function ProfileView({
               className="p-2"
               variant="ghost"
               size="sm"
-              onClick={() => {
-                setSelected(undefined);
-                router.push(pathname.replace(/\/[^/]+$/, ""), {
-                  scroll: false,
-                });
-              }}
+              onClick={closePersonTab}
             >
               <ArrowRightFromLine className="min-w-5 min-h-5" />
             </Button>
+            <ProfileMoreOptions
+              userId={profile.id}
+              courseId={course.id}
+              closePersonTab={closePersonTab}
+            />
           </div>
         </div>
 
@@ -151,5 +169,100 @@ export default function ProfileView({
         </div>
       </div>
     </div>
+  );
+}
+
+function ProfileMoreOptions({
+  userId,
+  courseId,
+  closePersonTab,
+}: {
+  userId: string;
+  courseId: string;
+  closePersonTab: () => void;
+}) {
+  const { toast } = useToast();
+  const { token, profile } = useContext(userContext);
+
+  const handleMoreClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  async function removeFromCourse() {
+    const res = await fetch(
+      `${getApiUrl()}/courses/${courseId}/members/${userId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    if (res.ok) {
+      toast({
+        title: "User removed",
+        description: "If course is open user might join back. ",
+      });
+    }
+
+    closePersonTab();
+  }
+
+  return (
+    <Popover>
+      <PopoverContent
+        side="left"
+        align="start"
+        // alignOffset={-10}
+        // sideOffset={20}
+        className=" bg-white border  w-fit p-0 border-neutral-200 rounded-lg shadow-sm"
+      >
+        <ul className="flex p-0 flex-col text-neutral-700 w-full ">
+          <li>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  `${window.location.origin}/forum/courses/${courseId}/people/${userId}`,
+                );
+                toast({
+                  title: "Copied link to profile",
+                });
+              }}
+              className=" flex gap-6 font-medium items-center border-b text-sm p-4 py-1 w-full "
+            >
+              <LinkIcon className="h-4 w-4 " />
+              <span>Copy link to profile</span>
+            </button>
+          </li>
+          {checkPermissionInDomain(
+            profile.permissions,
+            PERMISSIONS.SUSPEND_USER,
+            courseId,
+          ) && (
+            <li>
+              <button
+                type="button"
+                onClick={removeFromCourse}
+                className="text-sm flex gap-6 font-medium items-center p-4 py-1 w-full hover:text-red-500"
+              >
+                <DeleteIcon className="h-4 w-4 " />
+                <span>Remove from Course</span>
+              </button>
+            </li>
+          )}
+        </ul>
+      </PopoverContent>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          onClick={handleMoreClick}
+          className="focus:outline-none"
+        >
+          <MoreHorizontal className="h-5 w-5 opacity-70" />
+        </button>
+      </PopoverTrigger>
+    </Popover>
   );
 }

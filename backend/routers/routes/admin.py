@@ -1,27 +1,46 @@
 import os
 
 from controllers import user_controller
-from fastapi import (APIRouter, File, HTTPException, Request, Response,
-                     UploadFile)
+from controllers.permission_controller import UserPermissionManager
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+)
 from models.schemas.general_schema import GeneralResponse
-from models.schemas.user_schema import (CreateUserBaseRequest,
-                                        CreateUserResponse,
-                                        GetAllUsersResponse, GetUsersResponse,
-                                        UpdateUserRequest, UserProfile)
+from models.schemas.user_schema import (
+    CreateUserBaseRequest,
+    CreateUserResponse,
+    GetAllUsersResponse,
+    GetUsersResponse,
+    UpdateUserRequest,
+    UserProfile,
+)
+from routers.dependencies.permissions import get_permissions_manager
 
 admin_router = APIRouter()
 
 
 @admin_router.get("/users", response_model=GetAllUsersResponse)
-async def get_all_users():
+async def get_all_users(
+    perm_manager: UserPermissionManager = Depends(get_permissions_manager),
+):
     users = user_controller.get_all_users()
     return {"users": users}
 
 
-@admin_router.get("/{user_id}")
-async def get_user_by_id(user_id: str, req: Request):
-    user_id = req.state.user_id
-    user = user_controller.get_user_by_id(user_id)
+@admin_router.get("/users/{user_id}")
+async def get_user_by_id(
+    user_id: str,
+    req: Request,
+    perm_manager: UserPermissionManager = Depends(get_permissions_manager),
+):
+    # For admin routes, we want to use the user_id from path parameter
+    user = await user_controller.get_user_by_id(user_id, perm_manager, True)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
@@ -30,9 +49,12 @@ async def get_user_by_id(user_id: str, req: Request):
 
 
 @admin_router.get("/me")
-async def get_profile(request: Request):
+async def get_profile(
+    request: Request,
+    perm_manager: UserPermissionManager = Depends(get_permissions_manager),
+):
     user_id = request.state.user_id
-    profile = user_controller.get_user_by_id(user_id, full=True)
+    profile = user_controller.get_user_by_id(user_id, perm_manager, True)
 
     if not profile:
         raise HTTPException(status_code=404, detail="Failed to find profile.")

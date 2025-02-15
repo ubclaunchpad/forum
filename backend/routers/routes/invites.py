@@ -1,11 +1,16 @@
 from controllers import invite_controller
 from fastapi import APIRouter, Form, Request
 from models.schemas.general_schema import GeneralResponse
-from models.schemas.invite_schema import (CreateInviteResponse, EmailSchema,
-                                          GetInvitesResponse, InviteBase,
-                                          InviteResponse)
+from models.schemas.invite_schema import (
+    CreateInviteResponse,
+    EmailSchema,
+    GetInvitesResponse,
+    InviteBase,
+    InviteResponse,
+)
 
 invite_router = APIRouter()
+
 
 @invite_router.post("", response_model=CreateInviteResponse)
 async def create_invite(request: Request, data: EmailSchema):

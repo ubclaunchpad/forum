@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -7,4 +7,4 @@ from pydantic import BaseModel, Field
 
 class GeneralResponse(BaseModel):
     msg: str
-    properties: Dict[str, str] | None = None
+    properties: Dict[str, Any] | None = None

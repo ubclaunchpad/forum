@@ -2,12 +2,11 @@
 
 import { Profile } from "@/lib/types/profiles";
 import SettingsTitleHeader from "@/components/settings/SettingsTitleHeader";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useContext, useState } from "react";
 import { ArrowRightIcon } from "lucide-react";
-import UserModal from "./usermodal";
 import { getApiUrl } from "@/utils/helpers";
 import { userContext } from "@/contexts/userContext";
+import UserSheet from "./usermodal";
 
 export default function MembersTable({ users }: { users: Profile[] }) {
   const [listOfUsers, setListOfUsers] = useState(users);
@@ -96,26 +95,22 @@ export default function MembersTable({ users }: { users: Profile[] }) {
         </div>
       </div>
 
-      <Dialog open={isModalOpen} onOpenChange={closeModal}>
-        <DialogContent className="max-w-2xl">
-          {selectedUser && (
-            <UserModal
-              profile={selectedUser}
-              isOpen={isModalOpen}
-              onClose={closeModal}
-              onRemoveUser={async (userId) => {
-                await fetch(`${getApiUrl()}/admin/users/${userId}`, {
-                  method: "DELETE",
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                });
-                setListOfUsers((prev) => prev.filter((p) => p.id !== userId));
-              }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {selectedUser && (
+        <UserSheet
+          profile={selectedUser}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          onRemoveUser={async (userId) => {
+            await fetch(`${getApiUrl()}/admin/users/${userId}`, {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            setListOfUsers((prev) => prev.filter((p) => p.id !== userId));
+          }}
+        />
+      )}
     </>
   );
 }

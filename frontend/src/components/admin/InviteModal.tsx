@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
 import {
   DialogHeader,
   DialogTitle,
@@ -42,6 +40,7 @@ export default function InviteModal({ onSubmit, onClose }: InviteModalProps) {
       await onSubmit(email);
       onClose();
     } catch (err) {
+      console.log(err);
       setError("Failed to send invite. Please try again.");
     } finally {
       setIsSubmitting(false);

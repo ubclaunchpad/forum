@@ -1,6 +1,7 @@
 "use client";
 
 import AppearanceSection from "@/components/settings/AppearanceSection";
+import UserDangerSection from "@/components/settings/CourseDangerSection";
 import CourseGeneralSettingsSection from "@/components/settings/CourseGeneralSettings";
 import { FeaturesSection } from "@/components/settings/ExperimentsSection";
 import SettingsTitleHeader from "@/components/settings/SettingsTitleHeader";
@@ -12,6 +13,7 @@ export default function CourseSection() {
       <CourseGeneralSettingsSection />
       <AppearanceSection />
       <FeaturesSection />
+      <UserDangerSection />
     </div>
   );
 }

@@ -223,6 +223,12 @@ class FileStorage:
                 status_code=500, detail=f"Could not generate signed URLs: {e}"
             )
 
+    def delete_bucket(self):
+        if self.bucket_name in self.PUBLIC_BUCKETS:
+            raise ValueError("Cannot delete global buckets")
+        self.supabase.storage.empty_bucket(self.bucket_name)
+        self.supabase.storage.delete_bucket(self.bucket_name)
+
 
 # async def get_file_type(file: UploadFile, file_content: bytes) -> str:
 #     """Detect file type using both mime type and magic numbers."""

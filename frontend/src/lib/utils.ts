@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { Permission, Profile } from "./types/profiles";
+import { PermissionCheck, PermissionTree, Profile } from "./types/profiles";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -216,28 +216,65 @@ export function isDeepEqual<T extends DeepEqualType>(x: T, y: T): boolean {
   return false;
 }
 
-export function hasPermission(
-  permissions: Omit<Permission, "id">[],
-  perm: Omit<Permission, "id">,
-) {
-  return permissions.some(
-    (permission) =>
-      permission.action === perm.action &&
-      permission.resource === perm.resource &&
-      permission.domain === perm.domain &&
-      permission.modifier === perm.modifier &&
-      permission.scope === perm.scope &&
-      permission.subdomain === perm.subdomain,
-  );
-}
-
+// Define permissions constants
 export const PERMISSIONS = {
   CREATE_COURSE: {
     domain: null,
     subdomain: null,
-    scope: "org",
     resource: "course",
     action: "create",
     modifier: "any",
   },
-};
+  SYSTEM_ADMIN: {
+    domain: null,
+    subdomain: null,
+    resource: "system",
+    action: "manage",
+    modifier: "all",
+  },
+  CREATE_POST: {
+    domain: null,
+    subdomain: null,
+    resource: "post",
+    action: "create",
+    modifier: "any",
+  },
+  MODIFY_COURSE: {
+    domain: null,
+    subdomain: null,
+    resource: "course",
+    action: "settings",
+    modifier: "all",
+  },
+  SUSPEND_USER: {
+    domain: null,
+    subdomain: null,
+    resource: "user",
+    action: "suspend",
+    modifier: "any",
+  },
+} as const;
+
+export function hasPermission(
+  tree: Record<string, Record<string, Record<string, boolean>>>,
+  permission: PermissionCheck,
+): boolean {
+  return !!tree?.[permission.resource]?.[permission.action]?.[
+    permission.modifier
+  ];
+}
+
+export function checkPermissionInDomain(
+  permissionTree: PermissionTree,
+  permission: PermissionCheck,
+  domain: string | null = "all",
+  subdomain: string | null = "all",
+): boolean {
+  const domainKey = domain || "all";
+  const subdomainKey = subdomain || "all";
+
+  return hasPermission(
+    permissionTree[domainKey]?.[subdomainKey] || {},
+    permission,
+  );
+}

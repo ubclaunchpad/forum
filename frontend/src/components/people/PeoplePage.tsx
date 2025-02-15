@@ -1,6 +1,5 @@
 "use client";
 import { Profile } from "@/lib/types/profiles";
-import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { PeopleSidebar } from "./PeopleSidebar";
 import ProfileView from "./ProfileView";
@@ -25,7 +24,7 @@ export const PeoplePage = ({
           initialProfile ? "hidden xl:block" : "",
         )}
       >
-        <div className="flex flex-row justify-center items-center w-full h-16 px-2">
+        {/* <div className="flex flex-row justify-center items-center w-full h-16 px-2">
           <Button
             disabled
             className="disabled w-full max-w-[150px] min-h-none h-fit py-2"
@@ -33,7 +32,7 @@ export const PeoplePage = ({
           >
             Invite
           </Button>
-        </div>
+        </div> */}
 
         <div className="flex flex-row justify-center items-center w-full h-16 px-2"></div>
       </div>

@@ -1,7 +1,16 @@
 import os
 
 from controllers import user_controller
-from fastapi import APIRouter, File, HTTPException, Request, Response, UploadFile
+from controllers.permission_controller import UserPermissionManager
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+)
 from models.schemas.general_schema import GeneralResponse
 from models.schemas.user_schema import (
     CreateUserBaseRequest,
@@ -10,6 +19,7 @@ from models.schemas.user_schema import (
     UpdateUserRequest,
     UserProfile,
 )
+from routers.dependencies.permissions import get_permissions_manager
 
 user_router = APIRouter()
 
@@ -21,9 +31,13 @@ async def get_all_users():
 
 
 @user_router.get("/{user_id}")
-async def get_user_by_id(user_id: str, req: Request):
-    user_id = req.state.user_id
-    user = user_controller.get_user_by_id(user_id)
+async def get_user_by_id(
+    user_id: str,
+    req: Request,
+    perm_manager: UserPermissionManager = Depends(get_permissions_manager),
+):
+    # Use passed user_id instead of from request since this endpoint gets other users
+    user = await user_controller.get_user_by_id(user_id, perm_manager, False)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
@@ -31,10 +45,14 @@ async def get_user_by_id(user_id: str, req: Request):
     return user
 
 
-@user_router.get("/me")
-async def get_profile(request: Request):
+@user_router.get("/user/me")
+async def get_profile(
+    request: Request,
+    perm_manager: UserPermissionManager = Depends(get_permissions_manager),
+):
     user_id = request.state.user_id
-    profile = user_controller.get_user_by_id(user_id, full=True)
+    print("sss")
+    profile = await user_controller.get_user_by_id(user_id, perm_manager, True)
 
     if not profile:
         raise HTTPException(status_code=404, detail="Failed to find profile.")

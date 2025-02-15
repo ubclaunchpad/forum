@@ -1,21 +1,25 @@
 from bisect import bisect_right
 from datetime import datetime, timedelta
-from http.client import HTTPException
-from typing import List
+from typing import Any, Dict, List
+from uuid import UUID
+
+from fastapi import HTTPException
 from models.db import get_db
 from models.all import QueryHistory
-from models.schemas.query_history import QueryEntry
+from models.schemas.query_history import QueryEntry, QueryHistoryModel
 
 
-def get_history_for_course(course_id, user_id) -> List[QueryHistory]:
+def get_history_for_course(course_id: str, user_id: str) -> List[QueryHistoryModel]:
     try:
         with get_db() as db:
             queries = (
                 db.query(QueryHistory)
-                .filter(QueryHistory.user_id == user_id)
-                .filter(QueryHistory.course_id == course_id)
+                .filter(QueryHistory.user_id == UUID(user_id))
+                .filter(QueryHistory.course_id == UUID(course_id))
             ).all()
-            return queries
+
+            # Convert SQLAlchemy models to Pydantic models
+            return [QueryHistoryModel.model_validate(query) for query in queries]
     except Exception as e:
         print(f"Error in get_history_for course: {type(e).__name__}: {str(e)}")
         raise HTTPException(
@@ -23,13 +27,14 @@ def get_history_for_course(course_id, user_id) -> List[QueryHistory]:
         )
 
 
-def update_course_history(course_id, user_id, messages):
+def update_course_history(course_id: str, user_id: str, messages: List[Dict[str, Any]]):
     try:
         with get_db() as db:
-            db.query(QueryHistory).filter(QueryHistory.user_id == user_id).filter(
-                QueryHistory.course_id == course_id
+            db.query(QueryHistory).filter(
+                QueryHistory.user_id == UUID(user_id),
+                QueryHistory.course_id == UUID(course_id),
             ).update({"messages": messages})
-            db.flush()
+            db.commit()  # Changed from flush to commit
     except Exception as e:
         print(f"Error in updating history for course: {type(e).__name__}: {str(e)}")
         raise HTTPException(

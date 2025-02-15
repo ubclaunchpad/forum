@@ -8,8 +8,6 @@ export type InvitedUser = {
 };
 
 import {
-  Dialog,
-  DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -26,7 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { UserX, Mail } from "lucide-react";
+import { UserX } from "lucide-react";
 
 interface UserModalProps {
   invitedUser: InvitedUser;
@@ -37,7 +35,7 @@ interface UserModalProps {
 
 export default function InvitedUserModal({
   invitedUser,
-  isOpen,
+  // isOpen,
   onClose,
   onRevokeInvite,
 }: UserModalProps) {

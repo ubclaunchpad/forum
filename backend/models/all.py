@@ -230,15 +230,9 @@ class Profile(Base):
 
     user_roles = relationship(
         "UserRole",
-        primaryjoin="Profile.id==foreign(UserRole.user_id)",  # foreign() added
+        primaryjoin="Profile.id==foreign(UserRole.user_id)",
         backref="user",
     )
-
-    # user_permissions = relationship(
-    #     "UserPermission",
-    #     primaryjoin="Profile.id==foreign(UserPermission.user_id)",  # foreign() added
-    #     backref="user"
-    # )
 
     __table_args__ = ({"schema": "public"},)
 
@@ -619,12 +613,9 @@ class Invite(Base):
 class Permission(Base):
     __tablename__ = "permissions"
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-    scope = Column(String(50), nullable=False)
     resource = Column(String(50), nullable=False)
     action = Column(String(50), nullable=False)
     modifier = Column(String(50), nullable=False)
-    domain = Column(PUUID, ForeignKey("public.courses.id"))
-    subdomain = Column(PUUID, ForeignKey("public.tags.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -644,21 +635,14 @@ class Role(Base):
     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
     name = Column(String(100), nullable=False)
     description = Column(Text)
+    alias = Column(String(100))  # Added alias column
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     permissions = relationship(
         "Permission",
-        secondary=role_permissions,  # Use the Table object
+        secondary=role_permissions,
         backref="roles",
     )
-
-
-# class RolePermission(Base):
-#     __tablename__ = "role_permissions"
-#     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-#     role_id = Column(PUUID, ForeignKey("public.roles.id", ondelete="CASCADE"))
-#     permission_id = Column(PUUID, ForeignKey("public.permissions.id", ondelete="CASCADE"))
-#     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 class UserRole(Base):
@@ -670,12 +654,7 @@ class UserRole(Base):
     subdomain = Column(PUUID, ForeignKey("public.tags.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-
-# class UserPermission(Base):
-#     __tablename__ = "user_permissions"
-#     id = Column(PUUID, server_default=text("gen_random_uuid()"), primary_key=True)
-#     user_id = Column(PUUID, ForeignKey("auth.users.id", ondelete="CASCADE"))
-#     permission_id = Column(PUUID, ForeignKey("public.permissions.id", ondelete="CASCADE"))
-#     domain = Column(PUUID, ForeignKey("public.courses.id"))
-#     subdomain = Column(PUUID, ForeignKey("public.tags.id"))
-#     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    __table_args__ = {
+        "schema": "public",
+        "comment": "Defines role assignments for users. When both domain and subdomain are NULL, the role applies system-wide (superadmin). When only domain is set, role applies course-wide. When both are set, role applies to specific tag within course.",
+    }

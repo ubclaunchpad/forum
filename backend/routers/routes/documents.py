@@ -47,17 +47,38 @@ async def create_document(
     metadata: str = Form(...),
 ):
     try:
+        if not file.filename:
+            raise ValueError("No filename provided")
+
         file_content = await file.read()
         await file.seek(0)
-        extension = file.filename.split(".")[-1]
+
+        # Handle content type
+        content_type = file.content_type
+        if not content_type:
+            # Fallback content type based on extension
+            extension = file.filename.split(".")[-1].lower()
+            content_type_map = {
+                "pdf": "application/pdf",
+                "txt": "text/plain",
+                "md": "text/markdown",
+                "png": "image/png",
+                "jpg": "image/jpeg",
+                "jpeg": "image/jpeg",
+            }
+            content_type = content_type_map.get(extension)
+            if not content_type:
+                raise ValueError(f"Unsupported file type: {extension}")
+
         create_document_request = DocumentFileUpload(
             title=title,
             course_id=UUID(c_id),
             created_by=request.state.user_id,
             file=file_content,
-            type=file.content_type,
-            extension=extension,
+            type=content_type,
+            extension=file.filename.split(".")[-1].lower(),
         )
+
         doc_id = await document_manager.upload_new_document(create_document_request)
         return CreateDocumentResponse(id=doc_id)
     except Exception as e:
@@ -112,7 +133,7 @@ async def get_document_view(c_id: UUID, document_id: UUID, request: Request):
 
     # If not in cache or expired, generate new signed URL
     res = document_manager.get_signed_document_url(
-        course_id=str(c_id), document_id=str(document_id)
+        course_id=c_id, document_id=str(document_id)
     )
     signed_url = res["signedURL"]
 

@@ -20,7 +20,8 @@ class GetInvitesResponse(BaseModel):
 
 
 class CreateInviteResponse(InviteBase):
-    pass
+    invited_at: datetime
+
 
 class EmailSchema(BaseModel):
     email: str
