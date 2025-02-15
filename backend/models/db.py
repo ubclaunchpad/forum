@@ -28,6 +28,7 @@ SessionLocal = sessionmaker(
     bind=engine, autocommit=False, autoflush=False, expire_on_commit=False
 )
 
+
 supabase: Client = create_client(url, key)
 
 

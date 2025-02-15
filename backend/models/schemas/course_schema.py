@@ -3,6 +3,7 @@ from enum import Enum
 from typing import List, Optional, Union
 from uuid import UUID
 
+from models.schemas.role_schema import RoleAssignment
 from models.schemas.user_schema import UserProfile
 from pydantic import BaseModel
 
@@ -44,7 +45,7 @@ class CreateCourseResponse(BaseModel):
 class UpdateCourseReq(BaseModel):
     c_group: Optional[str] = None
     code: Optional[int] = None
-    section: Optional[int] = None
+    section: Optional[str] = None
     name: Optional[str] = None
     config: Optional[CourseConfig] = None
     start_date: Optional[date] = None
@@ -99,3 +100,11 @@ class CourseTagRequest(BaseModel):
     visibility: Optional[VisibilityEnum] = None
     parent_tag_id: Optional[UUID] = None
     properties: Optional[dict] = None
+
+
+class AddUserToCourseRequest(BaseModel):
+    roles: Optional[List[RoleAssignment]] = None
+
+
+class AddUserRequest(BaseModel):
+    roles: Optional[List[RoleAssignment]] = None

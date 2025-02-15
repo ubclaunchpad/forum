@@ -1,11 +1,12 @@
 import logging
 from csv import Error
-from math import log
 from typing import Optional
 
 from controllers import course_controller
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
+from controllers.permission_controller import UserPermissionManager
 from models.schemas.course_schema import (
+    AddUserRequest,
     CourseAccessEnum,
     CourseMembersResponse,
     CourseResponse,
@@ -18,6 +19,7 @@ from models.schemas.course_schema import (
     UpdateCourseReq,
 )
 from models.schemas.general_schema import GeneralResponse
+from routers.dependencies.permissions import get_permissions_manager
 
 course_router = APIRouter()
 
@@ -25,9 +27,13 @@ logger = logging.getLogger(__name__)
 
 
 @course_router.post("", response_model=CreateCourseResponse)
-async def create_course(create_course_req: CreateCourseReq, request: Request):
+async def create_course(
+    create_course_req: CreateCourseReq,
+    request: Request,
+    perm_manager: UserPermissionManager = Depends(get_permissions_manager),
+):
     user_id = request.state.user_id
-    return course_controller.create_course(user_id, create_course_req)
+    return course_controller.create_course(user_id, create_course_req, perm_manager)
 
 
 @course_router.get("", response_model=GetCoursesResponse)
@@ -68,8 +74,14 @@ async def get_course_members(c_id: str):
 
 
 @course_router.post("/{c_id}/members/{u_id}", response_model=GeneralResponse)
-async def register_user(c_id: str, u_id: str):
-    res = course_controller.add_user_to_course(c_id, u_id)
+async def register_user(
+    c_id: str,
+    u_id: str,
+    req: Optional[AddUserRequest] = None,
+    perm_manager: UserPermissionManager = Depends(get_permissions_manager),
+):
+    roles = req.roles if req else None
+    res = course_controller.add_user_to_course(c_id, u_id, perm_manager, roles)
     if res:
         return GeneralResponse(msg=f"User {u_id} registered to course {c_id}")
     else:

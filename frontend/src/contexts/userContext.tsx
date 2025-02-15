@@ -31,7 +31,7 @@ export function UserContextProvider({
   const [account, setAccount] = useState<Account>({} as Account);
 
   const getProfile = useCallback(async () => {
-    const res = await fetch(`${getApiUrl()}/users/me`, {
+    const res = await fetch(`${getApiUrl()}/users/user/me`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel, EmailStr, Field
 
 
 class InviteBase(BaseModel):
@@ -19,4 +20,8 @@ class GetInvitesResponse(BaseModel):
 
 
 class CreateInviteResponse(InviteBase):
-    pass
+    invited_at: datetime
+
+
+class EmailSchema(BaseModel):
+    email: str

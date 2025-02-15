@@ -1,18 +1,12 @@
 import os
 from datetime import datetime
-from time import perf_counter
 from typing import List, Optional, Union
 from uuid import UUID
 
-import supabase
-from controllers import invite_controller
-from controllers.permission_controller import (
-    get_user_roles,
-    get_user_roles_and_permissions,
-)
+from controllers.permission_controller import UserPermissionManager
 from core.util.file_storage import ConflictResolution, FileStorage
 from fastapi import HTTPException
-from models.all import Course, Invite, Profile, Role, UserRole
+from models.all import Course, Invite, Profile
 from models.db import get_db, supabase
 from models.schemas.general_schema import GeneralResponse
 from models.schemas.user_schema import (
@@ -23,9 +17,8 @@ from models.schemas.user_schema import (
     UpdateUserRequest,
     UserProfile,
 )
-from sqlalchemy import select, text
+from sqlalchemy import Text, delete, select, text
 from sqlalchemy.orm import joinedload
-from utils.timer import sync_timer
 
 
 def get_all_users() -> List[UserProfile]:
@@ -53,8 +46,10 @@ def get_all_users() -> List[UserProfile]:
         ]
 
 
-def get_user_by_id(
-    user_id: str, full: bool = False
+async def get_user_by_id(
+    user_id: str,
+    perm_manager: UserPermissionManager,
+    full: bool = False,
 ) -> Optional[Union[UserProfile, FullUserProfile]]:
     """
     Get a single user by ID with their profile information.
@@ -68,10 +63,12 @@ def get_user_by_id(
             return None
 
         # Get roles and permissions only if full profile is requested
-        roles = None
-        permissions = None
+        user_roles = None
         if full:
-            roles, permissions = get_user_roles_and_permissions(user_id, {})
+            roles_data = await perm_manager.get_user_roles_and_permissions(
+                db, user_id=UUID(user_id)
+            )
+            user_roles = roles_data
 
         # Create base profile data
         profile_data = {
@@ -87,9 +84,12 @@ def get_user_by_id(
             "icon_url": getattr(user, "icon_url", None),
         }
 
-        # Return appropriate profile type based on full parameter
-        if full:
-            return FullUserProfile(**profile_data, roles=roles, permissions=permissions)
+        if full and user_roles is not None:
+            return FullUserProfile(
+                **profile_data,
+                roles=user_roles["roles"],
+                permissions=user_roles["permissions"],
+            )
         else:
             return UserProfile(**profile_data)
 
@@ -112,11 +112,9 @@ def get_user_courses(user_id: str) -> List[Course]:
 
 def delete_user_by_id(user_id):
     with get_db() as db:
-        user = db.query(Profile).filter(Profile.id == user_id).first()
-        if not user:
-            return False
-        db.delete(user)
-        db.flush()
+        db.execute(
+            text("DELETE FROM auth.users WHERE id = :user_id"), {"user_id": user_id}
+        )
         return True
 
 

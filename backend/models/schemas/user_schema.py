@@ -68,8 +68,8 @@ class UserProfile(BaseModel):
 
 
 class FullUserProfile(UserProfile):
-    roles: Any
-    permissions: Any
+    roles: Optional[Any] = None
+    permissions: Optional[Any] = None
 
 
 class GetUserProfileResponse(BaseModel):
@@ -78,3 +78,7 @@ class GetUserProfileResponse(BaseModel):
 
 class UserProfilePhotoRequest(BaseModel):
     file: UploadFile
+
+
+class GetAllUsersResponse(BaseModel):
+    users: List[UserProfile]

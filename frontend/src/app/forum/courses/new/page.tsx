@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { courseSchema, CourseAccessOptions } from "@/lib/types/course";
 import FindCoursesToJoin from "@/components/courses/FindCoursesToJoin";
-import { hasPermission, PERMISSIONS } from "@/lib/utils";
+import { checkPermissionInDomain, PERMISSIONS } from "@/lib/utils";
 
 const inputStyle =
   "rounded-full w-full px-3 py-4 h-12 border border-neutral-200 focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
@@ -46,7 +46,10 @@ export default function CoursesPage() {
   const { profile } = useContext(userContext);
 
   const hasCreatePermission = useMemo(() => {
-    return hasPermission(profile.permissions, PERMISSIONS.CREATE_COURSE);
+    return checkPermissionInDomain(
+      profile.permissions,
+      PERMISSIONS.CREATE_COURSE,
+    );
   }, [profile]);
   return (
     <div className="flex flex-col w-dvw h-dvh overflow-hidden bg-neutral-100 items-center justify-center">

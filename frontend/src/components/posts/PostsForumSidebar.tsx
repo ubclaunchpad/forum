@@ -1,5 +1,10 @@
 "use client";
-import { cn, generateTempId } from "@/lib/utils";
+import {
+  checkPermissionInDomain,
+  cn,
+  generateTempId,
+  PERMISSIONS,
+} from "@/lib/utils";
 import { PostCard } from "./PostCard";
 import { useCallback, useContext, useEffect, useRef } from "react";
 import { forumPostsContext } from "@/contexts/PostsContext";
@@ -7,6 +12,8 @@ import { Button } from "../ui/button";
 import { PostWithRequiredId } from "@/lib/types/posts";
 import { MainListPanel, MainSidebar } from "../general/FourmTabs";
 import { PlusIcon } from "lucide-react";
+import { userContext } from "@/contexts/userContext";
+import { useCourseStore } from "@/providers/courseStoreProvider";
 
 export default function PostsForumSidebar() {
   const {
@@ -20,6 +27,8 @@ export default function PostsForumSidebar() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollPositionRef = useRef(0);
+  const course = useCourseStore((state) => state.course);
+  const { profile } = useContext(userContext);
 
   useEffect(() => {
     const savedScroll = sessionStorage.getItem("forumlist");
@@ -39,20 +48,26 @@ export default function PostsForumSidebar() {
     <>
       <MainSidebar className={selectedPost ? "hidden xl:block" : ""}>
         <div className="flex flex-row justify-center items-center w-full h-16 px-2">
-          <Button
-            size={"sm"}
-            className="w-fit  px-4 min-h-none h-fit py-2"
-            onClick={() => {
-              const id = generateTempId("local");
-              const post: PostWithRequiredId = { id: id, title: "" };
-              setListOfDrafts((prev) => [post, ...prev]);
-              setSelectedPost(post);
-              setIsEditing(id);
-            }}
-          >
-            <PlusIcon className="h-4 w-4" />
-            New Post
-          </Button>
+          {checkPermissionInDomain(
+            profile.permissions,
+            PERMISSIONS.CREATE_POST,
+            course.id,
+          ) && (
+            <Button
+              size={"sm"}
+              className="w-fit  px-4 min-h-none h-fit py-2"
+              onClick={() => {
+                const id = generateTempId("local");
+                const post: PostWithRequiredId = { id: id, title: "" };
+                setListOfDrafts((prev) => [post, ...prev]);
+                setSelectedPost(post);
+                setIsEditing(id);
+              }}
+            >
+              <PlusIcon className="h-4 w-4" />
+              New Post
+            </Button>
+          )}
         </div>
       </MainSidebar>
       <MainListPanel className={selectedPost ? "hidden xl:block" : ""}>

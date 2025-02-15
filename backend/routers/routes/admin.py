@@ -15,29 +15,32 @@ from models.schemas.general_schema import GeneralResponse
 from models.schemas.user_schema import (
     CreateUserBaseRequest,
     CreateUserResponse,
+    GetAllUsersResponse,
     GetUsersResponse,
     UpdateUserRequest,
     UserProfile,
 )
 from routers.dependencies.permissions import get_permissions_manager
 
-user_router = APIRouter()
+admin_router = APIRouter()
 
 
-@user_router.get("", response_model=GetUsersResponse)
-async def get_all_users():
+@admin_router.get("/users", response_model=GetAllUsersResponse)
+async def get_all_users(
+    perm_manager: UserPermissionManager = Depends(get_permissions_manager),
+):
     users = user_controller.get_all_users()
     return {"users": users}
 
 
-@user_router.get("/{user_id}")
+@admin_router.get("/users/{user_id}")
 async def get_user_by_id(
     user_id: str,
     req: Request,
     perm_manager: UserPermissionManager = Depends(get_permissions_manager),
 ):
-    # Use passed user_id instead of from request since this endpoint gets other users
-    user = await user_controller.get_user_by_id(user_id, perm_manager, False)
+    # For admin routes, we want to use the user_id from path parameter
+    user = await user_controller.get_user_by_id(user_id, perm_manager, True)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
@@ -45,14 +48,13 @@ async def get_user_by_id(
     return user
 
 
-@user_router.get("/user/me")
+@admin_router.get("/me")
 async def get_profile(
     request: Request,
     perm_manager: UserPermissionManager = Depends(get_permissions_manager),
 ):
     user_id = request.state.user_id
-    print("sss")
-    profile = await user_controller.get_user_by_id(user_id, perm_manager, True)
+    profile = user_controller.get_user_by_id(user_id, perm_manager, True)
 
     if not profile:
         raise HTTPException(status_code=404, detail="Failed to find profile.")
@@ -60,7 +62,7 @@ async def get_profile(
     return profile
 
 
-@user_router.delete("/{user_id}")
+@admin_router.delete("/users/{user_id}")
 async def delete_user_by_id(user_id: str):
     successful_delete = user_controller.delete_user_by_id(user_id)
 
@@ -70,12 +72,12 @@ async def delete_user_by_id(user_id: str):
     return Response(status_code=204)
 
 
-@user_router.patch("/{user_id}")
+@admin_router.patch("/{user_id}")
 async def update_user_by_id(user_id: str, updated_fields):
     raise HTTPException(status_code=400, detail="Not implemented.")
 
 
-@user_router.post("", response_model=CreateUserResponse)
+@admin_router.post("", response_model=CreateUserResponse)
 async def create_user(create_user_request: CreateUserBaseRequest):
     try:
         user = user_controller.create_user(create_user_request)
@@ -86,7 +88,7 @@ async def create_user(create_user_request: CreateUserBaseRequest):
         raise HTTPException(status_code=400, detail="Failed to create user." + str(e))
 
 
-@user_router.put("/me", response_model=UserProfile)
+@admin_router.put("/me", response_model=UserProfile)
 async def update_profile(request: Request, update_data: UpdateUserRequest):
     """Update the current user's profile."""
     try:
@@ -102,7 +104,7 @@ async def update_profile(request: Request, update_data: UpdateUserRequest):
         )
 
 
-@user_router.post("/me/photo", response_model=GeneralResponse)
+@admin_router.post("/me/photo", response_model=GeneralResponse)
 async def upload_profile_photo(request: Request, file: UploadFile = File(...)):
     """Upload/update profile photo."""
     user_id = request.state.user_id
@@ -141,7 +143,7 @@ async def upload_profile_photo(request: Request, file: UploadFile = File(...)):
     return user_controller.update_profile_photo(user_id, contents, filename)
 
 
-@user_router.delete("/me/photo", response_model=GeneralResponse)
+@admin_router.delete("/me/photo", response_model=GeneralResponse)
 async def remove_profile_photo(request: Request):
     """Remove profile photo."""
     user_id = request.state.user_id

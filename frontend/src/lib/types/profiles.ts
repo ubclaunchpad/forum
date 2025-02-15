@@ -13,7 +13,7 @@ export type Profile = {
   socials?: SocialLinks;
   status?: string;
   roles: Role[];
-  permissions: Omit<Permission, "id">[];
+  permissions: PermissionTree;
 };
 
 export type SocialLinks = {
@@ -31,9 +31,15 @@ export type SocialLinks = {
 export type Role = {
   id: string;
   name: string;
-  description: string;
-  created_at: string;
-  permissions: Omit<Permission, "id">[];
+  description?: string;
+  alias?: string;
+  domain: string | null;
+  subdomain: string | null;
+  permissions: Array<{
+    resource: string;
+    action: string;
+    modifier: string;
+  }>;
 };
 
 export type Permission = {
@@ -45,3 +51,23 @@ export type Permission = {
   modifier: string;
   action: string;
 };
+
+export type InvitedUser = {
+  referrer_id: string;
+  referred_email: string;
+  invited_at: string;
+  joined_at: string;
+};
+
+export type PermissionTree = Record<
+  string,
+  Record<string, Record<string, Record<string, Record<string, boolean>>>>
+>;
+
+export interface PermissionCheck {
+  resource: string;
+  action: string;
+  modifier: string;
+  domain?: string | null;
+  subdomain?: string | null;
+}
