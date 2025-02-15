@@ -13,6 +13,12 @@ import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
+const LINKS = {
+  FEATURE:
+    "https://launchpadubc.notion.site/19b1e489d920810abdfccfcb42908c70?pvs=105",
+  BUG: "https://launchpadubc.notion.site/19b1e489d920816681dad2d7cb17dd4e?pvs=105",
+};
+
 export function ProfileButton() {
   const [isOpen, setIsOpen] = useState(false);
   const { profile } = useContext(userContext);
@@ -45,28 +51,25 @@ export function ProfileButton() {
             </label>
 
             <ul className="flex flex-col min-w-[200px] divide-y  border-t">
-              {process.env.NEXT_PUBLIC_BUG_FORM_URL && (
-                <Link
-                  href={process.env.NEXT_PUBLIC_BUG_FORM_URL}
-                  target="_blank"
-                  referrerPolicy="no-referrer"
-                  className="w-full no-underline hover:text-primary-500 p-1 px-2  text-sm flex items-center gap-2 "
-                >
-                  <BugIcon className="w-4 min-h-4" />
-                  Report an issue
-                </Link>
-              )}
-              {process.env.NEXT_PUBLIC_FEATURE_FORM_URL && (
-                <Link
-                  href={process.env.NEXT_PUBLIC_FEATURE_FORM_URL}
-                  target="_blank"
-                  referrerPolicy="no-referrer"
-                  className="w-full no-underline hover:text-primary-500 p-1 px-2  text-sm flex items-center gap-2 "
-                >
-                  <ClipboardPenIcon className="w-4 min-h-4" />
-                  Request a feature
-                </Link>
-              )}
+              <Link
+                href={LINKS.BUG}
+                target="_blank"
+                referrerPolicy="no-referrer"
+                className="w-full no-underline hover:text-primary-500 p-1 px-2  text-sm flex items-center gap-2 "
+              >
+                <BugIcon className="w-4 min-h-4" />
+                Report an issue
+              </Link>
+
+              <Link
+                href={LINKS.FEATURE}
+                target="_blank"
+                referrerPolicy="no-referrer"
+                className="w-full no-underline hover:text-primary-500 p-1 px-2  text-sm flex items-center gap-2 "
+              >
+                <ClipboardPenIcon className="w-4 min-h-4" />
+                Request a feature
+              </Link>
             </ul>
           </section>
         </div>
