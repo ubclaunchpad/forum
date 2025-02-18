@@ -63,7 +63,6 @@ export function ForumContextProvider({
     if (isEditing !== post.id) {
       setIsEditing(null);
     }
-    console.log(post);
     setPostAndRoute(post);
   }
 

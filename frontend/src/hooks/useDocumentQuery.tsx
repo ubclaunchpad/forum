@@ -16,6 +16,10 @@ interface Source {
 interface QueryResponse {
   answer: string;
   sources: Source[];
+  checkpoint?: {
+    label: string;
+    expanded?: string;
+  };
 }
 
 interface StreamChunk {
@@ -23,6 +27,10 @@ interface StreamChunk {
   sources?: Source[];
   done?: boolean;
   error?: string;
+  checkpoint?: {
+    label: string;
+    expanded?: string;
+  };
 }
 
 function useDocumentQuery({
@@ -115,15 +123,28 @@ function useDocumentQuery({
               }
 
               if (chunk.sources) {
-                setResponse((prev) => ({ ...prev, sources: chunk.sources }));
+                setResponse((prev) => ({
+                  answer: prev?.answer || "",
+                  sources: chunk.sources || [],
+                  checkpoint: prev?.checkpoint,
+                }));
                 onUpdateSources?.(chunk.sources);
               }
 
               if (chunk.answer !== undefined) {
                 setStreamedAnswer(chunk.answer);
                 setResponse((prev) => ({
-                  ...prev,
-                  answer: chunk.answer,
+                  answer: chunk.answer || "",
+                  sources: prev?.sources || [],
+                  checkpoint: prev?.checkpoint,
+                }));
+              }
+
+              if (chunk.checkpoint) {
+                setResponse((prev) => ({
+                  answer: prev?.answer || "",
+                  sources: prev?.sources || [],
+                  checkpoint: chunk.checkpoint,
                 }));
               }
 
@@ -146,9 +167,10 @@ function useDocumentQuery({
         console.error("Stream reading error:", error);
         setIsLoading(false);
         setResponse((prev) => ({
-          ...prev,
           answer:
             prev?.answer || "An error occurred while processing your request.",
+          sources: prev?.sources || [],
+          checkpoint: prev?.checkpoint,
         }));
       }
     }

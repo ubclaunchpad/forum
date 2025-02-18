@@ -40,6 +40,5 @@ export default async function MembersAdminPage({
   }
   const invites: InvitedUser[] = await getInvites(id, token);
 
-  console.log(invites);
   return <InvitesTable invites={invites} />;
 }

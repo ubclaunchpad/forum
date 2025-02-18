@@ -64,7 +64,7 @@ export function DocumentsPage({
       >
         {selectedFile ? (
           <>
-            <nav className="flex items-center gap-1 h-16 border-b p-2">
+            <nav className="flex items-center gap-1 h-16 border-b border-transparent p-2">
               <Button
                 className="p-0"
                 variant="ghost"

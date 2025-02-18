@@ -5,16 +5,20 @@ import { DocumentInterface } from "@/lib/types/documents";
 import { getApiUrl } from "@/utils/helpers";
 import { FileText, Frown } from "lucide-react";
 import { useState, useEffect, useContext } from "react";
-import { Document, Page } from "react-pdf";
-
-import { pdfjs } from "react-pdf";
+// import { Document, Page, pdfjs } from "react-pdf";
+// import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+// import "react-pdf/dist/esm/Page/TextLayer.css";
 import { IsLoadingView } from "../general/IsLoadingView";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url,
-).toString();
+// pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+//   "pdfjs-dist/build/pdf.worker.mjs",
+//   import.meta.url,
+// ).toString();
+
+// if (typeof window !== "undefined" && !pdfjs.GlobalWorkerOptions.workerSrc) {
+//   pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// }
 
 interface DocumentViewerInterface {
   signedUrl: string;
@@ -121,12 +125,26 @@ export default function FileViewer({
     //   );
     // }
 
+    if (doc.fileType === "application/pdf") {
+      const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.signedUrl)}&embedded=true`;
+      return (
+        <div className="w-full h-full overflow-hidden rounded-md">
+          <iframe
+            src={googleViewerUrl}
+            className="w-full h-full border-0"
+            title="PDF viewer"
+          />
+        </div>
+      );
+    }
+
     // Use PDFViewer for desktop
-    return (
-      <>
-        <PDFViewer url={doc.signedUrl} />
-      </>
-    );
+    // FIXME: This is not working
+    // return (
+    //   <>
+    //     <PDFViewer url={doc.signedUrl} />
+    //   </>
+    // );
   }
 
   // Text viewer
@@ -199,84 +217,95 @@ export default function FileViewer({
   );
 }
 
-function PDFViewer({ url }: { url: string }) {
-  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
-  const [numPages, setNumPages] = useState<number | null>(null);
-  const [error, setError] = useState<Error | null>(null);
+// function PDFViewer({ url }: { url: string }) {
+//   const [numPages, setNumPages] = useState<number | null>(null);
+//   const [error, setError] = useState<Error | null>(null);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [pdfFile, setPdfFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    const fetchAndCachePDF = async () => {
-      try {
-        // Check sessionStorage for cached blob URL
-        const cachedUrl = sessionStorage.getItem(`pdf_${url}`);
-        if (cachedUrl) {
-          const blob = await (await fetch(cachedUrl)).blob();
-          setPdfBlob(blob);
-          return;
-        }
+//   useEffect(() => {
+//     async function fetchPDF() {
+//       try {
+//         const response = await fetch(url);
+//         if (!response.ok) throw new Error("Failed to fetch PDF");
+//         const blob = await response.blob();
+//         // Convert blob to File object
+//         const file = new File([blob], "document.pdf", {
+//           type: "application/pdf",
+//         });
+//         setPdfFile(file);
+//         setIsLoading(false);
+//       } catch (err) {
+//         console.error("Error fetching PDF:", err);
+//         setError(err instanceof Error ? err : new Error("Failed to load PDF"));
+//       }
+//     }
+//     fetchPDF();
+//   }, [url]);
 
-        // Fetch and cache if not found
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        sessionStorage.setItem(`pdf_${url}`, blobUrl);
-        setPdfBlob(blob);
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error("Failed to load PDF"));
-      }
-    };
+//   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
+//     setIsLoading(false);
+//     setNumPages(numPages);
+//   }
 
-    fetchAndCachePDF();
+//   if (error) {
+//     return (
+//       <div className="flex items-center justify-center h-full">
+//         <p>{error.message}</p>
+//       </div>
+//     );
+//   }
 
-    // Cleanup
-    return () => {
-      const cachedUrl = sessionStorage.getItem(`pdf_${url}`);
-      if (cachedUrl) {
-        URL.revokeObjectURL(cachedUrl);
-        sessionStorage.removeItem(`pdf_${url}`);
-      }
-    };
-  }, [url]);
+//   if (isLoading) {
+//     return <IsLoadingView />;
+//   }
 
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-    setNumPages(numPages);
-  }
+//   if (!pdfFile) {
+//     return <IsLoadingView />;
+//   }
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p>{error.message}</p>
-      </div>
-    );
-  }
-
-  if (!pdfBlob) return <IsLoadingView />;
-
-  return (
-    <div className="flex-1 overflow-auto relative">
-      <Document
-        file={pdfBlob}
-        loading={<IsLoadingView />}
-        onError={setError}
-        className="absolute inset-0"
-        error={<IsLoadingView />}
-        onLoadSuccess={onDocumentLoadSuccess}
-      >
-        {Array.from(new Array(numPages), (el, index) => (
-          <Page
-            onError={setError}
-            loading={<IsLoadingView />}
-            renderTextLayer={false}
-            renderAnnotationLayer={false}
-            key={`page_${index + 1}`}
-            pageNumber={index + 1}
-            className="mx-auto mb-4"
-          />
-        ))}
-      </Document>
-    </div>
-  );
-}
+//   return (
+//     <div className="flex-1 flex-shrink-0 border overflow-auto relative">
+//       <Document
+//         file={pdfFile}
+//         loading={<IsLoadingView />}
+//         onError={(error) => {
+//           console.error("PDF loading error:", error);
+//           setError(new Error("Failed to load PDF"));
+//         }}
+//         className="absolute inset-0"
+//         error={
+//           <div className="flex items-center justify-center h-full">
+//             <p>Failed to load PDF</p>
+//           </div>
+//         }
+//         onLoadSuccess={onDocumentLoadSuccess}
+//       >
+//         {!isLoading &&
+//           numPages &&
+//           Array.from(new Array(numPages), (el, index) => (
+//             <Page
+//               key={`page_${index + 1}`}
+//               pageNumber={index + 1}
+//               loading={<IsLoadingView />}
+//               // renderTextLayer={true}
+//               renderAnnotationLayer={false}
+//               className="mx-auto mb-4"
+//               onLoadError={(error) => {
+//                 console.error("Page loading error:", error);
+//                 setError(new Error("Failed to load page"));
+//               }}
+//               error={
+//                 <div className="flex items-center justify-center h-full">
+//                   <p>Failed to load page</p>
+//                 </div>
+//               }
+//             />
+//           ))}
+//       </Document>
+//     </div>
+//   );
+// }
 
 // const isMobileOS = () => {
 //   const userAgent = navigator.userAgent.toLowerCase();

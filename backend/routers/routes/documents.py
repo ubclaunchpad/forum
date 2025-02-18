@@ -20,6 +20,7 @@ from models.schemas.course_schema import CourseTagsResponse, CreateCourseRespons
 from models.schemas.document_schema import (
     CreateDocumentRequest,
     CreateDocumentResponse,
+    DocumentEmbeddingMetadata,
     DocumentFileUpload,
 )
 from models.schemas.general_schema import GeneralResponse
@@ -124,23 +125,10 @@ def cache_signed_url(
 
 @document_router.get("/{document_id}/signed_url")
 async def get_document_view(c_id: UUID, document_id: UUID, request: Request):
-    user_id = str(request.state.user_id)
-
-    # Check cache and handle cleanup if expired
-    cached_url = get_cached_url(user_id, str(document_id))
-    if cached_url:
-        return {"signed_url": cached_url}
-
-    # If not in cache or expired, generate new signed URL
     res = document_manager.get_signed_document_url(
         course_id=c_id, document_id=str(document_id)
     )
-    signed_url = res["signedURL"]
-
-    # Cache the new URL
-    cache_signed_url(user_id, str(document_id), signed_url)
-
-    return {"signed_url": signed_url}
+    return {"signed_url": res["signedURL"]}
 
 
 @document_router.delete("/{document_id}", response_model=GeneralResponse)
@@ -174,7 +162,7 @@ async def query_documents(
         with get_db() as db:
             query_engine = DocumentQueryEngine(
                 db=db,
-                model="gpt-4",  # You might want to make this configurable
+                model="gpt-4o-mini",  # You might want to make this configurable
                 max_chunks=5,
             )
 
@@ -188,13 +176,17 @@ async def query_documents(
                 "answer": response["answer"],
                 "sources": [
                     {
-                        "title": source["document_title"],
-                        "content": source["content"],
-                        "relevance": source["similarity"],
-                        "metadata": source["metadata"],
-                        "document_id": source["document_id"],
-                        "signed_url": source["signed_url"],
-                        "id": source["document_id"],
+                        "title": source.get("title")
+                        or source.get("document_title", "Unknown Document"),
+                        "content": source.get("content", ""),
+                        "relevance": source.get("similarity", 0.0),
+                        "metadata": source.get("metadata", {}),
+                        "document_id": source.get("document_id", ""),
+                        "signed_url": source.get("signed_url", ""),
+                        "id": source.get("document_id", ""),
+                        "type": source.get("type", "document"),
+                        "url": source.get("url", "") or source.get("signed_url", ""),
+                        "fe_type": source.get("fe_type", "pdf"),
                     }
                     for source in response["sources"]
                 ],
@@ -219,7 +211,7 @@ async def query_documents_stream(
             with get_db() as db:
                 query_engine = DocumentQueryEngine(
                     db=db,
-                    model="gpt-4o",
+                    model="gpt-4o-mini",
                     max_chunks=5,
                 )
                 async for chunk in query_engine.stream_query(
@@ -229,19 +221,17 @@ async def query_documents_stream(
                     template_name=query.template_name,
                 ):
                     answer_json = json.loads(chunk)
+                    # print(answer_json)
                     if not answer_json["done"]:
-                        query_builder["answer"] = answer_json["answer"]
-                        if "sources" in answer_json and isinstance(
-                            answer_json["sources"], list
-                        ):
-                            query_builder["sources"] += answer_json["sources"]
+                        for key in answer_json:
+                            query_builder[key] = answer_json[key]
                     else:
                         query_builder["timestamp"] = datetime.now().strftime(
                             DATE_FORMAT
                         )
-                        add_query_to_history(c_id, request.state.user_id, query_builder)
-                    # Format as SSE
-                    yield f"data: {chunk}\n\n"
+                    yield f"data: {json.dumps(answer_json)}\n\n"
+                    add_query_to_history(c_id, request.state.user_id, query_builder)
+
         except Exception as e:
             logger.error(f"Error querying documents: {e}", exc_info=True)
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
@@ -272,3 +262,18 @@ async def remove_document_tag(document_id: str, tag_id: str):
     if not res:
         raise HTTPException(status_code=400, detail="Failed to remove document tag")
     return res
+
+
+@document_router.post("/{document_id}/embeddings", response_model=GeneralResponse)
+async def update_embeddings(document_id: str, request: Request):
+    user_id = request.state.user_id
+    return document_manager.update_embeddings(document_id, user_id)
+
+
+@document_router.get(
+    "/{document_id}/embeddings/metadata", response_model=DocumentEmbeddingMetadata
+)
+async def get_embedding_metadata(document_id: str, request: Request):
+    print("get_embedding_metadata", document_id, request.state.user_id)
+    user_id = request.state.user_id
+    return document_manager.get_embedding_metadata(document_id, user_id)
