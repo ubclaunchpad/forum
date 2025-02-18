@@ -176,7 +176,8 @@ async def query_documents(
                 "answer": response["answer"],
                 "sources": [
                     {
-                        "title": source.get("title") or source.get("document_title", "Unknown Document"),
+                        "title": source.get("title")
+                        or source.get("document_title", "Unknown Document"),
                         "content": source.get("content", ""),
                         "relevance": source.get("similarity", 0.0),
                         "metadata": source.get("metadata", {}),
@@ -185,7 +186,7 @@ async def query_documents(
                         "id": source.get("document_id", ""),
                         "type": source.get("type", "document"),
                         "url": source.get("url", "") or source.get("signed_url", ""),
-                        "fe_type": source.get("fe_type", "pdf")
+                        "fe_type": source.get("fe_type", "pdf"),
                     }
                     for source in response["sources"]
                 ],
@@ -277,4 +278,3 @@ async def get_embedding_metadata(document_id: str, request: Request):
     print("get_embedding_metadata", document_id, request.state.user_id)
     user_id = request.state.user_id
     return document_manager.get_embedding_metadata(document_id, user_id)
-

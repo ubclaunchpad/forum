@@ -61,11 +61,7 @@ def get_posts(c_id: str) -> List[Post]:
 def get_post(user_id: str, c_id: str, local_id: int) -> GetPostResponse:
     try:
         with get_db() as db:
-            post: Post = (
-                db.query(Post)
-                .filter(Post.course_id == c_id)
-                .first()
-            )
+            post: Post = db.query(Post).filter(Post.course_id == c_id).first()
 
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")

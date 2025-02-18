@@ -90,7 +90,6 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
                 },
             )
 
-
             return document_id
 
         except Exception as e:
@@ -291,17 +290,20 @@ def update_embeddings(document_id: str, user_id: str) -> GeneralResponse:
             if not document:
                 logger.error("Document not found", extra={"document_id": document_id})
                 raise ValueError("Document not found")
-            
+
             # Process document content
             file_storage = FileStorage(
-                bucket_name=f"course-{str(document.courses[0].id)}", create_bucket_if_not_found=False
+                bucket_name=f"course-{str(document.courses[0].id)}",
+                create_bucket_if_not_found=False,
             )
             file_content = file_storage.get_with_download(str(document.file_url))
 
             if not file_content:
-                logger.error("File content not found", extra={"document_id": document_id})
+                logger.error(
+                    "File content not found", extra={"document_id": document_id}
+                )
                 raise ValueError("File content not found")
-                
+
             process_start = time.time()
             with DocumentProcessor(db) as processor:
                 processor.process_document(
@@ -312,7 +314,9 @@ def update_embeddings(document_id: str, user_id: str) -> GeneralResponse:
 
             logger.info(
                 "Document processing completed",
-                extra={"document_id": str(document_id), "processing_time": f"{time.time() - process_start:.2f}s",
+                extra={
+                    "document_id": str(document_id),
+                    "processing_time": f"{time.time() - process_start:.2f}s",
                 },
             )
 
@@ -337,18 +341,21 @@ def get_embedding_metadata(document_id: str, user_id: str) -> DocumentEmbeddingM
             if not document:
                 logger.error("Document not found", extra={"document_id": document_id})
                 raise ValueError("Document not found")
-            
+
             # Get the embeddings for this document
             embeddings = (
                 db.query(Embedding)
-                .filter(Embedding.entity_type == "document", Embedding.entity_id == document.id)
+                .filter(
+                    Embedding.entity_type == "document",
+                    Embedding.entity_id == document.id,
+                )
                 .order_by(Embedding.created_at.desc())
                 .all()
             )
 
             if not embeddings:
                 return DocumentEmbeddingMetadata()
-            
+
             updated_at = getattr(embeddings[0], "created_at")
 
             return DocumentEmbeddingMetadata(
@@ -364,4 +371,3 @@ def get_embedding_metadata(document_id: str, user_id: str) -> DocumentEmbeddingM
                 exc_info=True,
             )
             raise e
-

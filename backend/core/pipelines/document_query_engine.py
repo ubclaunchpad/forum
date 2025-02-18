@@ -128,7 +128,7 @@ class DocumentQueryEngine:
                     "similarity": float(chunk.similarity)
                     if chunk.similarity is not None
                     else 0.0,
-                    "entity_type": chunk.entity_type
+                    "entity_type": chunk.entity_type,
                 }
                 for chunk in chunks
                 if chunk is not None
@@ -470,10 +470,12 @@ class DocumentQueryEngine:
                 logger.debug(f"Streaming took: {time.time() - stream_time:.2f}s")
                 logger.debug(f"Total query time: {time.time() - start_time:.2f}s")
 
-                yield json.dumps({"answer": current_answer, "sources": sources, "done": True})
+                yield json.dumps(
+                    {"answer": current_answer, "sources": sources, "done": True}
+                )
 
                 print(current_answer)
-                print(sources)  
+                print(sources)
 
             except Exception as e:
                 logger.error(f"OpenAI API error: {e}", exc_info=True)
