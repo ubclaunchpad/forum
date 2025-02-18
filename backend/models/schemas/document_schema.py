@@ -33,3 +33,9 @@ class GetCourseDocumentsResponse(BaseModel):
 
 class GetCourseDocumentsRequest(BaseModel):
     pass
+
+
+class DocumentEmbeddingMetadata(BaseModel):
+    last_updated: Optional[datetime] = None
+    chunk_count: int = 0
+    has_embeddings: bool = False

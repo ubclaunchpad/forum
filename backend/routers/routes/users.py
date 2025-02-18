@@ -51,9 +51,7 @@ async def get_profile(
     perm_manager: UserPermissionManager = Depends(get_permissions_manager),
 ):
     user_id = request.state.user_id
-    print("sss")
     profile = await user_controller.get_user_by_id(user_id, perm_manager, True)
-
     if not profile:
         raise HTTPException(status_code=404, detail="Failed to find profile.")
 

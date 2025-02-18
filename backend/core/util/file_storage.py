@@ -161,6 +161,14 @@ class FileStorage:
             # logger.error(f"Error retrieving file: {e}")
             raise HTTPException(status_code=500, detail="Failed to retrieve file")
 
+
+    def get_with_download(self, file_path: str) -> Optional[bytes]:
+        storage = self.supabase.storage.from_(self.bucket_name)
+        content = storage.download(file_path)
+        if not content:
+            return None
+        return content
+
     def delete_file(self, file_path: str) -> bool:
         storage = self.supabase.storage.from_(self.bucket_name)
 

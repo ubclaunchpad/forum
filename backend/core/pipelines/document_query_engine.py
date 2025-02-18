@@ -32,7 +32,7 @@ class DocumentQueryEngine:
     def __init__(
         self,
         db: Session,
-        model: str = "gpt-4",
+        model: str = "gpt-4o-mini",
         embedding_model: str = "text-embedding-3-small",
         max_chunks: int = 5,
         template_dir: Optional[Path] = None,
@@ -75,16 +75,16 @@ class DocumentQueryEngine:
             query_str = f"""
                 SELECT 
                     e.id,
-                    e.content,
                     e.chunk_metadata as metadata,
                     d.title as document_title,
-                    (1 - (e.embedding <=> {vector_literal}::vector)) * 0.8 as similarity,
+                    (1 - (e.embedding <=> {vector_literal}::vector))  as similarity,
                     d.id as document_id,
-                    d.file_url as document_url
+                    d.file_url as document_url,
+                    e.entity_type
                 FROM public.embeddings e
                 JOIN public.documents d ON e.entity_id = d.id
                 JOIN public.course_documents cd ON d.id = cd.document_id
-                WHERE (1 - (e.embedding <=> {vector_literal}::vector)) * 0.8 > :threshold
+                WHERE (1 - (e.embedding <=> {vector_literal}::vector))  > :threshold
                 AND e.embedding IS NOT NULL
                 AND e.entity_type = 'document'
             """
@@ -121,7 +121,6 @@ class DocumentQueryEngine:
                 {
                     "id": str(chunk.id),
                     "type": "document",
-                    "content": chunk.content or "",
                     "metadata": chunk.metadata or {},
                     "document_title": chunk.document_title or "Unknown Document",
                     "document_id": str(chunk.document_id),
@@ -129,6 +128,7 @@ class DocumentQueryEngine:
                     "similarity": float(chunk.similarity)
                     if chunk.similarity is not None
                     else 0.0,
+                    "entity_type": chunk.entity_type
                 }
                 for chunk in chunks
                 if chunk is not None
@@ -152,12 +152,12 @@ class DocumentQueryEngine:
                 SELECT 
                     p.id,
                     p.title,
-                    e.content,
                     p.course_id,
-                    (1 - (e.embedding <=> {vector_literal}::vector)) * 1.5 as similarity
+                    e.entity_type,
+                    (1 - (e.embedding <=> {vector_literal}::vector)) as similarity
                 FROM public.posts p
                 JOIN public.embeddings e ON e.entity_id = CAST(p.id::text AS uuid)
-                WHERE (1 - (e.embedding <=> {vector_literal}::vector)) * 1.5 > :threshold
+                WHERE (1 - (e.embedding <=> {vector_literal}::vector)) > :threshold
                 AND e.embedding IS NOT NULL
                 AND e.entity_type = 'post'
             """
@@ -188,11 +188,8 @@ class DocumentQueryEngine:
                     "id": str(post.id),
                     "type": "post",
                     "title": post.title or "Untitled Post",
-                    "content": post.content or "",
                     "course_id": str(post.course_id) if post.course_id else None,
-                    "similarity": float(post.similarity)
-                    if post.similarity is not None
-                    else 0.0,
+                    "similarity": float(post.similarity),
                 }
                 for post in posts
                 if post is not None
@@ -216,7 +213,6 @@ class DocumentQueryEngine:
             try:
                 base_source = {
                     "similarity": float(self._safe_get(ctx, "similarity", 0.0)),
-                    "content": self._safe_get(ctx, "content", "No content available"),
                 }
 
                 # Ensure similarity is in valid range
@@ -277,7 +273,7 @@ class DocumentQueryEngine:
                 logger.warning("Empty answer received")
                 return {
                     "answer": "I apologize, but I couldn't generate a proper response.",
-                    "sources": self._format_sources(contexts) if contexts else [],
+                    "sources": [],
                 }
 
             return {"answer": answer.strip(), "sources": self._format_sources(contexts)}
@@ -354,7 +350,7 @@ class DocumentQueryEngine:
                 logger.error(f"OpenAI API error: {e}", exc_info=True)
                 return {
                     "answer": "I apologize, but I encountered an error while generating the response.",
-                    "sources": self._format_sources(all_contexts),
+                    "sources": [],
                 }
 
         except Exception as e:
@@ -407,10 +403,10 @@ class DocumentQueryEngine:
             chunk_time = time.time()
 
             relevant_chunks = self._find_relevant_document_chunks(
-                question_embedding, threshold=0.45, course_id=course_id
+                question_embedding, threshold=0.35, course_id=course_id
             )
             relevant_posts = self._find_relevant_post_chunks(
-                question_embedding, threshold=0.45, course_id=course_id
+                question_embedding, threshold=0.35, course_id=course_id
             )
 
             logger.debug(
@@ -422,7 +418,7 @@ class DocumentQueryEngine:
             if not all_contexts:
                 yield json.dumps(
                     {
-                        "answer": "I couldn't find any relevant information to answer your question.",
+                        "answer": "I could not find much relevant information to answer your question.",
                         "sources": [],
                         "done": True,
                     }
@@ -433,7 +429,7 @@ class DocumentQueryEngine:
             sources = self._format_sources(all_contexts)
 
             try:
-                yield json.dumps({"answer": "", "sources": sources, "done": False})
+                yield json.dumps({"answer": "", "sources": [], "done": False})
                 messages = []
                 if history:
                     messages.extend(history)  # type: ignore
@@ -474,7 +470,10 @@ class DocumentQueryEngine:
                 logger.debug(f"Streaming took: {time.time() - stream_time:.2f}s")
                 logger.debug(f"Total query time: {time.time() - start_time:.2f}s")
 
-                yield json.dumps({"done": True})
+                yield json.dumps({"answer": current_answer, "sources": sources, "done": True})
+
+                print(current_answer)
+                print(sources)  
 
             except Exception as e:
                 logger.error(f"OpenAI API error: {e}", exc_info=True)

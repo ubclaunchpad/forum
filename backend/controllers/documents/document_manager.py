@@ -7,9 +7,10 @@ from uuid import UUID
 
 from core.processors.document_processor import DocumentProcessor
 from core.util.file_storage import FileStorage
-from models.all import Course, Document
+from models.all import Course, Document, Embedding
 from models.db import get_db
-from models.schemas.document_schema import DocumentFileUpload
+from models.schemas.document_schema import DocumentEmbeddingMetadata, DocumentFileUpload
+from models.schemas.general_schema import GeneralResponse
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -89,23 +90,6 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
                 },
             )
 
-            # Process document content
-            # process_start = time.time()
-            # with DocumentProcessor(db) as processor:
-            #     processor.process_document(
-            #         document_id=document_id,
-            #         file_content=create_document.file,
-            #         strategy_type="pdf",
-            #     )
-
-            # logger.info(
-            #     "Document processing completed",
-            #     extra={
-            #         "document_id": str(document_id),
-            #         "processing_time": f"{time.time() - process_start:.2f}s",
-            #         "total_time": f"{time.time() - start_time:.2f}s",
-            #     },
-            # )
 
             return document_id
 
@@ -295,3 +279,89 @@ def get_signed_document_urls(
                 exc_info=True,
             )
             raise e
+
+
+def update_embeddings(document_id: str, user_id: str) -> GeneralResponse:
+    """Update embeddings for a document."""
+    logger.info("Updating embeddings", extra={"document_id": document_id})
+
+    with get_db() as db:
+        try:
+            document = db.query(Document).get(document_id)
+            if not document:
+                logger.error("Document not found", extra={"document_id": document_id})
+                raise ValueError("Document not found")
+            
+            # Process document content
+            file_storage = FileStorage(
+                bucket_name=f"course-{str(document.courses[0].id)}", create_bucket_if_not_found=False
+            )
+            file_content = file_storage.get_with_download(str(document.file_url))
+
+            if not file_content:
+                logger.error("File content not found", extra={"document_id": document_id})
+                raise ValueError("File content not found")
+                
+            process_start = time.time()
+            with DocumentProcessor(db) as processor:
+                processor.process_document(
+                    document_id=UUID(document_id),
+                    file_content=file_content,
+                    strategy_type="pdf",
+                )
+
+            logger.info(
+                "Document processing completed",
+                extra={"document_id": str(document_id), "processing_time": f"{time.time() - process_start:.2f}s",
+                },
+            )
+
+        except Exception as e:
+            logger.error(
+                "Error updating embeddings",
+                extra={"document_id": str(document_id), "error": str(e)},
+                exc_info=True,
+            )
+            raise e
+
+    return GeneralResponse(msg="Embeddings updated")
+
+
+def get_embedding_metadata(document_id: str, user_id: str) -> DocumentEmbeddingMetadata:
+    """Get metadata about a document's embeddings."""
+    logger.info("Getting embedding metadata", extra={"document_id": document_id})
+
+    with get_db() as db:
+        try:
+            document = db.query(Document).get(document_id)
+            if not document:
+                logger.error("Document not found", extra={"document_id": document_id})
+                raise ValueError("Document not found")
+            
+            # Get the embeddings for this document
+            embeddings = (
+                db.query(Embedding)
+                .filter(Embedding.entity_type == "document", Embedding.entity_id == document.id)
+                .order_by(Embedding.created_at.desc())
+                .all()
+            )
+
+            if not embeddings:
+                return DocumentEmbeddingMetadata()
+            
+            updated_at = getattr(embeddings[0], "created_at")
+
+            return DocumentEmbeddingMetadata(
+                last_updated=updated_at,
+                chunk_count=len(embeddings),
+                has_embeddings=True,
+            )
+
+        except Exception as e:
+            logger.error(
+                "Error getting embedding metadata",
+                extra={"document_id": str(document_id), "error": str(e)},
+                exc_info=True,
+            )
+            raise e
+
