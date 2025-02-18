@@ -31,7 +31,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 import FileViewer from "../files/FileViewer";
 import { DocumentInterface } from "@/lib/types/documents";
 import { Post } from "@/lib/types/posts";
-import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
 import PostTextEditor from "../posts/PostTextEditor";
 
