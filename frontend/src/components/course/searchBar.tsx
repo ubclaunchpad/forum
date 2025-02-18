@@ -63,27 +63,13 @@ interface QuerySource {
   };
 }
 
-const CONFIDENCE_RANGES = [
-  {
-    min: 0,
-    max: 0.35,
-    label: "Might be relevant",
-  },
-  {
-    min: 0.35,
-    max: 0.65,
-    label: "Probably relevant",
-  },
-  {
-    min: 0.65,
-    max: 1,
-    label: "Definitely relevant",
-  },
-];
-
 interface SearchResponse {
   answer: string;
   sources: Source[];
+  checkpoint?: {
+    label: string;
+    expanded?: string;
+  };
 }
 
 interface SearchContentProps {
@@ -106,6 +92,24 @@ interface SourceLinkProps {
 interface SourceMetadataProps {
   source: Source;
 }
+
+const CONFIDENCE_RANGES = [
+  {
+    min: 0,
+    max: 0.35,
+    label: "Might be relevant",
+  },
+  {
+    min: 0.35,
+    max: 0.65,
+    label: "Probably relevant",
+  },
+  {
+    min: 0.65,
+    max: 1,
+    label: "Definitely relevant",
+  },
+];
 
 const MIN_SEARCH_LENGTH = 5;
 const MAX_SEARCH_LENGTH = 1000;
@@ -185,7 +189,7 @@ const PostViewerWrapper: React.FC<{ postId: string }> = ({ postId }) => {
   const { token } = useContext(userContext);
   const course = useCourseStore((state) => state.course);
   const [post, setPost] = useState<Post | null>(null);
-  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchPost() {
@@ -201,33 +205,37 @@ const PostViewerWrapper: React.FC<{ postId: string }> = ({ postId }) => {
         if (!response.ok) throw new Error("Failed to fetch post");
         const data = await response.json();
         setPost(data.post);
-      } catch {
-        toast({
-          title: "Error",
-          description: "Failed to load post",
-          variant: "destructive",
-        });
+      } catch (e) {
+        console.error("Failed to fetch post", e);
+        setError("Failed to fetch post");
       }
     }
 
     if (postId) {
       fetchPost();
     }
-  }, [postId, course.id, token, toast]);
+  }, [postId, course.id, token]);
 
-  if (!post) return <div>Loading...</div>;
+  if (!post) {
+    if (error) {
+      return <div>Could not load post</div>;
+    }
+    return <div>Loading...</div>;
+  }
 
   return (
-    <PostTextEditor
-      post={post}
-      showTitle={false}
-      readonly={true}
-      title={post.title}
-      content={post.content}
-      setTitle={() => {}}
-      setContent={() => {}}
-      handleSave={async () => {}}
-    />
+    <>
+      <PostTextEditor
+        post={post}
+        showTitle={false}
+        readonly={true}
+        title={post.title}
+        content={post.content}
+        setTitle={() => {}}
+        setContent={() => {}}
+        handleSave={async () => {}}
+      />
+    </>
   );
 };
 
@@ -258,7 +266,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
         <SheetContent
           side="right"
           showClose={false}
-          className="w-full m-2 max-h-[calc(100dvh-1rem)] rounded-lg overflow-y-auto w-full sm:max-w-xl bg-white lg:max-w-3xl"
+          className="w-full course m-2 max-h-[calc(100dvh-1rem)] rounded-lg overflow-hidden w-full sm:max-w-xl bg-white lg:max-w-3xl"
         >
           <SheetHeader>
             <SheetTitle>{selectedSource?.title}</SheetTitle>
@@ -321,25 +329,72 @@ const SearchContent: React.FC<SearchContentProps> = ({
 
       {isLoading && !response && (
         <div className="flex flex-col px-4 w-full gap-4 min-h-[300px]">
-          <div className="loading-bar"></div>
-          <div className="loading-bar max-w-sm"></div>
-          <div className="flex gap-2">
-            <div className="loading-bar max-w-sm"></div>
-            <div className="loading-bar max-w-sm"></div>
+          <div className="w-full pl-2 mb-4">
+            <div className="flex items-center gap-2 text-sm text-neutral-600">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+              <span className="font-medium">Searching...</span>
+              <span className="text-neutral-500">
+                - Looking through documents and posts
+              </span>
+            </div>
           </div>
-          <div className="loading-bar"></div>
-          <div className="loading-bar max-w-sm"></div>
-          <div className="loading-bar"></div>
-          <div className="loading-bar max-w-sm"></div>
+          <div className="loading-bar" style={{ animationDelay: "0ms" }}></div>
+          <div
+            className="loading-bar max-w-sm"
+            style={{ animationDelay: "100ms" }}
+          ></div>
+          <div className="flex gap-2">
+            <div
+              className="loading-bar max-w-sm"
+              style={{ animationDelay: "200ms" }}
+            ></div>
+            <div
+              className="loading-bar max-w-sm"
+              style={{ animationDelay: "300ms" }}
+            ></div>
+          </div>
+          <div
+            className="loading-bar"
+            style={{ animationDelay: "400ms" }}
+          ></div>
+          <div
+            className="loading-bar max-w-sm"
+            style={{ animationDelay: "500ms" }}
+          ></div>
+          <div
+            className="loading-bar"
+            style={{ animationDelay: "600ms" }}
+          ></div>
+          <div
+            className="loading-bar max-w-sm"
+            style={{ animationDelay: "700ms" }}
+          ></div>
         </div>
       )}
 
       {response && (
         <article className="pt-0 px-4 roundex-xl h-full pb-4 w-full min-h-1 flex flex-col gap-4 overflow-y-auto">
           <div className="flex flex-col w-full rounded-2xl justify-center items-center border-none py-4 pb-0">
-            <div className="p-2 text-primary-800 prose max-w-none">
-              <AnimatedMarkdown content={response.answer} />
-            </div>
+            {response.checkpoint && (
+              <div className="w-full flex pl-2 mb-4">
+                <div className="flex items-center gap-2 text-sm text-neutral-600">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                  <span className="font-medium">
+                    {response.checkpoint.label}
+                  </span>
+                  {response.checkpoint.expanded && (
+                    <span className="text-neutral-500">
+                      - {response.checkpoint.expanded}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            {response.answer && (
+              <div className="p-2 text-primary-800 prose max-w-none">
+                <AnimatedMarkdown content={response.answer} />
+              </div>
+            )}
 
             {response.sources.length > 0 && (
               <div className="flex flex-col gap-2 w-full">
@@ -395,7 +450,8 @@ export function Searchbar() {
   // Transform QueryResponse to SearchResponse
   const response: SearchResponse | null = queryResponse
     ? {
-        answer: queryResponse.answer,
+        answer: queryResponse.answer || "",
+        checkpoint: queryResponse.checkpoint,
         sources: (() => {
           const sourceMap = new Map<string, Source>();
 
@@ -526,7 +582,7 @@ export function Searchbar() {
           <DialogContent
             position="tc"
             showClose={false}
-            className="flex  flex-col max-w-4xl gap-2 w-full min-w-[90dvw] xl:min-w-[1000px] flex-shrink-0 max-h-[80dvh] overflow-hidden bg-white border-neutral-100 rounded-lg rounded-t-3xl p-0"
+            className="flex  course flex-col max-w-4xl gap-2 w-full min-w-[90dvw] xl:min-w-[1000px] flex-shrink-0 max-h-[80dvh] overflow-hidden bg-white border-neutral-100 rounded-lg rounded-t-3xl p-0"
           >
             <DialogHeader className="hidden">
               <DialogTitle>Search Documents and Posts</DialogTitle>

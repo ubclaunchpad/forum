@@ -223,9 +223,8 @@ async def query_documents_stream(
                     answer_json = json.loads(chunk)
                     # print(answer_json)
                     if not answer_json["done"]:
-                        query_builder["answer"] = answer_json["answer"]
-                        if "sources" in answer_json:
-                            query_builder["sources"] = answer_json["sources"]
+                        for key in answer_json:
+                            query_builder[key] = answer_json[key]
                     else:
                         query_builder["timestamp"] = datetime.now().strftime(
                             DATE_FORMAT

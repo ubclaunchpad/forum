@@ -45,7 +45,7 @@ export default function PostTextEditor({
   }
 
   return (
-    <div className="flex flex-col relative  bg-white rounded-xl border border-primary-50 h-fit  w-full pb-4  gap-4 items-center ">
+    <div className="flex flex-col relative  bg-white rounded-xl border border-primary-50 h-fit overflow-auto h-full  w-full pb-4  gap-4 items-center ">
       <div className=" w-full pt-2  justify-center flex items-center ">
         <div className="flex-col w-full flex px-4 items-center  gap-1">
           {!readonly && (
@@ -112,7 +112,7 @@ export default function PostTextEditor({
             ))}
         </div>
       </div>
-      <div className="flex max-w-4xl flex-1 p-2 px-6  w-full flex-col gap-2">
+      <div className="flex max-w-4xl  flex-1 p-2 px-6  w-full flex-col gap-2">
         <EditorComponent
           markdown={content ?? ""}
           onMarkdownChange={setContent}

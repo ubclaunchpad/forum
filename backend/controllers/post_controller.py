@@ -58,10 +58,14 @@ def get_posts(c_id: str) -> List[Post]:
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
 
 
-def get_post(user_id: str, c_id: str, local_id: int) -> GetPostResponse:
+def get_post(user_id: str, c_id: str, post_id: str) -> GetPostResponse:
     try:
         with get_db() as db:
-            post: Post = db.query(Post).filter(Post.course_id == c_id).first()
+            post: Post = (
+                db.query(Post)
+                .filter(Post.course_id == c_id, Post.id == UUID(post_id))
+                .first()
+            )
 
             if not post:
                 raise HTTPException(status_code=404, detail="Post not found")

@@ -199,6 +199,171 @@ class DocumentQueryEngine:
             logger.error("Error finding relevant posts", exc_info=True)
             raise e
 
+    def _find_all_relevant_chunks(
+        self,
+        question_embedding: List[float],
+        threshold: float = 0.0,
+        course_id: Optional[UUID] = None,
+        limit: int = 10,
+    ) -> List[Dict[str, Any]]:
+        """Find all relevant chunks (both documents and posts) using a single query with CTE."""
+        try:
+            vector_literal = f"'[{','.join(map(str, question_embedding))}]'"
+
+            query_str = f"""
+                WITH ranked_embeddings AS (
+                    SELECT 
+                        e.id as embedding_id,
+                        e.entity_id,
+                        e.entity_type,
+                        e.chunk_metadata,
+                        (1 - (e.embedding <=> {vector_literal}::vector)) as similarity
+                    FROM public.embeddings e
+                    WHERE (1 - (e.embedding <=> {vector_literal}::vector)) > :threshold
+                    AND e.embedding IS NOT NULL
+                    ORDER BY similarity DESC
+                    LIMIT :initial_limit
+                ),
+                document_chunks AS (
+                    SELECT 
+                        re.embedding_id,
+                        re.entity_id,
+                        re.entity_type,
+                        re.chunk_metadata,
+                        re.similarity,
+                        d.title as document_title,
+                        d.file_url as document_url,
+                        d.id as document_id
+                    FROM ranked_embeddings re
+                    JOIN public.documents d ON re.entity_id = d.id
+                    JOIN public.course_documents cd ON d.id = cd.document_id
+                    WHERE re.entity_type = 'document'
+                    {f"AND cd.course_id = :course_id" if course_id else ""}
+                    ORDER BY re.similarity DESC
+                    LIMIT :chunk_limit
+                ),
+                post_chunks AS (
+                    SELECT 
+                        re.embedding_id,
+                        re.entity_id,
+                        re.entity_type,
+                        re.chunk_metadata,
+                        re.similarity,
+                        p.title as post_title,
+                        p.course_id
+                    FROM ranked_embeddings re
+                    JOIN public.posts p ON re.entity_id = CAST(p.id::text AS uuid)
+                    WHERE re.entity_type = 'post'
+                    {f"AND p.course_id = :course_id" if course_id else ""}
+                    ORDER BY re.similarity DESC
+                    LIMIT :chunk_limit
+                )
+                SELECT 
+                    json_build_object(
+                        'documents', COALESCE(
+                            (SELECT json_agg(
+                                json_build_object(
+                                    'embedding_id', dc.embedding_id,
+                                    'entity_id', dc.entity_id,
+                                    'entity_type', dc.entity_type,
+                                    'chunk_metadata', dc.chunk_metadata,
+                                    'similarity', dc.similarity,
+                                    'document_title', dc.document_title,
+                                    'document_url', dc.document_url,
+                                    'document_id', dc.document_id
+                                )
+                            )
+                            FROM document_chunks dc), '[]'::json
+                        ),
+                        'posts', COALESCE(
+                            (SELECT json_agg(
+                                json_build_object(
+                                    'embedding_id', pc.embedding_id,
+                                    'entity_id', pc.entity_id,
+                                    'entity_type', pc.entity_type,
+                                    'chunk_metadata', pc.chunk_metadata,
+                                    'similarity', pc.similarity,
+                                    'post_title', pc.post_title,
+                                    'course_id', pc.course_id
+                                )
+                            )
+                            FROM post_chunks pc), '[]'::json
+                        )
+                    ) as results
+            """
+
+            query = text(query_str)
+            params = {
+                "threshold": threshold,
+                "initial_limit": limit
+                * 4,  # Get more initial matches to ensure we have enough after filtering
+                "chunk_limit": limit,  # Limit per type (documents/posts)
+            }
+            if course_id:
+                params["course_id"] = str(course_id)
+
+            logger.debug(f"Executing combined query with params: {params}")
+            result = self.db.execute(statement=query, params=params)
+            row = result.fetchone()
+            results = row.results if row else {"documents": [], "posts": []}
+
+            # Combine and sort all chunks by similarity
+            all_chunks = []
+
+            # Process document chunks
+            for doc in results["documents"]:
+                all_chunks.append(
+                    {
+                        "id": str(doc["embedding_id"]),
+                        "type": "document",
+                        "metadata": doc["chunk_metadata"] or {},
+                        "document_title": doc["document_title"] or "Unknown Document",
+                        "document_id": str(doc["document_id"]),
+                        "signed_url": "",  # Will be populated below
+                        "similarity": float(doc["similarity"]),
+                        "entity_type": doc["entity_type"],
+                    }
+                )
+
+            # Process post chunks
+            for post in results["posts"]:
+                all_chunks.append(
+                    {
+                        "id": str(post["entity_id"]),
+                        "type": "post",
+                        "title": post["post_title"] or "Untitled Post",
+                        "course_id": str(post["course_id"])
+                        if post["course_id"]
+                        else None,
+                        "similarity": float(post["similarity"]),
+                        "entity_type": post["entity_type"],
+                    }
+                )
+
+            # Sort all chunks by similarity
+            all_chunks.sort(key=lambda x: x["similarity"], reverse=True)
+            all_chunks = all_chunks[:limit]  # Apply final limit
+
+            # Get signed URLs for documents
+            doc_chunks = [chunk for chunk in all_chunks if chunk["type"] == "document"]
+            doc_ids = [chunk["document_id"] for chunk in doc_chunks]
+            signed_url_map = {}
+            if doc_ids and course_id:
+                signed_url_map = document_manager.get_signed_document_urls(
+                    course_id=course_id, document_ids=doc_ids
+                )
+
+            # Update document chunks with signed URLs
+            for chunk in all_chunks:
+                if chunk["type"] == "document":
+                    chunk["signed_url"] = signed_url_map.get(chunk["document_id"], "")
+
+            return all_chunks
+
+        except Exception as e:
+            logger.error("Error finding relevant chunks", exc_info=True)
+            raise e
+
     def _process_openai_response(self, response: ChatCompletion) -> str:
         """Safely process OpenAI response."""
         if not response or not response.choices or not response.choices[0].message:
@@ -315,20 +480,19 @@ class DocumentQueryEngine:
         """Process a query through the RAG pipeline."""
         try:
             question_embedding = self.embedding_processor.generate_embedding(question)
-            relevant_chunks = self._find_relevant_document_chunks(
-                question_embedding, threshold=0.0, course_id=course_id
-            )
-            relevant_posts = self._find_relevant_post_chunks(
-                question_embedding, threshold=0.0, course_id=course_id
+            all_contexts = self._find_all_relevant_chunks(
+                question_embedding,
+                threshold=0.40,
+                course_id=course_id,
+                limit=self.max_chunks,
             )
 
-            if not relevant_chunks and not relevant_posts:
+            if not all_contexts:
                 return {
                     "answer": "I couldn't find any relevant information to answer your question.",
                     "sources": [],
                 }
 
-            all_contexts = relevant_chunks + relevant_posts
             prompt = self._build_prompt(question, all_contexts, template_name)
             try:
                 response = self.client.chat.completions.create(
@@ -398,22 +562,55 @@ class DocumentQueryEngine:
         try:
             if history is None:
                 history = []
+
+            # Initial checkpoint
+            yield json.dumps(
+                {
+                    "checkpoint": {
+                        "label": "Starting search",
+                        "expanded": "Processing your question and preparing to search through documents and posts",
+                    },
+                    "done": False,
+                }
+            )
+
             question_embedding = self.embedding_processor.generate_embedding(question)
 
-            chunk_time = time.time()
-
-            relevant_chunks = self._find_relevant_document_chunks(
-                question_embedding, threshold=0.35, course_id=course_id
+            # Before search checkpoint
+            yield json.dumps(
+                {
+                    "checkpoint": {
+                        "label": "Searching through documents and posts",
+                        "expanded": "Looking for relevant information in course materials",
+                    },
+                    "done": False,
+                }
             )
-            relevant_posts = self._find_relevant_post_chunks(
-                question_embedding, threshold=0.35, course_id=course_id
+
+            chunk_time = time.time()
+            all_contexts = self._find_all_relevant_chunks(
+                question_embedding,
+                threshold=0.35,
+                course_id=course_id,
+                limit=self.max_chunks,
+            )
+
+            # After search checkpoint with results summary
+            doc_count = len([c for c in all_contexts if c["type"] == "document"])
+            post_count = len([c for c in all_contexts if c["type"] == "post"])
+            yield json.dumps(
+                {
+                    "checkpoint": {
+                        "label": "Found relevant content",
+                        "expanded": f"Found {doc_count} relevant documents and {post_count} relevant posts",
+                    },
+                    "done": False,
+                }
             )
 
             logger.debug(
                 f"Finding relevant chunks took: {time.time() - chunk_time:.2f}s"
             )
-
-            all_contexts = relevant_chunks + relevant_posts
 
             if not all_contexts:
                 yield json.dumps(
@@ -429,7 +626,19 @@ class DocumentQueryEngine:
             sources = self._format_sources(all_contexts)
 
             try:
-                yield json.dumps({"answer": "", "sources": [], "done": False})
+                # Before AI response checkpoint
+                yield json.dumps(
+                    {
+                        "checkpoint": {
+                            "label": "Analyzing information",
+                            "expanded": "Processing found information to answer your question",
+                        },
+                        "answer": "",
+                        "sources": [],
+                        "done": False,
+                    }
+                )
+
                 messages = []
                 if history:
                     messages.extend(history)  # type: ignore
@@ -454,6 +663,18 @@ class DocumentQueryEngine:
                 buffer = ""
                 BATCH_SIZE = 100  # Adjust this value based on your needs
 
+                # Start answer checkpoint
+                yield json.dumps(
+                    {
+                        "checkpoint": {
+                            "label": "Generating response",
+                            "expanded": "Creating a detailed answer based on the found information",
+                        },
+                        "answer": "",
+                        "done": False,
+                    }
+                )
+
                 for chunk in stream:
                     if chunk.choices[0].delta.content is not None:
                         buffer += chunk.choices[0].delta.content
@@ -470,17 +691,27 @@ class DocumentQueryEngine:
                 logger.debug(f"Streaming took: {time.time() - stream_time:.2f}s")
                 logger.debug(f"Total query time: {time.time() - start_time:.2f}s")
 
+                # Final checkpoint with sources
                 yield json.dumps(
-                    {"answer": current_answer, "sources": sources, "done": True}
+                    {
+                        "checkpoint": {
+                            "label": "Completed",
+                            "expanded": "Answer generated with relevant sources",
+                        },
+                        "answer": current_answer,
+                        "sources": sources,
+                        "done": True,
+                    }
                 )
-
-                print(current_answer)
-                print(sources)
 
             except Exception as e:
                 logger.error(f"OpenAI API error: {e}", exc_info=True)
                 yield json.dumps(
                     {
+                        "checkpoint": {
+                            "label": "Error",
+                            "expanded": "An error occurred while generating the response",
+                        },
                         "answer": "I apologize, but I encountered an error while generating the response.",
                         "sources": sources,
                         "done": True,
@@ -492,6 +723,10 @@ class DocumentQueryEngine:
             print(e)
             yield json.dumps(
                 {
+                    "checkpoint": {
+                        "label": "Error",
+                        "expanded": "An error occurred while processing your question",
+                    },
                     "answer": "An error occurred while processing your question.",
                     "sources": [],
                     "done": True,
