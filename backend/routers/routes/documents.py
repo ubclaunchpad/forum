@@ -13,7 +13,7 @@ from controllers.query_history_controller import (
 )
 from core.pipelines.document_query_engine import DocumentQueryEngine
 from core.util import file_storage
-from fastapi import APIRouter, Form, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Form, HTTPException, Request, UploadFile, BackgroundTasks
 from fastapi.responses import StreamingResponse
 from models.db import get_db
 from models.schemas.course_schema import CourseTagsResponse, CreateCourseResponse
@@ -269,9 +269,12 @@ async def remove_document_tag(document_id: str, tag_id: str):
 
 
 @document_router.post("/{document_id}/embeddings", response_model=GeneralResponse)
-async def update_embeddings(document_id: str, request: Request):
+async def update_embeddings(
+    document_id: str, request: Request, background_tasks: BackgroundTasks
+):
     user_id = request.state.user_id
-    return document_manager.update_embeddings(document_id, user_id)
+    background_tasks.add_task(document_manager.update_embeddings, document_id, user_id)
+    return GeneralResponse(msg="Embedding update started")
 
 
 @document_router.get(

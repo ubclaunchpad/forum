@@ -280,18 +280,19 @@ def get_signed_document_urls(
             raise e
 
 
-def update_embeddings(document_id: str, user_id: str) -> GeneralResponse:
-    """Update embeddings for a document."""
-    logger.info("Updating embeddings", extra={"document_id": document_id})
+async def update_embeddings(document_id: str, user_id: str) -> GeneralResponse:
+    """Update embeddings for a document asynchronously."""
+    logger.info("Starting async embedding update", extra={"document_id": document_id})
 
-    with get_db() as db:
-        try:
+    try:
+        # Use context manager for database session
+        with get_db() as db:
             document = db.query(Document).get(document_id)
             if not document:
                 logger.error("Document not found", extra={"document_id": document_id})
                 raise ValueError("Document not found")
 
-            # Process document content
+            # Get file content
             file_storage = FileStorage(
                 bucket_name=f"course-{str(document.courses[0].id)}",
                 create_bucket_if_not_found=False,
@@ -304,7 +305,7 @@ def update_embeddings(document_id: str, user_id: str) -> GeneralResponse:
                 )
                 raise ValueError("File content not found")
 
-            process_start = time.time()
+            # Process document content in background
             with DocumentProcessor(db) as processor:
                 processor.process_document(
                     document_id=UUID(document_id),
@@ -313,22 +314,18 @@ def update_embeddings(document_id: str, user_id: str) -> GeneralResponse:
                 )
 
             logger.info(
-                "Document processing completed",
-                extra={
-                    "document_id": str(document_id),
-                    "processing_time": f"{time.time() - process_start:.2f}s",
-                },
+                "Document embeddings updated successfully",
+                extra={"document_id": str(document_id)},
             )
 
-        except Exception as e:
-            logger.error(
-                "Error updating embeddings",
-                extra={"document_id": str(document_id), "error": str(e)},
-                exc_info=True,
-            )
-            raise e
+    except Exception as e:
+        logger.error(
+            "Error updating embeddings",
+            extra={"document_id": str(document_id), "error": str(e)},
+            exc_info=True,
+        )
 
-    return GeneralResponse(msg="Embeddings updated")
+    return GeneralResponse(msg="Embedding update started")
 
 
 def get_embedding_metadata(document_id: str, user_id: str) -> DocumentEmbeddingMetadata:

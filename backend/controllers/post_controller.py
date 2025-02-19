@@ -1,6 +1,6 @@
 import logging
 import stat
-from typing import List, Optional
+from typing import Any, List, Optional
 from uuid import UUID
 from sqlalchemy import insert
 from sqlalchemy.orm import joinedload
@@ -43,8 +43,9 @@ def create_post(user_id: str, c_id: str, post_info: CreatePostRequest) -> Post:
             raise e
 
 
-def get_posts(c_id: str) -> List[Post]:
+def get_posts(c_id: str) -> List[Any]:
     try:
+        print(f"Getting posts for course {c_id}")
         with get_db() as db:
             posts = (
                 db.query(Post)
