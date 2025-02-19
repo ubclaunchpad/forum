@@ -141,7 +141,7 @@ export default function SignUp() {
               {...register("confirmPassword")}
               aria-invalid={errors.confirmPassword ? "true" : "false"}
             />
-            <div className="h-6 pl-2 w-full">
+            <div className="mt-1 h-6 pl-2 w-full">
               {errors.confirmPassword && (
                 <p className="text-xs text-red-500">
                   {errors.confirmPassword.message}
