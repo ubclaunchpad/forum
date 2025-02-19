@@ -92,7 +92,6 @@ async def create_user(create_user_request: CreateUserBaseRequest):
 async def update_profile(request: Request, update_data: UpdateUserRequest):
     """Update the current user's profile."""
     try:
-        print("s")
         user_id = request.state.user_id
         updated_profile = user_controller.update_user_profile(user_id, update_data)
         return updated_profile

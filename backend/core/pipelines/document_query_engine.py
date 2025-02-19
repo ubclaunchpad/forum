@@ -1,5 +1,6 @@
 """Module for document querying using RAG (Retrieval Augmented Generation)."""
 
+from __future__ import print_function
 import json
 import logging
 import os
@@ -7,10 +8,15 @@ import time
 from pathlib import Path
 from typing import Any, AsyncGenerator, Dict, List, Optional, Union
 from uuid import UUID
+from functools import lru_cache
+
+from controllers import course_controller
+from datetime import datetime
+
 
 from controllers.documents import document_manager
 from core.processors.embedding_processor import EmbeddingProcessor
-from models.all import Document, Embedding
+from models.all import Document, Embedding, Profile
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
 from openai.types.chat.chat_completion_system_message_param import (
@@ -21,6 +27,8 @@ from openai.types.chat.chat_completion_user_message_param import (
 )
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+
+from models.db import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -217,6 +225,7 @@ class DocumentQueryEngine:
                         e.entity_id,
                         e.entity_type,
                         e.chunk_metadata,
+                        e.content,
                         (1 - (e.embedding <=> {vector_literal}::vector)) as similarity
                     FROM public.embeddings e
                     WHERE (1 - (e.embedding <=> {vector_literal}::vector)) > :threshold
@@ -230,6 +239,7 @@ class DocumentQueryEngine:
                         re.entity_id,
                         re.entity_type,
                         re.chunk_metadata,
+                        re.content,
                         re.similarity,
                         d.title as document_title,
                         d.file_url as document_url,
@@ -248,6 +258,7 @@ class DocumentQueryEngine:
                         re.entity_id,
                         re.entity_type,
                         re.chunk_metadata,
+                        re.content,
                         re.similarity,
                         p.title as post_title,
                         p.course_id
@@ -270,7 +281,8 @@ class DocumentQueryEngine:
                                     'similarity', dc.similarity,
                                     'document_title', dc.document_title,
                                     'document_url', dc.document_url,
-                                    'document_id', dc.document_id
+                                    'document_id', dc.document_id,
+                                    'content', dc.content
                                 )
                             )
                             FROM document_chunks dc), '[]'::json
@@ -284,7 +296,8 @@ class DocumentQueryEngine:
                                     'chunk_metadata', pc.chunk_metadata,
                                     'similarity', pc.similarity,
                                     'post_title', pc.post_title,
-                                    'course_id', pc.course_id
+                                    'course_id', pc.course_id,
+                                    'content', pc.content
                                 )
                             )
                             FROM post_chunks pc), '[]'::json
@@ -322,6 +335,7 @@ class DocumentQueryEngine:
                         "signed_url": "",  # Will be populated below
                         "similarity": float(doc["similarity"]),
                         "entity_type": doc["entity_type"],
+                        "content": doc["content"],
                     }
                 )
 
@@ -337,6 +351,7 @@ class DocumentQueryEngine:
                         else None,
                         "similarity": float(post["similarity"]),
                         "entity_type": post["entity_type"],
+                        "content": post["content"],
                     }
                 )
 
@@ -397,6 +412,7 @@ class DocumentQueryEngine:
                         "id": self._safe_get(ctx, "document_id", ""),
                         "url": self._safe_get(ctx, "signed_url", ""),
                         "metadata": self._safe_get(ctx, "metadata", {}),
+                        "content": self._safe_get(ctx, "content", ""),
                     }
                 else:  # post
                     course_id = self._safe_get(ctx, "course_id", "")
@@ -410,6 +426,7 @@ class DocumentQueryEngine:
                         "url": f"courses/{course_id}/posts/{post_id}"
                         if course_id and post_id
                         else "",
+                        "content": self._safe_get(ctx, "content", ""),
                     }
 
                 formatted_sources.append(source)
@@ -455,6 +472,8 @@ class DocumentQueryEngine:
         question: str,
         contexts: List[Dict[str, Any]],
         template_name: Optional[str] = None,
+        c_id: Optional[str] = None,
+        user_id: Optional[str] = None,
     ) -> str:
         """Build the answer with context and question."""
         context_str = "\n\n".join(
@@ -464,12 +483,33 @@ class DocumentQueryEngine:
             if ctx.get("content")
         )
 
+        # Add additional context information if course_id and user_id are provided
+        additional_context = ""
+        if c_id and user_id:
+            additional_context = self._add_context_info(
+                "",  # Empty question since we don't want to append it
+                c_id,
+                user_id,
+                includes=[
+                    "all_members",
+                    "external",
+                ],  # Add contexts not used in embedding
+            ).replace(
+                "End of extra information. The question asked was: \n", ""
+            )  # Remove the question part
+
         template_name = template_name or "default.txt"
         template = self.templates.get(template_name)
         if not template:
             raise KeyError(f"Template not found: {template_name}")
 
-        return template.format(context=context_str, question=question)
+        # Combine both contexts
+        full_context = (
+            f"{context_str}\n\nAdditional Context:\n{additional_context}"
+            if additional_context
+            else context_str
+        )
+        return template.format(context=full_context, question=question)
 
     def query(
         self,
@@ -545,10 +585,17 @@ class DocumentQueryEngine:
             logger.error(f"Database verification error: {e}", exc_info=True)
             raise e
 
+    def _format_time(self, seconds: float) -> str:
+        """Format time in a human-readable way (ms or s)."""
+        if seconds < 1:
+            return f"{int(seconds * 1000)}ms"
+        return f"{seconds:.1f}s"
+
     async def stream_query(
         self,
         question: str,
-        course_id: Optional[UUID] = None,
+        course_id: UUID,
+        user_id: UUID,
         history: Optional[
             List[
                 Union[ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam]
@@ -558,6 +605,13 @@ class DocumentQueryEngine:
     ) -> AsyncGenerator[str, None]:
         """Process a query through the RAG pipeline with streaming response."""
         start_time = time.time()
+        last_checkpoint_time = start_time
+
+        def get_timing_info() -> str:
+            current_time = time.time()
+            checkpoint_duration = current_time - last_checkpoint_time
+            total_duration = current_time - start_time
+            return f"({self._format_time(checkpoint_duration)} / {self._format_time(total_duration)})"
 
         try:
             if history is None:
@@ -567,25 +621,73 @@ class DocumentQueryEngine:
             yield json.dumps(
                 {
                     "checkpoint": {
-                        "label": "Starting search",
+                        "label": f"Starting search {get_timing_info()}",
                         "expanded": "Processing your question and preparing to search through documents and posts",
                     },
                     "done": False,
                 }
             )
+            last_checkpoint_time = time.time()
 
-            question_embedding = self.embedding_processor.generate_embedding(question)
+            history = history[-10:] if history else []
 
-            # Before search checkpoint
+            # Build combined text from history and current question
+            combined_text = question
+            if history:
+                last_response = (
+                    history[-1].get("content", "")
+                    if history[-1].get("role") == "assistant"
+                    else ""
+                )
+                combined_text = f"{last_response} {question}"
+
             yield json.dumps(
                 {
                     "checkpoint": {
-                        "label": "Searching through documents and posts",
+                        "label": f"Checking the course and member directory {get_timing_info()}",
+                        "expanded": "Checking the course and member directory for more insights",
+                    },
+                    "done": False,
+                }
+            )
+            last_checkpoint_time = time.time()
+
+            # Only include current user context for embedding search
+            combined_text = self._add_context_info(
+                question,
+                str(course_id),
+                str(user_id),
+                includes=["current_user", "course"],
+            )
+
+            max_chunk_length = 6000
+            if len(combined_text) > max_chunk_length:
+                text_chunks = [
+                    combined_text[i : i + max_chunk_length]
+                    for i in range(0, len(combined_text), max_chunk_length)
+                ]
+                chunk_embeddings = [
+                    self.embedding_processor.generate_embedding(chunk)
+                    for chunk in text_chunks
+                ]
+                question_embedding = [
+                    sum(x) / len(chunk_embeddings) for x in zip(*chunk_embeddings)
+                ]
+            else:
+                question_embedding = self.embedding_processor.generate_embedding(
+                    combined_text
+                )
+
+            yield json.dumps(
+                {
+                    "checkpoint": {
+                        "label": f"Searching through documents and posts {get_timing_info()}",
                         "expanded": "Looking for relevant information in course materials",
                     },
                     "done": False,
                 }
             )
+            last_checkpoint_time = time.time()
 
             chunk_time = time.time()
             all_contexts = self._find_all_relevant_chunks(
@@ -601,55 +703,77 @@ class DocumentQueryEngine:
             yield json.dumps(
                 {
                     "checkpoint": {
-                        "label": "Found relevant content",
+                        "label": f"Found relevant content {get_timing_info()}",
                         "expanded": f"Found {doc_count} relevant documents and {post_count} relevant posts",
                     },
                     "done": False,
                 }
             )
-
-            logger.debug(
-                f"Finding relevant chunks took: {time.time() - chunk_time:.2f}s"
-            )
+            last_checkpoint_time = time.time()
 
             if not all_contexts:
                 yield json.dumps(
                     {
-                        "answer": "I could not find much relevant information to answer your question.",
+                        "answer": "I could not find much relevant information to answer your question. Can you elaborate on your question?",
                         "sources": [],
                         "done": True,
                     }
                 )
                 return
 
-            prompt = self._build_prompt(question, all_contexts, template_name)
+            yield json.dumps(
+                {
+                    "checkpoint": {
+                        "label": f"Analyzing information {get_timing_info()}",
+                        "expanded": "Processing found information to answer your question",
+                    },
+                    "answer": "",
+                    "sources": [],
+                    "done": False,
+                }
+            )
+            last_checkpoint_time = time.time()
+
+            prompt = self._build_prompt(
+                question,
+                all_contexts,
+                template_name,
+                c_id=str(course_id),
+                user_id=str(user_id),
+            )
             sources = self._format_sources(all_contexts)
 
             try:
-                # Before AI response checkpoint
+                messages = []
+                if history:
+                    messages.extend(history)
+                    messages.append(
+                        {
+                            "role": "system",
+                            "content": "Here are some relevant sources to help answer the question:\n\n"
+                            + "\n\n".join(
+                                [
+                                    f"Source: {s['title']}\n{s['content']}"
+                                    for s in sources
+                                ]
+                            ),
+                        }
+                    )
+                messages.append(
+                    ChatCompletionUserMessageParam(role="user", content=prompt)
+                )
+
                 yield json.dumps(
                     {
                         "checkpoint": {
-                            "label": "Analyzing information",
-                            "expanded": "Processing found information to answer your question",
+                            "label": f"Generating response",
+                            "expanded": "Creating a detailed answer based on the found information",
                         },
                         "answer": "",
-                        "sources": [],
                         "done": False,
                     }
                 )
-
-                messages = []
-                if history:
-                    messages.extend(history)  # type: ignore
-                messages.append(
-                    ChatCompletionUserMessageParam(role="user", content=prompt)
-                )  # type: ignore
-
-                stream_time = time.time()
-                logger.debug(
-                    f"time to get to streaming: {time.time() - start_time:.2f}s"
-                )
+                last_checkpoint_time = time.time()
 
                 stream = self.client.chat.completions.create(
                     model=self.model,
@@ -658,45 +782,28 @@ class DocumentQueryEngine:
                     stream=True,
                 )
 
-                # Initialize buffers for batching
                 current_answer = ""
                 buffer = ""
-                BATCH_SIZE = 100  # Adjust this value based on your needs
-
-                # Start answer checkpoint
-                yield json.dumps(
-                    {
-                        "checkpoint": {
-                            "label": "Generating response",
-                            "expanded": "Creating a detailed answer based on the found information",
-                        },
-                        "answer": "",
-                        "done": False,
-                    }
-                )
+                BATCH_SIZE = 100
 
                 for chunk in stream:
                     if chunk.choices[0].delta.content is not None:
                         buffer += chunk.choices[0].delta.content
-                        # Only yield when buffer reaches batch size
                         if len(buffer) >= BATCH_SIZE:
                             current_answer += buffer
                             yield json.dumps({"answer": current_answer, "done": False})
-                            buffer = ""  # Reset buffer after yielding
+                            buffer = ""
 
                 if buffer:
                     current_answer += buffer
                     yield json.dumps({"answer": current_answer, "done": False})
 
-                logger.debug(f"Streaming took: {time.time() - stream_time:.2f}s")
-                logger.debug(f"Total query time: {time.time() - start_time:.2f}s")
-
                 # Final checkpoint with sources
                 yield json.dumps(
                     {
                         "checkpoint": {
-                            "label": "Completed",
-                            "expanded": "Answer generated with relevant sources",
+                            "label": f"Completed",
+                            "expanded": f"Answer generated with relevant sources {get_timing_info()}",
                         },
                         "answer": current_answer,
                         "sources": sources,
@@ -709,7 +816,7 @@ class DocumentQueryEngine:
                 yield json.dumps(
                     {
                         "checkpoint": {
-                            "label": "Error",
+                            "label": f"Error {get_timing_info()}",
                             "expanded": "An error occurred while generating the response",
                         },
                         "answer": "I apologize, but I encountered an error while generating the response.",
@@ -724,7 +831,7 @@ class DocumentQueryEngine:
             yield json.dumps(
                 {
                     "checkpoint": {
-                        "label": "Error",
+                        "label": f"Error {get_timing_info()}",
                         "expanded": "An error occurred while processing your question",
                     },
                     "answer": "An error occurred while processing your question.",
@@ -732,3 +839,136 @@ class DocumentQueryEngine:
                     "done": True,
                 }
             )
+
+    def _get_cache_key(self, *args, **kwargs) -> str:
+        """Generate a cache key that includes a timestamp for TTL."""
+        # Round down to the nearest hour for TTL
+        hour_timestamp = int(time.time() / 3600)
+        return f"{hour_timestamp}:{':'.join(str(arg) for arg in args)}:{':'.join(f'{k}={v}' for k, v in sorted(kwargs.items()))}"
+
+    @lru_cache(maxsize=128)
+    def _get_all_members_context_with_key(self, cache_key: str, c_id: str) -> str:
+        """Cached version of _get_all_members_context."""
+        return self._get_all_members_context_impl(c_id)
+
+    def _get_all_members_context(self, c_id: str) -> str:
+        """Get information about all course members with caching."""
+        cache_key = self._get_cache_key(c_id)
+        return self._get_all_members_context_with_key(cache_key, c_id)
+
+    def _get_all_members_context_impl(self, c_id: str) -> str:
+        """Implementation of getting all members context."""
+        members = course_controller.get_course_members(c_id)
+        memberInfo = []
+        for member in members:
+            memberInfo.append(
+                ", ".join(
+                    [
+                        f"{key}: {value}"
+                        for key, value in member.__dict__.items()
+                        if not key.startswith("_") and key != "id"
+                    ]
+                )
+            )
+
+        return f"These are all the members in the course: {str(members)}\n"
+
+    @lru_cache(maxsize=128)
+    def _get_current_user_context_with_key(
+        self, cache_key: str, c_id: str, user_id: str
+    ) -> str:
+        """Cached version of _get_current_user_context."""
+        return self._get_current_user_context_impl(c_id, user_id)
+
+    def _get_current_user_context(self, c_id: str, user_id: str) -> str:
+        """Get information about current user with caching."""
+        cache_key = self._get_cache_key(c_id, user_id)
+        return self._get_current_user_context_with_key(cache_key, c_id, user_id)
+
+    def _get_current_user_context_impl(self, c_id: str, user_id: str) -> str:
+        """Implementation of getting current user context."""
+        members = course_controller.get_course_members(c_id)
+        current_user = None
+        for member in members:
+            if str(member.id) == user_id:
+                current_user = member
+                break
+
+        current_user_info = (
+            "I am: "
+            + ", ".join(
+                [
+                    f"{key}: {value}"
+                    for key, value in current_user.__dict__.items()
+                    if not key.startswith("_")
+                ]
+            )
+            if current_user
+            else None
+        )
+        return f"Current User: {current_user_info if current_user_info else 'No current user is logged in - this is a guest query which means we do not know who you are'}\n"
+
+    @lru_cache(maxsize=128)
+    def _get_course_context_with_key(self, cache_key: str, c_id: str) -> str:
+        """Cached version of _get_course_context."""
+        return self._get_course_context_impl(c_id)
+
+    def _get_course_context(self, c_id: str) -> str:
+        """Get context information about the course with caching."""
+        cache_key = self._get_cache_key(c_id)
+        return self._get_course_context_with_key(cache_key, c_id)
+
+    def _get_course_context_impl(self, c_id: str) -> str:
+        """Implementation of getting course context."""
+        course = course_controller.get_course(c_id, None)
+        context_string = "This is a university course at UBC, university name: University of British Columbia\n"
+        context_string += f"Course name: {course.name}\n"
+        context_string += f"Course code: {course.code}\n"
+        context_string += f"Course course group/department: {course.c_group}\n"
+        context_string += f"Course section: {course.section}\n"
+        return context_string
+
+    def _get_external_context(self) -> str:
+        """Get external context information like date."""
+        return f"Date: {datetime.now().strftime('%B %d, %Y')}\n"
+
+    def _add_context_info(
+        self,
+        question: str,
+        c_id: str,
+        user_id: str,
+        includes: Optional[List[str]] = None,
+    ) -> str:
+        """
+        Combine all context information with the question.
+
+        Args:
+            question: The user's question
+            c_id: Course ID
+            user_id: User ID
+            includes: List of contexts to include. Options: ['course', 'current_user', 'all_members', 'external']
+                     If None, includes all contexts except 'all_members'
+        """
+        if includes is None:
+            includes = ["course", "current_user", "external"]
+
+        context_string = (
+            "Extra information gathered that might be relevant but good to know: \n"
+        )
+
+        if "course" in includes:
+            context_string += self._get_course_context(c_id)
+
+        if "current_user" in includes:
+            context_string += self._get_current_user_context(c_id, user_id)
+
+        if "all_members" in includes:
+            context_string += self._get_all_members_context(c_id)
+
+        if "external" in includes:
+            context_string += self._get_external_context()
+
+        context_string += (
+            f"End of extra information. The question asked was: {question}\n"
+        )
+        return f"{context_string} {question}"
