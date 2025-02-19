@@ -11,7 +11,7 @@ const dialogVariants = cva(
   {
     variants: {
       variant: {
-        default: "border border-neutral-500 bg-white ",
+        default: "border border-neutral-500 bg-white p-4",
       },
       position: {
         default:
