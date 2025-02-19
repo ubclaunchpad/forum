@@ -127,7 +127,6 @@ class FileStorage:
                     return f"documents/{filename}"
 
             file_path = f"documents/{filename}"
-            print(file_path)
             response = storage.upload(
                 file=file_content,  # Pass bytes directly
                 path=file_path,

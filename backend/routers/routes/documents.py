@@ -207,6 +207,7 @@ async def query_documents_stream(
     query_builder = {"question": query.question, "sources": []}
 
     async def stream_response() -> AsyncGenerator[str, None]:
+        final_answer_history = {}
         try:
             with get_db() as db:
                 query_engine = DocumentQueryEngine(
@@ -217,11 +218,11 @@ async def query_documents_stream(
                 async for chunk in query_engine.stream_query(
                     question=query.question,
                     course_id=c_id,
+                    user_id=request.state.user_id,
                     history=context,
                     template_name=query.template_name,
                 ):
                     answer_json = json.loads(chunk)
-                    # print(answer_json)
                     if not answer_json["done"]:
                         for key in answer_json:
                             query_builder[key] = answer_json[key]
@@ -230,7 +231,10 @@ async def query_documents_stream(
                             DATE_FORMAT
                         )
                     yield f"data: {json.dumps(answer_json)}\n\n"
-                    add_query_to_history(c_id, request.state.user_id, query_builder)
+                    final_answer_history = answer_json
+
+                final_answer_history["question"] = query.question
+                add_query_to_history(c_id, request.state.user_id, final_answer_history)
 
         except Exception as e:
             logger.error(f"Error querying documents: {e}", exc_info=True)
@@ -274,6 +278,6 @@ async def update_embeddings(document_id: str, request: Request):
     "/{document_id}/embeddings/metadata", response_model=DocumentEmbeddingMetadata
 )
 async def get_embedding_metadata(document_id: str, request: Request):
-    print("get_embedding_metadata", document_id, request.state.user_id)
+    # print("get_embedding_metadata", document_id, request.state.user_id)
     user_id = request.state.user_id
     return document_manager.get_embedding_metadata(document_id, user_id)

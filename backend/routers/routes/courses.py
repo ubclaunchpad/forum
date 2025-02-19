@@ -69,7 +69,6 @@ async def update_course(create_course_req: UpdateCourseReq, c_id: str):
 @course_router.get("/{c_id}/members", response_model=CourseMembersResponse)
 async def get_course_members(c_id: str):
     members = course_controller.get_course_members(c_id)
-    print(members[0])
     return {"members": members}
 
 
