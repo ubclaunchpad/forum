@@ -9,9 +9,8 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Install Python dependencies
-COPY pyproject.toml .
-RUN pip install uv && \
-    uv pip install -e .
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
 # Copy application code
 COPY . .
