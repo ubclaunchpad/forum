@@ -26,7 +26,7 @@ def upgrade() -> None:
         DROP CONSTRAINT IF EXISTS user_roles_domain_fkey,
         DROP CONSTRAINT IF EXISTS user_roles_subdomain_fkey;
 
-        ALTER TABLE user_rolesuv
+        ALTER TABLE user_roles
         ADD CONSTRAINT user_roles_user_id_fkey 
             FOREIGN KEY (user_id) 
             REFERENCES profiles(id) 
