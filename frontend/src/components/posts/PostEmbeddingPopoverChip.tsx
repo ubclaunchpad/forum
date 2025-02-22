@@ -169,7 +169,10 @@ export default function PostEmbeddingPopoverChip({ post }: { post: Post }) {
               {metadata.has_embeddings && (
                 <div className="">
                   Last updated:{" "}
-                  {new Date(metadata.last_updated!).toLocaleString()}
+                  {new Date(metadata.last_updated!).toLocaleString("en-US", {
+                    timeZone: "America/Vancouver",
+                    timeZoneName: "short",
+                  })}
                 </div>
               )}
             </li>

@@ -41,7 +41,7 @@ export default function Home() {
               window.open(
                 "https://forumai.me/auth/signin",
                 "_blank",
-                "noopener,noreferrer"
+                "noopener,noreferrer",
               )
             }
           >
@@ -55,7 +55,7 @@ export default function Home() {
               window.open(
                 "https://github.com/ubclaunchpad/forum",
                 "_blank",
-                "noopener,noreferrer"
+                "noopener,noreferrer",
               )
             }
           >
@@ -270,7 +270,7 @@ export default function Home() {
                   window.open(
                     "https://forumai.me/auth/signin",
                     "_blank",
-                    "noopener,noreferrer"
+                    "noopener,noreferrer",
                   )
                 }
               >
