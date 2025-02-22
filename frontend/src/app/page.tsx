@@ -17,18 +17,18 @@ import HeroMouseEffect from "./landing/hero-mouse-hover";
 
 export default function Home() {
   return (
-    <div className="w-full bg-primary-200">
+    <div className="w-full bg-primary-200 dark:bg-gray-900">
       <Header />
-      <section className="relative flex flex-col items-center justify-center space-y-6 min-h-screen py-24 px-4 text-center md:py-32 lg:py-48 bg-gradient-to-b from-primary-200 to-gray-100">
+      <section className="relative flex flex-col items-center justify-center space-y-6 min-h-screen py-24 px-4 text-center md:py-32 lg:py-48 bg-gradient-to-b from-primary-200 to-gray-100 dark:from-gray-800 dark:to-gray-900">
         <HeroMouseEffect />
         <div className="relative z-10 space-y-4">
           <div className="inline-block rounded-full px-3 py-1 text-xs sm:text-sm border border-gray-700 bg-gray-800 text-white">
             AI-Native, Open Source Educational Platform
           </div>
-          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary-950">
+          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary-950 dark:text-gray-100">
             Forum AI
           </h1>
-          <p className="mx-auto max-w-[700px] text-md text-primary-900 sm:text-lg md:text-xl">
+          <p className="mx-auto max-w-[700px] text-md text-primary-900 sm:text-lg md:text-xl dark:text-gray-300">
             Revolutionize document interaction and student engagement with
             advanced AI-powered Retrieval Augmented Generation.
           </p>
@@ -41,7 +41,7 @@ export default function Home() {
               window.open(
                 "https://forumai.me/auth/signin",
                 "_blank",
-                "noopener,noreferrer",
+                "noopener,noreferrer"
               )
             }
           >
@@ -55,7 +55,7 @@ export default function Home() {
               window.open(
                 "https://github.com/ubclaunchpad/forum",
                 "_blank",
-                "noopener,noreferrer",
+                "noopener,noreferrer"
               )
             }
           >
@@ -63,22 +63,22 @@ export default function Home() {
           </Button>
         </div>
         <div className="mt-12 animate-bounce relative z-10">
-          <ChevronDown className="h-6 w-6 text-gray-300" />
+          <ChevronDown className="h-6 w-6 text-gray-300 dark:text-gray-500" />
         </div>
       </section>
 
-      <div className="flex flex-col bg-gray-100">
+      <div className="flex flex-col bg-gray-100 dark:bg-gray-800">
         {/* How It Works Section */}
         <section
           id="how-it-works"
-          className="border-b border-gray-300 bg-gray-100 px-4 md:px-0"
+          className="border-b border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 md:px-0"
         >
           <div className="container mx-auto space-y-6 py-12 md:py-24">
             <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-              <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-primary-800">
+              <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-primary-800 dark:text-gray-100">
                 How Forum AI Works
               </h2>
-              <p className="max-w-[85%] text-sm text-primary-800 sm:text-base">
+              <p className="max-w-[85%] text-sm text-primary-800 dark:text-gray-300 sm:text-base">
                 Experience the seamless integration of AI in your document
                 interactions
               </p>
@@ -103,11 +103,13 @@ export default function Home() {
               ].map((step, index) => (
                 <Card
                   key={index}
-                  className="group relative overflow-hidden border border-gray-300 bg-gray-100 p-6 transition-all hover:border-primary-800 hover:bg-primary-100 hover:shadow-md"
+                  className="group relative overflow-hidden border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-6 transition-all hover:border-primary-800 hover:bg-primary-100 dark:hover:border-primary-600 dark:hover:bg-gray-700 hover:shadow-md"
                 >
                   <div className="space-y-2">
-                    <h3 className="font-bold text-primary-800">{`Step ${index + 1}: ${step.title}`}</h3>
-                    <p className="text-sm text-primary-600">
+                    <h3 className="font-bold text-primary-800 dark:text-gray-100">
+                      {`Step ${index + 1}: ${step.title}`}
+                    </h3>
+                    <p className="text-sm text-primary-600 dark:text-gray-300">
                       {step.description}
                     </p>
                   </div>
@@ -115,12 +117,12 @@ export default function Home() {
               ))}
             </div>
             {/* RAG Process Visualization */}
-            <div className="mx-auto mt-12 max-w-[64rem] rounded-lg border border-gray-300 bg-gray-100 p-6">
-              <h3 className="text-center text-lg font-bold mb-4 text-primary-800">
+            <div className="mx-auto mt-12 max-w-[64rem] rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-6">
+              <h3 className="text-center text-lg font-bold mb-4 text-primary-800 dark:text-gray-100">
                 RAG Process Visualization
               </h3>
-              <div className="h-64 bg-gray-200 rounded-md flex items-center justify-center">
-                <p className="text-primary-800">
+              <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-md flex items-center justify-center">
+                <p className="text-primary-800 dark:text-gray-100">
                   Interactive RAG Process Graphic
                 </p>
               </div>
@@ -134,10 +136,10 @@ export default function Home() {
           className="container mx-auto space-y-6 py-12 md:py-24 px-4 md:px-0"
         >
           <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-primary-800">
+            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-primary-800 dark:text-gray-100">
               Key Features
             </h2>
-            <p className="max-w-[85%] text-sm text-primary-600 sm:text-base">
+            <p className="max-w-[85%] text-sm text-primary-600 dark:text-gray-300 sm:text-base">
               Discover the power of AI-native document and community interaction
             </p>
           </div>
@@ -180,15 +182,15 @@ export default function Home() {
             ].map((feature, index) => (
               <Card
                 key={index}
-                className="group relative overflow-hidden border border-gray-300 bg-gray-100 p-6 transition-all hover:border-primary-800 hover:bg-primary-100 hover:shadow-md"
+                className="group relative overflow-hidden border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-6 transition-all hover:border-primary-800 hover:bg-primary-100 dark:hover:border-primary-600 dark:hover:bg-gray-700 hover:shadow-md"
               >
                 <div className="flex flex-col items-center space-y-4">
-                  <feature.icon className="h-12 w-12 text-primary-600" />
+                  <feature.icon className="h-12 w-12 text-primary-600 dark:text-gray-300" />
                   <div className="space-y-2 text-center">
-                    <h3 className="font-bold text-primary-800">
+                    <h3 className="font-bold text-primary-800 dark:text-gray-100">
                       {feature.title}
                     </h3>
-                    <p className="text-sm text-primary-600">
+                    <p className="text-sm text-primary-600 dark:text-gray-300">
                       {feature.description}
                     </p>
                   </div>
@@ -199,13 +201,13 @@ export default function Home() {
         </section>
 
         {/* Open Source Section */}
-        <section className="border-t border-gray-300 bg-gray-100 px-4 md:px-0">
+        <section className="border-t border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 md:px-0">
           <div className="container mx-auto space-y-6 py-12 md:py-24">
             <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-              <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-primary-800">
+              <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-primary-800 dark:text-gray-100">
                 Open Source
               </h2>
-              <p className="max-w-[85%] text-sm text-primary-600 sm:text-base">
+              <p className="max-w-[85%] text-sm text-primary-600 dark:text-gray-300 sm:text-base">
                 Join our community and contribute to the future of AI-powered
                 forums
               </p>
@@ -231,15 +233,15 @@ export default function Home() {
               ].map((feature, index) => (
                 <Card
                   key={index}
-                  className="group relative overflow-hidden border border-gray-300 bg-gray-100 p-6 transition-all hover:border-primary-800 hover:bg-primary-100 hover:shadow-md"
+                  className="group relative overflow-hidden border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-6 transition-all hover:border-primary-800 hover:bg-primary-100 dark:hover:border-primary-600 dark:hover:bg-gray-700 hover:shadow-md"
                 >
                   <div className="flex flex-col items-center space-y-4">
-                    <feature.icon className="h-12 w-12 text-primary-600" />
+                    <feature.icon className="h-12 w-12 text-primary-600 dark:text-gray-300" />
                     <div className="space-y-2 text-center">
-                      <h3 className="font-bold text-primary-800">
+                      <h3 className="font-bold text-primary-800 dark:text-gray-100">
                         {feature.title}
                       </h3>
-                      <p className="text-sm text-primary-600">
+                      <p className="text-sm text-primary-600 dark:text-gray-300">
                         {feature.description}
                       </p>
                     </div>
@@ -251,13 +253,13 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="border-t border-gray-300">
+        <section className="border-t border-gray-300 dark:border-gray-700">
           <div className="container mx-auto space-y-6 py-12 md:py-24 px-4 md:px-0">
             <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-              <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-primary-800">
+              <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-primary-800 dark:text-gray-100">
                 Ready to Revolutionize Your Forums?
               </h2>
-              <p className="max-w-[85%] text-sm text-primary-600 sm:text-base">
+              <p className="max-w-[85%] text-sm text-primary-600 dark:text-gray-300 sm:text-base">
                 Join the growing community of developers, students and educators
                 using Forum AI
               </p>
@@ -268,7 +270,7 @@ export default function Home() {
                   window.open(
                     "https://forumai.me/auth/signin",
                     "_blank",
-                    "noopener,noreferrer",
+                    "noopener,noreferrer"
                   )
                 }
               >
