@@ -93,7 +93,7 @@ export function Header() {
             <Button
               variant="outline"
               size="icon"
-              className="hidden sm:flex  hover:border-gray-600 bg-white hover:bg-gray-100"
+              className="hidden sm:flex hover:border-gray-600 bg-white hover:bg-gray-100"
               onClick={() => setDarkMode(!darkMode)}
             >
               {darkMode ? (
