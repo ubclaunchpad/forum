@@ -78,7 +78,7 @@ export function Header() {
               <Button
                 variant="outline"
                 size="icon"
-                className="hidden sm:flex border-gray-400 hover:border-gray-600 bg-white hover:bg-gray-100"
+                className="hidden sm:flex hover:border-gray-600 bg-white hover:bg-gray-100"
               >
                 <Github className="h-4 w-4 text-primary-800" />
                 <span className="sr-only">GitHub</span>
@@ -93,7 +93,7 @@ export function Header() {
             <Button
               variant="outline"
               size="icon"
-              className="hidden sm:flex"
+              className="hidden sm:flex  hover:border-gray-600 bg-white hover:bg-gray-100"
               onClick={() => setDarkMode(!darkMode)}
             >
               {darkMode ? (
