@@ -66,15 +66,15 @@ export default function SignUp() {
   };
 
   return (
-    <Card className="w-full max-w-lg px-12 py-3 bg-neutral-50 rounded-xl [&_label]:pl-1">
+    <Card className="w-full max-w-xl min-h-[450px] px-12 py-3 flex shadow-lg flex-col rounded-xl [&_label]:pl-1">
       <CardHeader className="pl-0">
-        <h2 className="text-2xl pl-0">Sign Up</h2>
+        <h2 className="text-2xl pl-0 pb-2">Sign Up</h2>
       </CardHeader>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <div className="space-y-0">
           <div className="flex items-center gap-4">
             <div className=" w-full">
-              <Label htmlFor="email">First Name</Label>
+              <Label htmlFor="firstName">First Name</Label>
               <Input
                 id="firstName"
                 placeholder="John"
@@ -91,7 +91,7 @@ export default function SignUp() {
               </div>
             </div>
             <div className="w-full">
-              <Label htmlFor="email">Last Name</Label>
+              <Label htmlFor="lastName">Last Name</Label>
               <Input
                 id="lastName"
                 placeholder="Doe"
@@ -203,10 +203,17 @@ export default function SignUp() {
           {isLoading ? "Creating your account..." : "Create Account"}
         </Button>
       </form>
-      <div className="flex pt-4 justify-center">
+      <div className="flex flex-col py-10 gap-2">
+        <div className="flex items-center gap-2">
+          <div className="w-full h-[1px] bg-neutral-200"></div>
+          <span className="text-neutral-500 text-sm">OR</span>
+          <div className="w-full h-[1px] bg-neutral-200"></div>
+        </div>
+      </div>
+      <div className="flex justify-center">
         <Button
           onClick={handleGoogleSignUp}
-          className="relative flex w-[350px] h-10 items-center justify-center rounded-[20px] border border-[#747775] bg-white text-[#1f1f1f] font-roboto text-sm font-medium shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none active:bg-gray-200"
+          className="relative flex min-w-[250px] w-full h-12 items-center justify-center rounded-full border border-neutral-200 bg-white text-[#1f1f1f] text-md font-medium shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none active:bg-gray-200"
         >
           <div className="absolute inset-0 opacity-0 transition-opacity duration-200 group-active:opacity-10 group-focus:opacity-10 bg-grey"></div>
           <div className="flex items-center">

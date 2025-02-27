@@ -45,7 +45,7 @@ export default function SignIn() {
   };
 
   return (
-    <Card className="w-full max-w-lg min-h-[450px] px-12 py-3 flex flex-col rounded-xl [&_label]:pl-1">
+    <Card className="w-full max-w-xl min-h-[450px] px-12 py-3 flex shadow-lg flex-col rounded-xl [&_label]:pl-1">
       <CardHeader className="pl-0">
         <h2 className="text-2xl pl-0 pb-2">Sign In</h2>
       </CardHeader>
@@ -94,10 +94,17 @@ export default function SignIn() {
           {isLoading ? "Signing in..." : "Sign In"}
         </Button>
       </form>
-      <div className="flex pt-4 justify-center">
+      <div className="flex flex-col py-10 gap-2">
+        <div className="flex items-center gap-2">
+          <div className="w-full h-[1px] bg-neutral-200"></div>
+          <span className="text-neutral-500 text-sm">OR</span>
+          <div className="w-full h-[1px] bg-neutral-200"></div>
+        </div>
+      </div>
+      <div className="flex  justify-center">
         <Button
           onClick={handleGoogleSignIn}
-          className="relative flex w-[250px] h-10 items-center justify-center rounded-[20px] border border-[#747775] bg-white text-[#1f1f1f] font-roboto text-sm font-medium shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none active:bg-gray-200"
+          className="relative flex min-w-[250px] w-full h-12 items-center justify-center rounded-full border border-neutral-200 bg-white text-[#1f1f1f]  text-md font-medium shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none active:bg-gray-200"
         >
           <div className="absolute inset-0 opacity-0 transition-opacity duration-200 group-active:opacity-10 group-focus:opacity-10 bg-grey"></div>
           <div className="flex items-center">
@@ -129,7 +136,7 @@ export default function SignIn() {
           </div>
         </Button>
       </div>
-      <div className="w-full pl-2 flex-1 pt-4 text-sm text-muted-foreground">
+      <div className="w-full pl-2 flex-1 pt-10 text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}
         <Link className="underline" href="/auth/signup">
           Sign up
