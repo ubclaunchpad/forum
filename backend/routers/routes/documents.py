@@ -217,8 +217,8 @@ async def query_documents_stream(
                     # Format as SSE
                     yield f"data: {chunk}\n\n"
 
-                query_builder["timestamp"] = datetime.now().strftime(DATE_FORMAT)
-                add_query_to_history(c_id, request.state.user_id, query_builder)
+            query_builder["timestamp"] = datetime.now().strftime(DATE_FORMAT)
+            add_query_to_history(c_id, request.state.user_id, query_builder)
         except Exception as e:
             logger.error(f"Error querying documents: {e}", exc_info=True)
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
