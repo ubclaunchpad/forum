@@ -118,11 +118,41 @@ def delete_user_by_id(user_id):
         return True
 
 
+def create_profile(
+    user_id: str,
+    email: Optional[str],
+    first_name: Optional[str] = None,
+    last_name: Optional[str] = None,
+) -> Profile:
+    """Create a new profile for a user."""
+    with get_db() as db:
+        # Check if profile already exists
+        existing_profile = db.execute(
+            select(Profile).where(Profile.id == user_id)
+        ).scalar_one_or_none()
+        if existing_profile:
+            return existing_profile
+
+        if not email:
+            raise ValueError("Email is required to create a profile")
+
+        print(first_name, last_name)
+        # Create new profile
+        profile = Profile(
+            id=user_id,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+        )
+        db.add(profile)
+        db.commit()
+        return profile
+
+
 def create_user(create_user_request: CreateUserBaseRequest) -> CreateUserResponse:
     with get_db() as db:
         if db.query(Profile).filter(Profile.email == create_user_request.email).first():
             raise ValueError("User already exists.")
-
         invite = (
             db.query(Invite)
             .filter(Invite.referred_email == create_user_request.email)
@@ -130,7 +160,6 @@ def create_user(create_user_request: CreateUserBaseRequest) -> CreateUserRespons
         )
         if invite == None:
             raise ValueError("Email has not been invited")
-
         auth_response = supabase.auth.sign_up(
             {
                 "email": create_user_request.email,
@@ -139,15 +168,20 @@ def create_user(create_user_request: CreateUserBaseRequest) -> CreateUserRespons
         )
         if not auth_response.user:
             raise ValueError("Failed to create user.")
-        user = Profile(
-            id=auth_response.user.id,
+
+        # Create profile
+        user = create_profile(
+            user_id=auth_response.user.id,
             email=create_user_request.email,
             first_name=create_user_request.first_name,
             last_name=create_user_request.last_name,
         )
+
         db.add(user)
+        # Create invite
         setattr(invite, "joined_at", datetime.now())
-        db.flush()
+        db.commit()
+
         return CreateUserResponse(
             id=UUID(auth_response.user.id), email=create_user_request.email
         )

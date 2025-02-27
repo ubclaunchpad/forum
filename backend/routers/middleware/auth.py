@@ -98,7 +98,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         if (
-            request.url.path.endswith("users") or request.url.path.endswith("users/")
+            request.url.path.endswith("users")
+            or request.url.path.endswith("users/")
+            or request.url.path.endswith("users/auth/callback")
         ) and request.method == "POST":
             logger.info("Allowing user creation")
             return await call_next(request)
