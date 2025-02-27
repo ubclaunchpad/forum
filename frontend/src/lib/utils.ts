@@ -278,3 +278,14 @@ export function checkPermissionInDomain(
     permission,
   );
 }
+
+const supportedAuthProviders =
+  process.env.NEXT_PUBLIC_SUPPORTED_AUTH_PROVIDERS?.split(",") || [];
+
+export function isAuthProviderSupported(provider: string): boolean {
+  return supportedAuthProviders.includes(provider);
+}
+
+export function supportedAnyAuthProvider(): boolean {
+  return supportedAuthProviders.length > 0;
+}
