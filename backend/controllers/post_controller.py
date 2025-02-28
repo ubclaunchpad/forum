@@ -1,6 +1,6 @@
 import logging
 import stat
-from typing import List, Optional
+from typing import Any, List, Optional
 from uuid import UUID
 from sqlalchemy import insert
 from sqlalchemy.orm import joinedload
@@ -43,8 +43,9 @@ def create_post(user_id: str, c_id: str, post_info: CreatePostRequest) -> Post:
             raise e
 
 
-def get_posts(c_id: str) -> List[Post]:
+def get_posts(c_id: str) -> List[Any]:
     try:
+        print(f"Getting posts for course {c_id}")
         with get_db() as db:
             posts = (
                 db.query(Post)
@@ -58,12 +59,12 @@ def get_posts(c_id: str) -> List[Post]:
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
 
 
-def get_post(user_id: str, c_id: str, local_id: int) -> GetPostResponse:
+def get_post(user_id: str, c_id: str, post_id: str) -> GetPostResponse:
     try:
         with get_db() as db:
             post: Post = (
                 db.query(Post)
-                .filter(Post.course_id == c_id, Post.local_id == local_id)
+                .filter(Post.course_id == c_id, Post.id == UUID(post_id))
                 .first()
             )
 
@@ -338,13 +339,13 @@ def get_post_tags(post_id: str) -> CourseTagsResponse:
         for tag in post.tags:
             tags.append(
                 CourseTagInformation(
-                    id=tag.id,
-                    name=tag.name,
-                    visibility=tag.visibility,
-                    course_id=tag.course_id,
-                    parent_tag_id=tag.parent_tag_id,
-                    created_by=tag.created_by,
-                    properties=tag.properties,
+                    id=getattr(tag, "id"),
+                    name=getattr(tag, "name"),
+                    visibility=getattr(tag, "visibility"),
+                    course_id=getattr(tag, "course_id"),
+                    parent_tag_id=getattr(tag, "parent_tag_id"),
+                    created_by=getattr(tag, "created_by"),
+                    properties=getattr(tag, "properties"),
                 )
             )
     return CourseTagsResponse(tags=tags)

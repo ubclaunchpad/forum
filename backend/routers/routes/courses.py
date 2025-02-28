@@ -1,10 +1,16 @@
+import logging
 from csv import Error
+from typing import Optional
 
 from controllers import course_controller
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
+from controllers.permission_controller import UserPermissionManager
 from models.schemas.course_schema import (
+    AddUserRequest,
+    CourseAccessEnum,
     CourseMembersResponse,
     CourseResponse,
+    CourseTagInformation,
     CourseTagRequest,
     CourseTagsResponse,
     CreateCourseReq,
@@ -13,20 +19,29 @@ from models.schemas.course_schema import (
     UpdateCourseReq,
 )
 from models.schemas.general_schema import GeneralResponse
+from routers.dependencies.permissions import get_permissions_manager
 
 course_router = APIRouter()
 
+logger = logging.getLogger(__name__)
+
 
 @course_router.post("", response_model=CreateCourseResponse)
-async def create_course(create_course_req: CreateCourseReq, request: Request):
+async def create_course(
+    create_course_req: CreateCourseReq,
+    request: Request,
+    perm_manager: UserPermissionManager = Depends(get_permissions_manager),
+):
     user_id = request.state.user_id
-    return course_controller.create_course(user_id, create_course_req)
+    return course_controller.create_course(user_id, create_course_req, perm_manager)
 
 
 @course_router.get("", response_model=GetCoursesResponse)
-async def get_courses_route(request: Request):
+async def get_courses_route(
+    request: Request, access: Optional[CourseAccessEnum] = None
+):
     user_id = request.state.user_id
-    courses = course_controller.get_courses(user_id)
+    courses = course_controller.get_courses(user_id, access)
     return {"courses": courses}
 
 
@@ -54,13 +69,18 @@ async def update_course(create_course_req: UpdateCourseReq, c_id: str):
 @course_router.get("/{c_id}/members", response_model=CourseMembersResponse)
 async def get_course_members(c_id: str):
     members = course_controller.get_course_members(c_id)
-    print(members[0])
     return {"members": members}
 
 
 @course_router.post("/{c_id}/members/{u_id}", response_model=GeneralResponse)
-async def register_user(c_id: str, u_id: str):
-    res = course_controller.add_user_to_course(c_id, u_id)
+async def register_user(
+    c_id: str,
+    u_id: str,
+    req: Optional[AddUserRequest] = None,
+    perm_manager: UserPermissionManager = Depends(get_permissions_manager),
+):
+    roles = req.roles if req else None
+    res = course_controller.add_user_to_course(c_id, u_id, perm_manager, roles)
     if res:
         return GeneralResponse(msg=f"User {u_id} registered to course {c_id}")
     else:
@@ -79,12 +99,19 @@ async def unregister_user(c_id: str, u_id: str):
 
 # ----------------- Course Tags -----------------#
 @course_router.get("/{c_id}/tags", response_model=CourseTagsResponse)
-async def get_course_tags(c_id: str):
+async def get_course_tags(c_id: str, nested: bool = True):
     try:
-        return course_controller.get_all_tags(c_id)
+        return course_controller.get_all_tags(c_id, nested)
     except Error as e:
         raise HTTPException(status_code=404, detail="Item not found")
-        # return HTTPException(status_code=500, detail={"msg": str(e)})
+
+
+@course_router.get("/{c_id}/tags/{t_id}", response_model=CourseTagInformation)
+async def get_course_tag(c_id: str, t_id: str):
+    try:
+        return course_controller.get_tag(c_id, t_id)
+    except Error as e:
+        raise HTTPException(status_code=404, detail="Tag not found")
 
 
 @course_router.post("/{c_id}/tags", response_model=GeneralResponse)

@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { Profile } from "./types/profiles";
+import { PermissionCheck, PermissionTree, Profile } from "./types/profiles";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -164,4 +164,128 @@ export function getDisplayname(profile: Profile) {
   }
 
   return `${profile.first_name} ${profile.last_name}`;
+}
+
+type DeepEqualType =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | { [key: string]: DeepEqualType }
+  | DeepEqualType[];
+
+export function isDeepEqual<T extends DeepEqualType>(x: T, y: T): boolean {
+  if (x === y) {
+    return true;
+  }
+
+  if (
+    typeof x !== "object" ||
+    x === null ||
+    typeof y !== "object" ||
+    y === null
+  ) {
+    return false;
+  }
+
+  // Handle arrays
+  if (Array.isArray(x) && Array.isArray(y)) {
+    if (x.length !== y.length) return false;
+    return x.every((item, index) => isDeepEqual(item, y[index]));
+  }
+
+  // Handle objects (not arrays)
+  if (!Array.isArray(x) && !Array.isArray(y)) {
+    const xKeys = Object.keys(x);
+    const yKeys = Object.keys(y as object);
+
+    if (xKeys.length !== yKeys.length) return false;
+
+    return xKeys.every((key) => {
+      return (
+        Object.prototype.hasOwnProperty.call(y, key) &&
+        isDeepEqual(
+          (x as { [key: string]: DeepEqualType })[key],
+          (y as { [key: string]: DeepEqualType })[key],
+        )
+      );
+    });
+  }
+
+  return false;
+}
+
+// Define permissions constants
+export const PERMISSIONS = {
+  CREATE_COURSE: {
+    domain: null,
+    subdomain: null,
+    resource: "course",
+    action: "create",
+    modifier: "any",
+  },
+  SYSTEM_ADMIN: {
+    domain: null,
+    subdomain: null,
+    resource: "system",
+    action: "manage",
+    modifier: "all",
+  },
+  CREATE_POST: {
+    domain: null,
+    subdomain: null,
+    resource: "post",
+    action: "create",
+    modifier: "any",
+  },
+  MODIFY_COURSE: {
+    domain: null,
+    subdomain: null,
+    resource: "course",
+    action: "settings",
+    modifier: "all",
+  },
+  SUSPEND_USER: {
+    domain: null,
+    subdomain: null,
+    resource: "user",
+    action: "suspend",
+    modifier: "any",
+  },
+} as const;
+
+export function hasPermission(
+  tree: Record<string, Record<string, Record<string, boolean>>>,
+  permission: PermissionCheck,
+): boolean {
+  return !!tree?.[permission.resource]?.[permission.action]?.[
+    permission.modifier
+  ];
+}
+
+export function checkPermissionInDomain(
+  permissionTree: PermissionTree,
+  permission: PermissionCheck,
+  domain: string | null = "all",
+  subdomain: string | null = "all",
+): boolean {
+  const domainKey = domain || "all";
+  const subdomainKey = subdomain || "all";
+
+  return hasPermission(
+    permissionTree[domainKey]?.[subdomainKey] || {},
+    permission,
+  );
+}
+
+const supportedAuthProviders =
+  process.env.NEXT_PUBLIC_SUPPORTED_AUTH_PROVIDERS?.split(",") || [];
+
+export function isAuthProviderSupported(provider: string): boolean {
+  return supportedAuthProviders.includes(provider);
+}
+
+export function supportedAnyAuthProvider(): boolean {
+  return supportedAuthProviders.length > 0;
 }

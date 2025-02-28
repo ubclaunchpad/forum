@@ -1,12 +1,18 @@
-import Link from "next/link"
-import Image from "next/image"
+import Link from "next/link";
+import Image from "next/image";
 
 export function Footer() {
   return (
     <footer className="border-t border-gray-300 bg-white/80 py-6 md:py-0">
-      <div className="container mx-auto flex flex-col items-center justify-center gap-4 md:h-24 md:flex-row">
+      <div className="container mx-auto flex flex-col items-center justify-evenly gap-4 md:h-24 md:flex-row">
         <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-        <Image alt="logo" src="/icon.png" width="96" height="96" className="h-6 w-6 text-primary-800" />
+          <Image
+            alt="logo"
+            src="/icon.png"
+            width="96"
+            height="96"
+            className="h-6 w-6 text-primary-800"
+          />
           <p className="text-center text-sm leading-loose text-primary-800 md:text-left">
             Built by{" "}
             <Link
@@ -32,8 +38,36 @@ export function Footer() {
             </span>
           </p>
         </div>
+        <div>
+          <p className="flex gap-5 text-center text-sm leading-loose text-primary-800 md:text-left">
+            <span>
+              <Link
+                href="privacy"
+                className="font-medium transition-colors hover:text-primary-600"
+              >
+                Privacy
+              </Link>
+            </span>
+
+            <span>
+              <Link
+                href="terms"
+                className="font-medium transition-colors hover:text-primary-600"
+              >
+                Terms
+              </Link>
+            </span>
+            <span>
+              <Link
+                href="https://forumai.statuspage.io/"
+                className="font-medium transition-colors hover:text-primary-600"
+              >
+                Page Status
+              </Link>
+            </span>
+          </p>
+        </div>
       </div>
     </footer>
-  )
+  );
 }
-

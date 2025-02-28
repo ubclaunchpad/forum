@@ -127,7 +127,6 @@ class FileStorage:
                     return f"documents/{filename}"
 
             file_path = f"documents/{filename}"
-            print(file_path)
             response = storage.upload(
                 file=file_content,  # Pass bytes directly
                 path=file_path,
@@ -160,6 +159,13 @@ class FileStorage:
         except Exception as e:
             # logger.error(f"Error retrieving file: {e}")
             raise HTTPException(status_code=500, detail="Failed to retrieve file")
+
+    def get_with_download(self, file_path: str) -> Optional[bytes]:
+        storage = self.supabase.storage.from_(self.bucket_name)
+        content = storage.download(file_path)
+        if not content:
+            return None
+        return content
 
     def delete_file(self, file_path: str) -> bool:
         storage = self.supabase.storage.from_(self.bucket_name)
@@ -205,6 +211,29 @@ class FileStorage:
             raise HTTPException(
                 status_code=500, detail=f"Could not generate signed URL: {e}"
             )
+
+    def get_file_signed_urls(self, file_paths: List[str]) -> List[dict[str, str]]:
+        try:
+            signed_urls = self.supabase.storage.from_(
+                self.bucket_name
+            ).create_signed_urls(file_paths, 3600)
+            if not signed_urls:
+                raise HTTPException(
+                    status_code=500,
+                    detail="Failed to generate signed URLs for files",
+                )
+            return signed_urls
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Could not generate signed URLs: {e}"
+            )
+
+    def delete_bucket(self):
+        if self.bucket_name in self.PUBLIC_BUCKETS:
+            raise ValueError("Cannot delete global buckets")
+        self.supabase.storage.empty_bucket(self.bucket_name)
+        self.supabase.storage.delete_bucket(self.bucket_name)
 
 
 # async def get_file_type(file: UploadFile, file_content: bytes) -> str:

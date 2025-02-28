@@ -1,29 +1,50 @@
 import logging
-from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
+from controllers.permission_controller import UserPermissionManager
+from controllers.tags.tag_manager import (
+    build_flat_tag_array,
+    build_tag_tree,
+    count_all_tags,
+    get_tag_association_counts,
+    has_cycle,
+)
+from core.util.file_storage import FileStorage
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from models.all import Course, Profile, Tag, user_courses
+from models.all import (
+    Course,
+    Profile,
+    Tag,
+    UserRole,
+    document_tags,
+    post_tags,
+    user_courses,
+)
 from models.db import get_db
 from models.schemas.course_schema import (
+    CourseAccessEnum,
     CourseResponse,
+    CourseTagInformation,
     CourseTagRequest,
     CourseTagsResponse,
     CreateCourseReq,
     CreateCourseResponse,
     UpdateCourseReq,
 )
+from models.schemas.role_schema import DefaultRole, RoleAssignment
 from models.schemas.user_schema import SocialLinks, UserProfile
 from pydantic import ValidationError
-from sqlalchemy import desc
+from sqlalchemy import exists, func
 
 logger = logging.getLogger(__name__)
 
 
 def create_course(
-    user_id: str, create_course_req: CreateCourseReq
+    user_id: str,
+    create_course_req: CreateCourseReq,
+    perm_manager: UserPermissionManager,
 ) -> CreateCourseResponse:
     with get_db() as db:
         course = Course(
@@ -34,6 +55,7 @@ def create_course(
             config=jsonable_encoder(create_course_req.config),
             start_date=create_course_req.start_date,
             end_date=create_course_req.end_date,
+            access=create_course_req.access,
         )
 
         try:
@@ -41,8 +63,16 @@ def create_course(
             db.flush()
             course_id = UUID(str(course.id))
 
+            # Add user to course
             stmt = user_courses.insert().values(user_id=user_id, course_id=course_id)
             db.execute(stmt)
+
+            # Assign creator as course admin
+            role_id = perm_manager.get_role_by_name(DefaultRole.COURSE_ADMIN.value)
+            user_role = UserRole(
+                user_id=UUID(user_id), role_id=role_id, domain=course_id
+            )
+            db.add(user_role)
 
             db.commit()
             return CreateCourseResponse(id=course_id)
@@ -51,10 +81,26 @@ def create_course(
             raise e
 
 
-def get_courses(user_id) -> List[CourseResponse]:
+def get_courses(
+    user_id, access: Optional[CourseAccessEnum] = None
+) -> List[CourseResponse]:
     try:
         with get_db() as db:
-            courses = db.query(Course).filter(Course.users.any(id=user_id)).all()
+            courses = []
+            if access is not None:
+                courses = (
+                    db.query(Course)
+                    .filter(
+                        ~exists().where(
+                            user_courses.c.course_id == Course.id,
+                            user_courses.c.user_id == user_id,
+                        ),
+                        Course.access == access,
+                    )
+                    .all()
+                )
+            else:
+                courses = db.query(Course).filter(Course.users.any(id=user_id)).all()
             pydantic_courses = []
 
             for course in courses:
@@ -96,11 +142,18 @@ def delete_course(c_id: str) -> CourseResponse:
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
         db.delete(course)
+        file_storage = FileStorage(bucket_name=f"course-{c_id}")
+        file_storage.delete_bucket()
         db.flush()
         return CourseResponse.model_validate(course)
 
 
-def add_user_to_course(c_id: str, u_id: str) -> bool:
+def add_user_to_course(
+    c_id: str,
+    u_id: str,
+    perm_manager: UserPermissionManager,
+    roles: Optional[List[RoleAssignment]] = None,
+) -> bool:
     with get_db() as db:
         c_uuid = UUID(c_id)
         u_uuid = UUID(u_id)
@@ -108,6 +161,9 @@ def add_user_to_course(c_id: str, u_id: str) -> bool:
         course = db.query(Course).filter(Course.id == c_uuid).first()
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
+
+        if course.access.value == CourseAccessEnum.private:
+            raise HTTPException(status_code=403, detail="Cannot join a private course")
 
         user = db.query(Profile).filter(Profile.id == u_uuid).first()
         if not user:
@@ -118,9 +174,34 @@ def add_user_to_course(c_id: str, u_id: str) -> bool:
                 status_code=400, detail="User already registered in course"
             )
 
-        course.users.append(user)
-        db.flush()
-        return True
+        try:
+            # Add user to course
+            course.users.append(user)
+
+            # Handle roles
+            if roles:
+                # Add specified roles
+                for role in roles:
+                    user_role = UserRole(
+                        user_id=u_uuid,
+                        role_id=role.role_id,
+                        domain=c_uuid,
+                        subdomain=role.subdomain,
+                    )
+                    db.add(user_role)
+            else:
+                # Add default member role
+                role_id = perm_manager.get_role_by_name(DefaultRole.COURSE_MEMBER.value)
+                user_role = UserRole(user_id=u_uuid, role_id=role_id, domain=c_uuid)
+                db.add(user_role)
+
+            db.commit()
+            return True
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500, detail=f"Failed to add user to course: {str(e)}"
+            )
 
 
 def remove_user_from_course(c_id: str, u_id: str) -> CourseResponse:
@@ -203,16 +284,46 @@ def update_course(create_course_req: UpdateCourseReq, c_id: str) -> Course:
             )
 
 
-def get_all_tags(course_id: str) -> CourseTagsResponse:
+def get_all_tags(course_id: str, nested: bool) -> CourseTagsResponse:
+    c_uuid = UUID(course_id)
+    try:
+        tag_counts = count_all_tags(course_id)
+        tags = build_tag_tree(c_uuid) if nested else build_flat_tag_array(c_uuid)
+        tags_list = CourseTagsResponse.model_validate(
+            {
+                "tags": tags,
+                "count": tag_counts,
+            }
+        )
+        return tags_list
+    except ValidationError as e:
+        logger.error(f"TAGS gotten from DB does not match schema - fix ASAP {str(e)}")
+        raise Exception("Could not get tags")
+
+
+def get_tag(course_id: str, tag_id: str) -> CourseTagInformation:
     with get_db() as db:
         c_uuid = UUID(course_id)
-        tags = db.query(Tag).filter(Tag.course_id == c_uuid).all()
+        t_uuid = UUID(tag_id)
+        tag = db.query(Tag).filter(Tag.course_id == c_uuid, Tag.id == t_uuid).first()
+        if not tag:
+            raise HTTPException(status_code=404, detail="Tag not found")
         try:
-            tags_list = CourseTagsResponse.model_validate({"tags": tags})
-            return tags_list
-        except ValidationError:
-            logger.error("TAGS gotten from DB does not match schema - fix ASAP")
-            raise Exception("Could not get tags")
+            return CourseTagInformation.model_validate(
+                {
+                    "id": getattr(tag, "id"),
+                    "name": getattr(tag, "name"),
+                    "visibility": getattr(tag, "visibility"),
+                    "course_id": getattr(tag, "course_id"),
+                    "created_by": getattr(tag, "created_by"),
+                    "properties": getattr(tag, "properties"),
+                    "subtags": build_tag_tree(c_uuid, t_uuid),
+                    "count": get_tag_association_counts(t_uuid, all=True),
+                }
+            )
+        except ValidationError as e:
+            logger.error(f"TAG from DB does not match schema {str(e)}")
+            raise Exception("Could not get tag")
 
 
 def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool:
@@ -220,12 +331,12 @@ def create_tag(course_id: str, tagReq: CourseTagRequest, author_id: str) -> bool
         c_uuid = UUID(course_id)
         p_uuid = UUID(str(tagReq.parent_tag_id)) if tagReq.parent_tag_id else None
         tag = Tag(
-            name=tagReq.name,
+            name=getattr(tagReq, "name"),
             course_id=c_uuid,
-            visibility=tagReq.visibility,
+            visibility=getattr(tagReq, "visibility"),
             parent_tag_id=p_uuid,
             created_by=UUID(author_id),
-            properties=tagReq.properties,
+            properties=getattr(tagReq, "properties"),
         )
         try:
             db.add(tag)
@@ -263,6 +374,9 @@ def update_tag(c_id: str, t_id: str, tagReq: CourseTagRequest) -> bool:
 
             if not tag:
                 raise Exception("Tag not found")
+
+            if tagReq.parent_tag_id and has_cycle(t_uuid, tagReq.parent_tag_id):
+                raise Exception("Tag cannot have a cycle")
 
             update_dict = tagReq.model_dump(exclude_unset=True)
 

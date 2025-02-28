@@ -7,9 +7,10 @@ from uuid import UUID
 
 from core.processors.document_processor import DocumentProcessor
 from core.util.file_storage import FileStorage
-from models.all import Course, Document
+from models.all import Course, Document, Embedding
 from models.db import get_db
-from models.schemas.document_schema import DocumentFileUpload
+from models.schemas.document_schema import DocumentEmbeddingMetadata, DocumentFileUpload
+from models.schemas.general_schema import GeneralResponse
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -86,24 +87,6 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
                     "document_id": str(document_id),
                     "storage_path": path,
                     "storage_time": f"{time.time() - storage_start:.2f}s",
-                },
-            )
-
-            # Process document content
-            process_start = time.time()
-            with DocumentProcessor(db) as processor:
-                processor.process_document(
-                    document_id=document_id,
-                    file_content=create_document.file,
-                    strategy_type="pdf",
-                )
-
-            logger.info(
-                "Document processing completed",
-                extra={
-                    "document_id": str(document_id),
-                    "processing_time": f"{time.time() - process_start:.2f}s",
-                    "total_time": f"{time.time() - start_time:.2f}s",
                 },
             )
 
@@ -247,6 +230,141 @@ def get_signed_document_url(course_id: UUID, document_id: str) -> Dict[str, str]
             logger.error(
                 "Error getting signed URL",
                 extra={"document_id": document_id, "error": str(e)},
+                exc_info=True,
+            )
+            raise e
+
+
+def get_signed_document_urls(
+    course_id: UUID, document_ids: list[str]
+) -> Dict[str, str]:
+    """Get signed URLs for multiple documents.
+
+    Args:
+        course_id: Course ID
+        document_ids: List of document IDs
+
+    Returns:
+        Dict mapping document IDs to signed URLs
+    """
+    logger.info("Getting signed URLs", extra={"document_ids": ", ".join(document_ids)})
+
+    with get_db() as db:
+        try:
+            documents = db.query(Document).filter(Document.id.in_(document_ids)).all()
+            if not documents:
+                logger.error("No documents found", extra={"document_ids": document_ids})
+                raise ValueError("No documents found")
+
+            file_paths = [str(doc.file_url) for doc in documents]
+            file_storage = FileStorage(
+                bucket_name=f"course-{str(course_id)}", create_bucket_if_not_found=False
+            )
+
+            signed_urls = file_storage.get_file_signed_urls(file_paths)
+
+            # Map document IDs to their signed URLs
+            id_to_url = {}
+            for doc, signed_url in zip(documents, signed_urls):
+                id_to_url[str(doc.id)] = signed_url["signedURL"]
+
+            logger.info("Signed URLs generated", extra={"count": len(id_to_url)})
+            return id_to_url
+
+        except Exception as e:
+            logger.error(
+                "Error getting signed URLs",
+                extra={"document_ids": document_ids, "error": str(e)},
+                exc_info=True,
+            )
+            raise e
+
+
+async def update_embeddings(document_id: str, user_id: str) -> GeneralResponse:
+    """Update embeddings for a document asynchronously."""
+    logger.info("Starting async embedding update", extra={"document_id": document_id})
+
+    try:
+        # Use context manager for database session
+        with get_db() as db:
+            document = db.query(Document).get(document_id)
+            if not document:
+                logger.error("Document not found", extra={"document_id": document_id})
+                raise ValueError("Document not found")
+
+            # Get file content
+            file_storage = FileStorage(
+                bucket_name=f"course-{str(document.courses[0].id)}",
+                create_bucket_if_not_found=False,
+            )
+            file_content = file_storage.get_with_download(str(document.file_url))
+
+            if not file_content:
+                logger.error(
+                    "File content not found", extra={"document_id": document_id}
+                )
+                raise ValueError("File content not found")
+
+            # Process document content in background
+            with DocumentProcessor(db) as processor:
+                processor.process_document(
+                    document_id=UUID(document_id),
+                    file_content=file_content,
+                    strategy_type="pdf",
+                )
+
+            logger.info(
+                "Document embeddings updated successfully",
+                extra={"document_id": str(document_id)},
+            )
+
+    except Exception as e:
+        logger.error(
+            "Error updating embeddings",
+            extra={"document_id": str(document_id), "error": str(e)},
+            exc_info=True,
+        )
+
+    return GeneralResponse(msg="Embedding update started")
+
+
+def get_embedding_metadata(document_id: str, user_id: str) -> DocumentEmbeddingMetadata:
+    """Get metadata about a document's embeddings."""
+    logger.info("Getting embedding metadata", extra={"document_id": document_id})
+
+    with get_db() as db:
+        try:
+            document = db.query(Document).get(document_id)
+            if not document:
+                logger.error("Document not found", extra={"document_id": document_id})
+                raise ValueError("Document not found")
+
+            # Get the embeddings for this document
+            embeddings = (
+                db.query(Embedding)
+                .filter(
+                    Embedding.entity_type == "document",
+                    Embedding.entity_id == document.id,
+                )
+                .order_by(Embedding.created_at.desc())
+                .all()
+            )
+
+            if not embeddings:
+                return DocumentEmbeddingMetadata()
+
+            updated_at = getattr(embeddings[0], "created_at")
+
+            return DocumentEmbeddingMetadata(
+                last_updated=updated_at,
+                chunk_count=len(embeddings),
+                has_embeddings=True,
+            )
+
+        except Exception as e:
+            logger.error(
+                "Error getting embedding metadata",
+                extra={"document_id": str(document_id), "error": str(e)},
                 exc_info=True,
             )
             raise e

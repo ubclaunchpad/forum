@@ -6,11 +6,15 @@ from core.util.env_util import ENV, parse_bool_env
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from models.db import get_db
+from routers.dependencies.permissions import get_permissions_container
 from routers.middleware.auth import AuthMiddleware
+from routers.routes.admin import admin_router
 from routers.routes.courses import course_router
 from routers.routes.documents import document_router
+from routers.routes.invites import invite_router
 from routers.routes.posts import post_router
 from routers.routes.query_history import query_history_router
+from routers.routes.roles import roles_router
 from routers.routes.users import user_router
 from routers.routes.invites import invite_router
 
@@ -28,10 +32,11 @@ allowed_origins = [
     "https://forumapp.up.railway.app/",
 ]
 
-app = FastAPI(dependencies=[Depends(get_db)])
+app = FastAPI(dependencies=[Depends(get_db), Depends(get_permissions_container)])
 
 app.include_router(course_router, tags=["Courses"], prefix="/courses")
 app.include_router(user_router, tags=["Users"], prefix="/users")
+app.include_router(admin_router, tags=["Admin"], prefix="/admin")
 app.include_router(invite_router, tags=["Invites"], prefix="/invites")
 course_router.include_router(post_router, tags=["Posts"], prefix="/{c_id}/posts")
 course_router.include_router(
@@ -40,6 +45,8 @@ course_router.include_router(
 course_router.include_router(
     query_history_router, tags=["Course Query History"], prefix="/{c_id}/query_history"
 )
+app.include_router(roles_router, tags=["Roles"], prefix="/roles")
+
 
 app.add_middleware(
     CORSMiddleware,

@@ -24,7 +24,7 @@ async def create_post(c_id: str, post_info: CreatePostRequest, request: Request)
     return post
 
 
-@post_router.get("", response_model=GetPostsResponse)
+@post_router.get("")
 async def get_posts(c_id: str):
     posts = post_controller.get_posts(c_id)
 
@@ -32,7 +32,7 @@ async def get_posts(c_id: str):
 
 
 @post_router.get("/{post_id}", response_model=GetPostResponse)
-async def get_post(c_id: str, post_id: int, request: Request):
+async def get_post(c_id: str, post_id: str, request: Request):
     user_id = request.state.user_id
     post = post_controller.get_post(user_id, c_id, post_id)
     return post

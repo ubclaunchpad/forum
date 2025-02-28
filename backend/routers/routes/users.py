@@ -1,7 +1,17 @@
 import os
+from typing import Optional
 
 from controllers import user_controller
-from fastapi import APIRouter, File, HTTPException, Request, Response, UploadFile
+from controllers.permission_controller import UserPermissionManager
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+)
 from models.schemas.general_schema import GeneralResponse
 from models.schemas.user_schema import (
     CreateUserBaseRequest,
@@ -10,6 +20,10 @@ from models.schemas.user_schema import (
     UpdateUserRequest,
     UserProfile,
 )
+from routers.dependencies.permissions import get_permissions_manager
+from models.db import  get_db
+from models.all import Profile, Invite
+from gotrue.types import User
 
 user_router = APIRouter()
 
@@ -21,9 +35,13 @@ async def get_all_users():
 
 
 @user_router.get("/{user_id}")
-async def get_user_by_id(user_id: str, req: Request):
-    user_id = req.state.user_id
-    user = user_controller.get_user_by_id(user_id)
+async def get_user_by_id(
+    user_id: str,
+    req: Request,
+    perm_manager: UserPermissionManager = Depends(get_permissions_manager),
+):
+    # Use passed user_id instead of from request since this endpoint gets other users
+    user = await user_controller.get_user_by_id(user_id, perm_manager, False)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
@@ -31,11 +49,13 @@ async def get_user_by_id(user_id: str, req: Request):
     return user
 
 
-@user_router.get("/me")
-async def get_profile(request: Request):
+@user_router.get("/user/me")
+async def get_profile(
+    request: Request,
+    perm_manager: UserPermissionManager = Depends(get_permissions_manager),
+):
     user_id = request.state.user_id
-    profile = user_controller.get_user_by_id(user_id)
-
+    profile = await user_controller.get_user_by_id(user_id, perm_manager, True)
     if not profile:
         raise HTTPException(status_code=404, detail="Failed to find profile.")
 
@@ -128,3 +148,58 @@ async def remove_profile_photo(request: Request):
     """Remove profile photo."""
     user_id = request.state.user_id
     return user_controller.delete_profile_photo(user_id)
+
+
+@user_router.post("/user/finish-setup")
+async def auth_callback(request: Request, data: dict):
+    user: Optional[User] = request.state.user
+
+    if not user or not user.id or not user.email:
+        raise HTTPException(status_code=400, detail="User not found.")
+
+    try:
+        with get_db() as db:
+            # Check if user has an invite
+            invite = (
+                db.query(Invite).filter(Invite.referred_email == user.email).first()
+            )
+            if not invite:
+                raise HTTPException(
+                    status_code=400, detail="No invite found for this email."
+                )
+
+            # Create profile
+            user_controller.create_profile(
+                user_id=user.id,
+                email=user.email,
+                first_name=data.get("first_name"),
+                last_name=data.get("last_name"),
+            )
+
+            return {"message": "Profile created successfully."}
+    except Exception as e:
+        raise HTTPException(
+            status_code=400, detail="Failed to create profile." + str(e)
+        )
+
+
+@user_router.post("/user/status")
+async def get_user_status(request: Request):
+    user: Optional[User] = request.state.user
+
+    if not user or not user.id or not user.email:
+        raise HTTPException(status_code=400, detail="User not found.")
+
+    with get_db() as db:
+        # Check if user has an invite
+        invite = db.query(Invite).filter(Invite.referred_email == user.email).first()
+        if not invite:
+            return {"status": "pending_invite"}
+
+        # Check if user has a profile
+        profile = db.query(Profile).filter(Profile.id == user.id).first()
+        if not profile:
+            return {"status": "pending_setup"}
+
+        # If both exist, user is active
+        return {"status": "active"}

@@ -37,11 +37,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (
-    request.nextUrl.pathname.startsWith("/playground") ||
-    request.nextUrl.pathname.startsWith("/terms") ||
-    request.nextUrl.pathname.startsWith("/privacy")
-  ) {
+  if (!request.nextUrl.pathname.startsWith("/forum")) {
     return supabaseResponse;
   }
 
@@ -53,6 +49,28 @@ export async function updateSession(request: NextRequest) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = "/auth/signin";
+    return NextResponse.redirect(url);
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user?.id)
+    .single();
+  if (
+    !profile &&
+    request.nextUrl.pathname !== "/auth/finish-setup" &&
+    request.nextUrl.pathname !== "/auth/signin" &&
+    request.nextUrl.pathname !== "/auth/signup"
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/finish-setup";
+    return NextResponse.redirect(url);
+  }
+
+  if (user && profile && request.nextUrl.pathname.startsWith("/auth")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/forum/courses";
     return NextResponse.redirect(url);
   }
 

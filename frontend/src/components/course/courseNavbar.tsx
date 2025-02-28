@@ -43,7 +43,7 @@ export default function CourseNavbar() {
 
   return (
     <div className="flex justify-between items-center w-full border-b  px-2 border-b-neutral-200">
-      <div className="flex gap-8">
+      <div className="flex gap-6">
         {tabs.map((tab) => (
           <Link
             aria-disabled={tab.disabled}
@@ -53,9 +53,10 @@ export default function CourseNavbar() {
              ${
                isSelected(tab.name)
                  ? "text-primary-600 border-b-primary-600  "
-                 : "text-neutral-600 hover:text-neutral-900  border-b-transparent "
+                 : "text-neutral-600 hover:text-primary-800  border-b-transparent "
              }`}
           >
+            <tab.icon className="w-4 h-4" />
             {tab.label}
           </Link>
         ))}

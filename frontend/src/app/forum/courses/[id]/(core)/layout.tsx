@@ -1,5 +1,7 @@
 import CourseNavbar from "@/components/course/courseNavbar";
 import { CourseTopbar } from "@/components/course/courseTopbar";
+import { IsLoadingView } from "@/components/general/IsLoadingView";
+import { Suspense } from "react";
 
 export default async function CourseCoreLayout({
   children,
@@ -10,7 +12,7 @@ export default async function CourseCoreLayout({
     <>
       <CourseTopbar />
       <CourseNavbar />
-      {children}
+      <Suspense fallback={<IsLoadingView />}>{children}</Suspense>
     </>
   );
 }

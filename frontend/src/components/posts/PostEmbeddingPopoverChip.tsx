@@ -1,9 +1,9 @@
 "use client";
 
-import { courseContext } from "@/contexts/courseContext";
 import { userContext } from "@/contexts/userContext";
 import { toast } from "@/hooks/use-toast";
 import { Post } from "@/lib/types/posts";
+import { useCourseStore } from "@/providers/courseStoreProvider";
 import { getApiUrl } from "@/utils/helpers";
 import {
   Popover,
@@ -49,7 +49,7 @@ function setCachedMetadata(postId: string, data: EmbeddingMetadata) {
 }
 
 export default function PostEmbeddingPopoverChip({ post }: { post: Post }) {
-  const course = useContext(courseContext);
+  const course = useCourseStore((state) => state.course);
   const user = useContext(userContext);
   const [metadata, setMetadata] = useState<EmbeddingMetadata | null>(() =>
     getCachedMetadata(`${course.id}_${post.local_id}`),
@@ -169,7 +169,10 @@ export default function PostEmbeddingPopoverChip({ post }: { post: Post }) {
               {metadata.has_embeddings && (
                 <div className="">
                   Last updated:{" "}
-                  {new Date(metadata.last_updated!).toLocaleString()}
+                  {new Date(metadata.last_updated!).toLocaleString("en-US", {
+                    timeZone: "America/Vancouver",
+                    timeZoneName: "short",
+                  })}
                 </div>
               )}
             </li>

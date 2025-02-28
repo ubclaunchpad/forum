@@ -1,8 +1,9 @@
 from datetime import date, datetime
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Union
 from uuid import UUID
 
+from models.schemas.role_schema import RoleAssignment
 from models.schemas.user_schema import UserProfile
 from pydantic import BaseModel
 
@@ -12,14 +13,22 @@ class CourseConfig(BaseModel):
     font: Optional[str] = None
 
 
+class CourseAccessEnum(str, Enum):
+    public = "public"
+    open = "open"
+    unlisted = "unlisted"
+    private = "private"
+
+
 class CourseBase(BaseModel):
     c_group: str
     code: int
-    section: int
+    section: Union[int, str]
     name: Optional[str] = None
     config: Optional[CourseConfig] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+    access: str
 
     class Config:
         from_attributes = True
@@ -36,7 +45,7 @@ class CreateCourseResponse(BaseModel):
 class UpdateCourseReq(BaseModel):
     c_group: Optional[str] = None
     code: Optional[int] = None
-    section: Optional[int] = None
+    section: Optional[str] = None
     name: Optional[str] = None
     config: Optional[CourseConfig] = None
     start_date: Optional[date] = None
@@ -60,6 +69,12 @@ class VisibilityEnum(str, Enum):
     private = "private"
 
 
+class CourseTagCount(BaseModel):
+    posts: int
+    documents: int
+    total: int
+
+
 class CourseTagInformation(BaseModel):
     id: UUID
     name: str
@@ -68,6 +83,8 @@ class CourseTagInformation(BaseModel):
     parent_tag_id: Optional[UUID] = None
     created_by: Optional[UUID] = None
     properties: Optional[dict] = None
+    subtags: Optional[List["CourseTagInformation"]] = None
+    count: Optional[CourseTagCount] = None
 
     class Config:
         from_attributes = True
@@ -75,6 +92,7 @@ class CourseTagInformation(BaseModel):
 
 class CourseTagsResponse(BaseModel):
     tags: List[CourseTagInformation]
+    count: Optional[CourseTagCount] = None
 
 
 class CourseTagRequest(BaseModel):
@@ -82,3 +100,11 @@ class CourseTagRequest(BaseModel):
     visibility: Optional[VisibilityEnum] = None
     parent_tag_id: Optional[UUID] = None
     properties: Optional[dict] = None
+
+
+class AddUserToCourseRequest(BaseModel):
+    roles: Optional[List[RoleAssignment]] = None
+
+
+class AddUserRequest(BaseModel):
+    roles: Optional[List[RoleAssignment]] = None

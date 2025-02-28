@@ -26,6 +26,8 @@ Add a `.env` file to the `frontend` directory with your Supabase project details
 NEXT_PUBLIC_SUPABASE_URL=your_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key_here
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+NEXT_PUBLIC_SUPPORTED_AUTH_PROVIDERS=<comma-separated-list-of-providers>
+NEXT_PUBLIC_SITE_URL=http://localhost:3000 # The URL of the frontend
 ```
 
 ## Learn More

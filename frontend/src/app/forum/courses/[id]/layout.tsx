@@ -1,9 +1,10 @@
-import { CourseContextProvider } from "@/contexts/courseContext";
 import ClientWrapper from "./(core)/resources/wrapper";
 import { getApiUrl } from "@/utils/helpers";
 import { Course } from "@/lib/types/course";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { CourseStoreProvider } from "@/providers/courseStoreProvider";
+// import { getTags } from "@/lib/fetchers/tags";
 
 async function getCourse(id: string, token: string) {
   try {
@@ -44,17 +45,26 @@ export default async function CoursePage({
     redirect("/auth/login");
   }
 
-  const course = await getCourse(id, token!);
+  const [course] = await Promise.all([
+    getCourse(id, token!),
+    // getTags(id, token),
+  ]);
 
   if (!course) {
     redirect("/courses");
   }
 
+  const store = {
+    course: course,
+    pendingCourse: course,
+    tags: [],
+  };
+
   return (
-    <CourseContextProvider course={course}>
-      <div className="course flex flex-col max-h-dvh h-dvh w-dvw overflow-hidden">
+    <CourseStoreProvider initState={store}>
+      <div className="course flex flex-col h-dvh w-dvw overflow-hidden">
         <ClientWrapper>{children}</ClientWrapper>
       </div>
-    </CourseContextProvider>
+    </CourseStoreProvider>
   );
 }

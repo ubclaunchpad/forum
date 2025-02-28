@@ -24,7 +24,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.enabled = enabled
         self.protected_paths = (
-            ["courses/*", "users/*"] if protected_paths is None else protected_paths
+            ["courses/*", "users/*", "invites/*", "admin/*", "roles/*"]
+            if protected_paths is None
+            else protected_paths
         )
         # Normalize paths during initialization
         self.split_protected_paths = [
@@ -96,7 +98,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
 
         if (
-            request.url.path.endswith("users") or request.url.path.endswith("users/")
+            request.url.path.endswith("users")
+            or request.url.path.endswith("users/")
+            or request.url.path.endswith("users/auth/callback")
         ) and request.method == "POST":
             logger.info("Allowing user creation")
             return await call_next(request)

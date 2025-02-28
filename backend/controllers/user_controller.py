@@ -1,11 +1,12 @@
 import os
-from typing import List, Optional
+from datetime import datetime
+from typing import List, Optional, Union
 from uuid import UUID
 
-import supabase
+from controllers.permission_controller import UserPermissionManager
 from core.util.file_storage import ConflictResolution, FileStorage
 from fastapi import HTTPException
-from models.all import Course, Profile, Invite
+from models.all import Course, Invite, Profile
 from models.db import get_db, supabase
 from models.schemas.general_schema import GeneralResponse
 from controllers import invite_controller
@@ -13,10 +14,12 @@ from datetime import datetime
 from models.schemas.user_schema import (
     CreateUserBaseRequest,
     CreateUserResponse,
+    FullUserProfile,
     SocialLinks,
     UpdateUserRequest,
     UserProfile,
 )
+from sqlalchemy import Text, delete, select, text
 from sqlalchemy.orm import joinedload
 
 
@@ -45,35 +48,52 @@ def get_all_users() -> List[UserProfile]:
         ]
 
 
-def get_user_by_id(user_id: str) -> Optional[UserProfile]:
-    """Get a single user by ID with their profile information."""
+async def get_user_by_id(
+    user_id: str,
+    perm_manager: UserPermissionManager,
+    full: bool = False,
+) -> Optional[Union[UserProfile, FullUserProfile]]:
+    """
+    Get a single user by ID with their profile information.
+    Returns FullUserProfile if full=True, otherwise returns UserProfile.
+    """
     with get_db() as db:
-        user = (
-            db.query(Profile)
-            .options(joinedload(Profile.courses))
-            .filter(Profile.id == user_id)
-            .first()
-        )
+        stmt = select(Profile).where(Profile.id == user_id)
+        user = db.execute(stmt).scalar_one_or_none()
 
         if not user:
             return None
 
-        social_data = getattr(user, "socials") if getattr(user, "socials") else {}
-        social_links = SocialLinks(**social_data) if social_data else None
+        # Get roles and permissions only if full profile is requested
+        user_roles = None
+        if full:
+            roles_data = await perm_manager.get_user_roles_and_permissions(
+                db, user_id=UUID(user_id)
+            )
+            user_roles = roles_data
 
-        return UserProfile(
-            id=UUID(str(user.id)),
-            email=getattr(user, "email"),
-            first_name=getattr(user, "first_name", None),
-            last_name=getattr(user, "last_name", None),
-            pronouns=getattr(user, "pronouns", None),
-            username=getattr(user, "username", None),
-            bio=getattr(user, "bio", None),
-            socials=social_links,
-            timezone=getattr(user, "timezone", None),
-            display_name=getattr(user, "display_name", None),
-            icon_url=getattr(user, "icon_url", None),
-        )
+        # Create base profile data
+        profile_data = {
+            "id": UUID(str(user.id)),
+            "email": getattr(user, "email"),
+            "first_name": getattr(user, "first_name", None),
+            "last_name": getattr(user, "last_name", None),
+            "pronouns": getattr(user, "pronouns", None),
+            "username": getattr(user, "username", None),
+            "bio": getattr(user, "bio", None),
+            "timezone": getattr(user, "timezone", None),
+            "display_name": getattr(user, "display_name", None),
+            "icon_url": getattr(user, "icon_url", None),
+        }
+
+        if full and user_roles is not None:
+            return FullUserProfile(
+                **profile_data,
+                roles=user_roles["roles"],
+                permissions=user_roles["permissions"],
+            )
+        else:
+            return UserProfile(**profile_data)
 
 
 def get_user_courses(user_id: str) -> List[Course]:
@@ -94,23 +114,54 @@ def get_user_courses(user_id: str) -> List[Course]:
 
 def delete_user_by_id(user_id):
     with get_db() as db:
-        user = db.query(Profile).filter(Profile.id == user_id).first()
-        if not user:
-            return False
-        db.delete(user)
-        db.flush()
+        db.execute(
+            text("DELETE FROM auth.users WHERE id = :user_id"), {"user_id": user_id}
+        )
         return True
+
+
+def create_profile(
+    user_id: str,
+    email: Optional[str],
+    first_name: Optional[str] = None,
+    last_name: Optional[str] = None,
+) -> Profile:
+    """Create a new profile for a user."""
+    with get_db() as db:
+        # Check if profile already exists
+        existing_profile = db.execute(
+            select(Profile).where(Profile.id == user_id)
+        ).scalar_one_or_none()
+        if existing_profile:
+            return existing_profile
+
+        if not email:
+            raise ValueError("Email is required to create a profile")
+
+        print(first_name, last_name)
+        # Create new profile
+        profile = Profile(
+            id=user_id,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+        )
+        db.add(profile)
+        db.commit()
+        return profile
 
 
 def create_user(create_user_request: CreateUserBaseRequest) -> CreateUserResponse:
     with get_db() as db:
         if db.query(Profile).filter(Profile.email == create_user_request.email).first():
             raise ValueError("User already exists.")
-
-        invite = db.query(Invite).filter(Invite.referred_email == create_user_request.email).first()
+        invite = (
+            db.query(Invite)
+            .filter(Invite.referred_email == create_user_request.email)
+            .first()
+        )
         if invite == None:
             raise ValueError("Email has not been invited")
-        
         auth_response = supabase.auth.sign_up(
             {
                 "email": create_user_request.email,
@@ -119,15 +170,20 @@ def create_user(create_user_request: CreateUserBaseRequest) -> CreateUserRespons
         )
         if not auth_response.user:
             raise ValueError("Failed to create user.")
-        user = Profile(
-            id=auth_response.user.id,
+
+        # Create profile
+        user = create_profile(
+            user_id=auth_response.user.id,
             email=create_user_request.email,
             first_name=create_user_request.first_name,
             last_name=create_user_request.last_name,
         )
+
         db.add(user)
+        # Create invite
         setattr(invite, "joined_at", datetime.now())
-        db.flush()
+        db.commit()
+
         return CreateUserResponse(
             id=UUID(auth_response.user.id), email=create_user_request.email
         )

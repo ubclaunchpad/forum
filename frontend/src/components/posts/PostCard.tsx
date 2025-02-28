@@ -16,10 +16,10 @@ import {
 } from "@/components/ui/popover";
 import { DeleteIcon, LinkIcon, MoreHorizontal } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { courseContext } from "@/contexts/courseContext";
 import { userContext } from "@/contexts/userContext";
 import { getApiUrl } from "@/utils/helpers";
 import { forumPostsContext } from "@/contexts/PostsContext";
+import { useCourseStore } from "@/providers/courseStoreProvider";
 
 type PostCardProps<T extends PostType> = {
   post: T extends "draft" ? PostWithRequiredId : Post;
@@ -34,7 +34,7 @@ export const PostCard = <T extends PostType>({
     useContext(forumPostsContext);
 
   const user = useContext(userContext);
-  const course = useContext(courseContext);
+  const course = useCourseStore((state) => state.course);
   const { toast } = useToast();
   const postType = getIdType(post.id);
   const handleMoreClick = (e: React.MouseEvent) => {

@@ -1,22 +1,16 @@
 "use client";
 
-import { courseContext } from "@/contexts/courseContext";
-import {
-  ArrowLeftIcon,
-  BugIcon,
-  ClipboardPenIcon,
-  LogOutIcon,
-  Settings2Icon,
-  UserCircleIcon,
-} from "lucide-react";
+import { ArrowLeftIcon, LogOutIcon, Settings2Icon } from "lucide-react";
 import { Fragment, useContext, useState } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { Searchbar } from "./searchBar";
-import { signOut } from "./actions";
-import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { checkPermissionInDomain, cn, PERMISSIONS } from "@/lib/utils";
 import { userContext } from "@/contexts/userContext";
+import { useCourseStore } from "@/providers/courseStoreProvider";
+import { getApiUrl } from "@/utils/helpers";
+import { useRouter } from "next/navigation";
+import { ProfileButton } from "../general/ProfileButton";
 
 export function CourseTopbar() {
   return (
@@ -30,87 +24,33 @@ export function CourseTopbar() {
   );
 }
 
-function ProfileButton() {
-  const [isOpen, setIsOpen] = useState(false);
-  const { profile } = useContext(userContext);
-  return (
-    <Fragment>
-      {isOpen && (
-        <div className="fixed text-sm flex z-20  flex-col gap-2  rounded-lg top-14 right-4 bg-white  shadow-md border border-neutral-200">
-          <section className="flex flex-col gap-1  ">
-            <ul className="flex flex-col min-w-[200px] divide-y  last:border-b ">
-              <Link
-                href={"/forum/profile"}
-                className="w-full no-underline hover:text-primary-500 p-1 px-2  text-sm flex items-center gap-2 "
-              >
-                <UserCircleIcon className="w-4 min-h-4" />
-                Profile
-              </Link>
-
-              <button
-                className="w-full no-underline hover:text-primary-500 p-1  px-2  text-sm flex items-center gap-2"
-                onClick={() => signOut()}
-              >
-                <LogOutIcon className="w-4 min-h-4" />
-                Logout
-              </button>
-            </ul>
-          </section>
-          <section className="flex flex-col gap-1  pt-2">
-            <label className="font-semibold text-neutral-800 px-2">
-              Feedback
-            </label>
-
-            <ul className="flex flex-col min-w-[200px] divide-y  border-t">
-              {process.env.NEXT_PUBLIC_BUG_FORM_URL && (
-                <Link
-                  href={process.env.NEXT_PUBLIC_BUG_FORM_URL}
-                  target="_blank"
-                  referrerPolicy="no-referrer"
-                  className="w-full no-underline hover:text-primary-500 p-1 px-2  text-sm flex items-center gap-2 "
-                >
-                  <BugIcon className="w-4 min-h-4" />
-                  Report an issue
-                </Link>
-              )}
-              {process.env.NEXT_PUBLIC_FEATURE_FORM_URL && (
-                <Link
-                  href={process.env.NEXT_PUBLIC_FEATURE_FORM_URL}
-                  target="_blank"
-                  referrerPolicy="no-referrer"
-                  className="w-full no-underline hover:text-primary-500 p-1 px-2  text-sm flex items-center gap-2 "
-                >
-                  <ClipboardPenIcon className="w-4 min-h-4" />
-                  Request a feature
-                </Link>
-              )}
-            </ul>
-          </section>
-        </div>
-      )}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          "text-neutral-500 flex p-0.5 border border-neutral-200  justify-center items-center  rounded-full bg-neutral-50 gap-2",
-          isOpen ? "shadow-lg" : "shadow-md",
-        )}
-      >
-        <Avatar className="w-9 h-9">
-          <AvatarImage src={profile.icon_url} className="object-cover" />
-          <AvatarFallback>
-            {profile.first_name[0]}
-            {profile.last_name[0]}
-          </AvatarFallback>
-        </Avatar>
-      </button>
-    </Fragment>
-  );
-}
-
 function CourseButton() {
   const [isOpen, setIsOpen] = useState(false);
-  const course = useContext(courseContext);
+  const course = useCourseStore((state) => state.course);
+  const { user, token, profile } = useContext(userContext);
   const courseName = `${course.c_group} ${course.code} ${course.name}`;
+  const router = useRouter();
+
+  async function leaveCourse() {
+    try {
+      const res = await fetch(
+        `${getApiUrl()}/courses/${course.id}/members/${user.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!res.ok) throw new Error("Failed to leave course");
+
+      router.push("/forum/courses");
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  }
 
   return (
     <Fragment>
@@ -125,20 +65,24 @@ function CourseButton() {
                 <ArrowLeftIcon className="w-4 min-h-4" />
                 Back to All Courses
               </Link>
-              <Link
-                href={`/forum/courses/${course.id}/settings`}
-                className="w-full no-underline hover:text-primary-500 p-1 px-2 text-sm flex items-center gap-2"
-              >
-                <Settings2Icon className="w-4 min-h-4" />
-                Course Settings
-              </Link>
+
+              {checkPermissionInDomain(
+                profile.permissions,
+                PERMISSIONS.MODIFY_COURSE,
+                course.id,
+              ) && (
+                <Link
+                  href={`/forum/courses/${course.id}/settings`}
+                  className="w-full no-underline hover:text-primary-500 p-1 px-2 text-sm flex items-center gap-2"
+                >
+                  <Settings2Icon className="w-4 min-h-4" />
+                  Course Settings
+                </Link>
+              )}
               <button
-                disabled
-                className="w-full text-neutral-400 disabled:hover:text-neutral-400 cursor-not-allowed no-underline hover:text-primary-500 p-1 px-2 text-sm flex items-center gap-2"
-                onClick={() => {
-                  // Add leave course functionality here
-                  console.log("Leave course clicked");
-                }}
+                disabled={false}
+                className="w-full  disabled:hover:text-neutral-400  hover:text-red-500 p-1 px-2 text-sm flex items-center gap-2"
+                onClick={leaveCourse}
               >
                 <LogOutIcon className="w-4 min-h-4" />
                 Leave Course
