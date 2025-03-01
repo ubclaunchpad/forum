@@ -14,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { DeleteIcon, LinkIcon, MoreHorizontal } from "lucide-react";
+import { DeleteIcon, LinkIcon, MoreHorizontal, ThumbsUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { userContext } from "@/contexts/userContext";
 import { getApiUrl } from "@/utils/helpers";
@@ -80,6 +80,84 @@ export const PostCard = <T extends PostType>({
     }
   }
 
+  async function updateUserEvent(post: Post, eventType: "view" | "like") {
+    const response = await fetch(
+      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/${eventType}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      }
+    );
+    fetch("/api/revalidate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ courseId: course.id }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to mark post as ${eventType}`);
+    }
+  }
+
+  const handleLikeClick = async (post: Post) => {
+    // Optimistically update the like count
+    const updatedPost = {
+      ...post,
+      user_interactions: {
+        ...post.user_interactions,
+        liked: true,
+      },
+      stats: {
+        ...post.stats,
+        likes: post.stats?.likes ? post.stats.likes + 1 : 0,
+      },
+    };
+    setSelectedPost(updatedPost); // Update the selected post in state
+  
+    try {
+      // Make the like API call
+      await updateUserEvent(post, "like");
+  
+      // Optionally handle success actions after the like request is complete
+    } catch (error) {
+      // In case of failure, revert the optimistic update
+      const revertedPost = { ...post, likes_count: (post.stats?.likes || 0) - 1 };
+      setSelectedPost(revertedPost);
+    }
+  };
+
+  const handleView = async (post: Post | PostWithRequiredId) => {
+    // Optimistically update the like count
+    const updatedPost = {
+      ...post,
+      user_interactions: {
+        ...post.user_interactions,
+        viewed: true,
+      },
+      stats: {
+        ...post.stats,
+        views: post.stats?.views + 1,
+      },
+    };
+    setSelectedPost(updatedPost); // Update the selected post in state
+  
+    try {
+      // Make the like API call
+      await updateUserEvent(post, "view");
+  
+      // Optionally handle success actions after the like request is complete
+    } catch (error) {
+      // In case of failure, revert the optimistic update
+      const revertedPost = { ...post, likes_count: (post.stats?.views || 0) - 1 };
+      setSelectedPost(revertedPost);
+    }
+  };
+
   return (
     <div
       role="button"
@@ -89,6 +167,7 @@ export const PostCard = <T extends PostType>({
         if (container instanceof HTMLElement) {
           sessionStorage.setItem("forumlist", container.scrollTop.toString());
         }
+        handleView(post);
         setSelectedPost(post);
       }}
       className={cn(
@@ -135,7 +214,29 @@ export const PostCard = <T extends PostType>({
             isSelected ? "border-t-primary-100" : "border-t-neutral-100",
           )}
         >
+          {/* Add "Not Viewed" dot here before the MoreHorizontal button */}
+          {!post.user_interactions?.viewed && (
+            <span className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-primary-600 inline-block"></span>
+              <span className="text-xs text-neutral-700">Not Viewed</span>
+            </span>
+          )}
           <div className="flex flex-1 " />
+
+          {/* Display likes, and allow user to like post */}
+          <div className="flex items-center gap-2">
+          {post.user_interactions?.liked ? (
+            <ThumbsUp
+              className="h-5 w-5 text-primary-600 cursor-pointer"
+              onClick={() => handleLikeClick(post)} // Handle like click
+            />
+          ) : (
+            <ThumbsUp
+              className="h-5 w-5 text-neutral-600 cursor-pointer"
+            />
+          )}
+          <span className="text-xs text-neutral-700">{post.stats?.likes || 0}</span>
+          </div>
 
           <Popover>
             <PopoverContent

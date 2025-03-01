@@ -75,6 +75,9 @@ class GetPostResponse(BaseModel):
     stats: dict
     user_interactions: dict
 
+class GetDetailedPostsResponse(BaseModel):
+    posts: list[GetPostResponse]
+
 
 class PostEmbeddingMetadata(BaseModel):
     last_updated: Optional[datetime] = None

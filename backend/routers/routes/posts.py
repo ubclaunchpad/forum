@@ -25,8 +25,9 @@ async def create_post(c_id: str, post_info: CreatePostRequest, request: Request)
 
 
 @post_router.get("")
-async def get_posts(c_id: str):
-    posts = post_controller.get_posts(c_id)
+async def get_posts(c_id: str, request: Request):
+    user_id = request.state.user_id
+    posts = post_controller.get_detailed_posts(c_id, user_id)
 
     return {"posts": posts}
 

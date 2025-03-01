@@ -5,6 +5,8 @@ export type Post = {
   id: string;
   local_id: number;
   applied_at: string;
+  stats: PostStats;
+  user_interactions: UserInteractions;
 };
 
 export type PostWithRequiredId = { id: string } & Partial<Omit<Post, "id">>;
@@ -20,6 +22,16 @@ type RealOperation = {
   id: string;
   post: Pick<Post, "id">;
 };
+
+type PostStats = {
+  views: number;
+  likes: number;
+};
+
+type UserInteractions = {
+  viewed: boolean;
+  liked: boolean;
+}
 
 export type AppendOperation = OptimisticOperation | RealOperation;
 
