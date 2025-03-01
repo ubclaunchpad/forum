@@ -16,6 +16,7 @@ type ForumContextType = {
   setIsEditing: (id: string | null) => void;
   setDrafts: Dispatch<SetStateAction<PostWithRequiredId[]>>;
   edittingSelectPost: (post: Post) => void;
+  updatePost: (postToUpdate: Post) => void;
 };
 
 export const forumPostsContext = createContext({} as ForumContextType);
@@ -43,6 +44,13 @@ export function ForumContextProvider({
   const [listofPosts, setListOfPosts] = useState<Post[]>(initialPosts);
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<PostWithRequiredId[]>([]);
+
+  const updatePost = (postToUpdate: Post) => {
+    setListOfPosts((prev) =>
+      prev.map((post) => (post.id === postToUpdate.id ? postToUpdate : post))
+    );
+  };
+  
 
   //   function appendToPosts({ operation, id, post }: AppendOperation) {
   //     if (operation === "optimistic") {
@@ -117,6 +125,7 @@ export function ForumContextProvider({
         setIsEditing,
         setDrafts,
         edittingSelectPost,
+        updatePost,
       }}
     >
       {children}

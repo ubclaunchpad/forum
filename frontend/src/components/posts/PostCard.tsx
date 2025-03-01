@@ -35,6 +35,7 @@ export const PostCard = <T extends PostType>({
 
   const user = useContext(userContext);
   const course = useCourseStore((state) => state.course);
+  const { updatePost } = useContext(forumPostsContext);
   const { toast } = useToast();
   const postType = getIdType(post.id);
   const handleMoreClick = (e: React.MouseEvent) => {
@@ -84,7 +85,7 @@ export const PostCard = <T extends PostType>({
     const response = await fetch(
       `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/${eventType}`,
       {
-        method: "PUT",
+        method: eventType === "view" ? 'PUT' : 'POST',
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.token}`,
@@ -104,57 +105,76 @@ export const PostCard = <T extends PostType>({
     }
   }
 
-  const handleLikeClick = async (post: Post) => {
-    // Optimistically update the like count
+  const handleLikeClick = async (post: Post, addLike: boolean) => {
+    const likeVal = addLike ? 1 : -1
     const updatedPost = {
       ...post,
       user_interactions: {
         ...post.user_interactions,
-        liked: true,
+        liked: addLike,
       },
       stats: {
         ...post.stats,
-        likes: post.stats?.likes ? post.stats.likes + 1 : 0,
+        likes: (post.stats?.likes || 0) + likeVal,
       },
     };
-    setSelectedPost(updatedPost); // Update the selected post in state
+  
+    updatePost(updatedPost); // Update UI optimistically
   
     try {
-      // Make the like API call
       await updateUserEvent(post, "like");
-  
-      // Optionally handle success actions after the like request is complete
     } catch (error) {
-      // In case of failure, revert the optimistic update
-      const revertedPost = { ...post, likes_count: (post.stats?.likes || 0) - 1 };
-      setSelectedPost(revertedPost);
+      // Revert state if API call fails
+      updatePost({
+        ...post,
+        user_interactions: {
+          ...post.user_interactions,
+          liked: false,
+        },
+        stats: {
+          ...post.stats,
+          likes: (post.stats?.likes || 0) - likeVal,
+        },
+      });
     }
   };
 
-  const handleView = async (post: Post | PostWithRequiredId) => {
-    // Optimistically update the like count
-    const updatedPost = {
-      ...post,
-      user_interactions: {
-        ...post.user_interactions,
-        viewed: true,
-      },
-      stats: {
-        ...post.stats,
-        views: post.stats?.views + 1,
-      },
-    };
-    setSelectedPost(updatedPost); // Update the selected post in state
-  
-    try {
-      // Make the like API call
-      await updateUserEvent(post, "view");
-  
-      // Optionally handle success actions after the like request is complete
-    } catch (error) {
-      // In case of failure, revert the optimistic update
-      const revertedPost = { ...post, likes_count: (post.stats?.views || 0) - 1 };
-      setSelectedPost(revertedPost);
+  const handleView = async (post: Post) => {
+    // Optimistically update the view count
+    if (!post.user_interactions?.viewed) {
+      const updatedPost = {
+        ...post,
+        user_interactions: {
+          ...post.user_interactions,
+          viewed: true,
+        },
+        stats: {
+          ...post.stats,
+          views: (post.stats?.views || 0) + 1,
+        },
+      }; // Update the selected post in state
+      
+      updatePost(updatedPost);
+
+      try {
+        // Make the view API call
+        await updateUserEvent(post, "view");
+    
+        // Optionally handle success actions after the like request is complete
+      } catch (error) {
+        // In case of failure, revert the optimistic update
+        updatePost({
+          ...post,
+          user_interactions: {
+            ...post.user_interactions,
+            viewed: false,
+          },
+          stats: {
+            ...post.stats,
+            views: (post.stats?.views || 0) - 1,
+          },
+        });
+      }
     }
   };
 
@@ -167,7 +187,7 @@ export const PostCard = <T extends PostType>({
         if (container instanceof HTMLElement) {
           sessionStorage.setItem("forumlist", container.scrollTop.toString());
         }
-        handleView(post);
+        handleView(post as Post);
         setSelectedPost(post);
       }}
       className={cn(
@@ -228,11 +248,13 @@ export const PostCard = <T extends PostType>({
           {post.user_interactions?.liked ? (
             <ThumbsUp
               className="h-5 w-5 text-primary-600 cursor-pointer"
-              onClick={() => handleLikeClick(post)} // Handle like click
+              fill="currentColor"
+              onClick={() => handleLikeClick(post as Post, false)}
             />
           ) : (
             <ThumbsUp
-              className="h-5 w-5 text-neutral-600 cursor-pointer"
+              className="h-5 w-5 text-primary-600 cursor-pointer"
+              onClick={() => handleLikeClick(post as Post, true)} // Handle like click
             />
           )}
           <span className="text-xs text-neutral-700">{post.stats?.likes || 0}</span>
