@@ -44,7 +44,7 @@ export default function FinishSetup() {
     try {
       await finishSetup({ firstName, lastName });
       toast.success("Profile setup complete! Redirecting to courses...");
-      
+
       // Set a timeout for navigation
       setTimeout(() => {
         router.push("/forum/courses");

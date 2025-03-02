@@ -284,11 +284,11 @@ const supportedAuthProviders =
 
 export function isAuthProviderSupported(provider: string): boolean {
   // return supportedAuthProviders.includes(provider);
-  return true
+  return true;
 }
 
 export function supportedAnyAuthProvider(): boolean {
-  return true
+  return true;
   // console.log(supportedAuthProviders);
   // console.log(process.env.NEXT_PUBLIC_SUPPORTED_AUTH_PROVIDERS);
   // return supportedAuthProviders.length > 0;

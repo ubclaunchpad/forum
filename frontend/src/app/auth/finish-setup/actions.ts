@@ -9,8 +9,10 @@ export type UserStatus = "pending_invite" | "pending_setup" | "active";
 
 export async function checkUserStatus() {
   const supabase = await createClient();
-  
-  const { data: { session } } = await supabase.auth.getSession();
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   if (!session) {
     redirect("/auth/signin");
   }
@@ -28,15 +30,21 @@ export async function checkUserStatus() {
     }
 
     const data = await response.json();
-    
+
     if (data.status === "active") {
       redirect("/");
     }
 
-    const userData = { status: data.status as UserStatus, firstName: "", lastName: "" };
+    const userData = {
+      status: data.status as UserStatus,
+      firstName: "",
+      lastName: "",
+    };
 
     if (data.status === "pending_setup") {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user?.user_metadata?.full_name) {
         const fullName = user.user_metadata.full_name;
         userData.firstName = fullName.split(" ")[0] || "";
@@ -51,10 +59,15 @@ export async function checkUserStatus() {
   }
 }
 
-export async function finishSetup(formData: { firstName: string; lastName: string }) {
+export async function finishSetup(formData: {
+  firstName: string;
+  lastName: string;
+}) {
   const supabase = await createClient();
-  
-  const { data: { session } } = await supabase.auth.getSession();
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   if (!session) {
     redirect("/auth/signin");
   }
@@ -82,4 +95,4 @@ export async function finishSetup(formData: { firstName: string; lastName: strin
     console.error("Setup error:", error);
     throw error;
   }
-} 
+}
