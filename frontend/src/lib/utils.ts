@@ -283,11 +283,13 @@ const supportedAuthProviders =
   process.env.NEXT_PUBLIC_SUPPORTED_AUTH_PROVIDERS?.split(",") || [];
 
 export function isAuthProviderSupported(provider: string): boolean {
-  return supportedAuthProviders.includes(provider);
+  // return supportedAuthProviders.includes(provider);
+  return true
 }
 
 export function supportedAnyAuthProvider(): boolean {
-  console.log(supportedAuthProviders);
-  console.log(process.env.NEXT_PUBLIC_SUPPORTED_AUTH_PROVIDERS);
-  return supportedAuthProviders.length > 0;
+  return true
+  // console.log(supportedAuthProviders);
+  // console.log(process.env.NEXT_PUBLIC_SUPPORTED_AUTH_PROVIDERS);
+  // return supportedAuthProviders.length > 0;
 }
