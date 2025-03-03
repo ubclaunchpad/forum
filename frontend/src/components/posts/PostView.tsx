@@ -79,7 +79,6 @@ export default function PostView<T extends PostType>({
 
         // Clear editing state
         setIsEditing(null);
-        // add user interaction so post is already viewed for this user
         // Revalidate
         await fetch("/api/revalidate", {
           method: "POST",
