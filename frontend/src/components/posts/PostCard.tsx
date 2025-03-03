@@ -81,11 +81,11 @@ export const PostCard = <T extends PostType>({
     }
   }
 
-  async function updateUserEvent(post: Post, eventType: "view" | "like") {
+  async function viewPost(post: Post) {
     const response = await fetch(
-      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/${eventType}`,
+      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/view`,
       {
-        method: eventType === "view" ? 'PUT' : 'POST',
+        method: 'PUT',
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.token}`,
@@ -101,7 +101,55 @@ export const PostCard = <T extends PostType>({
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to mark post as ${eventType}`);
+      throw new Error(`Failed to mark post as viewed`);
+    }
+  }
+
+  async function likePost(post: Post) {
+    const response = await fetch(
+      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/like`,
+      {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      }
+    );
+    fetch("/api/revalidate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ courseId: course.id }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to mark post as liked`);
+    }
+  }
+
+  async function unlikePost(post: Post) {
+    const response = await fetch(
+      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/like`,
+      {
+        method: 'DELETE',
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      }
+    );
+    fetch("/api/revalidate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ courseId: course.id }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to mark post as unliked`);
     }
   }
 
@@ -122,7 +170,12 @@ export const PostCard = <T extends PostType>({
     updatePost(updatedPost); // Update UI optimistically
   
     try {
-      await updateUserEvent(post, "like");
+      if (addLike) {
+        await likePost(post);
+      } else {
+        await unlikePost(post);
+      }
+      
     } catch (error) {
       // Revert state if API call fails
       updatePost({
@@ -158,7 +211,7 @@ export const PostCard = <T extends PostType>({
 
       try {
         // Make the view API call
-        await updateUserEvent(post, "view");
+        await viewPost(post);
     
         // Optionally handle success actions after the like request is complete
       } catch (error) {
@@ -201,7 +254,8 @@ export const PostCard = <T extends PostType>({
       )}
     >
       <div className="flex items-center justify-between p-2 px-4 w-full gap-2 pb-2">
-        <p className="text-sm font-semibold">
+        {/* Title aligned to the left */}
+        <p className="text-sm font-semibold flex-1 truncate">
           {postType === "local" && (
             <span className="border text-xs rounded-md text-neutral-600 dashed p-1 uppercase">
               Draft
@@ -210,15 +264,20 @@ export const PostCard = <T extends PostType>({
           {post.title}
         </p>
 
-        <h2 className=" font-medium text-xs flex-shrink-0 ">
-          {post.applied_at &&
-            getRelativeTimeString(
-              new Date(post.applied_at).getTime(),
-              "en",
-              30,
-            )}
-        </h2>
+        {/* Right-aligned container for time and "Not Viewed" indicator */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {post.applied_at && (
+            <h2 className="font-medium text-xs whitespace-nowrap">
+              {getRelativeTimeString(new Date(post.applied_at).getTime(), "en", 30)}
+            </h2>
+          )}
+
+          {!post.user_interactions?.viewed && (
+            <span className="w-2.5 h-2.5 rounded-full bg-primary-600 inline-block"></span>
+          )}
+        </div>
       </div>
+
       <section className="max-h-40 overflow-hidden px-4">
         <p className="text-xs py-2  text-wrap text-neutral-500 select-none line-clamp-4 break-words">
           {isEditing === post.id
@@ -234,13 +293,6 @@ export const PostCard = <T extends PostType>({
             isSelected ? "border-t-primary-100" : "border-t-neutral-100",
           )}
         >
-          {/* Add "Not Viewed" dot here before the MoreHorizontal button */}
-          {!post.user_interactions?.viewed && (
-            <span className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-primary-600 inline-block"></span>
-              <span className="text-xs text-neutral-700">Not Viewed</span>
-            </span>
-          )}
           <div className="flex flex-1 " />
 
           {/* Display likes, and allow user to like post */}

@@ -274,7 +274,7 @@ def view_post(c_id: str, user_id: str, local_id: int) -> UserPostEvent:
         raise HTTPException(status_code=500, detail=f"Failed to record view: {str(e)}")
 
 
-def like_post(c_id: str, user_id: str, local_id: int) -> UserPostEvent:
+def like_post(c_id: str, user_id: str, local_id: int, like: bool) -> UserPostEvent:
     try:
         with get_db() as db:
             post = (
@@ -295,13 +295,13 @@ def like_post(c_id: str, user_id: str, local_id: int) -> UserPostEvent:
 
             if not post_event:
                 event = UserPostEvent(
-                    viewed=True, liked=True, user_id=user_id, post_id=post.id
+                    viewed=True, liked=like, user_id=user_id, post_id=post.id
                 )
                 db.add(event)
                 db.flush()
                 return event
             else:
-                post_event.liked = not post_event.liked
+                post_event.liked = like
                 db.flush()
                 return post_event
     except Exception as e:
