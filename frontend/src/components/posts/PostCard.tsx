@@ -81,59 +81,11 @@ export const PostCard = <T extends PostType>({
     }
   }
 
-  async function viewPost(post: Post) {
+  async function updateInteraction(post: Post, method: string, endpoint: string) {
     const response = await fetch(
-      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/view`,
+      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/${endpoint}`,
       {
-        method: 'PUT',
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-      }
-    );
-    fetch("/api/revalidate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ courseId: course.id }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to mark post as viewed`);
-    }
-  }
-
-  async function likePost(post: Post) {
-    const response = await fetch(
-      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/like`,
-      {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-      }
-    );
-    fetch("/api/revalidate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ courseId: course.id }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to mark post as liked`);
-    }
-  }
-
-  async function unlikePost(post: Post) {
-    const response = await fetch(
-      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/like`,
-      {
-        method: 'DELETE',
+        method: method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.token}`,
@@ -167,13 +119,14 @@ export const PostCard = <T extends PostType>({
       },
     };
   
-    updatePost(updatedPost); // Update UI optimistically
+    // Update UI optimistically
+    updatePost(updatedPost);
   
     try {
       if (addLike) {
-        await likePost(post);
+        await updateInteraction(post, 'POST', 'like');
       } else {
-        await unlikePost(post);
+        await updateInteraction(post, 'DELETE', 'like');
       }
       
     } catch (error) {
@@ -205,15 +158,12 @@ export const PostCard = <T extends PostType>({
           ...post.stats,
           views: (post.stats?.views || 0) + 1,
         },
-      }; // Update the selected post in state
+      };
       
       updatePost(updatedPost);
 
       try {
-        // Make the view API call
-        await viewPost(post);
-    
-        // Optionally handle success actions after the like request is complete
+        await updateInteraction(post, 'PUT', 'view');
       } catch (error) {
         // In case of failure, revert the optimistic update
         updatePost({
@@ -306,7 +256,7 @@ export const PostCard = <T extends PostType>({
           ) : (
             <ThumbsUp
               className="h-5 w-5 text-primary-600 cursor-pointer"
-              onClick={() => handleLikeClick(post as Post, true)} // Handle like click
+              onClick={() => handleLikeClick(post as Post, true)}
             />
           )}
           <span className="text-xs text-neutral-700">{post.stats?.likes || 0}</span>
