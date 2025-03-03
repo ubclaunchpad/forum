@@ -55,7 +55,7 @@ function CourseButton() {
   return (
     <Fragment>
       {isOpen && (
-        <div className="fixed text-sm flex z-20 flex-col gap-2 rounded-lg top-14 left-4 bg-white shadow-md border border-neutral-200">
+        <div className="fixed text-sm flex z-30 flex-col gap-2 rounded-lg top-14 left-4 bg-white shadow-md border border-neutral-200">
           <section className="flex flex-col gap-1">
             <ul className="flex flex-col min-w-[200px] divide-y last:border-b">
               <Link
@@ -91,17 +91,21 @@ function CourseButton() {
           </section>
         </div>
       )}
-      <Button
-        variant="outline"
-        size="md"
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          "border-neutral-200 border h-10 px-4 text-neutral-600",
-          isOpen ? "shadow-lg" : "shadow-sm",
-        )}
-      >
-        {courseName}
-      </Button>
+      <div className={cn("relative", isOpen ? "z-20" : "")}>
+        <Button
+          variant="outline"
+          size="md"
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "border-neutral-200 border h-10 px-4 text-neutral-600 text-left overflow-hidden transition-all",
+            isOpen ? "shadow-lg max-w-none" : "shadow-sm max-w-[28rem]",
+          )}
+        >
+          <span className={cn("block", isOpen ? "" : "truncate")}>
+            {courseName}
+          </span>
+        </Button>
+      </div>
     </Fragment>
   );
 }
