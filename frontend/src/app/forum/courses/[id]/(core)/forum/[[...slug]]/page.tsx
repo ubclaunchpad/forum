@@ -10,7 +10,7 @@ async function getPosts(id: string, token: string) {
       cache: "force-cache",
       next: {
         revalidate: 3600,
-       tags: [`course-${id}-posts`],
+        tags: [`course-${id}-posts`],
       },
       headers: {
         "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
