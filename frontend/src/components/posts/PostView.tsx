@@ -79,7 +79,7 @@ export default function PostView<T extends PostType>({
 
         // Clear editing state
         setIsEditing(null);
-        
+
         // Revalidate
         await fetch("/api/revalidate", {
           method: "POST",
