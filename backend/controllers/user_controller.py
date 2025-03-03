@@ -9,8 +9,6 @@ from fastapi import HTTPException
 from models.all import Course, Invite, Profile
 from models.db import get_db, supabase
 from models.schemas.general_schema import GeneralResponse
-from controllers import invite_controller
-from datetime import datetime
 from models.schemas.user_schema import (
     CreateUserBaseRequest,
     CreateUserResponse,
