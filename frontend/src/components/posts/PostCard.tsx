@@ -142,6 +142,7 @@ export const PostCard = <T extends PostType>({
           likes: (post.stats?.likes || 0) - likeVal,
         },
       });
+      console.error("Error updating like status:", error);
     }
   };
 
@@ -177,6 +178,7 @@ export const PostCard = <T extends PostType>({
             views: (post.stats?.views || 0) - 1,
           },
         });
+        console.error("Error updating view status:", error);
       }
     }
   };
