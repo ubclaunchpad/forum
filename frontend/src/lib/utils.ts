@@ -279,13 +279,17 @@ export function checkPermissionInDomain(
   );
 }
 
-const supportedAuthProviders =
-  process.env.NEXT_PUBLIC_SUPPORTED_AUTH_PROVIDERS?.split(",") || [];
+// const supportedAuthProviders =
+//   process.env.NEXT_PUBLIC_SUPPORTED_AUTH_PROVIDERS?.split(",") || [];
 
-export function isAuthProviderSupported(provider: string): boolean {
-  return supportedAuthProviders.includes(provider);
+export function isAuthProviderSupported(): boolean {
+  // return supportedAuthProviders.includes(provider);
+  return true;
 }
 
 export function supportedAnyAuthProvider(): boolean {
-  return supportedAuthProviders.length > 0;
+  return true;
+  // console.log(supportedAuthProviders);
+  // console.log(process.env.NEXT_PUBLIC_SUPPORTED_AUTH_PROVIDERS);
+  // return supportedAuthProviders.length > 0;
 }
