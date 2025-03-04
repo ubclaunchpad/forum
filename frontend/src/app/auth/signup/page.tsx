@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { signUpSchema, SignUpFormValues } from "@/lib/schemas/auth";
 import Link from "next/link";
 import { signup, signUpWithGoogle } from "./actions";
-import { convertObjectToSnakeCase } from "@/utils/helpers";
+import { convertObjectToSnakeCase, getApiUrl } from "@/utils/helpers";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -73,7 +73,7 @@ export default function SignUp() {
   return (
     <Card className="w-full max-w-xl min-h-[450px] px-12 py-3 flex shadow-lg flex-col rounded-xl [&_label]:pl-1">
       <CardHeader className="pl-0">
-        <h2 className="text-2xl pl-0 pb-2">Sign Up</h2>
+        <h2 className="text-2xl pl-0 pb-2">Sign Up {getApiUrl()}</h2>
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="space-y-0">

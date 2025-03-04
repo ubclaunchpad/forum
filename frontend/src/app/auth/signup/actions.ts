@@ -5,21 +5,26 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
 export async function signup(user_data: Record<string, unknown>) {
-  const res = await fetch(`${getApiUrl()}/users`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(user_data),
-  });
-
-  const response_data = await res.json();
-
-  if (!res.ok) {
-    return { ok: false, error: response_data.detail };
+  try {
+    const res = await fetch(`${getApiUrl()}/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(user_data),
+    });
+  
+    const response_data = await res.json();
+  
+    if (!res.ok) {
+      return { ok: false, error: response_data.detail };
+    }
+  
+    return { ok: true };
+  } catch (error) {
+    console.error("Signup error:", error);
+    return { ok: false, error: "Failed to sign up" };
   }
-
-  return { ok: true };
 }
 
 export async function signUpWithGoogle() {

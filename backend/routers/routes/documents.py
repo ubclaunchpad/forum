@@ -25,6 +25,7 @@ from models.schemas.document_schema import (
 )
 from models.schemas.general_schema import GeneralResponse
 from pydantic import BaseModel
+from global_constants import CONTENTTYPEMAP
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 document_router = APIRouter()
@@ -59,15 +60,7 @@ async def create_document(
         if not content_type:
             # Fallback content type based on extension
             extension = file.filename.split(".")[-1].lower()
-            content_type_map = {
-                "pdf": "application/pdf",
-                "txt": "text/plain",
-                "md": "text/markdown",
-                "png": "image/png",
-                "jpg": "image/jpeg",
-                "jpeg": "image/jpeg",
-            }
-            content_type = content_type_map.get(extension)
+            content_type = CONTENTTYPEMAP.get(extension)
             if not content_type:
                 raise ValueError(f"Unsupported file type: {extension}")
 

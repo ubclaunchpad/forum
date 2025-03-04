@@ -58,12 +58,21 @@ const editorClasses = cn(
   "[&_.ProseMirror_h2]:mt-6 [&_.ProseMirror_h2]:mb-4",
   "[&_.ProseMirror_h3]:mt-4 [&_.ProseMirror_h3]:mb-2",
   "[&_.ProseMirror_blockquote]:border-l-4 [&_.ProseMirror_blockquote]:border-primary-400 [&_.ProseMirror_blockquote]:pl-4 [&_.ProseMirror_blockquote]:my-4",
+<<<<<<< Updated upstream
   "[&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:my-4 [&_.ProseMirror_ul]:list-outside",
   "[&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ol]:my-4 [&_.ProseMirror_ol]:list-outside",
   "[&_.ProseMirror_li]:marker:text-neutral-900",
   "[&_.ProseMirror_li]:pl-2 [&_.ProseMirror_li]:align-top",
   "[&_.ProseMirror_li>p]:align-top",
   "[&_.ProseMirror_li>p]:my-0 [&_.ProseMirror_li>p]:align-items-start",
+=======
+  "[&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:my-4",
+  "[&_.ProseMirror_ol]:list-decimal [&_.ProseMirror_ol]:pl-6 [&_.ProseMirror_ol]:my-4",
+  "[&_.ProseMirror_li]:marker:text-neutral-900",
+  "[&_.ProseMirror_li]:pl-2",
+  "[&_.ProseMirror_li>p]:inline-block",
+  "[&_.ProseMirror_li>p]:my-0",
+>>>>>>> Stashed changes
 );
 
 interface EditorProps {

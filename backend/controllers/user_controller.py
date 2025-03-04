@@ -151,15 +151,15 @@ def create_profile(
 
 def create_user(create_user_request: CreateUserBaseRequest) -> CreateUserResponse:
     with get_db() as db:
-        if db.query(Profile).filter(Profile.email == create_user_request.email).first():
-            raise ValueError("User already exists.")
-        invite = (
-            db.query(Invite)
-            .filter(Invite.referred_email == create_user_request.email)
-            .first()
-        )
-        if invite == None:
-            raise ValueError("Email has not been invited")
+        # if db.query(Profile).filter(Profile.email == create_user_request.email).first():
+        #     raise ValueError("User already exists.")
+        # invite = (
+        #     db.query(Invite)
+        #     .filter(Invite.referred_email == create_user_request.email)
+        #     .first()
+        # )
+        # if invite == None:
+        #     raise ValueError("Email has not been invited")
         auth_response = supabase.auth.sign_up(
             {
                 "email": create_user_request.email,
@@ -179,7 +179,7 @@ def create_user(create_user_request: CreateUserBaseRequest) -> CreateUserRespons
 
         db.add(user)
         # Create invite
-        setattr(invite, "joined_at", datetime.now())
+        # setattr(invite, "joined_at", datetime.now())
         db.commit()
 
         return CreateUserResponse(

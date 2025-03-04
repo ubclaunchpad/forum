@@ -1,23 +1,30 @@
 """Document management operations with logging."""
 
 import logging
+from pydoc import doc
 import time
+import os
+from turtle import st
 from typing import Dict, Optional
 from uuid import UUID
 
 from core.processors.document_processor import DocumentProcessor
 from core.util.file_storage import FileStorage
+from global_constants import CONTENTTYPEMAP
 from models.all import Course, Document, Embedding
 from models.db import get_db
 from models.schemas.document_schema import DocumentEmbeddingMetadata, DocumentFileUpload
 from models.schemas.general_schema import GeneralResponse
 
+from dotenv import load_dotenv
+from supabase import create_client
+url: str = os.getenv("SUPABASE_URL") or ""
+key: str = os.getenv("SUPABASE_KEY") or ""
+
 # Configure logging
 logger = logging.getLogger(__name__)
 
-
-supportedTypes = {"pdf": "application/pdf", "txt": "text/plain", "md": "text/markdown"}
-
+supabase = create_client(url, key)
 
 async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
     """
@@ -77,7 +84,8 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
             file_storage = FileStorage(
                 bucket_name=f"course-{str(create_document.course_id)}"
             )
-            path = file_storage.store_file(create_document.file, str(document_id))
+            document_name = str(document.title)
+            path = file_storage.store_file(create_document.file, document_name, str(document_id))
             document.file_url = path  # type: ignore
             db.commit()
 
@@ -106,14 +114,14 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
 
 
 def validate_document_type(document: DocumentFileUpload) -> None:
-    if document.extension not in supportedTypes.keys():
+    if document.extension not in CONTENTTYPEMAP.keys():
         logger.error(
             "File extension not supported",
             extra={"extension": str(document.extension)},
         )
         raise ValueError(f".{document.extension} extension not supported.")
 
-    content_type = supportedTypes[str(document.extension)]
+    content_type = CONTENTTYPEMAP[str(document.extension)]
 
     if content_type != document.type:
         logger.error(
@@ -306,12 +314,16 @@ async def update_embeddings(document_id: str, user_id: str) -> GeneralResponse:
                 raise ValueError("File content not found")
 
             # Process document content in background
-            with DocumentProcessor(db) as processor:
+            with DocumentProcessor(db) as processor:             
+                strategy_type = document.document_type.split("/")[-1] # assuming document_type = "application/pdf", then returns "pdf"
+                
                 processor.process_document(
                     document_id=UUID(document_id),
                     file_content=file_content,
-                    strategy_type="pdf",
+                    strategy_type=strategy_type,
                 )
+                
+                print("\n\nthere\n\n")
 
             logger.info(
                 "Document embeddings updated successfully",

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+<<<<<<< Updated upstream
 import Script from "next/script";
+=======
+>>>>>>> Stashed changes
 import {
   Quicksand,
   Source_Sans_3,
@@ -81,6 +84,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+<<<<<<< Updated upstream
         {/* Google Tag Manager */}
         <Script
           id="gtm-script"
@@ -102,6 +106,8 @@ export default function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           ></iframe>
         </noscript>
+=======
+>>>>>>> Stashed changes
         {/* <script src="https://unpkg.com/react-scan/dist/auto.global.js" async /> */}
       </head>
       <body

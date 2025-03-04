@@ -68,11 +68,11 @@ def create_course(
             db.execute(stmt)
 
             # Assign creator as course admin
-            role_id = perm_manager.get_role_by_name(DefaultRole.COURSE_ADMIN.value)
-            user_role = UserRole(
-                user_id=UUID(user_id), role_id=role_id, domain=course_id
-            )
-            db.add(user_role)
+            # role_id = perm_manager.get_role_by_name(DefaultRole.COURSE_ADMIN.value)
+            # user_role = UserRole(
+            #     user_id=UUID(user_id), role_id=role_id, domain=course_id
+            # )
+            # db.add(user_role)
 
             db.commit()
             return CreateCourseResponse(id=course_id)

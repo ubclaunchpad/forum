@@ -44,7 +44,7 @@ class ConflictResolution(Enum):
 
 
 class FileStorage:
-    MAX_SIZE_MB = 15
+    MAX_SIZE_MB = 50
     PUBLIC_BUCKETS = ["profiles"]
 
     def __init__(
@@ -69,10 +69,10 @@ class FileStorage:
         content_type, _ = mimetypes.guess_type(filename)
         return content_type or "application/octet-stream"
 
-    def _file_exists(self, storage, filename: str) -> bool:
+    def _file_exists(self, storage, file_id: str) -> bool:
         try:
             files = storage.list()
-            return any(f["name"] == f"documents/{filename}" for f in files)
+            return any(f["name"] == f"documents/{file_id}" for f in files)
         except Exception as e:
             return False
 
@@ -109,7 +109,7 @@ class FileStorage:
                 f"Filesize {file_content_MB}MB exceeds maximum limit of {self.MAX_SIZE_MB}MB"
             )
 
-    def store_file(self, file_content: bytes, filename: str) -> str:
+    def store_file(self, file_content: bytes, filename: str, file_id) -> str:
         self._can_upload_file(file_content)
 
         content_type = self._get_content_type(filename)
@@ -118,15 +118,15 @@ class FileStorage:
             storage = self.supabase.storage.from_(self.bucket_name)
 
             if self.conflict_resolution == ConflictResolution.APPEND_TIMESTAMP:
-                filename = self._handle_filename_conflict(storage, filename)
+                file_id = self._handle_filename_conflict(storage, filename)
             elif self.conflict_resolution == ConflictResolution.RAISE_ERROR:
-                if self._file_exists(storage, filename):
-                    raise FileExistsError(f"File {filename} already exists")
+                if self._file_exists(storage, file_id):
+                    raise FileExistsError(f"File {file_id} already exists")
             elif self.conflict_resolution == ConflictResolution.IGNORE:
-                if self._file_exists(storage, filename):
-                    return f"documents/{filename}"
+                if self._file_exists(storage, file_id):
+                    return f"documents/{file_id}"
 
-            file_path = f"documents/{filename}"
+            file_path = f"documents/{file_id}"
             response = storage.upload(
                 file=file_content,  # Pass bytes directly
                 path=file_path,
@@ -239,7 +239,7 @@ class FileStorage:
 # async def get_file_type(file: UploadFile, file_content: bytes) -> str:
 #     """Detect file type using both mime type and magic numbers."""
 #     # Get mime type from file extension
-#     mime_type, _ = mimetypes.guess_type(file.filename)  # type: ignore
+#     mime_type, _ = mimetypes.guess_type(file.file_id)  # type: ignore
 
 #     # Get mime type from file content using python-magic
 #     content_type = magic.from_buffer(file_content, mime=True)
