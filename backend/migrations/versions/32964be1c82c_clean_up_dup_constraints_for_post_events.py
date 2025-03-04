@@ -22,10 +22,12 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # Drop all numbered variations of user_id foreign key (1-15 and unnumbered)
     for i in range(1, 16):
-        op.execute(f"""
+        op.execute(
+            f"""
            ALTER TABLE public.user_post_events 
            DROP CONSTRAINT IF EXISTS user_post_events_user_id_fkey{i}
-       """)
+       """
+        )
     op.execute(
         "ALTER TABLE public.user_post_events DROP CONSTRAINT IF EXISTS user_post_events_user_id_fkey"
     )
@@ -36,20 +38,24 @@ def upgrade() -> None:
     )
 
     # Create clean constraints
-    op.execute("""
+    op.execute(
+        """
        ALTER TABLE public.user_post_events 
        ADD CONSTRAINT user_post_events_user_id_fkey 
        FOREIGN KEY (user_id) 
        REFERENCES public.profiles(id)
-   """)
+   """
+    )
 
-    op.execute("""
+    op.execute(
+        """
        ALTER TABLE public.user_post_events 
        ADD CONSTRAINT user_post_events_post_id_fkey 
        FOREIGN KEY (post_id) 
        REFERENCES public.posts(id) 
        ON DELETE CASCADE
-   """)
+   """
+    )
 
 
 def downgrade() -> None:

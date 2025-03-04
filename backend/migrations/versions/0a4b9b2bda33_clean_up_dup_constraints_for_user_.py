@@ -22,41 +22,49 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # Drop all numbered variations of course_id foreign key (1-17 and unnumbered)
     for i in range(1, 18):
-        op.execute(f"""
+        op.execute(
+            f"""
            ALTER TABLE public.user_courses 
            DROP CONSTRAINT IF EXISTS user_courses_course_id_fkey{i}
-       """)
+       """
+        )
     op.execute(
         "ALTER TABLE public.user_courses DROP CONSTRAINT IF EXISTS user_courses_course_id_fkey"
     )
 
     # Drop all numbered variations of user_id foreign key (1-17)
     for i in range(1, 18):
-        op.execute(f"""
+        op.execute(
+            f"""
            ALTER TABLE public.user_courses 
            DROP CONSTRAINT IF EXISTS user_courses_user_id_fkey{i}
-       """)
+       """
+        )
     op.execute(
         "ALTER TABLE public.user_courses DROP CONSTRAINT IF EXISTS user_courses_user_id_fkey"
     )
 
     # Create single clean constraints
-    op.execute("""
+    op.execute(
+        """
        ALTER TABLE public.user_courses 
        ADD CONSTRAINT user_courses_course_id_fkey 
        FOREIGN KEY (course_id) 
        REFERENCES public.courses(id) 
        ON DELETE CASCADE
-   """)
+   """
+    )
 
     # Note: This should reference profiles table based on your model
-    op.execute("""
+    op.execute(
+        """
        ALTER TABLE public.user_courses 
        ADD CONSTRAINT user_courses_user_id_fkey 
        FOREIGN KEY (user_id) 
        REFERENCES public.profiles(id) 
        ON DELETE CASCADE
-   """)
+   """
+    )
 
 
 def downgrade() -> None:

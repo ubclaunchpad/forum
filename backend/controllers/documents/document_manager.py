@@ -18,6 +18,7 @@ from models.schemas.general_schema import GeneralResponse
 
 from dotenv import load_dotenv
 from supabase import create_client
+
 url: str = os.getenv("SUPABASE_URL") or ""
 key: str = os.getenv("SUPABASE_KEY") or ""
 
@@ -25,6 +26,7 @@ key: str = os.getenv("SUPABASE_KEY") or ""
 logger = logging.getLogger(__name__)
 
 supabase = create_client(url, key)
+
 
 async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
     """
@@ -85,7 +87,9 @@ async def upload_new_document(create_document: DocumentFileUpload) -> UUID:
                 bucket_name=f"course-{str(create_document.course_id)}"
             )
             document_name = str(document.title)
-            path = file_storage.store_file(create_document.file, document_name, str(document_id))
+            path = file_storage.store_file(
+                create_document.file, document_name, str(document_id)
+            )
             document.file_url = path  # type: ignore
             db.commit()
 
@@ -314,15 +318,17 @@ async def update_embeddings(document_id: str, user_id: str) -> GeneralResponse:
                 raise ValueError("File content not found")
 
             # Process document content in background
-            with DocumentProcessor(db) as processor:             
-                strategy_type = document.document_type.split("/")[-1] # assuming document_type = "application/pdf", then returns "pdf"
-                
+            with DocumentProcessor(db) as processor:
+                strategy_type = document.document_type.split("/")[
+                    -1
+                ]  # assuming document_type = "application/pdf", then returns "pdf"
+
                 processor.process_document(
                     document_id=UUID(document_id),
                     file_content=file_content,
                     strategy_type=strategy_type,
                 )
-                
+
                 print("\n\nthere\n\n")
 
             logger.info(

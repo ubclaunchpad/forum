@@ -133,9 +133,9 @@ class DocumentQueryEngine:
                     "document_title": chunk.document_title or "Unknown Document",
                     "document_id": str(chunk.document_id),
                     "signed_url": signed_url_map.get(str(chunk.document_id), ""),
-                    "similarity": float(chunk.similarity)
-                    if chunk.similarity is not None
-                    else 0.0,
+                    "similarity": (
+                        float(chunk.similarity) if chunk.similarity is not None else 0.0
+                    ),
                     "entity_type": chunk.entity_type,
                 }
                 for chunk in chunks
@@ -346,9 +346,9 @@ class DocumentQueryEngine:
                         "id": str(post["entity_id"]),
                         "type": "post",
                         "title": post["post_title"] or "Untitled Post",
-                        "course_id": str(post["course_id"])
-                        if post["course_id"]
-                        else None,
+                        "course_id": (
+                            str(post["course_id"]) if post["course_id"] else None
+                        ),
                         "similarity": float(post["similarity"]),
                         "entity_type": post["entity_type"],
                         "content": post["content"],
@@ -423,9 +423,11 @@ class DocumentQueryEngine:
                         "type": "post",
                         "title": self._safe_get(ctx, "title", "Untitled Post"),
                         "id": post_id,
-                        "url": f"courses/{course_id}/posts/{post_id}"
-                        if course_id and post_id
-                        else "",
+                        "url": (
+                            f"courses/{course_id}/posts/{post_id}"
+                            if course_id and post_id
+                            else ""
+                        ),
                         "content": self._safe_get(ctx, "content", ""),
                     }
 
@@ -577,9 +579,9 @@ class DocumentQueryEngine:
                 "document_count": doc_count,
                 "embedding_count": embedding_count,
                 "has_embeddings": sample_embedding is not None,
-                "sample_embedding_id": str(sample_embedding.id)
-                if sample_embedding
-                else None,
+                "sample_embedding_id": (
+                    str(sample_embedding.id) if sample_embedding else None
+                ),
             }
         except Exception as e:
             logger.error(f"Database verification error: {e}", exc_info=True)

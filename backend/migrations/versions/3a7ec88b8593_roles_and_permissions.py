@@ -21,7 +21,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # Create permissions table
-    op.execute("""
+    op.execute(
+        """
         CREATE TABLE permissions (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             scope VARCHAR(50) NOT NULL,
@@ -32,20 +33,24 @@ def upgrade() -> None:
             subdomain UUID REFERENCES tags(id),
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
-    """)
+    """
+    )
 
     # Create roles table
-    op.execute("""
+    op.execute(
+        """
         CREATE TABLE roles (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             name VARCHAR(100) NOT NULL,
             description TEXT,
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
-    """)
+    """
+    )
 
     # Create role_permissions junction table
-    op.execute("""
+    op.execute(
+        """
         CREATE TABLE role_permissions (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             role_id UUID REFERENCES roles(id) ON DELETE CASCADE,
@@ -53,10 +58,12 @@ def upgrade() -> None:
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(role_id, permission_id)
         );
-    """)
+    """
+    )
 
     # Create user_roles table
-    op.execute("""
+    op.execute(
+        """
         CREATE TABLE user_roles (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -66,10 +73,12 @@ def upgrade() -> None:
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(user_id, role_id, domain, subdomain)
         );
-    """)
+    """
+    )
 
     # Create user_permissions table
-    op.execute("""
+    op.execute(
+        """
         CREATE TABLE user_permissions (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -79,18 +88,22 @@ def upgrade() -> None:
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(user_id, permission_id, domain, subdomain)
         );
-    """)
+    """
+    )
 
     # Create indexes
-    op.execute("""
+    op.execute(
+        """
         CREATE INDEX idx_user_roles_user ON user_roles(user_id);
         CREATE INDEX idx_user_roles_domain ON user_roles(domain);
         CREATE INDEX idx_user_permissions_user ON user_permissions(user_id);
         CREATE INDEX idx_user_permissions_domain ON user_permissions(domain);
         CREATE INDEX idx_permissions_scope_resource ON permissions(scope, resource);
-    """)
+    """
+    )
 
-    op.execute("""
+    op.execute(
+        """
     WITH inserted_role AS (
         INSERT INTO roles (name, description) 
         VALUES ('Organization Admin', 'Organization-wide administrator with full access')
@@ -106,12 +119,14 @@ def upgrade() -> None:
     INSERT INTO role_permissions (role_id, permission_id)
     SELECT inserted_role.id, inserted_permissions.id
     FROM inserted_role, inserted_permissions
-    """)
+    """
+    )
 
 
 def downgrade() -> None:
     # Drop tables in reverse order (respecting foreign key constraints)
-    op.execute("""
+    op.execute(
+        """
         DELETE FROM role_permissions 
         WHERE role_id IN (SELECT id FROM roles WHERE name = 'org_admin');
         
@@ -120,8 +135,10 @@ def downgrade() -> None:
         
         DELETE FROM roles 
         WHERE name = 'org_admin';
-    """)
-    op.execute("""
+    """
+    )
+    op.execute(
+        """
         DROP INDEX IF EXISTS idx_user_roles_user;
         DROP INDEX IF EXISTS idx_user_roles_domain;
         DROP INDEX IF EXISTS idx_user_permissions_user;
@@ -133,4 +150,5 @@ def downgrade() -> None:
         DROP TABLE IF EXISTS role_permissions;
         DROP TABLE IF EXISTS roles;
         DROP TABLE IF EXISTS permissions;
-    """)
+    """
+    )

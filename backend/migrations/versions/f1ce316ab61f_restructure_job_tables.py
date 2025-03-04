@@ -28,12 +28,14 @@ def upgrade() -> None:
     )
 
     # Update existing rows to set specification_id from job_specification
-    op.execute("""
+    op.execute(
+        """
         UPDATE public.job j
         SET specification_id = js.id
         FROM public.job_specification js
         WHERE j.id = js.job_id
-    """)
+    """
+    )
 
     # Now make the column NOT NULL
     op.alter_column("job", "specification_id", nullable=False, schema="public")
@@ -80,12 +82,14 @@ def downgrade() -> None:
     )
 
     # Update job_id values from the job table
-    op.execute("""
+    op.execute(
+        """
         UPDATE public.job_specification js
         SET job_id = j.id
         FROM public.job j
         WHERE j.specification_id = js.id
-    """)
+    """
+    )
 
     # Now make job_id NOT NULL
     op.alter_column("job_specification", "job_id", nullable=False, schema="public")

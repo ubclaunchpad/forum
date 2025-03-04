@@ -22,22 +22,26 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # Drop all numbered variations of created_by foreign key (1-9 and unnumbered)
     for i in range(1, 10):
-        op.execute(f"""
+        op.execute(
+            f"""
             ALTER TABLE public.documents 
             DROP CONSTRAINT IF EXISTS documents_created_by_fkey{i}
-        """)
+        """
+        )
     op.execute(
         "ALTER TABLE public.documents DROP CONSTRAINT IF EXISTS documents_created_by_fkey"
     )
 
     # Create single clean constraint
-    op.execute("""
+    op.execute(
+        """
         ALTER TABLE public.documents 
         ADD CONSTRAINT documents_created_by_fkey 
         FOREIGN KEY (created_by) 
         REFERENCES public.profiles(id) 
         ON DELETE CASCADE
-    """)
+    """
+    )
 
 
 def downgrade() -> None:

@@ -29,13 +29,15 @@ def upgrade() -> None:
     )
 
     # Create single clean constraint
-    op.execute("""
+    op.execute(
+        """
         ALTER TABLE public.embeddings 
         ADD CONSTRAINT embeddings_parent_chunk_id_fkey 
         FOREIGN KEY (parent_chunk_id) 
         REFERENCES public.embeddings(id) 
         ON DELETE CASCADE
-    """)
+    """
+    )
 
 
 def downgrade() -> None:

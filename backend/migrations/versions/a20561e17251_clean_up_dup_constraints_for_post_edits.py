@@ -23,10 +23,12 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # Drop all numbered variations of edited_by foreign key (1-15 and unnumbered)
     for i in range(1, 16):
-        op.execute(f"""
+        op.execute(
+            f"""
            ALTER TABLE public.post_edits 
            DROP CONSTRAINT IF EXISTS post_edits_edited_by_fkey{i}
-       """)
+       """
+        )
     op.execute(
         "ALTER TABLE public.post_edits DROP CONSTRAINT IF EXISTS post_edits_edited_by_fkey"
     )
@@ -37,20 +39,24 @@ def upgrade() -> None:
     )
 
     # Create clean constraints
-    op.execute("""
+    op.execute(
+        """
        ALTER TABLE public.post_edits 
        ADD CONSTRAINT post_edits_edited_by_fkey 
        FOREIGN KEY (edited_by) 
        REFERENCES public.profiles(id)
-   """)
+   """
+    )
 
-    op.execute("""
+    op.execute(
+        """
        ALTER TABLE public.post_edits 
        ADD CONSTRAINT post_edits_post_id_fkey 
        FOREIGN KEY (post_id) 
        REFERENCES public.posts(id) 
        ON DELETE CASCADE
-   """)
+   """
+    )
 
 
 def downgrade() -> None:

@@ -21,25 +21,32 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # Drop unnecessary columns from permissions
-    op.execute("""
+    op.execute(
+        """
    ALTER TABLE permissions
    DROP COLUMN domain,
    DROP COLUMN subdomain,
    DROP COLUMN scope
-   """)
+   """
+    )
 
     # Drop user_permissions table
-    op.execute("""
+    op.execute(
+        """
    DROP TABLE user_permissions;
-   """)
+   """
+    )
 
     # Add comment to user_roles
-    op.execute("""
+    op.execute(
+        """
    COMMENT ON TABLE user_roles IS 'Defines role assignments for users. When both domain and subdomain are NULL, the role applies system-wide (superadmin). When only domain is set, role applies course-wide. When both are set, role applies to specific tag within course.';
-   """)
+   """
+    )
 
     # Create trigger function for domain validation
-    op.execute("""
+    op.execute(
+        """
    CREATE OR REPLACE FUNCTION check_subdomain_domain_match()
    RETURNS TRIGGER AS $$
    BEGIN
@@ -55,24 +62,30 @@ def upgrade() -> None:
        RETURN NEW;
    END;
    $$ LANGUAGE plpgsql;
-   """)
+   """
+    )
 
     # Create the trigger
-    op.execute("""
+    op.execute(
+        """
    CREATE TRIGGER enforce_subdomain_domain_match
    BEFORE INSERT OR UPDATE ON user_roles
    FOR EACH ROW
    EXECUTE FUNCTION check_subdomain_domain_match();
-   """)
+   """
+    )
 
     # Add alias column to roles
-    op.execute("""
+    op.execute(
+        """
    ALTER TABLE roles
    ADD COLUMN alias VARCHAR(100)
-   """)
+   """
+    )
 
     # Insert permissions and roles
-    op.execute("""
+    op.execute(
+        """
    WITH inserted_permissions AS (
        INSERT INTO permissions (resource, action, modifier) 
        VALUES
@@ -174,11 +187,13 @@ def upgrade() -> None:
             'search:create:any', 
             'search:view:any'
         ))
-   """)
+   """
+    )
 
 
 def downgrade() -> None:
-    op.execute("""
+    op.execute(
+        """
        -- Drop the trigger and function
        DROP TRIGGER IF EXISTS enforce_subdomain_domain_match ON user_roles;
        DROP FUNCTION IF EXISTS check_subdomain_domain_match;
@@ -215,4 +230,5 @@ def downgrade() -> None:
        ADD COLUMN domain UUID REFERENCES courses(id),
        ADD COLUMN subdomain UUID REFERENCES tags(id),
        ADD COLUMN scope VARCHAR(50);
-   """)
+   """
+    )

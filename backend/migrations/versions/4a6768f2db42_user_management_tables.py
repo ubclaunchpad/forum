@@ -21,7 +21,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute("""
+    op.execute(
+        """
         CREATE TABLE public.invites (
             referrer_id UUID NOT NULL,
             referred_email TEXT NOT NULL,
@@ -30,15 +31,18 @@ def upgrade() -> None:
             PRIMARY KEY (referrer_id, referred_email),
             FOREIGN KEY (referrer_id) REFERENCES public.profiles(id) ON DELETE CASCADE
         );
-    """)
+    """
+    )
 
-    op.execute("""
+    op.execute(
+        """
         CREATE TABLE public.super_users (
             id UUID NOT NULL,
             PRIMARY KEY (id),
             FOREIGN KEY (id) REFERENCES public.profiles(id) ON DELETE CASCADE
         );
-    """)
+    """
+    )
 
 
 def downgrade() -> None:

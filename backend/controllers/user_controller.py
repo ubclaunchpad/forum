@@ -35,9 +35,11 @@ def get_all_users() -> List[UserProfile]:
                 pronouns=getattr(user, "pronouns", None),
                 username=getattr(user, "username", None),
                 bio=getattr(user, "bio", None),
-                socials=SocialLinks(**getattr(user, "socials"))
-                if getattr(user, "socials")
-                else None,
+                socials=(
+                    SocialLinks(**getattr(user, "socials"))
+                    if getattr(user, "socials")
+                    else None
+                ),
                 timezone=getattr(user, "timezone", None),
                 display_name=getattr(user, "display_name", None),
                 icon_url=getattr(user, "icon_url", None),

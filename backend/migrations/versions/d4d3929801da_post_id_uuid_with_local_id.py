@@ -20,16 +20,19 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # Create sequence management table
-    op.execute("""
+    op.execute(
+        """
         CREATE TABLE public.post_sequences (
             course_id UUID REFERENCES public.courses(id) ON DELETE CASCADE,
             last_value INTEGER NOT NULL DEFAULT 0,
             PRIMARY KEY (course_id)
         )
-    """)
+    """
+    )
 
     # Create function for next_post_local_id
-    op.execute("""
+    op.execute(
+        """
         CREATE OR REPLACE FUNCTION public.next_post_local_id(course UUID)
         RETURNS INTEGER AS $$
         DECLARE
@@ -44,7 +47,8 @@ def upgrade() -> None:
             RETURN next_val;
         END;
         $$ LANGUAGE plpgsql;
-    """)
+    """
+    )
 
     # 1. First drop all existing foreign key constraints
     op.execute(
@@ -88,12 +92,15 @@ def upgrade() -> None:
     op.execute("ALTER TABLE public.user_post_events ADD COLUMN new_post_id UUID")
 
     # 3. Initialize sequences and local_ids
-    op.execute("""
+    op.execute(
+        """
         INSERT INTO public.post_sequences (course_id, last_value)
         SELECT DISTINCT course_id, 0 FROM public.posts
-    """)
+    """
+    )
 
-    op.execute("""
+    op.execute(
+        """
         WITH numbered_posts AS (
             SELECT id, course_id, 
                    ROW_NUMBER() OVER (PARTITION BY course_id ORDER BY id) as new_local_id
@@ -105,31 +112,38 @@ def upgrade() -> None:
         )
         FROM numbered_posts
         WHERE posts.id = numbered_posts.id
-    """)
+    """
+    )
 
     # 4. Copy relationships using the original id to match
-    op.execute("""
+    op.execute(
+        """
         UPDATE public.post_edits
         SET new_post_id = posts.uuid_id
         FROM public.posts
         WHERE post_edits.post_id = posts.id
-    """)
+    """
+    )
 
-    op.execute("""
+    op.execute(
+        """
         UPDATE public.user_post_events
         SET new_post_id = posts.uuid_id
         FROM public.posts
         WHERE user_post_events.post_id = posts.id
-    """)
+    """
+    )
 
     # Update embeddings if exists
-    op.execute("""
+    op.execute(
+        """
         UPDATE public.embeddings
         SET entity_id = posts.uuid_id
         FROM public.posts
         WHERE embeddings.entity_id::text = posts.id::text
         AND embeddings.entity_type = 'post'
-    """)
+    """
+    )
 
     # 5. Make new columns NOT NULL
     op.execute("ALTER TABLE public.posts ALTER COLUMN uuid_id SET NOT NULL")
@@ -160,24 +174,29 @@ def upgrade() -> None:
     )
 
     # 9. Add new foreign key constraints
-    op.execute("""
+    op.execute(
+        """
         ALTER TABLE public.post_edits
         ADD CONSTRAINT post_edits_post_id_fkey 
         FOREIGN KEY (post_id) 
         REFERENCES public.posts(id) 
         ON DELETE CASCADE
-    """)
+    """
+    )
 
-    op.execute("""
+    op.execute(
+        """
         ALTER TABLE public.user_post_events
         ADD CONSTRAINT user_post_events_post_id_fkey 
         FOREIGN KEY (post_id) 
         REFERENCES public.posts(id) 
         ON DELETE CASCADE
-    """)
+    """
+    )
 
     # 10. Create trigger for future inserts
-    op.execute("""
+    op.execute(
+        """
         CREATE OR REPLACE FUNCTION public.set_post_local_id()
         RETURNS TRIGGER AS $$
         BEGIN
@@ -187,14 +206,17 @@ def upgrade() -> None:
             RETURN NEW;
         END;
         $$ LANGUAGE plpgsql;
-    """)
+    """
+    )
 
-    op.execute("""
+    op.execute(
+        """
         CREATE TRIGGER tr_set_post_local_id
         BEFORE INSERT ON public.posts
         FOR EACH ROW
         EXECUTE FUNCTION public.set_post_local_id();
-    """)
+    """
+    )
 
 
 def downgrade() -> None:

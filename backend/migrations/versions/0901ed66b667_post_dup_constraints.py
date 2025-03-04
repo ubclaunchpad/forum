@@ -33,29 +33,35 @@ def upgrade() -> None:
         )
 
     # Rename the unique constraint to match our model
-    op.execute("""
+    op.execute(
+        """
         ALTER TABLE public.posts 
         RENAME CONSTRAINT uq_course_local_id 
         TO uq_posts_course_local_id
-    """)
+    """
+    )
 
     # Ensure we have exactly one of each constraint with our desired names
-    op.execute("""
+    op.execute(
+        """
         ALTER TABLE public.posts 
         DROP CONSTRAINT IF EXISTS posts_course_id_fkey,
         ADD CONSTRAINT posts_course_id_fkey 
         FOREIGN KEY (course_id) 
         REFERENCES public.courses(id) 
         ON DELETE CASCADE;
-    """)
+    """
+    )
 
-    op.execute("""
+    op.execute(
+        """
         ALTER TABLE public.posts 
         DROP CONSTRAINT IF EXISTS posts_created_by_fkey,
         ADD CONSTRAINT posts_created_by_fkey 
         FOREIGN KEY (created_by) 
         REFERENCES public.profiles(id);
-    """)
+    """
+    )
 
 
 def downgrade() -> None:

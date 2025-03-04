@@ -21,7 +21,7 @@ from models.schemas.user_schema import (
     UserProfile,
 )
 from routers.dependencies.permissions import get_permissions_manager
-from models.db import  get_db
+from models.db import get_db
 from models.all import Profile, Invite
 from gotrue.types import User
 

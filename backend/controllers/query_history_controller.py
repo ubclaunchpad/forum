@@ -12,12 +12,14 @@ from models.schemas.query_history import QueryEntry, QueryHistoryModel
 def get_history_for_course(course_id: str, user_id: str) -> List[QueryHistoryModel]:
     try:
         with get_db() as db:
-            stmt = text("""
+            stmt = text(
+                """
                 SELECT  user_id, course_id, messages
                 FROM query_history
                 WHERE user_id = :user_id
                 AND course_id = :course_id
-            """)
+            """
+            )
 
             result = db.execute(
                 stmt, {"user_id": user_id, "course_id": course_id}
@@ -64,12 +66,14 @@ def add_query_to_history(course_id, user_id, query):
             query_array = [query] if isinstance(query, dict) else query
             query_json = json.dumps(query_array)
 
-            stmt = text("""
+            stmt = text(
+                """
                 INSERT INTO public.query_history (user_id, course_id, messages)
                 VALUES (:user_id, :course_id, cast(:query as jsonb))
                 ON CONFLICT (user_id, course_id) 
                 DO UPDATE SET messages = query_history.messages || cast(:query as jsonb)
-            """)
+            """
+            )
 
             db.execute(
                 stmt,

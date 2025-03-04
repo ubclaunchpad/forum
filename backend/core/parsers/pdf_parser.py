@@ -64,9 +64,9 @@ class PDFParser(ParsingStrategy):
                 "metadata": {
                     "page_number": page_num + 1,
                     "has_images": bool(image_content),
-                    "image_content": "\n".join(image_content)
-                    if image_content
-                    else None,
+                    "image_content": (
+                        "\n".join(image_content) if image_content else None
+                    ),
                 },
             }
 
