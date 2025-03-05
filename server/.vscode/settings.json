@@ -1,0 +1,26 @@
+{
+  "deno.enablePaths": [
+    "supabase/functions"
+  ],
+  "deno.enable": true,
+  "deno.lint": true,
+  "deno.unstable": [
+    "bare-node-builtins",
+    "byonm",
+    "sloppy-imports",
+    "unsafe-proto",
+    "webgpu",
+    "broadcast-channel",
+    "worker-options",
+    "cron",
+    "kv",
+    "ffi",
+    "fs",
+    "http",
+    "net"
+  ],
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  }
+}
