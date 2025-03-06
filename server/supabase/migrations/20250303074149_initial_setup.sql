@@ -158,3 +158,28 @@ CREATE TRIGGER set_comment_number_id
 CREATE TRIGGER set_reply_number_id 
     BEFORE INSERT ON post_comment_replies
     FOR EACH ROW EXECUTE FUNCTION set_reply_number_id();
+
+
+
+CREATE TABLE admin_users (
+    id UUID PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id) REFERENCES profiles(id) ON DELETE CASCADE
+);
+
+COMMENT ON TABLE admin_users IS 'Table to store admin users - these are users who have been granted access to the admin panel';
+
+
+CREATE TABLE account_status (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL UNIQUE,
+    status TEXT NOT NULL, -- active, inactive, waiting_for_approval, approve_on_login
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    invited_at TIMESTAMP WITH TIME ZONE,
+    invited_by UUID,
+    joined_at TIMESTAMP WITH TIME ZONE,
+    FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE,
+    FOREIGN KEY (invited_by) REFERENCES profiles(id) ON DELETE SET NULL
+);
