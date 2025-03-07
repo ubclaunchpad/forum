@@ -15,8 +15,9 @@ ForumAI is an online platform which enables AI assistance in structured academic
 - Node.js
 - Yarn or npm
 - Supabase CLI
-- Deno (Ensure you have the Deno extension installed in your IDE)
-- Docker
+- Deno (required for running tests)
+  - [Deno extension](https://docs.deno.com/runtime/getting_started/installation/) for VSCode
+- Docker (required for supabase start)
 
 ## Installation
 
@@ -71,6 +72,7 @@ yarn dev # or npm run dev
 - Follow the instructions here to install the Supabase CLI: [Supabase CLI](https://supabase.io/docs/guides/cli)
 
 #### 2. Start Supabase
+Ensure Docker is installed and running before executing this command.
 
 ```bash
 supabase start
@@ -86,6 +88,12 @@ supabase db up
 
 ```bash
 deno test --allow-all --coverage --env-file=./.env.local
+```
+
+If you do not have the [Deno extension installed](https://marketplace.visualstudio.com/items?itemName=denoland.vscode-deno) in your IDE, you can run the tests using the following command:
+
+```bash
+deno test --allow-all --coverage --env-file=./.env.local --unstable --watch
 ```
 
 ### Environment Variables
@@ -110,30 +118,12 @@ ENV=development # or production
 <a name="envsetup"></a>
 Where to find these?
 
-- Go on [Supabase](https://supabase.io/) and create a new project
-- Go to the project settings:
-  - In the API section, you will find the `SUPABASE_URL` and `SUPABASE_KEY`
-  - In the Database section, you will find the `DATABASE_URL` (you want a connection string)
+- When you do `supabase start`, you will get an API URL, anon key, and service role key. Make sure you populate these in the `.env` file.
 - For most cases you will need to have the `AUTH_MIDDLEWARE_ENABLED` set to `true` and the `DEV_USER_EMAIL` and `DEV_USER_PASSWORD` set to your email and password
   - On your Supabase project, go to the `Auth` section and create a new user (you can manually set the email and password); then use these credentials in the `.env` file
 - Go on [OpenAI](https://platform.openai.com/) and create a new project (or use an existing one)
   - You do not need this unless you use the OpenAI API
 
-#### 5. Syncing the Database
-
-- Run the following command to create the database tables:
-
-```bash
-uv run --env-file .env alembic upgrade head
-```
-
-#### 6. Running the Server
-
-- With the virtual environment activated, run the following command:
-
-```bash
-uv run --env-file .env -m main
-```
 
 For more details on managing migrations and dependencies, go to `/backend/README.md`
 
