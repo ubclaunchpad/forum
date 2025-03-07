@@ -1,14 +1,22 @@
 # ForumAI
 
 [![CodeQL](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql) ![License](https://img.shields.io/github/license/ubclaunchpad/forum)
+<!-- [![Coverage](https://codecov.io/gh/ubclaunchpad/forum/branch/main/graph/badge.svg)](https://codecov.io/gh/ubclaunchpad/forum) -->
 
-ForumAI is an online platform which enables AI assistance in structured academic forums, facillutating discussions between students and faculty.
+ForumAI is an online platform which enables AI assistance in structured academic forums, facilitating discussions between students and faculty.
 
 ## Features
 
-- 24/7 AI assistance to help answer questions about course material, assigments and general logistics
+- 24/7 AI assistance to help answer questions about course material, assignments and general logistics
 - Discussions boards and Q&A forums for interaction between students, instructors and teaching assistants
-- Anonoymous posting and messaging for safe and inclusive discussions
+- Anonymous posting and messaging for safe and inclusive discussions
+
+## Prerequisites
+- Node.js
+- Yarn or npm
+- Supabase CLI
+- Deno (Ensure you have the Deno extension installed in your IDE)
+- Docker
 
 ## Installation
 
@@ -58,26 +66,26 @@ yarn dev # or npm run dev
 
 ### Backend
 
-#### 1. Install Python
+#### 1. Install Supabase CLI
 
-- Download and install Python from [python.org](https://www.python.org/downloads/)
-- Ensure Python is added to your system's PATH
+- Follow the instructions here to install the Supabase CLI: [Supabase CLI](https://supabase.io/docs/guides/cli)
 
-#### 2. Install uv
-
-- Copy based on your OS: <https://docs.astral.sh/uv/getting-started/installation/>
-  - e.g. macOS: `curl -LsSf https://astral.sh/uv/install.sh | sh`
-
-#### 3. Go to the backend directory
+#### 2. Start Supabase
 
 ```bash
-cd forum/backend
+supabase start
 ```
 
-#### 4. Install Dependencies (syncing dependencies)
+#### 3. Apply Database Migrations
 
 ```bash
-uv sync
+supabase db up
+```
+
+#### 4. Running Tests using Deno
+
+```bash
+deno test --allow-all --coverage --env-file=./.env.local
 ```
 
 ### Environment Variables
@@ -85,10 +93,12 @@ uv sync
 Create a `.env` file with:
 
 ```txt
+SUPABASE_URL="your_supabase_url"
+SUPABASE_ANON_KEY="your_supabase_anon_key"
+SUPABASE_SERVICE_ROLE_KEY="your_supabase_service_role_key"
+DATABASE_URL="your_database_url"
+
 OPENAI_API_KEY=your_key_here
-DATABASE_URL=your_database_url
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_key
 AUTH_MIDDLEWARE_ENABLED=true # or false
 DEV_USER_EMAIL=your_email_here
 DEV_USER_PASSWORD=your_password_here
