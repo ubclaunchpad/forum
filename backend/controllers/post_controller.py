@@ -2,7 +2,7 @@ import logging
 import stat
 from typing import Any, List, Optional
 from uuid import UUID
-from sqlalchemy import insert
+from sqlalchemy import insert, func
 from sqlalchemy.orm import joinedload
 
 from core.processors.embedding_processor import EmbeddingProcessor
@@ -17,6 +17,7 @@ from models.schemas.post_schema import (
     CreatePostEditRequest,
     CreatePostRequest,
     GetPostResponse,
+    GetDetailedPostsResponse,
     PostEditResponse,
     PostEmbeddingMetadata,
     PostResponse,
@@ -90,6 +91,85 @@ def get_post(user_id: str, c_id: str, post_id: str) -> GetPostResponse:
     except Exception as e:
         print(f"Error in get_post: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}")
+
+
+def get_detailed_posts(course_id: str, user_id: str) -> GetDetailedPostsResponse:
+    """
+    Get posts with all metadata and user interaction info in a single query
+    """
+    try:
+        with get_db() as db:
+            # Define subqueries to count views and likes
+            view_count = (
+                db.query(
+                    UserPostEvent.post_id,
+                    func.count('*').label('view_count')
+                )
+                .filter(UserPostEvent.viewed == True)
+                .group_by(UserPostEvent.post_id)
+                .subquery()
+            )
+
+            like_count = (
+                db.query(
+                    UserPostEvent.post_id,
+                    func.count('*').label('like_count')
+                )
+                .filter(UserPostEvent.liked == True)
+                .group_by(UserPostEvent.post_id)
+                .subquery()
+            )
+
+            # Get the current user's interactions
+            user_interaction = (
+                db.query(
+                    UserPostEvent.post_id,
+                    UserPostEvent.viewed,
+                    UserPostEvent.liked
+                )
+                .filter(UserPostEvent.user_id == user_id)
+                .subquery()
+            )
+
+            # Full query with user interactions
+            query = (
+                db.query(
+                    Post,
+                    func.coalesce(view_count.c.view_count, 0).label('view_count'),
+                    func.coalesce(like_count.c.like_count, 0).label('like_count'),
+                    func.coalesce(user_interaction.c.viewed, False).label('user_viewed'),
+                    func.coalesce(user_interaction.c.liked, False).label('user_liked')
+                )
+                .outerjoin(view_count, Post.id == view_count.c.post_id)
+                .outerjoin(like_count, Post.id == like_count.c.post_id)
+                .outerjoin(user_interaction, Post.id == user_interaction.c.post_id)
+                .filter(Post.course_id == course_id)
+                .order_by(Post.applied_at.desc())
+            )
+
+            results = query.all()
+
+            # Format the results
+            formatted_results = []
+            for result in results:
+                post_dict = {c.name: getattr(result.Post, c.name) for c in result.Post.__table__.columns}
+
+                post_dict["stats"] = {
+                    "views": result.view_count,
+                    "likes": result.like_count
+                }
+
+                post_dict["user_interactions"] = {
+                    "viewed": result.user_viewed,
+                    "liked": result.user_liked
+                }
+
+                formatted_results.append(post_dict)
+
+            return formatted_results
+    except Exception as e:
+        print(f"Error in get_posts: {type(e).__name__}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch posts: {str(e)}") 
 
 
 def update_post(
@@ -194,7 +274,7 @@ def view_post(c_id: str, user_id: str, local_id: int) -> UserPostEvent:
         raise HTTPException(status_code=500, detail=f"Failed to record view: {str(e)}")
 
 
-def like_post(c_id: str, user_id: str, local_id: int) -> UserPostEvent:
+def like_post(c_id: str, user_id: str, local_id: int, like: bool) -> UserPostEvent:
     try:
         with get_db() as db:
             post = (
@@ -215,13 +295,13 @@ def like_post(c_id: str, user_id: str, local_id: int) -> UserPostEvent:
 
             if not post_event:
                 event = UserPostEvent(
-                    viewed=True, liked=True, user_id=user_id, post_id=post.id
+                    viewed=True, liked=like, user_id=user_id, post_id=post.id
                 )
                 db.add(event)
                 db.flush()
                 return event
             else:
-                post_event.liked = not post_event.liked
+                post_event.liked = like
                 db.flush()
                 return post_event
     except Exception as e:

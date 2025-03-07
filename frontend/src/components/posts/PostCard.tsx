@@ -14,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { DeleteIcon, LinkIcon, MoreHorizontal } from "lucide-react";
+import { DeleteIcon, LinkIcon, MoreHorizontal, ThumbsUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { userContext } from "@/contexts/userContext";
 import { getApiUrl } from "@/utils/helpers";
@@ -35,6 +35,7 @@ export const PostCard = <T extends PostType>({
 
   const user = useContext(userContext);
   const course = useCourseStore((state) => state.course);
+  const { updatePost } = useContext(forumPostsContext);
   const { toast } = useToast();
   const postType = getIdType(post.id);
   const handleMoreClick = (e: React.MouseEvent) => {
@@ -80,6 +81,108 @@ export const PostCard = <T extends PostType>({
     }
   }
 
+  async function updateInteraction(post: Post, method: string, endpoint: string) {
+    const response = await fetch(
+      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/${endpoint}`,
+      {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      }
+    );
+    fetch("/api/revalidate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ courseId: course.id }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to mark post as unliked`);
+    }
+  }
+
+  const handleLikeClick = async (post: Post, addLike: boolean) => {
+    const likeVal = addLike ? 1 : -1
+    const updatedPost = {
+      ...post,
+      user_interactions: {
+        ...post.user_interactions,
+        liked: addLike,
+      },
+      stats: {
+        ...post.stats,
+        likes: (post.stats?.likes || 0) + likeVal,
+      },
+    };
+  
+    // Update UI optimistically
+    updatePost(updatedPost);
+  
+    try {
+      if (addLike) {
+        await updateInteraction(post, 'POST', 'like');
+      } else {
+        await updateInteraction(post, 'DELETE', 'like');
+      }
+      
+    } catch (error) {
+      // Revert state if API call fails
+      updatePost({
+        ...post,
+        user_interactions: {
+          ...post.user_interactions,
+          liked: false,
+        },
+        stats: {
+          ...post.stats,
+          likes: (post.stats?.likes || 0) - likeVal,
+        },
+      });
+      console.error("Error updating like status:", error);
+    }
+  };
+
+  const handleView = async (post: Post) => {
+    // Optimistically update the view count
+    if (!post.user_interactions?.viewed) {
+      const updatedPost = {
+        ...post,
+        user_interactions: {
+          ...post.user_interactions,
+          viewed: true,
+        },
+        stats: {
+          ...post.stats,
+          views: (post.stats?.views || 0) + 1,
+        },
+      };
+      
+      updatePost(updatedPost);
+
+      try {
+        await updateInteraction(post, 'PUT', 'view');
+      } catch (error) {
+        // In case of failure, revert the optimistic update
+        updatePost({
+          ...post,
+          user_interactions: {
+            ...post.user_interactions,
+            viewed: false,
+          },
+          stats: {
+            ...post.stats,
+            views: (post.stats?.views || 0) - 1,
+          },
+        });
+        console.error("Error updating view status:", error);
+      }
+    }
+  };
+
   return (
     <div
       role="button"
@@ -89,6 +192,7 @@ export const PostCard = <T extends PostType>({
         if (container instanceof HTMLElement) {
           sessionStorage.setItem("forumlist", container.scrollTop.toString());
         }
+        handleView(post as Post);
         setSelectedPost(post);
       }}
       className={cn(
@@ -102,7 +206,8 @@ export const PostCard = <T extends PostType>({
       )}
     >
       <div className="flex items-center justify-between p-2 px-4 w-full gap-2 pb-2">
-        <p className="text-sm font-semibold">
+        {/* Title aligned to the left */}
+        <p className="text-sm font-semibold flex-1 truncate">
           {postType === "local" && (
             <span className="border text-xs rounded-md text-neutral-600 dashed p-1 uppercase">
               Draft
@@ -111,15 +216,20 @@ export const PostCard = <T extends PostType>({
           {post.title}
         </p>
 
-        <h2 className=" font-medium text-xs flex-shrink-0 ">
-          {post.applied_at &&
-            getRelativeTimeString(
-              new Date(post.applied_at).getTime(),
-              "en",
-              30,
-            )}
-        </h2>
+        {/* Right-aligned container for time and "Not Viewed" indicator */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {post.applied_at && (
+            <h2 className="font-medium text-xs whitespace-nowrap">
+              {getRelativeTimeString(new Date(post.applied_at).getTime(), "en", 30)}
+            </h2>
+          )}
+
+          {!post.user_interactions?.viewed && (
+            <span className="w-2.5 h-2.5 rounded-full bg-primary-600 inline-block"></span>
+          )}
+        </div>
       </div>
+
       <section className="max-h-40 overflow-hidden px-4">
         <p className="text-xs py-2  text-wrap text-neutral-500 select-none line-clamp-4 break-words">
           {isEditing === post.id
@@ -136,6 +246,23 @@ export const PostCard = <T extends PostType>({
           )}
         >
           <div className="flex flex-1 " />
+
+          {/* Display likes, and allow user to like post */}
+          <div className="flex items-center gap-2">
+          {post.user_interactions?.liked ? (
+            <ThumbsUp
+              className="h-5 w-5 text-primary-600 cursor-pointer"
+              fill="currentColor"
+              onClick={() => handleLikeClick(post as Post, false)}
+            />
+          ) : (
+            <ThumbsUp
+              className="h-5 w-5 text-primary-600 cursor-pointer"
+              onClick={() => handleLikeClick(post as Post, true)}
+            />
+          )}
+          <span className="text-xs text-neutral-700">{post.stats?.likes || 0}</span>
+          </div>
 
           <Popover>
             <PopoverContent
