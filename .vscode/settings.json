@@ -50,5 +50,6 @@
     "./backend"
   ],
   "python.linting.pylintEnabled": true,
-  "python.terminal.activateEnvironment": true
+  "python.terminal.activateEnvironment": true,
+  "deno.enable": true
 }

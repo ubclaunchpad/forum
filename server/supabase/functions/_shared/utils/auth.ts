@@ -1,5 +1,5 @@
 import { supa } from "../db.ts";
-import { NotFoundError } from "../errors.ts";
+// import { NotFoundError } from "../errors.ts";
 
 
 export async function signUpByEmailPassword(email: string, password: string, args: Record<string, unknown> = {}) {

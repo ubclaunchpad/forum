@@ -1,5 +1,5 @@
 import { Hono } from "jsr:@hono/hono";
-import { AccountStatusValue, ACCOUNT_STATUS_VALUES, newUserSchema } from "@shared/schema/users.ts";
+import { AccountStatusValue, ACCOUNT_STATUS_VALUES, newUserSchema } from "@shared/mod.ts";
 import {
   approveUserAccount,
   deleteUserById,
@@ -10,13 +10,13 @@ import {
   getUserById,
   inviteUserToApplication,
   userController,
-} from "../_shared/userController.ts";
+} from "./controller.ts";
 import {
   NotFoundError,
 } from "../_shared/errors.ts";
 
 const functionName = "users";
-const app = new Hono().basePath(`/${functionName}`);
+const app = new Hono().basePath(`/${functionName}`); 
 
 // Get all users
 app.get("/", async (c) => {
@@ -43,9 +43,6 @@ app.post("/", async (c) => {
         details: validationResult.error.errors,
       }, 400);
     }
-
-    console.log(validationResult.data);
-    console.log("Creating user...");
 
     const user = await userController.createUserViaEmailPassword(validationResult.data);
     return c.json(user, 201);
@@ -82,7 +79,6 @@ app.delete("/:id", async (c) => {
     await deleteUserById(id);
     return c.json({ message: "User deleted successfully" }, 200);
   } catch (error) {
-    console.log(error);
     if (error instanceof NotFoundError) {
       return c.json({ error: error.message }, 404);
     }

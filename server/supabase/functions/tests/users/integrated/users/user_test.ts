@@ -1,6 +1,6 @@
 import { afterAll, beforeEach, describe, it, afterEach } from "jsr:@std/testing/bdd";
 import { assertEquals } from "jsr:@std/assert";
-import { userController } from "../../../../_shared/userController.ts";
+import { userController } from "../../../../users/controller.ts";
 import { supa } from "../../../../_shared/db.ts";
 import { NotFoundError } from "../../../../_shared/errors.ts";
 import { stub } from "jsr:@std/testing/mock";

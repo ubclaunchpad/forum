@@ -1,0 +1,60 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Execute Server Tests",
+            "type": "shell",
+            "command": "/opt/homebrew/bin/deno",
+            "args": [
+                "test",
+                "--allow-all",
+                "--coverage",
+                "--env-file=./supabase/.env.local"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/server"
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Test and Generate Coverage Report",
+            "type": "shell",
+            "command": "/opt/homebrew/bin/deno",
+            "args": [
+                "coverage",
+                "./coverage",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/server"
+            },
+			"dependsOn": [
+				"Execute Server Tests"
+			],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+		{
+			"label": "Generate Coverage Report",
+			"type": "shell",
+			"command": "/opt/homebrew/bin/deno",
+			"args": ["coverage", "--html"],
+			"options": {
+				"cwd": "${workspaceFolder}/server"
+			},
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+			}
+		}
+    ]
+}

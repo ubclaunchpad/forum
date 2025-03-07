@@ -4,6 +4,7 @@
     "jsr:@hono/hono@*": "4.7.2",
     "jsr:@std/assert@*": "1.0.11",
     "jsr:@std/assert@^1.0.10": "1.0.11",
+    "jsr:@std/dotenv@*": "0.225.3",
     "jsr:@std/internal@^1.0.5": "1.0.5",
     "jsr:@std/testing@*": "1.0.9",
     "jsr:@supabase/supabase-js@2": "2.49.1",
@@ -14,7 +15,7 @@
     "npm:@supabase/realtime-js@2.11.2": "2.11.2",
     "npm:@supabase/storage-js@2.7.1": "2.7.1",
     "npm:@types/node@*": "22.12.0",
-    "npm:zod@^3.24.2": "3.24.2"
+    "npm:zod@*": "3.24.2"
   },
   "jsr": {
     "@hono/hono@4.7.2": {
@@ -25,6 +26,9 @@
       "dependencies": [
         "jsr:@std/internal"
       ]
+    },
+    "@std/dotenv@0.225.3": {
+      "integrity": "a95e5b812c27b0854c52acbae215856d9cce9d4bbf774d938c51d212711e8d4a"
     },
     "@std/internal@1.0.5": {
       "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
@@ -125,10 +129,5 @@
     "zod@3.24.2": {
       "integrity": "sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ=="
     }
-  },
-  "workspace": {
-    "dependencies": [
-      "npm:zod@^3.24.2"
-    ]
   }
 }

@@ -1,7 +1,7 @@
 import { assertEquals } from "jsr:@std/assert";
 import { describe, it, beforeAll, afterAll, beforeEach, afterEach, before } from "jsr:@std/testing/bdd";
-import { app } from "../../../users/index.ts";
-import { userController } from "../../../_shared/userController.ts";
+import { app } from "../../../users/index.ts"; 
+import { userController } from "../../../users/controller.ts";
 import { newUserSchema } from "@shared/schema/users.ts";
 import type { AccountStatus, AccountStatusValue } from "@shared/schema/users.ts";
 import {

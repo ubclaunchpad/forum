@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "@shared/deps.ts"
 
 export const newUserSchema = z.object({
     first_name: z.string(),

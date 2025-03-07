@@ -1,4 +1,4 @@
-import { supa } from "./db.ts";
+import { supa } from "../_shared/db.ts";
 
 import {
   AccountStatus,
@@ -6,9 +6,9 @@ import {
   NewUser,
   ProfileWithoutId,
   User,
-} from "@shared/schema/users.ts";
-import { NotFoundError } from "./errors.ts";
-import { signUpByEmailPassword } from "./utils/auth.ts";
+} from "@shared/mod.ts";
+import { NotFoundError } from "../_shared/errors.ts";
+import { signUpByEmailPassword } from "../_shared/utils/auth.ts";
 
 // TEMP
 const ENFORCE_INVITES = true;
@@ -184,17 +184,14 @@ export async function activateUserAccount(
 
 
 
-    console.log("userId", userId);
     const { data: profileRecord } = await supa.from("profiles")
       .select("*").eq("id", userId).single();
-    console.log("profileRecord", profileRecord);
     if (!profileRecord) {
        const m = await createUserProfile({
         id: userId,
         ...profile,
         username: profile.username ?? profile.email,
       });
-      console.log("profileRecord", m);
     }
     await supa.from("account_status").update({
         status: "active",
@@ -325,7 +322,6 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
     .select("id")
     .eq("id", userId);
 
-  console.log(data);
 
 //   if (error) {
 //     throw new DatabaseError(error.message);
@@ -343,31 +339,19 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
 export async function makeUserAdmin(userId: string): Promise<void> {
     
   const isAlreadyAdmin = await userController.isUserAdmin(userId);
-  console.log("isAlreadyAdmin", isAlreadyAdmin);
   if (isAlreadyAdmin) {
     return;
   }
 
   const accountStatus = await userController.getUserAccountStatus(userId);
-  console.log("accountStatus", accountStatus);
   if (!accountStatus || accountStatus.status !== "active") {
     throw new Error("User account is not active");
   }
-
-  console.log("accountStatus", accountStatus);
 
   const { error:_ } = await supa
     .from("admin_users")
     .insert({ id: userId });
 
-    const getAdminUsers = await supa
-      .from("admin_users")
-      .select('*');
-
-    console.log("HHHHH")
-    console.log("getAdminUsers")
-    console.log(getAdminUsers.data)
-  console.log("error", _);
 //   if (error) {
 //     throw new DatabaseError(error.message);
 //   }
@@ -402,13 +386,6 @@ export async function getAllAdminUsers(): Promise<User[]> {
     // const adminUsers = await supa
     //   .from("admin_users")
     //   .select('*');
-
-    //   console.log("adminUsers")
-    //   console.log(adminUsers.data)
-    //   console.log(profiles.data)
-
-    // console.log("HERE")
-    console.log(data)
 
 //   if (error) {
 //     throw new DatabaseError(error.message);

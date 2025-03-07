@@ -1,7 +1,7 @@
 import { afterAll, beforeEach, describe, it} from "jsr:@std/testing/bdd";
 import { assertEquals } from "jsr:@std/assert";
-import { userController } from "../../../../_shared/userController.ts";
-import { ProfileWithoutId, User } from "@shared/schema/users.ts";
+import { userController } from "../../../../users/controller.ts";
+import { ProfileWithoutId, User } from "@shared/mod.ts";
 import { supa } from "../../../../_shared/db.ts";
 
 
@@ -102,7 +102,6 @@ describe("Admin functions", () => {
         }
         await userController.activateUserAccount(user.id, profile, true);
         await userController.makeUserAdmin(user.id);
-        console.log("use~~~~")
         let isAdmin = await userController.isUserAdmin(user.id);
         assertEquals(isAdmin, true);
         
@@ -121,15 +120,12 @@ describe("Admin functions", () => {
             pronouns: user.pronouns,
             username: user.email,
         }
-        console.log("user")
-        console.log(user)
+
         await userController.activateUserAccount(user.id, profile, true);
         await userController.makeUserAdmin(user.id);
         
         const adminUsers = await userController.getAllAdminUsers();
         assertEquals(adminUsers.length, 1);
-        console.log("adminUsers")
-        console.log(adminUsers)
         assertEquals(adminUsers[0].id, user.id);
     });
 

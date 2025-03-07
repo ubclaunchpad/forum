@@ -1,6 +1,7 @@
 {
   "version": "4",
   "specifiers": {
+    "jsr:@armin/forum-shared@0.1": "0.1.0",
     "jsr:@hono/hono@^4.7.2": "4.7.2",
     "jsr:@supabase/supabase-js@^2.49.1": "2.49.1",
     "npm:@supabase/auth-js@2.68.0": "2.68.0",
@@ -12,6 +13,12 @@
     "npm:zod@^3.24.2": "3.24.2"
   },
   "jsr": {
+    "@armin/forum-shared@0.1.0": {
+      "integrity": "4404c4dd2ceb42097dddc85c7c92f1879b62f259e9e8e1650c17a15ec22f5866",
+      "dependencies": [
+        "npm:zod"
+      ]
+    },
     "@hono/hono@4.7.2": {
       "integrity": "73466a24bd6eb3b527cde18e59ca5543890ddacb4312fc0bc7504d28a7e57a38"
     },
@@ -107,9 +114,9 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@armin/forum-shared@0.1",
       "jsr:@hono/hono@^4.7.2",
-      "jsr:@supabase/supabase-js@^2.49.1",
-      "npm:zod@^3.24.2"
+      "jsr:@supabase/supabase-js@^2.49.1"
     ]
   }
 }
