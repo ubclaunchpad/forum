@@ -1,6 +1,6 @@
 # ForumAI
 
-![License](https://img.shields.io/github/license/ubclaunchpad/forum) ![Supabase](https://img.shields.io/badge/Supabase-connected-brightgreen) [![CodeQL](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql) [![Coverage](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml/badge.svg?branch=dev)](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml)
+![License](https://img.shields.io/github/license/ubclaunchpad/forum) ![Supabase](https://img.shields.io/badge/Supabase-connected-brightgreen) [![CodeQL](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql) [![Coverage](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml/badge.svg)](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml)
 
 ForumAI is an online platform which enables AI assistance in structured academic forums, facilitating discussions between students and faculty.
 
