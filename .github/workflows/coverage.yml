@@ -1,0 +1,21 @@
+name: Coverage
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - main
+      - dev
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x # Run with latest stable Deno.
+      - name: Run tests with coverage
+        working-directory: server
+        run: |
+          deno test --env-file=.env.local --allow-all
+          deno coverage

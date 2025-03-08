@@ -1,5 +1,7 @@
 # ForumAI
 
+> OUTDATED
+
 [![CodeQL](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql) ![License](https://img.shields.io/github/license/ubclaunchpad/forum)
 
 ForumAI is an online platform which enables AI assistance in structured academic forums, facillutating discussions between students and faculty.
