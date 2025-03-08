@@ -98,7 +98,7 @@ deno test --allow-all --coverage --env-file=./.env.local --unstable --watch
 
 ### Environment Variables
 
-Create a `.env` file with:
+Create a `.env` file with in the supabase folder with:
 
 ```txt
 SUPABASE_URL="your_supabase_url"
