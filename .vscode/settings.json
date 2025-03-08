@@ -1,28 +1,55 @@
 {
-  "python.analysis.extraPaths": ["./backend"],
-  "python.analysis.diagnosticMode": "workspace",
-  "python.defaultInterpreterPath": "./backend/.venv/bin/python",
-  "python.envFile": "${workspaceFolder}/.env",
-  "python.linting.pylintEnabled": true,
-  "python.linting.enabled": true,
-  "python.linting.pylintArgs": ["--python-path", "./backend"],
   "[python]": {
-    "editor.defaultFormatter": "ms-python.python",
-    "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit"
-    }
+    },
+    "editor.defaultFormatter": "ms-python.python",
+    "editor.formatOnSave": true
   },
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "deno.enablePaths": [
+    "server",
+    "shared"
+  ],
+  "deno.lint": true,
+  "deno.unstable": [
+    "bare-node-builtins",
+    "byonm",
+    "sloppy-imports",
+    "unsafe-proto",
+    "webgpu",
+    "broadcast-channel",
+    "worker-options",
+    "cron",
+    "kv",
+    "ffi",
+    "fs",
+    "http",
+    "net"
+  ],
   "files.exclude": {
-    "**/__pycache__": true,
-    "**/.pytest_cache": true,
     "**/*.pyc": true,
-    "**/backend/.ruff_cache": true,
-    
-
+    "**/.pytest_cache": true,
+    "**/__pycache__": true,
+    "**/backend/.ruff_cache": true
   },
-  "python.analysis.typeCheckingMode": "standard",
-  "python.terminal.activateEnvironment": true,
   "python.analysis.autoImportCompletions": true,
-  "python.analysis.supportRestructuredText": false
+  "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.extraPaths": [
+    "./backend"
+  ],
+  "python.analysis.supportRestructuredText": false,
+  "python.analysis.typeCheckingMode": "standard",
+  "python.defaultInterpreterPath": "./backend/.venv/bin/python",
+  "python.envFile": "${workspaceFolder}/.env",
+  "python.linting.enabled": true,
+  "python.linting.pylintArgs": [
+    "--python-path",
+    "./backend"
+  ],
+  "python.linting.pylintEnabled": true,
+  "python.terminal.activateEnvironment": true,
+  "deno.enable": true
 }

@@ -1,6 +1,15 @@
 # ForumAI
 
+<<<<<<< HEAD
 ![License](https://img.shields.io/github/license/ubclaunchpad/forum) ![Supabase](https://img.shields.io/badge/Supabase-connected-brightgreen) [![CodeQL](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql) [![Coverage](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml/badge.svg?branch=dev)](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml)
+=======
+> OUTDATED
+
+[![CodeQL](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql) ![License](https://img.shields.io/github/license/ubclaunchpad/forum)
+![Supabase](https://img.shields.io/badge/Supabase-connected-brightgreen)
+![Deno Tests](https://img.shields.io/badge/Deno-Tests-passing?logo=deno&color=black)
+[![Coverage](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml/badge.svg?branch=dev)](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml)
+>>>>>>> 880257710890b24a3c9d90c4a2d18da279e3a98e
 
 ForumAI is an online platform which enables AI assistance in structured academic forums, facilitating discussions between students and faculty.
 
