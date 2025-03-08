@@ -1,7 +1,10 @@
 # ForumAI
 
 [![CodeQL](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql) ![License](https://img.shields.io/github/license/ubclaunchpad/forum)
-<!-- [![Coverage](https://codecov.io/gh/ubclaunchpad/forum/branch/main/graph/badge.svg)](https://codecov.io/gh/ubclaunchpad/forum) -->
+![Supabase](https://img.shields.io/badge/Supabase-connected-brightgreen)
+![Deno Tests](https://img.shields.io/badge/Deno-Tests-passing?logo=deno&color=black)
+[![Coverage](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml/badge.svg?branch=dev)](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml)
+
 
 ForumAI is an online platform which enables AI assistance in structured academic forums, facilitating discussions between students and faculty.
 
@@ -16,7 +19,6 @@ ForumAI is an online platform which enables AI assistance in structured academic
 - Yarn or npm
 - Supabase CLI
 - Deno (required for running tests)
-  - [Deno extension](https://docs.deno.com/runtime/getting_started/installation/) for VSCode
 - Docker (required for supabase start)
 
 ## Installation
@@ -84,7 +86,12 @@ supabase start
 supabase db up
 ```
 
-#### 4. Running Tests using Deno
+#### 4. Install Deno
+
+- Follow the instructions here to install Deno: [Deno Installation](https://deno.land/manual/getting_started/installation)
+- For VSCode users, you can also install the Deno extension: [Deno Extension](https://marketplace.visualstudio.com/items?itemName=denoland.vscode-deno)
+
+#### 5. Running Tests using Deno
 
 ```bash
 deno test --allow-all --coverage --env-file=./.env.local
@@ -124,8 +131,31 @@ Where to find these?
 - Go on [OpenAI](https://platform.openai.com/) and create a new project (or use an existing one)
   - You do not need this unless you use the OpenAI API
 
+### Development Resources
 
-For more details on managing migrations and dependencies, go to `/backend/README.md`
+- Supabase CLI Documentation: [Supabase CLI](https://supabase.io/docs/guides/cli)
+- Supabase Edge Functions: [Supabase Edge Functions](https://supabase.io/docs/guides/functions)
+- Deno Documentation: [Deno Manual](https://deno.land/manual)
+- Deno Setup for VSCode: [Deno Extension](https://marketplace.visualstudio.com/items?itemName=denoland.vscode-deno)
+
+### Essential Commands for Local Development
+
+#### Supabase Commands
+
+- `supabase start` - Start the Supabase server
+- `supabase stop` - Stop the Supabase server
+- `supabase db up` - Apply database migrations
+- `supabase db reset` - Reset the database
+
+#### Supabase Edge Functions
+
+- `supabase functions new function_name` - Create a new edge function
+- `supabase functions deploy function_name` - Deploy an edge function
+
+#### Deno Commands
+
+- `deno test --allow-all --coverage=coverage` - Run tests with coverage
+- `deno coverage --html` - Generate an HTML coverage report
 
 ## Contributing
 
