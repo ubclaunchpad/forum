@@ -1,15 +1,6 @@
 # ForumAI
 
-<<<<<<< HEAD
 ![License](https://img.shields.io/github/license/ubclaunchpad/forum) ![Supabase](https://img.shields.io/badge/Supabase-connected-brightgreen) [![CodeQL](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql) [![Coverage](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml/badge.svg?branch=dev)](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml)
-=======
-> OUTDATED
-
-[![CodeQL](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql) ![License](https://img.shields.io/github/license/ubclaunchpad/forum)
-![Supabase](https://img.shields.io/badge/Supabase-connected-brightgreen)
-![Deno Tests](https://img.shields.io/badge/Deno-Tests-passing?logo=deno&color=black)
-[![Coverage](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml/badge.svg?branch=dev)](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml)
->>>>>>> 880257710890b24a3c9d90c4a2d18da279e3a98e
 
 ForumAI is an online platform which enables AI assistance in structured academic forums, facilitating discussions between students and faculty.
 
@@ -138,28 +129,28 @@ Where to find these?
 - Go on [OpenAI](https://platform.openai.com/) and create a new project (or use an existing one)
   - You do not need this unless you use the OpenAI API
 
-### Development Resources
+### 🛠 Development Resources
 
 - Supabase CLI Documentation: [Supabase CLI](https://supabase.io/docs/guides/cli)
 - Supabase Edge Functions: [Supabase Edge Functions](https://supabase.io/docs/guides/functions)
 - Deno Documentation: [Deno Manual](https://deno.land/manual)
 - Deno Setup for VSCode: [Deno Extension](https://marketplace.visualstudio.com/items?itemName=denoland.vscode-deno)
 
-### Essential Commands for Local Development
+### 📦 Essential Commands for Local Development
 
-#### Supabase Commands
+#### 🔄 Supabase Commands
 
 - `supabase start` - Start the Supabase server
 - `supabase stop` - Stop the Supabase server
 - `supabase db up` - Apply database migrations
 - `supabase db reset` - Reset the database
 
-#### Supabase Edge Functions
+#### ⚙️ Supabase Edge Functions
 
 - `supabase functions new function_name` - Create a new edge function
 - `supabase functions deploy function_name` - Deploy an edge function
 
-#### Deno Commands
+#### 🛠 Deno Commands
 
 - `deno test --allow-all --coverage=coverage` - Run tests with coverage
 - `deno coverage --html` - Generate an HTML coverage report
