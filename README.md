@@ -1,5 +1,7 @@
 # ForumAI
 
+> OUTDATED
+
 [![CodeQL](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/ubclaunchpad/forum/actions/workflows/github-code-scanning/codeql) ![License](https://img.shields.io/github/license/ubclaunchpad/forum)
 ![Supabase](https://img.shields.io/badge/Supabase-connected-brightgreen)
 ![Deno Tests](https://img.shields.io/badge/Deno-Tests-passing?logo=deno&color=black)
