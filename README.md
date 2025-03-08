@@ -5,7 +5,6 @@
 ![Deno Tests](https://img.shields.io/badge/Deno-Tests-passing?logo=deno&color=black)
 [![Coverage](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml/badge.svg?branch=dev)](https://github.com/ubclaunchpad/forum/actions/workflows/coverage.yml)
 
-
 ForumAI is an online platform which enables AI assistance in structured academic forums, facilitating discussions between students and faculty.
 
 ## Features
@@ -15,6 +14,7 @@ ForumAI is an online platform which enables AI assistance in structured academic
 - Anonymous posting and messaging for safe and inclusive discussions
 
 ## Prerequisites
+
 - Node.js
 - Yarn or npm
 - Supabase CLI
@@ -47,7 +47,7 @@ cd forum/frontend
 yarn install # or npm install
 ```
 
-### Environment Variables
+### Environment Variables For Frontend
 
 Create a `.env` file with:
 
@@ -74,6 +74,7 @@ yarn dev # or npm run dev
 - Follow the instructions here to install the Supabase CLI: [Supabase CLI](https://supabase.io/docs/guides/cli)
 
 #### 2. Start Supabase
+
 Ensure Docker is installed and running before executing this command.
 
 ```bash
