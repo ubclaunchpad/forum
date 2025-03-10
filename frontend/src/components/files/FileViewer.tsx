@@ -170,12 +170,11 @@ export default function FileViewer({
   if (doc.fileType.startsWith("image")) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-black/5">
-        NOT IMPLEMENTED
-        {/* <img
+        <img
           src={doc.signedUrl}
           alt={document.title}
           className="max-w-full max-h-full object-contain"
-        /> */}
+        />
       </div>
     );
   }
@@ -186,6 +185,9 @@ export default function FileViewer({
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     ].includes(doc.fileType)
   ) {
     const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.signedUrl)}&embedded=true`;
