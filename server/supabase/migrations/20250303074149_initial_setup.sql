@@ -55,7 +55,7 @@ CREATE TABLE course_roles (
 CREATE TABLE course_members (
     course_id UUID NOT NULL,
     user_id UUID NOT NULL,
-    role_id UUID NOT NULL,
+    role_id UUID, -- TODO: make it required
     PRIMARY KEY (course_id, user_id),
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE
@@ -83,7 +83,7 @@ CREATE TABLE post_authors (
     visibility TEXT NOT NULL DEFAULT 'everyone', -- everyone, all_members, only_instructors, anonymous
     PRIMARY KEY (post_id, user_id),
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES profiles(id),
+    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE,
     CHECK (user_id IS NOT NULL OR pseudonym IS NOT NULL)
 );
 
