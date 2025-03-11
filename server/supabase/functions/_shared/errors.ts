@@ -26,6 +26,13 @@ export class AuthError extends Error {
         this.name = "AuthError"
     }
 }
+
+export class UserStatusError extends Error {
+    constructor(message: string) {
+        super(message)
+        this.name = "UserStatusError"
+    }
+}
 // export class ValidationError extends Error {
 //     constructor(message: string) {
 //         super(message)

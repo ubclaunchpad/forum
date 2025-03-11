@@ -3,19 +3,17 @@ import { supa } from "../_shared/db.ts";
 import {
   AccountStatus,
   AccountStatusValue,
-  NewUser,
   ProfileWithoutId,
   User,
   WithId,
   WithEmailAndPassword,
   emailPasswordSchema,
 } from "@shared/mod.ts";
-import { AuthError, InputValidationError, NotFoundError } from "../_shared/errors.ts";
+import {  InputValidationError, NotFoundError, UserStatusError } from "../_shared/errors.ts";
 import { signUpByEmailPassword } from "../_shared/utils/auth.ts";
 
 // TEMP
 const ENFORCE_INVITES = true;
-
 
 export function isInviteEnforced(): boolean {
   return ENFORCE_INVITES;
@@ -102,10 +100,6 @@ export async function createUserViaEmailPassword(
   );
 
   const statusToSet = ENFORCE_INVITES ? "waiting_for_approval" : "approve_on_login";
-  const accountStatus = await userController.getUserAccountStatus(
-    authUser.id,
-  );
-  if (!accountStatus) {
     await supa.from("account_status").insert({
       user_id: authUser.id,
       status: statusToSet,
@@ -117,19 +111,22 @@ export async function createUserViaEmailPassword(
     return {
       id: authUser.id,
     };
-  } else {
-    throw new AuthError("User already registered");
-  }
+
 }
 
-export async function deleteUserByEmail(email: string): Promise<void> {
+/**
+ * Delete a profile by email
+ * This function can only delete a profile - meaning if user has yet to be approved, it will not delete the user from auth
+ * To unconditionally delete a user, use deleteUserById
+ */
+export async function deleteProfileByEmail(email: string): Promise<void> {
   const { data, error: _ } = await supa.from("profiles").select("*").eq(
     "email",
     email,
   );
   if (!data || data.length === 0) {
     console.info(`User with email ${email} not found - try deleting user by id instead`);
-    return;
+    throw new NotFoundError(`User with email ${email} not found`);
   }
 
   const user = data[0];
@@ -168,93 +165,26 @@ export async function activateAccountAndProfile(
   }
 
   if (accountStatus.status === "active") {
-    throw new Error("User is already active");
+    throw new UserStatusError("User is already active");
   }
 
   if (accountStatus.status === "waiting_for_approval" && ENFORCE_INVITES) {
-    throw new Error("User is not authorized to access this application yet. Please contact an administrator to get access.");
+    throw new UserStatusError("User is not authorized to access this application yet. Please contact an administrator to get access.");
   }
-
 
   await createUserProfile({
     id: userId,
     ...profile,
-    username: profile.username ?? profile.email,
+    username: profile.username
   });
-  const { data: statusData, error: statusError } = await supa.from("account_status").update({
+  const { data: statusData, error: _ } = await supa.from("account_status").update({
     status: "active",
     approved_at: accountStatus.approved_at ?? new Date(),
     joined_at: new Date(),
   }).eq("user_id", userId).select().single();
 
-  if (statusError) {
-    throw new Error(statusError.message);
-  }
-
   return statusData;
 }
-
-
-// TODO: remove this function
-// /**
-//  * Invite a user to the application
-//  */
-// export async function inviteUserToApplication(
-//   userId: string,
-//   invitingUserId: string | null = null,
-//   autoActivate: boolean = false,
-// ): Promise<AccountStatus | null> {
-//   const user = await supa.auth.admin.getUserById(userId);
-//   const accountStatus = await userController.getUserAccountStatus(userId);
-
-//   if (autoActivate && user) {
-//     if (accountStatus?.status === "active") {
-//       console.info("User is already active", userId);
-//       return accountStatus;
-//     }
-//     // await userController.activateUserAccount(userId, user.data, true);
-//     return accountStatus;
-//   }
-
-//   if (accountStatus?.status === "active") {
-//     console.info("User is already active", userId);
-//     return accountStatus;
-//   }
-
-//   if (accountStatus?.status === "approve_on_login") {
-//     return accountStatus;
-//   } else {
-//     console.info("User is waiting for approval", userId);
-//     const status: AccountStatusValue = autoActivate
-//       ? "approve_on_login"
-//       : "waiting_for_approval";
-
-//     const { data: statusData, error: _ } = await supa.from("account_status")
-//       .insert({
-//         user_id: userId,
-//         status,
-//         invited_by: invitingUserId,
-//       }).select().single();
-
-//     return statusData;
-//   }
-// }
-
-// TODO: remove this function
-// /**
-//  * delete a user's invite
-//  */
-// export async function deleteUserInvite(
-//   userId: string,
-// ): Promise<void> {
-//   const { error: _ } = await supa.from("account_status").delete().eq(
-//     "user_id",
-//     userId,
-//   );
-//   //   if (error) {
-//   //     throw new DatabaseError(error.message);
-//   //   }
-// }
 
 /**
  * Approve a user's account
@@ -272,21 +202,11 @@ export async function approveUserAccount(
  */
 export async function getAllUsersAccountStatus(
   statusesToInclude: AccountStatusValue[],
-  includeProfile: boolean = false,
 ): Promise<(AccountStatus & Record<string, unknown>)[]> {
-  const { data, error: _ } = await supa.from("account_status").select(`
-    *,
-    ${includeProfile ? "profiles:user_id(*)" : ""}
-  `).in(
+  const { data, error: _ } = await supa.from("account_status").select('*').in(
     "status",
     statusesToInclude,
   );
-  //   if (error) {
-  //     throw new DatabaseError(error.message);
-  //   }
-  //   if (!data) {
-  //     throw new DatabaseError("No data returned from database");
-  //   }
   return data as unknown as (AccountStatus & Record<string, unknown>)[];
 }
 
@@ -297,19 +217,16 @@ export async function updateUserProfile(
   userId: string,
   updates: Partial<Omit<User, "id" | "email">>,
 ): Promise<User> {
-  const { data: profile, error: profileError } = await supa
+  const { data: profile} = await supa
     .from("profiles")
     .update(updates)
     .eq("id", userId)
     .select()
     .single();
 
-  if (profileError) {
-    throw new Error(profileError.message);
-  }
-
   if (!profile) {
     throw new NotFoundError("User not found");
+
   }
 
   return profile as User;
@@ -324,11 +241,7 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
     .select("id")
     .eq("id", userId);
 
-  if (!data) {
-    return false;
-  }
-
-  return data && data.length > 0;
+  return (data && data.length > 0) ?? false;
 }
 
 /**
@@ -342,16 +255,12 @@ export async function makeUserAdmin(userId: string): Promise<void> {
 
   const accountStatus = await userController.getUserAccountStatus(userId);
   if (!accountStatus || accountStatus.status !== "active") {
-    throw new Error("User account is not active");
+    throw new UserStatusError("User account is not active");
   }
 
   const { error: _ } = await supa
     .from("admin_users")
     .insert({ id: userId });
-
-  //   if (error) {
-  //     throw new DatabaseError(error.message);
-  //   }
 }
 
 /**
@@ -375,22 +284,6 @@ export async function getAllAdminUsers(): Promise<User[]> {
   const { data, error: _ } = await supa
     .from("admin_users")
     .select("*");
-
-  // const profiles = await supa
-  //   .from("profiles")
-  //   .select("*")
-
-  // const adminUsers = await supa
-  //   .from("admin_users")
-  //   .select('*');
-
-  //   if (error) {
-  //     throw new DatabaseError(error.message);
-  //   }
-
-  if (!data) {
-    return [];
-  }
 
   return data as unknown as User[];
 }
@@ -459,7 +352,7 @@ export const userController = {
   getAllUsersAccountStatus,
   updateUserProfile,
   createUserViaEmailPassword,
-  deleteUserByEmail,
+  deleteProfileByEmail,
   isUserAdmin,
   makeUserAdmin,
   removeUserAdmin,
@@ -470,3 +363,64 @@ export const userController = {
   updateUserPhoto,
   isInviteEnforced,
 };
+
+// TODO: remove this function
+// /**
+//  * Invite a user to the application
+//  */
+// export async function inviteUserToApplication(
+//   userId: string,
+//   invitingUserId: string | null = null,
+//   autoActivate: boolean = false,
+// ): Promise<AccountStatus | null> {
+//   const user = await supa.auth.admin.getUserById(userId);
+//   const accountStatus = await userController.getUserAccountStatus(userId);
+
+//   if (autoActivate && user) {
+//     if (accountStatus?.status === "active") {
+//       console.info("User is already active", userId);
+//       return accountStatus;
+//     }
+//     // await userController.activateUserAccount(userId, user.data, true);
+//     return accountStatus;
+//   }
+
+//   if (accountStatus?.status === "active") {
+//     console.info("User is already active", userId);
+//     return accountStatus;
+//   }
+
+//   if (accountStatus?.status === "approve_on_login") {
+//     return accountStatus;
+//   } else {
+//     console.info("User is waiting for approval", userId);
+//     const status: AccountStatusValue = autoActivate
+//       ? "approve_on_login"
+//       : "waiting_for_approval";
+
+//     const { data: statusData, error: _ } = await supa.from("account_status")
+//       .insert({
+//         user_id: userId,
+//         status,
+//         invited_by: invitingUserId,
+//       }).select().single();
+
+//     return statusData;
+//   }
+// }
+
+// TODO: remove this function
+// /**
+//  * delete a user's invite
+//  */
+// export async function deleteUserInvite(
+//   userId: string,
+// ): Promise<void> {
+//   const { error: _ } = await supa.from("account_status").delete().eq(
+//     "user_id",
+//     userId,
+//   );
+//   //   if (error) {
+//   //     throw new DatabaseError(error.message);
+//   //   }
+// }

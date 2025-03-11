@@ -1,27 +1,27 @@
-// import { assertEquals } from "jsr:@std/assert";
-// import { describe, it, beforeAll, afterAll, beforeEach, afterEach, before } from "jsr:@std/testing/bdd";
-// import { app } from "../../../users/index.ts"; 
-// import { userController } from "../../../users/controller.ts";
-// import { newUserSchema } from "@shared/schema/users.ts";
-// import type { AccountStatus, AccountStatusValue } from "@shared/schema/users.ts";
-// import {
-//     assertSpyCall,
-//     assertSpyCalls,
-//     returnsNext,
-//     Stub,
-//     stub,
-//   } from "jsr:@std/testing/mock";
-// import { supa } from "../../../_shared/db.ts";
+import { assertEquals } from "jsr:@std/assert";
+import { describe, it, beforeAll, afterAll, beforeEach, afterEach, before } from "jsr:@std/testing/bdd";
+import { app } from "../../../users/index.ts"; 
+import { userController } from "../../../users/controller.ts";
+import { newUserSchema } from "@shared/schema/users.ts";
+import type { AccountStatus, AccountStatusValue } from "@shared/schema/users.ts";
+import {
+    assertSpyCall,
+    assertSpyCalls,
+    returnsNext,
+    Stub,
+    stub,
+  } from "jsr:@std/testing/mock";
+import { supa } from "../../../_shared/db.ts";
 
-// // Test data
-// const testUser = {
-//     first_name: "Test",
-//     last_name: "User",
-//     email: "test@example.com",
-//     password: "securePassword123",
-//     timezone: "UTC",
-//     pronouns: "they/them",
-// };
+// Test data
+const testUser = {
+    first_name: "Test",
+    last_name: "User",
+    email: "test@example.com",
+    password: "securePassword123",
+    timezone: "UTC",
+    pronouns: "they/them",
+};
 
 // const testUsers = [
 //     {
@@ -38,44 +38,44 @@
 //     }
 // ];
 
-// describe("User API Tests", () => {
-//     beforeAll(async () => {
-//         const users = await supa.auth.admin.listUsers();
-//         for (const user of users.data.users) {
-//             await supa.auth.admin.deleteUser(user.id);
-//         }
-//     });
+describe("User API Tests", () => {
+    beforeAll(async () => {
+        const users = await supa.auth.admin.listUsers();
+        for (const user of users.data.users) {
+            await supa.auth.admin.deleteUser(user.id);
+        }
+    });
 
-//     beforeEach(async () => {
-//         const users = await supa.auth.admin.listUsers();
-//         for (const user of users.data.users) {
-//             await supa.auth.admin.deleteUser(user.id);
-//         }
-//     });
+    beforeEach(async () => {
+        const users = await supa.auth.admin.listUsers();
+        for (const user of users.data.users) {
+            await supa.auth.admin.deleteUser(user.id);
+        }
+    });
 
-//     afterAll(async () => {
-//         const users = await supa.auth.admin.listUsers();
-//         for (const user of users.data.users) {
-//             await supa.auth.admin.deleteUser(user.id);
-//         }
-//     });
+    afterAll(async () => {
+        const users = await supa.auth.admin.listUsers();
+        for (const user of users.data.users) {
+            await supa.auth.admin.deleteUser(user.id);
+        }
+    });
 
 //     describe("User Creation", () => {
-//         it("should reject user creation if email is not provided", async () => {
-//             const { email: _, ...invalidUser } = { ...testUser };
+        it("should reject user creation if email is not provided", async () => {
+            const { email: _, ...invalidUser } = { ...testUser };
             
-//             const res = await app.request('/users', {
-//                 method: 'POST',
-//                 headers: {
-//                     'Content-Type': 'application/json',
-//                 },
-//                 body: JSON.stringify(invalidUser)
-//             });
+            const res = await app.request('/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(invalidUser)
+            });
 
-//             assertEquals(res.status, 400);
-//             const data = await res.json();
-//             assertEquals(data.error, "Validation failed");
-//         });
+            assertEquals(res.status, 400);
+            const data = await res.json();
+            assertEquals(data.error, "Validation failed");
+        });
 
 //         it("should reject user creation if password is not provided", async () => {
 //             const { password: _, ...invalidUser } = { ...testUser };
@@ -537,4 +537,4 @@
 //     //         assertEquals(admin?.email, adminUser.email);
 //     //     });
 //     // });
-// });
+});

@@ -93,11 +93,8 @@ async function setupDevSeedData() {
     }
 
     console.log("Profiles created:", profiles)    
-
     
-
     await userController.makeUserAdmin(users[0].id)
-
     console.log("Database setup complete")
 }
 
