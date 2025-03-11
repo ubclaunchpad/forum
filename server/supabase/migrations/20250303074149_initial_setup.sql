@@ -58,8 +58,8 @@ CREATE TABLE course_members (
     role_id UUID NOT NULL,
     PRIMARY KEY (course_id, user_id),
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE,
-    FOREIGN KEY (role_id) REFERENCES course_roles(id) 
+    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE
+    -- FOREIGN KEY (role_id) REFERENCES course_roles(id) 
 );
 
 CREATE TABLE posts (
