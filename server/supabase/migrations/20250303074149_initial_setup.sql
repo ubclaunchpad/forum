@@ -177,9 +177,9 @@ CREATE TABLE account_status (
     status TEXT NOT NULL, -- active, inactive, waiting_for_approval, approve_on_login
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    invited_at TIMESTAMP WITH TIME ZONE,
-    invited_by UUID,
+    approved_at TIMESTAMP WITH TIME ZONE,
     joined_at TIMESTAMP WITH TIME ZONE,
+    approved_by UUID,
     FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE,
-    FOREIGN KEY (invited_by) REFERENCES profiles(id) ON DELETE SET NULL
+    FOREIGN KEY (approved_by) REFERENCES profiles(id) ON DELETE SET NULL
 );

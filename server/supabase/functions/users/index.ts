@@ -1,5 +1,7 @@
-import { Hono } from "jsr:@hono/hono";
-import { AccountStatusValue, ACCOUNT_STATUS_VALUES, newUserSchema } from "@shared/mod.ts";
+import { Context, Hono } from "jsr:@hono/hono";
+import { createMiddleware } from "jsr:@hono/hono/factory";
+import { cors } from 'jsr:@hono/hono/cors';
+import { AccountStatusValue, ACCOUNT_STATUS_VALUES, newUserSchema, ProfileWithoutId, profileWithoutId } from "@shared/mod.ts";
 import {
   approveUserAccount,
   deleteUserById,
@@ -8,15 +10,49 @@ import {
   getAllUsersAccountStatus,
   getUserAccountStatus,
   getUserById,
-  inviteUserToApplication,
   userController,
 } from "./controller.ts";
 import {
   NotFoundError,
 } from "../_shared/errors.ts";
+import { validateUserFromToken } from "../_shared/utils/auth.ts";
 
 const functionName = "users";
 const app = new Hono().basePath(`/${functionName}`); 
+
+app.use("*", cors({
+  origin: ["http://localhost:3000"],
+  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowHeaders: ["Authorization", "Content-Type", "*"],
+  exposeHeaders: ["Authorization", "Content-Type"],
+}));
+
+const validateUser = async (c: Context) => {
+  const token = c.req.header("Authorization")?.split(" ")[1];
+  if (!token) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+  try {
+    const user = await validateUserFromToken(token);
+    return user;
+  } catch {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+}
+
+type UserVariables = {
+  user: any;
+};
+
+const authMiddleware = createMiddleware<{
+  Variables: UserVariables;
+}>(async (c: Context<{ Variables: UserVariables }>, next: () => Promise<void>) => {
+  const user = await validateUser(c);
+  c.set('user', user);
+  await next();
+});
+
+app.use("*", authMiddleware);
 
 // Get all users
 app.get("/", async (c) => {
@@ -56,7 +92,7 @@ app.post("/", async (c) => {
 });
 
 // Get user by ID
-app.get("/:id", async (c) => {
+app.get("/:id", async (c: Context<{ Variables: UserVariables }>) => {
   try {
     const { id } = c.req.param();
     const user = await getUserById(id);
@@ -89,21 +125,6 @@ app.delete("/:id", async (c) => {
   }
 });
 
-// Invite user to application
-app.post("/:id/invite", async (c) => {
-  try {
-    const { id } = c.req.param();
-    await inviteUserToApplication(id, '');
-    return c.json({ message: "User invited successfully" }, 200);
-  } catch (error) {
-    if (error instanceof NotFoundError) {
-      return c.json({ error: error.message }, 404);
-    }
-    if (error instanceof Error) {
-      return c.json({ error: error.message }, 500);
-    }
-  }
-});
 
 // Delete user invite
 app.delete("/:id/invite", async (c) => {
@@ -122,11 +143,57 @@ app.delete("/:id/invite", async (c) => {
 });
 
 // Get user account status
-app.get("/:id/status", async (c) => {
+app.get("/:id/status", async (c: Context<{ Variables: UserVariables }>) => {
   try {
+    const user2 = c.var.user;
+    console.log(user2);
     const { id } = c.req.param();
+    console.log(id);
+    console.log("here");
     const status = await getUserAccountStatus(id);
     return c.json(status);
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      return c.json({ error: error.message }, 404);
+    }
+    if (error instanceof Error) {
+      return c.json({ error: error.message }, 500);
+    }
+  }
+});
+
+app.post("/:id/status", async (c: Context<{ Variables: UserVariables }>) => {
+  // try {
+  //   const user = c.var.user;
+  //   const { id } = c.req.param();
+  //   const statusData = await inviteUserToApplication(id, null, false);
+  //   return c.json({ status: statusData }, 200);
+  // } catch (error) {
+  //   if (error instanceof NotFoundError) {
+  //     return c.json({ error: error.message }, 404);
+  //   }
+  //   if (error instanceof Error) {
+  //     return c.json({ error: error.message }, 500);
+  //   }
+  // }
+});
+
+app.post("/:id/activate", async (c: Context<{ Variables: UserVariables }>) => {
+  try {
+    const { id } = c.req.param();
+    const body = await c.req.json();
+    console.log("here");
+    console.log(body);
+    const data = profileWithoutId.safeParse(body);
+    console.log("here");
+    console.log(data);
+    if (!data.success) {
+      return c.json({ error: data.error.message }, 400);
+    }
+    console.log("here");
+    console.log(data.data);
+    await userController.activateUserAccount(id, data.data, false);
+    return c.json({ message: "User account activated successfully" }, 200);
   } catch (error) {
     if (error instanceof NotFoundError) {
       return c.json({ error: error.message }, 404);
@@ -176,6 +243,51 @@ app.get("/admin/status", async (c) => {
     if (error instanceof Error) {
       return c.json({ error: error.message }, 500);
     }
+  }
+});
+
+
+app.post("/:id/photo", async (c: Context<{ Variables: UserVariables }>) => {
+  try {
+    const { id } = c.req.param();
+    const user = c.var.user;
+    if (user.id !== id) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+    const { file } = await c.req.parseBody();
+    if (!file) {
+      return c.json({ error: "No file provided" }, 400);
+    }
+    if (file instanceof File) {
+      await userController.updateUserPhoto(id, file);
+      console.log("here");
+      return c.json({ message: "Photo uploaded successfully" }, 200);
+    }
+    return c.json({ error: "Invalid file type" }, 400);
+  } catch (error) {
+    if (error instanceof Error) {
+      return c.json({ error: error.message }, 500);
+    }
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+
+app.patch("/:id", async (c: Context<{ Variables: UserVariables }>) => {
+  try {
+    const { id } = c.req.param();
+    const user = c.var.user;
+    if (user.id !== id) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+    const data = await c.req.json();
+    await userController.updateUserProfile(id, data);
+    return c.json({ message: "User profile updated successfully" }, 200);
+  } catch (error) {
+    if (error instanceof Error) {
+      return c.json({ error: error.message }, 500);
+    }
+    return c.json({ error: "Internal server error" }, 500);
   }
 });
 

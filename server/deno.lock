@@ -15,7 +15,8 @@
     "npm:@supabase/realtime-js@2.11.2": "2.11.2",
     "npm:@supabase/storage-js@2.7.1": "2.7.1",
     "npm:@types/node@*": "22.12.0",
-    "npm:zod@*": "3.24.2"
+    "npm:zod@*": "3.24.2",
+    "npm:zod@3.24.2": "3.24.2"
   },
   "jsr": {
     "@hono/hono@4.7.2": {
