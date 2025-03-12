@@ -17,7 +17,6 @@ import { Label } from "../ui/label";
 import { useContext, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { userContext } from "@/contexts/userContext";
-import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import {
@@ -84,7 +83,6 @@ export default function ProfileFullView() {
   const { profile, token, refetchProfile } = useContext(userContext);
   const [isEditMode, setIsEditMode] = useState(false);
   const [formData, setFormData] = useState(profile);
-  const { toast } = useToast();
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -175,7 +173,6 @@ export default function ProfileFullView() {
               value={formData.email || ""}
               onChange={handleInputChange}
               editMode={isEditMode}
-          
               icon={<Mail className="w-4 h-4" />}
             />
             <ProfileField
@@ -266,13 +263,11 @@ export default function ProfileFullView() {
 }
 
 export const ProfileViewPage = ({
-  isEditMode = false,
   setIsEditMode,
 }: {
-  isEditMode: boolean;
   setIsEditMode: (isEditMode: boolean) => void;
 }) => {
-  const { profile, token } = useContext(userContext);
+  const { profile } = useContext(userContext);
   return (
     <div className="flex flex-col items-center gap-12 justify-center max-w-3xl w-full">
       <div className="flex gap-4 w-full  gap-12">
@@ -310,7 +305,10 @@ export const ProfileViewPage = ({
                   <MailIcon className="w-4 h-4" />
                 </p>
               </div>
-              <Link  href={`mailto:${profile.email}`} className="text-sm hover:underline">
+              <Link
+                href={`mailto:${profile.email}`}
+                className="text-sm hover:underline"
+              >
                 {profile.email}
               </Link>
             </div>
@@ -371,7 +369,7 @@ export const ProfileViewPage = ({
 //   );
 // }
 
-function AvatarEditButton({}: {}) {
+function AvatarEditButton() {
   const [edittingPhoto, setEdittingPhoto] = useState(false);
   const [photo, setPhoto] = useState<File | null>(null);
   const { profile, token, refetchProfile } = useContext(userContext);
@@ -402,7 +400,7 @@ function AvatarEditButton({}: {}) {
       toast.error("Failed to upload profile photo");
     }
   };
-  
+
   return (
     <div className="flex relative rounded-full border flex-col items-center gap-4">
       <Avatar className="h-40 w-40 border shadow-sm ">

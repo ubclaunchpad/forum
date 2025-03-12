@@ -5,7 +5,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { getApiUrl } from "@/utils/helpers";
 
-export type UserStatus = "active" | "inactive" | "waiting_for_approval" | "approve_on_login";
+export type UserStatus =
+  | "active"
+  | "inactive"
+  | "waiting_for_approval"
+  | "approve_on_login";
 
 export async function checkUserStatus() {
   const supabase = await createClient();
@@ -46,7 +50,7 @@ export async function checkUserStatus() {
       }
 
       data = await resp2.json();
-   
+
       if (data == null || data.status == null) {
         throw new Error("Failed to fetch user status");
       }

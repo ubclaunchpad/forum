@@ -77,7 +77,6 @@ export default function SignUp() {
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="space-y-0">
-          
           <div className="">
             <Label htmlFor="email">Email</Label>
             <Input

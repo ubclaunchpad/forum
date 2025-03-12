@@ -69,7 +69,7 @@ export function UserContextProvider({
       token,
       refetchProfile,
     });
-  }, [user, token]);
+  }, [user, token, refetchProfile]);
 
   useEffect(() => {
     getProfile();

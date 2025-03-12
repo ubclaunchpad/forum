@@ -27,13 +27,10 @@ export const signUpSchema = z
       const { password, email } = data;
       const emailIdentifier = email.split("@")[0];
       const lowerPassword = password.toLowerCase();
-      return (
-        !lowerPassword.includes(emailIdentifier.toLowerCase())
-      );
+      return !lowerPassword.includes(emailIdentifier.toLowerCase());
     },
     {
-      message:
-        "Password cannot contain your email identifier",
+      message: "Password cannot contain your email identifier",
       path: ["password"],
     },
   );

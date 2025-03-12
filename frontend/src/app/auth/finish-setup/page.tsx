@@ -43,7 +43,7 @@ export default function FinishSetup() {
       try {
         const userData = await checkUserStatus();
         setStatus(userData.status);
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           firstName: userData.firstName,
           lastName: userData.lastName,
@@ -82,11 +82,13 @@ export default function FinishSetup() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { id, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [id]: value
+      [id]: value,
     }));
   };
 
@@ -98,13 +100,12 @@ export default function FinishSetup() {
     );
   }
 
-  if (status === null)   {
+  if (status === null) {
     return (
       <Card className="w-full max-w-lg min-h-[450px] px-12 py-3 flex shadow-lg flex-col rounded-xl items-center justify-center">
         <CardHeader className="text-center">
           <h2 className="text-2xl font-semibold">Complete Setup</h2>
-          <p className="text-muted-foreground mt-2">
-          </p>
+          <p className="text-muted-foreground mt-2"></p>
         </CardHeader>
       </Card>
     );
@@ -234,7 +235,8 @@ export default function FinishSetup() {
         {status}
         <h2 className="text-2xl font-semibold">No Access</h2>
         <p className="text-muted-foreground mt-2">
-           Cannot access this page. Please contact an administrator if you believe this is an error.
+          Cannot access this page. Please contact an administrator if you
+          believe this is an error.
         </p>
       </CardHeader>
     </Card>
