@@ -5,7 +5,7 @@ export type Profile = {
   email?: string;
   joined_at?: string;
   display_name?: string;
-  icon_url?: string;
+  avatar_url?: string;
   pronouns?: string;
   username?: string;
   timezone: string;

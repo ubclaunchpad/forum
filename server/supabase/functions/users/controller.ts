@@ -114,6 +114,15 @@ export async function createUserViaEmailPassword(
 
 }
 
+async function initializeUserAccountStatus(userId: string): Promise<AccountStatus> {
+  const {data } = await supa.from("account_status").insert({
+    user_id: userId,
+    status: ENFORCE_INVITES ? "waiting_for_approval" : "approve_on_login",
+  }).select().single()
+
+  return data
+}
+
 /**
  * Delete a profile by email
  * This function can only delete a profile - meaning if user has yet to be approved, it will not delete the user from auth
@@ -218,6 +227,7 @@ export async function updateUserProfile(
   updates: Partial<Omit<User, "id" | "email">>,
 ): Promise<User> {
   const { data: profile} = await supa
+    .schema("public")
     .from("profiles")
     .update(updates)
     .eq("id", userId)
@@ -362,8 +372,9 @@ export const userController = {
   deleteUserById,
   updateUserPhoto,
   isInviteEnforced,
+  initializeUserAccountStatus,
 };
-
+``
 // TODO: remove this function
 // /**
 //  * Invite a user to the application

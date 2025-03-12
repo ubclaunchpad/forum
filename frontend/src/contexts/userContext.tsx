@@ -15,6 +15,7 @@ type Account = {
   user: User;
   profile: Profile;
   token: string;
+  refetchProfile: () => Promise<void>;
 };
 
 export const userContext = createContext({} as Account);
@@ -29,9 +30,28 @@ export function UserContextProvider({
   token: string;
 }) {
   const [account, setAccount] = useState<Account>({} as Account);
+  const refetchProfile = useCallback(async () => {
+    const res = await fetch(`${getApiUrl()}/users/${user.id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      return;
+    }
+    const profile = await res.json();
+
+    setAccount((prev) => ({
+      ...prev,
+      profile,
+    }));
+  }, [user, token]);
 
   const getProfile = useCallback(async () => {
-    const res = await fetch(`${getApiUrl()}/users/user/me`, {
+    const res = await fetch(`${getApiUrl()}/users/${user.id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -47,6 +67,7 @@ export function UserContextProvider({
       user,
       profile,
       token,
+      refetchProfile,
     });
   }, [user, token]);
 

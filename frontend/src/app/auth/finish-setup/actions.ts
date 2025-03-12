@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { getApiUrl } from "@/utils/helpers";
 
-export type UserStatus = "pending_invite" | "pending_setup" | "active";
+export type UserStatus = "active" | "inactive" | "waiting_for_approval" | "approve_on_login";
 
 export async function checkUserStatus() {
   const supabase = await createClient();
@@ -18,8 +18,10 @@ export async function checkUserStatus() {
   }
 
   try {
-    const response = await fetch(`${getApiUrl()}/users/user/status`, {
-      method: "POST",
+    const id = session.user.id;
+    const url = `${getApiUrl()}/users/${id}/status`;
+    const response = await fetch(url, {
+      method: "GET",
       headers: {
         Authorization: `Bearer ${session.access_token}`,
       },
@@ -29,10 +31,30 @@ export async function checkUserStatus() {
       throw new Error("Failed to fetch user status");
     }
 
-    const data = await response.json();
+    let data = await response.json();
+
+    if (data == null || data.status == null) {
+      const resp2 = await fetch(`${getApiUrl()}/users/${id}/status`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (!resp2.ok) {
+        throw new Error("Failed to fetch user status");
+      }
+
+      data = await resp2.json();
+   
+      if (data == null || data.status == null) {
+        throw new Error("Failed to fetch user status");
+      }
+      data = data.status;
+    }
 
     if (data.status === "active") {
-      redirect("/");
+      redirect("/forum/courses");
     }
 
     const userData = {
@@ -40,17 +62,6 @@ export async function checkUserStatus() {
       firstName: "",
       lastName: "",
     };
-
-    if (data.status === "pending_setup") {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user?.user_metadata?.full_name) {
-        const fullName = user.user_metadata.full_name;
-        userData.firstName = fullName.split(" ")[0] || "";
-        userData.lastName = fullName.split(" ").slice(1).join(" ") || "";
-      }
-    }
 
     return userData;
   } catch (error) {
@@ -62,6 +73,11 @@ export async function checkUserStatus() {
 export async function finishSetup(formData: {
   firstName: string;
   lastName: string;
+  username: string;
+  pronouns: string;
+  timezone: string;
+  bio: string;
+  displayName: string;
 }) {
   const supabase = await createClient();
 
@@ -73,7 +89,8 @@ export async function finishSetup(formData: {
   }
 
   try {
-    const response = await fetch(`${getApiUrl()}/users/user/finish-setup`, {
+    const id = session.user.id;
+    const response = await fetch(`${getApiUrl()}/users/${id}/activate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -82,6 +99,13 @@ export async function finishSetup(formData: {
       body: JSON.stringify({
         first_name: formData.firstName,
         last_name: formData.lastName,
+        email: session.user.email,
+        username: formData.username,
+        pronouns: formData.pronouns,
+        timezone: formData.timezone,
+        bio: formData.bio,
+        social_links: null,
+        display_name: formData.displayName,
       }),
     });
 
@@ -91,6 +115,7 @@ export async function finishSetup(formData: {
     }
 
     revalidatePath("/", "layout");
+    redirect("/forum/courses");
   } catch (error) {
     console.error("Setup error:", error);
     throw error;

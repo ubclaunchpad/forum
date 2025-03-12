@@ -82,7 +82,7 @@ export function ProfileButton() {
         )}
       >
         <Avatar className="w-9 h-9">
-          <AvatarImage src={profile.icon_url} className="object-cover" />
+          <AvatarImage src={profile.avatar_url} className="object-cover" />
           <AvatarFallback>
             {profile.first_name[0]}
             {profile.last_name[0]}

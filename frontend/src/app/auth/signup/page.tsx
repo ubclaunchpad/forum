@@ -44,7 +44,7 @@ export default function SignUp() {
         title: "Account created",
         description: "Welcome to the Forum Community",
       });
-      router.push("/forum/courses");
+      router.push("/auth/signin");
     } else {
       toast({
         title: "Sign Up Error",
@@ -77,42 +77,7 @@ export default function SignUp() {
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="space-y-0">
-          <div className="flex items-center gap-4">
-            <div className=" w-full">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                placeholder="John"
-                className={signupInputStyle}
-                {...register("firstName")}
-                aria-invalid={errors.firstName ? "true" : "false"}
-              />
-              <div className="mt-1 h-6 pl-2 w-full">
-                {errors.firstName && (
-                  <p className="text-xs text-red-500">
-                    {errors.firstName.message}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="w-full">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                placeholder="Doe"
-                className={signupInputStyle}
-                {...register("lastName")}
-                aria-invalid={errors.email ? "true" : "false"}
-              />
-              <div className="mt-1 h-6 pl-2 w-full">
-                {errors.lastName && (
-                  <p className="text-xs text-red-500">
-                    {errors.lastName.message}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+          
           <div className="">
             <Label htmlFor="email">Email</Label>
             <Input
