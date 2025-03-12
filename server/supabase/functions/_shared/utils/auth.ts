@@ -1,5 +1,5 @@
 import { supa } from "../db.ts";
-// import { NotFoundError } from "../errors.ts";
+import { AuthError } from "../errors.ts";
 
 
 export async function signUpByEmailPassword(email: string, password: string, args: Record<string, unknown> = {}) {
@@ -12,11 +12,11 @@ export async function signUpByEmailPassword(email: string, password: string, arg
     });
 
     if (error) {
-        throw new Error(error.message);
+        throw new AuthError(error.message);
     }
 
     if (!data.user) {
-        throw new Error("User not found");
+        throw new AuthError("User not found");
     }
 
     return data.user;
@@ -28,4 +28,14 @@ export async function deleteUser(userId: string) {
     if (error) {
         throw new Error(error.message);
     }
+}
+
+
+export async function validateUserFromToken(token: string) {
+    const { data, error } = await supa.auth.getUser(token);
+    if (error) {
+        throw new Error(error.message);
+    }
+
+    return data.user;
 }

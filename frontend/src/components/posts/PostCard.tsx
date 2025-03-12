@@ -81,7 +81,11 @@ export const PostCard = <T extends PostType>({
     }
   }
 
-  async function updateInteraction(post: Post, method: string, endpoint: string) {
+  async function updateInteraction(
+    post: Post,
+    method: string,
+    endpoint: string,
+  ) {
     const response = await fetch(
       `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/${endpoint}`,
       {
@@ -90,7 +94,7 @@ export const PostCard = <T extends PostType>({
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.token}`,
         },
-      }
+      },
     );
     fetch("/api/revalidate", {
       method: "POST",
@@ -106,7 +110,7 @@ export const PostCard = <T extends PostType>({
   }
 
   const handleLikeClick = async (post: Post, addLike: boolean) => {
-    const likeVal = addLike ? 1 : -1
+    const likeVal = addLike ? 1 : -1;
     const updatedPost = {
       ...post,
       user_interactions: {
@@ -118,17 +122,16 @@ export const PostCard = <T extends PostType>({
         likes: (post.stats?.likes || 0) + likeVal,
       },
     };
-  
+
     // Update UI optimistically
     updatePost(updatedPost);
-  
+
     try {
       if (addLike) {
-        await updateInteraction(post, 'POST', 'like');
+        await updateInteraction(post, "POST", "like");
       } else {
-        await updateInteraction(post, 'DELETE', 'like');
+        await updateInteraction(post, "DELETE", "like");
       }
-      
     } catch (error) {
       // Revert state if API call fails
       updatePost({
@@ -160,11 +163,11 @@ export const PostCard = <T extends PostType>({
           views: (post.stats?.views || 0) + 1,
         },
       };
-      
+
       updatePost(updatedPost);
 
       try {
-        await updateInteraction(post, 'PUT', 'view');
+        await updateInteraction(post, "PUT", "view");
       } catch (error) {
         // In case of failure, revert the optimistic update
         updatePost({
@@ -220,7 +223,11 @@ export const PostCard = <T extends PostType>({
         <div className="flex items-center gap-2 flex-shrink-0">
           {post.applied_at && (
             <h2 className="font-medium text-xs whitespace-nowrap">
-              {getRelativeTimeString(new Date(post.applied_at).getTime(), "en", 30)}
+              {getRelativeTimeString(
+                new Date(post.applied_at).getTime(),
+                "en",
+                30,
+              )}
             </h2>
           )}
 
@@ -249,19 +256,21 @@ export const PostCard = <T extends PostType>({
 
           {/* Display likes, and allow user to like post */}
           <div className="flex items-center gap-2">
-          {post.user_interactions?.liked ? (
-            <ThumbsUp
-              className="h-5 w-5 text-primary-600 cursor-pointer"
-              fill="currentColor"
-              onClick={() => handleLikeClick(post as Post, false)}
-            />
-          ) : (
-            <ThumbsUp
-              className="h-5 w-5 text-primary-600 cursor-pointer"
-              onClick={() => handleLikeClick(post as Post, true)}
-            />
-          )}
-          <span className="text-xs text-neutral-700">{post.stats?.likes || 0}</span>
+            {post.user_interactions?.liked ? (
+              <ThumbsUp
+                className="h-5 w-5 text-primary-600 cursor-pointer"
+                fill="currentColor"
+                onClick={() => handleLikeClick(post as Post, false)}
+              />
+            ) : (
+              <ThumbsUp
+                className="h-5 w-5 text-primary-600 cursor-pointer"
+                onClick={() => handleLikeClick(post as Post, true)}
+              />
+            )}
+            <span className="text-xs text-neutral-700">
+              {post.stats?.likes || 0}
+            </span>
           </div>
 
           <Popover>

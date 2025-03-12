@@ -13,6 +13,26 @@ export class NotFoundError extends Error {
     }
 }
 
+export class InputValidationError extends Error {
+    constructor(message: string) {
+        super(message)
+        this.name = "InputValidationError"
+    }
+}
+
+export class AuthError extends Error {
+    constructor(message: string) {
+        super(message)
+        this.name = "AuthError"
+    }
+}
+
+export class UserStatusError extends Error {
+    constructor(message: string) {
+        super(message)
+        this.name = "UserStatusError"
+    }
+}
 // export class ValidationError extends Error {
 //     constructor(message: string) {
 //         super(message)

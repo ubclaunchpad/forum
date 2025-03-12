@@ -1,4 +1,5 @@
-import { z } from "@shared/deps.ts"
+import { z } from "../deps.ts";
+
 
 export const newUserSchema = z.object({
     first_name: z.string(),
@@ -16,6 +17,14 @@ export const newUserSchema = z.object({
 
 export type NewUser = z.infer<typeof newUserSchema>
 
+export const emailPasswordSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(8).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+        .describe("Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character")
+})
+
+export type WithEmailAndPassword = z.infer<typeof emailPasswordSchema>
+
 export const userSchema = z.object({
     id: z.string(),
     first_name: z.string(),
@@ -25,12 +34,17 @@ export const userSchema = z.object({
     pronouns: z.string().optional(),
     avatar_url: z.string().optional(),
     bio: z.string().optional(),
-    social_links: z.array(z.string()).optional(),
+    social_links: z.array(z.string()).optional().nullable(),
     display_name: z.string().optional(),
     username: z.string()
 })
 
 export type User = z.infer<typeof userSchema>
+
+
+export type WithId<T> = T & {
+    id: string;
+}
 
 
 export const profileWithoutId = userSchema.omit({
@@ -49,7 +63,7 @@ export type AccountStatus = {
     status: AccountStatusValue;
     created_at: Date;
     updated_at: Date;
-    invited_at: Date | null;
-    invited_by: string | null;
+    approved_at: Date | null;
+    approved_by: string | null;
     joined_at: Date | null;
 };
