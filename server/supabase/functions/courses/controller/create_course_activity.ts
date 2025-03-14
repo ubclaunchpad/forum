@@ -1,6 +1,6 @@
 import { supa } from "../../_shared/db.ts";
 
-import { Course, NewCourse } from "@shared/mod.ts";
+import { Course, NewCourse, DEFAULT_ROLES, instructorRole } from "@shared/mod.ts";
 import { NotFoundError, InputValidationError } from '../../_shared/errors.ts';
 
 export async function createCourse(
@@ -28,13 +28,10 @@ export async function createCourse(
 }
 
 async function createCourseRoles(courseId: string) {
-  // Assumes that the roles are already created
-  const roleNames = ["instructor", "staff", "student"];
-
   const { data: rolesData, error: rolesError } = await supa
     .from("account_roles")
     .select("id, name")
-    .in("name", roleNames);
+    .in("name", DEFAULT_ROLES);
 
   if (rolesError || !rolesData || rolesData.length !== 3) {
     throw new Error(
@@ -65,7 +62,7 @@ async function addInstructorToCourse(courseId: string, userId: string) {
   const { data: instructorRoleData, error: instructorRoleError } = await supa
     .from("account_roles")
     .select("id")
-    .eq("name", "instructor")
+    .eq("name", instructorRole)
     .single();
 
   if (instructorRoleError || !instructorRoleData) {
