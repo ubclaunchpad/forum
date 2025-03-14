@@ -1,9 +1,9 @@
 CREATE TABLE courses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     code TEXT NOT NULL,
-    section TEXT,
+    section TEXT NOT NULL,
+    department TEXT NOT NULL,
     name TEXT NOT NULL,
-    term TEXT NOT NULL,
     description TEXT,
     start_date TIMESTAMP WITH TIME ZONE,
     end_date TIMESTAMP WITH TIME ZONE,
@@ -11,7 +11,7 @@ CREATE TABLE courses (
     config JSONB NOT NULL DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (code, section, term)
+    UNIQUE (code, section, department)
 );
 
 
@@ -33,15 +33,23 @@ CREATE TABLE profiles (
     FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE
 );
 
-
-CREATE TABLE course_roles (
+-- just holds names for roles
+CREATE TABLE account_roles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL UNIQUE, -- instructor, staff, student
     description TEXT,
     config JSONB NOT NULL DEFAULT '{}',
-    permissions JSONB NOT NULL DEFAULT '{}',
+    default_permissions JSONB NOT NULL DEFAULT '{}', -- permissions that are granted to the role by default
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE course_roles (
+    course_id UUID NOT NULL,
+    role_id UUID NOT NULL,
+    FOREIGN KEY (role_id) REFERENCES account_roles(id),
+    FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
 
 CREATE TABLE course_members (
@@ -50,8 +58,7 @@ CREATE TABLE course_members (
     role_id UUID NOT NULL,
     PRIMARY KEY (course_id, user_id),
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE,
-    FOREIGN KEY (role_id) REFERENCES course_roles(id) 
+    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE
 );
 
 CREATE TABLE posts (
@@ -75,7 +82,7 @@ CREATE TABLE post_authors (
     visibility TEXT NOT NULL DEFAULT 'everyone', -- everyone, all_members, only_instructors, anonymous
     PRIMARY KEY (post_id, user_id),
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES profiles(id),
+    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE,
     CHECK (user_id IS NOT NULL OR pseudonym IS NOT NULL)
 );
 
