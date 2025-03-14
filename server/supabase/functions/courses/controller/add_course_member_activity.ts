@@ -1,36 +1,22 @@
-import { supa } from "../_shared/db.ts"; 
-import { Course } from "../../shared/schema/course.ts";
-import { NotFoundError, PermissionError } from '../../_shared/errors.ts';
+import { supa } from "../../_shared/db.ts"; 
+import { Course, DefaultRoles, studentRole } from '../../../../../shared/schema/course.ts';
+import { NotFoundError, PermissionError, InputValidationError } from '../../_shared/errors.ts';
+
+NotFoundError
 
 export async function addUserToCourse(
   course_id: string,
   user_id: string,
-  role?: any // TODO: @victor: fix this
-): Promise<boolean> { // TODO: @victor: probably good for this function to use one of error handling or return false/true instead of a mix of both
-    const course = getCourse(course_id);
+  role?: DefaultRoles 
+) { 
+    const course = await getCourse(course_id);
 
-    const { data: user, error: userError } = await supa.from("profiles").select("*").eq("id", user_id).single();
+    await checkIfUserExistsAndInCourse(user_id, course_id);
 
-    if (userError || !user) {
-        throw new Error("User not found");
-    }
-
-    const { data: existingUserCourse } = await supa
-        .from("course_members")
-        .select("*")
-        .eq("course_id", course_id)
-        .eq("user_id", user_id)
-        .single();
-
-    if (existingUserCourse) {
-        throw new Error("User already registered in course");
-    }
-
-    // TODO: @victor: check shared/schema/course.ts for notes on how to get this is a more type safe way
-    const roleData = getRole(role);
+    const roleData = await getRole(role);
 
     const { error: joinError } = await supa
-        .from("user_courses")
+        .from("course_members")
         .insert([{ 
             course_id: course_id, 
             user_id: user_id, 
@@ -44,42 +30,63 @@ export async function addUserToCourse(
     return true;
 }
 
-function getCourse(course_id: string): Course { 
+async function getCourse(course_id: string): Promise<Course> { 
     const { data: course, error: courseError } = await supa.from("courses")
-        .select("*").eq("id", course_id).single();
+        .select("*").eq("id", course_id);
 
     if (courseError) {
-        throw new Error(`Database error when retrieving course with id $(course_id): $() `);
+        throw new Error(`Database error when retrieving course with id ${course_id}: ${courseError.message}`);
     }
 
-    if (!course) {
-        throw new NotFoundError(`Course with id $(course_id) not found`);
+    if (!course || course.length !== 1) {
+        throw new NotFoundError(`Course with id ${course_id} not found`);
     }
 
-    if (course.access === "private") {
+    if (course[0].access === "private") {
         throw new PermissionError("Cannot join a private course");
     }
     
-    return course as Course;
+    return course[0] as Course;
 }
 
-function getRole(role: string) {
+async function checkIfUserExistsAndInCourse(user_id: string, course_id: string) {
+    const { data: user, error: userError } = await supa.from("profiles").select("*").eq("id", user_id);
+
+    if (userError) {
+        throw new Error(`Database error when retrieving user with id ${user_id}: ${userError.message}`);
+    } 
+    if (!user || user.length !== 1) {
+        throw new NotFoundError(`User ${user_id} not found`);
+    }
+
+    const { data: existingUserCourse } = await supa
+        .from("course_members")
+        .select("*")
+        .eq("course_id", course_id)
+        .eq("user_id", user_id)
+        .single();
+
+    if (existingUserCourse) {
+        throw new InputValidationError(`User ${user_id} already registered in course ${course_id}`);
+    }
+}
+
+async function getRole(role: DefaultRoles | undefined ): Promise<{ id: string }> {
     if (!role) {
-        role = "student"; // use student by default
+        role = studentRole; // use student by default
     }
 
     const { data: roleData, error: roleError } = await supa.from("account_roles")
         .select("id")
-        .eq("name", role)
-        .single();
+        .eq("name", role);
 
     if (roleError) {
         throw new Error("Database error ")
     }
 
-    if (!roleData) {
-        throw new NotFoundError("Role not found: " + (roleError?.message || "No data returned"));
+    if (!roleData || roleData.length !== 1) {
+        throw new NotFoundError(`Role ${role} not found`);
     }
 
-    return roleData;
+    return roleData[0];
 }
