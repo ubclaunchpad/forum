@@ -52,6 +52,28 @@ const profiles: ProfileWithoutId[] = [
   },
 ];
 
+const courses: NewCourse[] = [
+  {
+    code: 301,
+    department: "CS",
+    section: "001",
+    access: "public",
+    name: "Introduction to Computer Science",
+    config: {
+      theme_colour: "#000000",
+      font: "Arial",
+    },
+    start_date: new Date("2024-01-01"),
+  },
+  {
+    code: 302,
+    department: "CS",
+    section: "002",
+    access: "public",
+    name: "Introduction to Computer Science",
+  },
+];
+
 /**
  * This file is used to setup the database for development purposes.
  * It is gitignored so it is not committed to the repo.
@@ -98,7 +120,17 @@ async function setupDevSeedData() {
   console.log("Profiles created:", profiles);
 
   await userController.makeUserAdmin(users[0].id);
+
+  // create two courses
+  const course1 = await createCourse(courses[0], users[0].id);
+  const course2 = await createCourse(courses[1], users[0].id);
+
+  console.log("Courses created:", course1, course2);
+
+
   console.log("Database setup complete");
+
+
 }
 
 async function emptyDatabase() {
@@ -170,3 +202,11 @@ export async function courseTestSeedSetup(
   }
   return coursesCreated;
 }
+
+
+// emptyDatabase().then(() => {
+//   console.log("Database emptied");
+//   setupDevSeedData().then(() => {
+//     console.log("Database setup complete");
+//   });
+// });
