@@ -1,6 +1,7 @@
 import { supa } from "../../_shared/db.ts";
 
 import { Course, NewCourse } from "@shared/mod.ts";
+import { NotFoundError, InputValidationError } from '../../_shared/errors.ts';
 
 export async function createCourse(
   newCourse: NewCourse,
@@ -12,13 +13,21 @@ export async function createCourse(
     }).select().single();
 
   if (courseError) {
-    throw new Error("Failed to create course: " + courseError.message);
+    throw new InputValidationError("Failed to create course: " + courseError.message);
   }
 
   console.log(userId);
 
   console.log("course", course);
 
+  await createCourseRoles(course.id);
+
+  await addInstructorToCourse(course.id, userId);
+
+  return course as Course;
+}
+
+async function createCourseRoles(courseId: string) {
   // Assumes that the roles are already created
   const roleNames = ["instructor", "staff", "student"];
 
@@ -37,7 +46,7 @@ export async function createCourse(
   const courseRolesToInsert = rolesData.map((
     role: { id: string; name: string },
   ) => ({
-    course_id: course.id,
+    course_id: courseId,
     role_id: role.id,
   }));
 
@@ -50,7 +59,9 @@ export async function createCourse(
       "Failed to create course roles: " + courseRolesError.message,
     );
   }
+}
 
+async function addInstructorToCourse(courseId: string, userId: string) {
   const { data: instructorRoleData, error: instructorRoleError } = await supa
     .from("account_roles")
     .select("id")
@@ -58,48 +69,23 @@ export async function createCourse(
     .single();
 
   if (instructorRoleError || !instructorRoleData) {
-    throw new Error(
-      "Failed retrieving instructor role, which was expected to succeed" + 
+    throw new NotFoundError(
+      "Failed retrieving instructor role: " + 
       (instructorRoleError?.message || "Retrieved nothing")
     );
   }
 
-  const { error } = await supa.from("course_members").insert({
-    course_id: course.id,
-    user_id: userId,
-    role_id: instructorRoleData.id
-  });
-  if (error) {
-    throw new Error("Failed to create course member: " + error.message);
-  }
-
-  const { data: courseMember, error: courseMemberError } = await supa
+  const { data: instructorData, error: instructorError } = await supa
     .from("course_members")
-    .select("*")
-    .eq("course_id", course.id)
-    .eq("user_id", userId);
+    .insert({
+      course_id: courseId,
+      user_id: userId,
+      role_id: instructorRoleData.id
+    })
+    .select()
+    .single();
 
-  if (courseMemberError) {
-    throw new Error(
-      "Failed to get course member: " + courseMemberError.message,
-    );
+  if (instructorError) {
+    throw new NotFoundError("Failed to associate user " + userId + " with course: " + instructorError.message);
   }
-  console.log("courseMember", courseMember);
-
-  return course as Course;
-}
-
-export async function deleteCourse(courseId: string) {
-  const { error } = await supa.from("courses").delete().eq("id", courseId);
-  if (error) {
-    throw new Error("Failed to delete course: " + error.message);
-  }
-}
-
-export async function getAllCourses() {
-  const { data, error } = await supa.from("courses").select("*");
-  if (error) {
-    throw new Error("Failed to get all courses: " + error.message);
-  }
-  return data;
 }

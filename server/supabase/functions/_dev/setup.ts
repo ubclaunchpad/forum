@@ -1,11 +1,9 @@
 import { NewCourse, ProfileWithoutId, User } from "@shared/mod.ts";
 import { userController } from "../users/controller.ts";
 import { supa } from "../_shared/db.ts";
-import {
-  createCourse,
-  deleteCourse,
-  getAllCourses,
-} from "../courses/controller/create_course_activity.ts";
+import { createCourse } from "../courses/controller/create_course_activity.ts";
+import { deleteCourse } from "../courses/controller/delete_course_activity.ts";
+import { getAllCourses } from "../courses/controller/get_all_courses_activity.ts";
 const authUsers = [
   {
     email: "admin@test.com",
