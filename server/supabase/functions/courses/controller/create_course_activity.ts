@@ -20,11 +20,54 @@ export async function createCourse(
   console.log("course", course);
 
   // Assumes that the roles are already created
-  const roleNames = ["admin", "instructor", "student"];
+  const roleNames = ["instructor", "staff", "student"];
+
+  const { data: rolesData, error: rolesError } = await supa
+    .from("account_roles")
+    .select("id, name")
+    .in("name", roleNames);
+
+  if (rolesError || !rolesData || rolesData.length !== 3) {
+    throw new Error(
+      "Failed to fetch account roles: " +
+        (rolesError?.message || "unknown error"),
+    );
+  }
+
+  const courseRolesToInsert = rolesData.map((
+    role: { id: string; name: string },
+  ) => ({
+    course_id: course.id,
+    role_id: role.id,
+  }));
+
+  const { error: courseRolesError } = await supa
+    .from("course_roles")
+    .insert(courseRolesToInsert);
+
+  if (courseRolesError) {
+    throw new Error(
+      "Failed to create course roles: " + courseRolesError.message,
+    );
+  }
+
+  const { data: instructorRoleData, error: instructorRoleError } = await supa
+    .from("account_roles")
+    .select("id")
+    .eq("name", "instructor")
+    .single();
+
+  if (instructorRoleError || !instructorRoleData) {
+    throw new Error(
+      "Failed retrieving instructor role, which was expected to succeed" + 
+      (instructorRoleError?.message || "Retrieved nothing")
+    );
+  }
 
   const { error } = await supa.from("course_members").insert({
     course_id: course.id,
     user_id: userId,
+    role_id: instructorRoleData.id
   });
   if (error) {
     throw new Error("Failed to create course member: " + error.message);
@@ -42,37 +85,6 @@ export async function createCourse(
     );
   }
   console.log("courseMember", courseMember);
-
-  //   const { data: rolesData, error: rolesError } = await supa
-  //     .from("account_roles")
-  //     .select("id, name")
-  //     .in("name", roleNames);
-
-  //   if (rolesError || !rolesData || rolesData.length !== 3) {
-  //     throw new Error(
-  //       "Failed to fetch account roles: " +
-  //         (rolesError?.message || "unknown error"),
-  //     );
-  //   }
-
-  //   // Prepare the rows to insert into the course_roles table
-  //   const courseRolesToInsert = rolesData.map((
-  //     role: { id: string; name: string },
-  //   ) => ({
-  //     course_id: course.id,
-  //     role_id: role.id,
-  //   }));
-
-  //   // Insert the course roles
-  //   const { error: courseRolesError } = await supa
-  //     .from("course_roles")
-  //     .insert(courseRolesToInsert);
-
-  //   if (courseRolesError) {
-  //     throw new Error(
-  //       "Failed to create course roles: " + courseRolesError.message,
-  //     );
-  //   }
 
   return course as Course;
 }
