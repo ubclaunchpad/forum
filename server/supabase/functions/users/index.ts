@@ -1,7 +1,7 @@
 import { Context, Hono } from "jsr:@hono/hono";
 import { createMiddleware } from "jsr:@hono/hono/factory";
 import { cors } from 'jsr:@hono/hono/cors';
-import { AccountStatusValue, ACCOUNT_STATUS_VALUES, newUserSchema, profileWithoutId } from "@shared/mod.ts";
+import { AccountStatusValue, ACCOUNT_STATUS_VALUES, profileWithoutId, emailPasswordSchema } from "@shared/mod.ts";
 import {
   approveUserAccount,
   deleteUserById,
@@ -28,6 +28,9 @@ app.use("*", cors({
 
 const validateUser = async (c: Context) => {
   const token = c.req.header("Authorization")?.split(" ")[1];
+  if (c.req.path.endsWith("/users") && c.req.method === "POST") {
+    return null;
+  }
   if (!token) {
     return c.json({ error: "Unauthorized" }, 401);
   }
@@ -45,7 +48,7 @@ type UserVariables = {
 
 const authMiddleware = createMiddleware<{
   Variables: UserVariables;
-}>(async (c: Context<{ Variables: UserVariables }>, next: () => Promise<void>) => {
+}>(async (c: Context<{ Variables: UserVariables }>, next: () => Promise<void>) => {;
   const user = await validateUser(c);
   c.set('user', user);
   await next();
@@ -70,23 +73,19 @@ app.get("/", async (c) => {
 app.post("/", async (c) => {
   try {
     const body = await c.req.json();
-
-    const validationResult = newUserSchema.safeParse(body);
+    const validationResult = emailPasswordSchema.safeParse(body);
     if (!validationResult.success) {
       return c.json({
         error: "Validation failed",
         details: validationResult.error.errors,
       }, 400);
     }
-
-
     const user = await userController.createUserViaEmailPassword(validationResult.data);
     return c.json(user, 201);
   } catch (error) {
     if (error instanceof Error) {
       return c.json({ error: error.message }, 500);
     }
-    console.error(error);
     return c.json({ error: "Internal server error" }, 500);
   }
 });
@@ -125,31 +124,15 @@ app.delete("/:id", async (c) => {
   }
 });
 
-
-// // Delete user invite
-// app.delete("/:id/invite", async (c) => {
-//   try {
-//     const { id } = c.req.param();
-//     await deleteUserInvite(id);
-//     return c.json({ message: "User invite deleted successfully" }, 200);
-//   } catch (error) {
-//     if (error instanceof NotFoundError) {
-//       return c.json({ error: error.message }, 404);
-//     }
-//     if (error instanceof Error) {
-//       return c.json({ error: error.message }, 500);
-//     }
-//   }
-// });
-
 // Get user account status
 app.get("/:id/status", async (c: Context<{ Variables: UserVariables }>) => {
   try {
     const user2 = c.var.user;
-    console.log(user2);
+
     const { id } = c.req.param();
-    console.log(id);
-    console.log("here");
+    if (user2.id !== id) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
     const status = await getUserAccountStatus(id);
     return c.json(status);
   } catch (error) {
@@ -163,35 +146,37 @@ app.get("/:id/status", async (c: Context<{ Variables: UserVariables }>) => {
 });
 
 app.post("/:id/status", async (c: Context<{ Variables: UserVariables }>) => {
-  // try {
-  //   const user = c.var.user;
-  //   const { id } = c.req.param();
-  //   const statusData = await inviteUserToApplication(id, null, false);
-  //   return c.json({ status: statusData }, 200);
-  // } catch (error) {
-  //   if (error instanceof NotFoundError) {
-  //     return c.json({ error: error.message }, 404);
-  //   }
-  //   if (error instanceof Error) {
-  //     return c.json({ error: error.message }, 500);
-  //   }
-  // }
+  try {
+    const user = c.var.user;
+    const { id } = c.req.param();
+    if (user.id !== id) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+    const hasStatus = await getUserAccountStatus(id);
+    if (hasStatus) {
+      return c.json({ error: "User already has a status" }, 400);
+    }
+    const statusData = await userController.initializeUserAccountStatus(id);
+    return c.json({ status: statusData }, 200);
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      return c.json({ error: error.message }, 404);
+    }
+    if (error instanceof Error) {
+      return c.json({ error: error.message }, 500);
+    }
+  }
 });
 
 app.post("/:id/activate", async (c: Context<{ Variables: UserVariables }>) => {
   try {
     const { id } = c.req.param();
     const body = await c.req.json();
-    console.log("here");
-    console.log(body);
     const data = profileWithoutId.safeParse(body);
-    console.log("here");
-    console.log(data);
     if (!data.success) {
       return c.json({ error: data.error.message }, 400);
     }
-    console.log("here");
-    console.log(data.data);
+    await userController.activateAccountAndProfile(id, data.data);
     await userController.activateAccountAndProfile(id, data.data);
     return c.json({ message: "User account activated successfully" }, 200);
   } catch (error) {
@@ -259,7 +244,6 @@ app.post("/:id/photo", async (c: Context<{ Variables: UserVariables }>) => {
     }
     if (file instanceof File) {
       await userController.updateUserPhoto(id, file);
-      console.log("here");
       return c.json({ message: "Photo uploaded successfully" }, 200);
     }
     return c.json({ error: "Invalid file type" }, 400);
@@ -280,8 +264,8 @@ app.patch("/:id", async (c: Context<{ Variables: UserVariables }>) => {
       return c.json({ error: "Unauthorized" }, 401);
     }
     const data = await c.req.json();
-    await userController.updateUserProfile(id, data);
-    return c.json({ message: "User profile updated successfully" }, 200);
+    const updatedUser = await userController.updateUserProfile(id, data);
+    return c.json(updatedUser, 200);
   } catch (error) {
     if (error instanceof Error) {
       return c.json({ error: error.message }, 500);

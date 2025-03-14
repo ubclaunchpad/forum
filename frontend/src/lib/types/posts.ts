@@ -31,7 +31,7 @@ type PostStats = {
 type UserInteractions = {
   viewed: boolean;
   liked: boolean;
-}
+};
 
 export type AppendOperation = OptimisticOperation | RealOperation;
 

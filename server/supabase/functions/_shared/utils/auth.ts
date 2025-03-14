@@ -18,12 +18,11 @@ export async function signUpByEmailPassword(
     console.error(error);
     throw new AuthError(error.message);
   }
-
   if (!data.user) {
-    throw new AuthError("User not found");
+      throw new AuthError("User not found");
   }
 
-  return data.user;
+    return data.user;
 }
 
 export async function deleteUser(userId: string) {

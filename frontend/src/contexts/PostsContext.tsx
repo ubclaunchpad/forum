@@ -47,10 +47,9 @@ export function ForumContextProvider({
 
   const updatePost = (postToUpdate: Post) => {
     setListOfPosts((prev) =>
-      prev.map((post) => (post.id === postToUpdate.id ? postToUpdate : post))
+      prev.map((post) => (post.id === postToUpdate.id ? postToUpdate : post)),
     );
   };
-  
 
   //   function appendToPosts({ operation, id, post }: AppendOperation) {
   //     if (operation === "optimistic") {

@@ -3,12 +3,6 @@ import * as z from "zod";
 export const signUpSchema = z
   .object({
     email: z.string().email({ message: "Please enter a valid email address" }),
-    firstName: z
-      .string()
-      .min(2, { message: "Must be at least 2 characters long" }),
-    lastName: z
-      .string()
-      .min(2, { message: "Must be at least 2 characters long" }),
     password: z
       .string()
       .min(8, { message: "Password must be at least 8 characters long" })
@@ -30,18 +24,13 @@ export const signUpSchema = z
   })
   .refine(
     (data) => {
-      const { password, firstName, lastName, email } = data;
+      const { password, email } = data;
       const emailIdentifier = email.split("@")[0];
       const lowerPassword = password.toLowerCase();
-      return (
-        !lowerPassword.includes(firstName.toLowerCase()) &&
-        !lowerPassword.includes(lastName.toLowerCase()) &&
-        !lowerPassword.includes(emailIdentifier.toLowerCase())
-      );
+      return !lowerPassword.includes(emailIdentifier.toLowerCase());
     },
     {
-      message:
-        "Password cannot contain your first name, last name, or email identifier",
+      message: "Password cannot contain your email identifier",
       path: ["password"],
     },
   );
