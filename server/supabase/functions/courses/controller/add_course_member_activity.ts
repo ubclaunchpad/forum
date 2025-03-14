@@ -1,10 +1,10 @@
-import { supa } from "../_shared/db.ts"; 
+import { supa } from "../../_shared/db.ts"; 
 
 export async function addUserToCourse(
   course_id: string,
   user_id: string,
-  role?: RoleAssignment
-): Promise<boolean> {
+  role?: any // TODO: @victor: fix this
+): Promise<boolean> { // TODO: @victor: probably good for this function to use one of error handling or return false/true instead of a mix of both
     const { data: course, error: courseError } = await supa.from("courses")
         .select("*").eq("id", course_id).single();
 
@@ -33,11 +33,12 @@ export async function addUserToCourse(
         throw new Error("User already registered in course");
     }
 
+    // TODO: @victor: check shared/schema/course.ts for notes on how to get this is a more type safe way
     if (!role) {
         role = "student"; // use student by default
     }
 
-    const { data: roleData, error: roleError } = supa.from("account_roles")
+    const { data: roleData, error: roleError } = await supa.from("account_roles")
         .select("id")
         .eq("name", role)
         .single();

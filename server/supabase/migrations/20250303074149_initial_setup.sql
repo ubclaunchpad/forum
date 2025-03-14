@@ -36,7 +36,7 @@ CREATE TABLE profiles (
 -- just holds names for roles
 CREATE TABLE account_roles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT NOT NULL UNIQUE, -- admin, instructor, student
+    name TEXT NOT NULL UNIQUE, -- instructor, staff, student
     description TEXT,
     config JSONB NOT NULL DEFAULT '{}',
     default_permissions JSONB NOT NULL DEFAULT '{}', -- permissions that are granted to the role by default
@@ -55,11 +55,10 @@ CREATE TABLE course_roles (
 CREATE TABLE course_members (
     course_id UUID NOT NULL,
     user_id UUID NOT NULL,
-    role_id UUID, -- TODO: make it required
+    role_id UUID NOT NULL,
     PRIMARY KEY (course_id, user_id),
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE
-    -- FOREIGN KEY (role_id) REFERENCES course_roles(id) 
 );
 
 CREATE TABLE posts (

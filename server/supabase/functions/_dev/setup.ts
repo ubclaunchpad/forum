@@ -1,11 +1,9 @@
 import { NewCourse, ProfileWithoutId, User } from "@shared/mod.ts";
 import { userController } from "../users/controller.ts";
 import { supa } from "../_shared/db.ts";
-import {
-  createCourse,
-  deleteCourse,
-  getAllCourses,
-} from "../courses/controller/create_course_activity.ts";
+import { createCourse } from "../courses/controller/create_course_activity.ts";
+import { deleteCourse } from "../courses/controller/delete_course_activity.ts";
+import { getAllCourses } from "../courses/controller/get_all_courses_activity.ts";
 const authUsers = [
   {
     email: "admin@test.com",
@@ -51,6 +49,28 @@ const profiles: ProfileWithoutId[] = [
     email: "user2@test.com",
     username: "user2",
     display_name: "User Test 2",
+  },
+];
+
+const courses: NewCourse[] = [
+  {
+    code: 301,
+    department: "CS",
+    section: "001",
+    access: "public",
+    name: "Introduction to Computer Science",
+    config: {
+      theme_colour: "#000000",
+      font: "Arial",
+    },
+    start_date: new Date("2024-01-01"),
+  },
+  {
+    code: 302,
+    department: "CS",
+    section: "002",
+    access: "public",
+    name: "Introduction to Computer Science",
   },
 ];
 
@@ -100,7 +120,17 @@ async function setupDevSeedData() {
   console.log("Profiles created:", profiles);
 
   await userController.makeUserAdmin(users[0].id);
+
+  // create two courses
+  const course1 = await createCourse(courses[0], users[0].id);
+  const course2 = await createCourse(courses[1], users[0].id);
+
+  console.log("Courses created:", course1, course2);
+
+
   console.log("Database setup complete");
+
+
 }
 
 async function emptyDatabase() {
@@ -172,3 +202,11 @@ export async function courseTestSeedSetup(
   }
   return coursesCreated;
 }
+
+
+// emptyDatabase().then(() => {
+//   console.log("Database emptied");
+//   setupDevSeedData().then(() => {
+//     console.log("Database setup complete");
+//   });
+// });

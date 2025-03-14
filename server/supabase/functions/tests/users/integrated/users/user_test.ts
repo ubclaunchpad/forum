@@ -20,26 +20,7 @@ import {
 // import { stub } from "jsr:@std/testing/mock";
 // import { PostgrestBuilder } from "npm:@supabase/postgrest-js@1.19.2";
 import { ProfileWithoutId } from "@shared/mod.ts";
-
-// Test data
-const testUser = {
-  first_name: "Test",
-  last_name: "User",
-  email: "test@example.com",
-  password: "securePassword123!",
-  timezone: "UTC",
-  pronouns: "they/them",
-};
-
-const testUser2 = {
-  first_name: "Test2",
-  last_name: "User2",
-  email: "test2@example.com",
-  password: "securePassword123!",
-  timezone: "UTC",
-  pronouns: "they/them",
-  username: "testuser2",
-}
+import { testUser, testUser2 } from '../../../shared/test_data.ts';
 
 // const mockFrom = {
 //   from: () => ({

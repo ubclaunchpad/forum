@@ -101,6 +101,7 @@ describe("Posts Integration Tests", () => {
     for (const user of users.data.users) {
       await supa.auth.admin.deleteUser(user.id);
     }
+    await supa.from("courses").delete().not('id', 'is', null);
   });
 
   it("should get an empty list of posts when there are no posts", async () => {
