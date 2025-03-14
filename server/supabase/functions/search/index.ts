@@ -42,7 +42,7 @@ const sql = postgres(
   Deno.env.get('SUPABASE_DB_URL')!
 )
 
-const MATCH_THRESHOLD = 0.5;
+const MATCH_THRESHOLD = 0.78;
 app.post("/", async (c: Context) => {
   const { text } = await c.req.json();
 

@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS public.embeddings (
     embedding vector(384),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    -- add composite constraint on entity_type, entity_id to match to the correct tables
+    -- todo: add composite constraint on entity_type, entity_id to match to the correct tables
 
 );
 
@@ -23,13 +23,6 @@ create table if not exists public.texts (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-
-
-create table if not exists public.logs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    message TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
 
 select vault.create_secret('http://api.supabase.internal:8000', 'project_url');
 

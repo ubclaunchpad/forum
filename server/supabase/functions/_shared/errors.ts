@@ -38,3 +38,25 @@ export class UserStatusError extends Error {
 //         super(message)
 //     }
 // }
+
+export class StorageError extends Error {
+    constructor(message: string) {
+        super(message)
+        this.name = "StorageError"
+    }
+}
+
+export class StorageBucketNotFoundError extends StorageError {
+    constructor(message: string) {
+        super(message)
+        this.name = "StorageBucketNotFoundError"
+    }
+}
+
+
+export class DuplicateBucketError  extends StorageError {
+    constructor(message: string) {
+        super(message)
+        this.name = "DuplicateBucketError"
+    }
+}
