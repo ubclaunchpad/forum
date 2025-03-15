@@ -30,10 +30,11 @@ import {
 } from '../../shared/test_data.ts';
 import { createCourse } from "../../../courses/controller/create_course_activity.ts";
 import { addUserToCourse } from "../../../courses/controller/add_course_member_activity.ts";
+import { removeCourseMember } from "../../../courses/controller/remove_course_member_activity.ts";
 import { getUserById } from "../../../users/controller.ts";
 import { Course, staffRole, studentRole } from '../../../../../../shared/schema/course.ts';
 
-describe("Add User to Course tests", () => {
+describe("Remove User from Course tests", () => {
     let user1Id: string;
     let user2Id: string;
     let courseId: string;
@@ -62,8 +63,8 @@ describe("Add User to Course tests", () => {
 
     afterEach(async () => {
         await supa.from("courses").delete().not('id', 'is', null);
-        await supa.from("course_roles").delete().not('course_id', 'is', null);
-        await supa.from("course_members").delete().not('course_id', 'is', null);
+        await supa.from("course_roles").delete().not('id', 'is', null);
+        await supa.from("course_members").delete().not('id', 'is', null);
     });
 
     afterAll(async () => {
@@ -75,83 +76,39 @@ describe("Add User to Course tests", () => {
 
     it("Should fail if course does not exist", async () => {
         try {
-            await addUserToCourse(invalidId, user2Id);
+            await removeCourseMember(invalidId, user1Id);
             throw new Error("Should have thrown an error but instead succeeded");
-        } catch (error) {
-            assertInstanceOf(error, NotFoundError);
-            assertEquals(error.message, `Course with id ${invalidId} not found`);
-        }
-    });
-
-    it("Should fail if course is private", async () => {
-        const course = await createCourse(coursePrivate, user1Id);
-        try {
-            await addUserToCourse(course.id, user2Id);
-            throw new Error("Should have thrown an error but instead succeeded");
-        } catch (error) {
-            assertInstanceOf(error, PermissionError);
-            assertEquals(error.message, "Cannot join a private course");
+        } catch (e) {
+            assertInstanceOf(e, NotFoundError);
         }
     });
 
     it("Should fail if user does not exist", async () => {
         try {
-            await addUserToCourse(courseId, invalidId);
+            await removeCourseMember(courseId, invalidId);
             throw new Error("Should have thrown an error but instead succeeded");
-        } catch (error) {
-            assertInstanceOf(error, NotFoundError);
-            assertEquals(error.message, `User ${invalidId} not found`);
+        } catch (e) {
+            assertInstanceOf(e, NotFoundError);
         }
     });
 
-    it("Should fail if user is already in course", async () => {
+    it("Should fail if user is not in course", async () => {
         try {
-            await addUserToCourse(courseId, user1Id);
+            await removeCourseMember(courseId, user2Id);
             throw new Error("Should have thrown an error but instead succeeded");
-        } catch (error) {
-            assertInstanceOf(error, InputValidationError);
-            assertEquals(error.message, `User ${user1Id} already registered in course ${courseId}`);
+        } catch (e) {
+            assertInstanceOf(e, InputValidationError);
         }
     });
 
-    it("Should add user to course", async () => {
+    it("Should remove user from course", async () => {
         await addUserToCourse(courseId, user2Id);
-
-        const { data: courseMember } = await supa
-            .from("course_members")
+        await removeCourseMember(courseId, user2Id);
+        const { data: courseMembers } = await supa.from("course_members")
             .select("*")
             .eq("course_id", courseId)
-            .eq("user_id", user2Id)
-            .single();
-        assertExists(courseMember);
-
-        const { data: studentRoleData } = await supa
-            .from("account_roles")
-            .select("*")
-            .eq("name", studentRole)
-            .single();
-
-        assertEquals(courseMember.role_id, studentRoleData.id);
-    });
-
-    it("Should add user to course with staff role", async () => {
-        await addUserToCourse(courseId, user2Id, staffRole);
-
-        const { data: courseMember } = await supa
-            .from("course_members")
-            .select("*")
-            .eq("course_id", courseId)
-            .eq("user_id", user2Id)
-            .single();
-
-        assertExists(courseMember);
-
-        const { data: staffRoleData } = await supa
-            .from("account_roles")
-            .select("*")
-            .eq("name", staffRole)
-            .single();
-
-        assertEquals(courseMember.role_id, staffRoleData.id);
+            .eq("user_id", user2Id);
+        assertExists(courseMembers);
+        assertEquals(courseMembers.length, 0);
     });
 });
