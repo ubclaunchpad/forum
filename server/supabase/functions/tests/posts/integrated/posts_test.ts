@@ -1,6 +1,6 @@
 import { afterAll, beforeEach, describe, it } from "jsr:@std/testing/bdd";
-import { assertEquals, assertExists, assertInstanceOf, assertNotEquals } from "jsr:@std/assert";
-import { postController } from "../../../posts/controller.ts";
+import { assertEquals, assertExists, assertFalse, assertInstanceOf, assertIsError } from "jsr:@std/assert";
+import { postController } from "../../../posts/controllers/crud.ts";
 import { supa } from "../../../_shared/db.ts";
 import {
   NewCourse,
@@ -9,7 +9,8 @@ import {
   ProfileWithoutId,
 } from "@shared/mod.ts";
 import { courseTestSeedSetup, userTestSeedSetup } from "../../../_dev/setup.ts";
-import { assert } from "node:console";
+import { userCourseSeedSetup } from "./helper.ts";
+import { fail } from "node:assert";
 
 // Test data
 const authUsers = [
@@ -120,11 +121,7 @@ describe("Posts Integration Tests", () => {
 
   describe("Create Post", () => {
     it("should create a post", async () => {
-      const tempProfiles = await userTestSeedSetup(authUsers, profiles);
-      const tempCourses = await courseTestSeedSetup(
-        coursesToCreate,
-        tempProfiles[0].id,
-      );
+      const {tempProfiles, tempCourses} = await userCourseSeedSetup(authUsers, profiles, coursesToCreate);
       const courseId = tempCourses[0].id;
       const newPost: NewPost = {
         title: "Test Post",
@@ -300,6 +297,143 @@ describe("Posts Integration Tests", () => {
       assertEquals(posts.length, 2);
       assertEquals(posts[0].number_id, 1);
       assertEquals(posts[1].number_id, 2);
+      try {
+        const newPost: NewPost = {
+          title: "Test Post",
+          content: "Test Content",
+          course_id: courseId,
+        };
+        const newPostOptions: NewPostOptions = {
+          visibility: "public",
+          usePseudonym: true,
+        };
+        console.log("tempProfiles 0", tempProfiles[0].id);
+        console.log("courseId", courseId);
+        const post = await postController.createPost(
+          tempProfiles[0].id,
+          newPost,
+          newPostOptions,
+        );
+        assertExists(post);
+        assertEquals(post.title, newPost.title);
+        const posts = await postController.getPosts(courseId);
+        assertEquals(posts.length, 1);
+        assertEquals(posts[0].title, newPost.title);
+      } catch(_e) {
+        fail("Should not throw an error");
+      }
+      
+    });
+    it("should throw an error and not create a post because the user is not in the course", async () => {
+      const {tempProfiles, tempCourses} = await userCourseSeedSetup(authUsers, profiles, coursesToCreate);
+      const courseId = tempCourses[0].id;
+      try {
+        const newPost: NewPost = {
+          title: "Test Post",
+          content: "Test Content",
+          course_id: courseId,
+        };
+        const newPostOptions: NewPostOptions = {
+          visibility: "public",
+          usePseudonym: true,
+        };
+        console.log("tempProfiles 0", tempProfiles[0].id);
+        console.log("courseId", courseId);
+        await postController.createPost(
+          tempProfiles[1].id,
+          newPost,
+          newPostOptions,
+        );
+        fail("Should have thrown an error");
+      }
+      catch(e) {
+        assertIsError(e);
+        const posts = await postController.getPosts(courseId);
+        assertEquals(posts.length, 0);
+      }
+    });
+    it("should have a post that does not have a pseudonym since the user has set the option off", async () => {
+      const {tempProfiles, tempCourses} = await userCourseSeedSetup(authUsers, profiles, coursesToCreate);
+      const courseId = tempCourses[0].id;
+      try {
+        const newPost: NewPost = {
+          title: "Test Post",
+          content: "Test Content",
+          course_id: courseId,
+        };
+        const newPostOptions: NewPostOptions = {
+          visibility: "public",
+          usePseudonym: false,
+        };
+        console.log("tempProfiles 0", tempProfiles[0].id);
+        console.log("courseId", courseId);
+        const post = await postController.createPost(
+          tempProfiles[0].id,
+          newPost,
+          newPostOptions,
+        );
+        assertExists(post);
+        assertFalse(post.pseudonym);
+      }
+      catch(_e) {
+        fail("Should not have thrown an error")
+      }
+    });
+    it("should have 2 posts, each with a different visibility setting of public and private in that order", async () => {
+      const {tempProfiles, tempCourses} = await userCourseSeedSetup(authUsers, profiles, coursesToCreate);
+      const courseId = tempCourses[0].id;
+      try {
+        const publicPost: NewPost = {
+          title: "Public Post",
+          content: "This should be a public post",
+          course_id: courseId,
+        };
+
+        const privatePost: NewPost = {
+          title: "Private Post",
+          content: "This should be a private post",
+          course_id: courseId,
+        };
+
+        const publicPostOptions: NewPostOptions = {
+          visibility: "public",
+          usePseudonym: true,
+        };
+
+        const privatePostOptions: NewPostOptions = {
+          visibility: "private",
+          usePseudonym: true,
+        };
+
+        console.log("tempProfiles 0", tempProfiles[0].id);
+        console.log("courseId", courseId);
+        const post1 = await postController.createPost(
+          tempProfiles[0].id,
+          publicPost,
+          publicPostOptions,
+        );
+
+        const post2 = await postController.createPost(
+          tempProfiles[0].id,
+          privatePost,
+          privatePostOptions,
+        );
+
+        assertExists(post1);
+        assertExists(post2);
+
+        const postAuthor1 = await postController.getPostAuthorByPostId(post1.post_id);
+        const postAuthor2 = await postController.getPostAuthorByPostId(post2.post_id);
+
+        assertExists(postAuthor1);
+        assertExists(postAuthor2);
+
+        assertEquals(postAuthor1.visibility, "public");
+        assertEquals(postAuthor2.visibility, "private");
+      }
+      catch(e) {
+        fail("Should not have thrown an error" + (e as Error).message);
+      }
     });
   });
 });

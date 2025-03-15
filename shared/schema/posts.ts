@@ -47,6 +47,17 @@ export const postInfoSchema = z.object({
 
 export type PostInfo = z.infer<typeof postInfoSchema>;
 
+export const postAuthorSchema = z.object( {
+  post_id: z.string().uuid(),
+  user_id: z.string().uuid().nullish().optional(),
+  comment_id: z.string().uuid().nullish().optional(),
+  reply_id: z.string().nullish().optional(),
+  pseudonym: z.string().optional(),
+  visibility: z.string(),
+});
+
+export type PostAuthor = z.infer<typeof postAuthorSchema>;
+
 // Schema for post edit information
 export const postEditInfoSchema = z.object({
   new_content: z.string(),

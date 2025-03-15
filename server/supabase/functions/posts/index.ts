@@ -10,15 +10,8 @@ import {
   profileWithoutId,
 } from "@shared/mod.ts";
 import {
-  approveUserAccount,
   createPost,
-  deleteUserById,
-  getAllUsers,
-  getAllUsersAccountStatus,
-  getUserAccountStatus,
-  getUserById,
-  userController,
-} from "./controller.ts";
+} from "./controllers/crud.ts";
 import { NotFoundError } from "../_shared/errors.ts";
 import { validateUserFromToken } from "../_shared/utils/auth.ts";
 
