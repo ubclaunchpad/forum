@@ -1,15 +1,15 @@
 import { afterAll, beforeEach, describe, it } from "jsr:@std/testing/bdd";
 import { assertEquals, assertExists, assertFalse, assertInstanceOf, assertIsError } from "jsr:@std/assert";
-import { postController } from "../../../posts/controllers/crud.ts";
-import { supa } from "../../../_shared/db.ts";
+import { postController } from "../../../../posts/controllers/crud.ts";
+import { supa } from "../../../../_shared/db.ts";
 import {
   NewCourse,
   NewPost,
   NewPostOptions,
   ProfileWithoutId,
 } from "@shared/mod.ts";
-import { courseTestSeedSetup, userTestSeedSetup } from "../../../_dev/setup.ts";
-import { userCourseSeedSetup } from "./helper.ts";
+import { courseTestSeedSetup, userTestSeedSetup } from "../../../../_dev/setup.ts";
+import { userCourseSeedSetup } from "../helper.ts";
 import { fail } from "node:assert";
 
 // Test data
@@ -435,5 +435,6 @@ describe("Posts Integration Tests", () => {
         fail("Should not have thrown an error" + (e as Error).message);
       }
     });
+    
   });
 });
