@@ -79,7 +79,18 @@ export async function createPost(
   };
 }
 
-export async function getPosts(courseId: string) {
+export async function getTestPosts(
+  courseId: string,
+) {
+  const { data } = await supa.from("posts").select().eq("course_id", courseId);
+  return data ?? [];
+}
+
+export async function getPosts(
+  userId: string,
+  courseId: string,
+  getRepliesComments: boolean
+) {
   const { data } = await supa.from("posts").select().eq("course_id", courseId);
   return data ?? [];
 }
@@ -169,7 +180,7 @@ export const PSEUDONYM = [
 
 export const postController = {
   createPost,
-  getPosts,
+  getPosts: getTestPosts,
   deletePost,
   getPostAuthorByPostId,
 };
