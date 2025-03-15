@@ -6,24 +6,16 @@ import { NotFoundError } from "../../_shared/errors.ts";
 
 // get course by course ID
 export async function getCourse(course_id: string): Promise<Course> {
-    const { data: course, error: _ } = await supa.from("courses")
-        .select("*").eq("id", course_id).single();
+    const { data: course, error: courseError } = await supa.from("courses")
+        .select("*").eq("id", course_id);
 
-    if (!course) {
+    if (courseError) {
+        throw new Error(`Database error when retrieving course with id ${course_id}: ${courseError.message}`);
+    }
+
+    if (!course || course.length === 0) {
         throw new NotFoundError("Course not found");
     }
 
-    return course as Course;
-}
-
-// get courses by user ID
-export async function getCourses(user_id: string): Promise<[]Course > {
-    const { data: courses, error: _ } = await supa.from("courses")
-        .select("*").eq("id", user_id).all();
-
-    if(len(courses) === 0) {
-        throw new NotFoundError("Courses not found");
-    };
-
-    return courses as []Course;
+    return course[0] as Course;
 }

@@ -96,14 +96,6 @@ export type NewCourse = z.infer<typeof courseBaseSchema>;
 
 export const VisibilityEnum = z.enum(["public", "private"]);
 
-export const updateCourseReqSchema = z.object({
-  c_group: z.string().optional(),
-  code: z.number().int().optional(),
-  section: z.string().optional(),
-  name: z.string().optional(),
-  config: courseConfigSchema.optional(),
-  start_date: z.date().optional(),
-  end_date: z.date().optional(),
-});
+export const updateCourseReqSchema = courseBaseSchema.omit({access: true});
 
 export type UpdateCourseReq = z.infer<typeof updateCourseReqSchema>;
