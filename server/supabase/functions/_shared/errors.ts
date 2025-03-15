@@ -38,3 +38,10 @@ export class UserStatusError extends Error {
 //         super(message)
 //     }
 // }
+
+export class PermissionError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "PermissionError";
+    }
+}
