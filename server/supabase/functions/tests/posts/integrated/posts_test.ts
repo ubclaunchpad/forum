@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, describe, it } from "jsr:@std/testing/bdd";
-import { assertEquals, assertExists, assertInstanceOf } from "jsr:@std/assert";
+import { assertEquals, assertExists, assertInstanceOf, assertNotEquals } from "jsr:@std/assert";
 import { postController } from "../../../posts/controller.ts";
 import { supa } from "../../../_shared/db.ts";
 import {
@@ -9,6 +9,7 @@ import {
   ProfileWithoutId,
 } from "@shared/mod.ts";
 import { courseTestSeedSetup, userTestSeedSetup } from "../../../_dev/setup.ts";
+import { assert } from "node:console";
 
 // Test data
 const authUsers = [
@@ -67,6 +68,13 @@ const coursesToCreate: NewCourse[] = [
     name: "Test Course",
     access: "public",
   },
+  {
+    department: "TEST 2",
+    code: 102,
+    section: "002",
+    name: "Test Course 2",
+    access: "public",
+  }
 ];
 
 // const mockFrom = {
@@ -139,6 +147,159 @@ describe("Posts Integration Tests", () => {
       const posts = await postController.getPosts(courseId);
       assertEquals(posts.length, 1);
       assertEquals(posts[0].title, newPost.title);
+      assertEquals(posts[0].number_id, 1);
+    });
+
+    it("should create two posts sequential number_id", async () => {
+      const tempProfiles = await userTestSeedSetup(authUsers, profiles);
+      const tempCourses = await courseTestSeedSetup(
+        coursesToCreate,
+        tempProfiles[0].id,
+      );
+      const courseId = tempCourses[0].id;
+      const newPost: NewPost = {
+        title: "Test Post",
+        content: "Test Content",
+        course_id: courseId,
+      };
+      const newPost2: NewPost = {
+        title: "Test Post 2",
+        content: "Test Content",
+        course_id: courseId,
+      };
+      const newPostOptions: NewPostOptions = {
+        visibility: "public",
+        usePseudonym: true,
+      };
+      console.log("tempProfiles 0", tempProfiles[0].id);
+      console.log("courseId", courseId);
+      await postController.createPost(
+        tempProfiles[0].id,
+        newPost,
+        newPostOptions,
+      );
+      await postController.createPost(
+        tempProfiles[0].id,
+        newPost2,
+        newPostOptions,
+      );
+      const posts = await postController.getPosts(courseId);
+      assertEquals(posts.length, 2);
+      assertEquals(posts[0].number_id, 1);
+      assertEquals(posts[1].number_id, 2);
+    });
+
+    it("should create two posts same number_id", async () => {
+      const tempProfiles = await userTestSeedSetup(authUsers, profiles);
+      const tempCourses = await courseTestSeedSetup(
+        coursesToCreate,
+        tempProfiles[0].id,
+      );
+      const courseId = tempCourses[0].id;
+      const courseId2 = tempCourses[1].id;
+      const newPost: NewPost = {
+        title: "Test Post",
+        content: "Test Content",
+        course_id: courseId,
+      };
+      const newPost2: NewPost = {
+        title: "Test Post 2",
+        content: "Test Content",
+        course_id: courseId2,
+      };
+      console.log(newPost.course_id);
+      console.log(newPost2.course_id);
+      const newPostOptions: NewPostOptions = {
+        visibility: "public",
+        usePseudonym: true,
+      };
+      await postController.createPost(
+        tempProfiles[0].id,
+        newPost,
+        newPostOptions,
+      );
+      await postController.createPost(
+        tempProfiles[0].id,
+        newPost2,
+        newPostOptions,
+      );
+      const posts = await postController.getPosts(courseId);
+      const posts2 = await postController.getPosts(courseId2);
+      assertEquals(posts[0].number_id, 1);
+      assertEquals(posts2[0].number_id, 1);
+
+    });
+  });
+
+  describe("Create Post", () => {
+    it("should create a post", async () => {
+      const tempProfiles = await userTestSeedSetup(authUsers, profiles);
+      const tempCourses = await courseTestSeedSetup(
+        coursesToCreate,
+        tempProfiles[0].id,
+      );
+      const courseId = tempCourses[0].id;
+      const newPost: NewPost = {
+        title: "Test Post",
+        content: "Test Content",
+        course_id: courseId,
+      };
+      const newPostOptions: NewPostOptions = {
+        visibility: "public",
+        usePseudonym: true,
+      };
+      console.log("tempProfiles 0", tempProfiles[0].id);
+      console.log("courseId", courseId);
+      const post = await postController.createPost(
+        tempProfiles[0].id,
+        newPost,
+        newPostOptions,
+      );
+      assertExists(post);
+      assertEquals(post.title, newPost.title);
+      const posts = await postController.getPosts(courseId);
+      assertEquals(posts.length, 1);
+      assertEquals(posts[0].title, newPost.title);
+      assertEquals(posts[0].number_id, 1);
+    });
+
+    it("should create two posts sequential number_id", async () => {
+      const tempProfiles = await userTestSeedSetup(authUsers, profiles);
+      const tempCourses = await courseTestSeedSetup(
+        coursesToCreate,
+        tempProfiles[0].id,
+      );
+      const courseId = tempCourses[0].id;
+      const newPost: NewPost = {
+        title: "Test Post",
+        content: "Test Content",
+        course_id: courseId,
+      };
+      const newPost2: NewPost = {
+        title: "Test Post 2",
+        content: "Test Content",
+        course_id: courseId,
+      };
+      const newPostOptions: NewPostOptions = {
+        visibility: "public",
+        usePseudonym: true,
+      };
+      console.log("tempProfiles 0", tempProfiles[0].id);
+      console.log("courseId", courseId);
+      await postController.createPost(
+        tempProfiles[0].id,
+        newPost,
+        newPostOptions,
+      );
+      await postController.createPost(
+        tempProfiles[0].id,
+        newPost2,
+        newPostOptions,
+      );
+      const posts = await postController.getPosts(courseId);
+      assertEquals(posts.length, 2);
+      assertEquals(posts[0].number_id, 1);
+      assertEquals(posts[1].number_id, 2);
     });
   });
 });
