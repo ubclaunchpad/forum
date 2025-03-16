@@ -48,11 +48,6 @@ export default function PostsForumSidebar() {
     <>
       <MainSidebar className={selectedPost ? "hidden xl:block" : ""}>
         <div className="flex flex-row justify-center items-center w-full h-16 px-2">
-          {checkPermissionInDomain(
-            profile.permissions,
-            PERMISSIONS.CREATE_POST,
-            course.id,
-          ) && (
             <Button
               size={"sm"}
               className="w-fit  px-4 min-h-none h-fit py-2"
@@ -67,7 +62,6 @@ export default function PostsForumSidebar() {
               <PlusIcon className="h-4 w-4" />
               New Post
             </Button>
-          )}
         </div>
       </MainSidebar>
       <MainListPanel className={selectedPost ? "hidden xl:block" : ""}>

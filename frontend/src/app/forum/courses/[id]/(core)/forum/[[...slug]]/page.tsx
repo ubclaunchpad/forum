@@ -3,6 +3,7 @@ import { Post } from "@/lib/types/posts";
 import { PostsForumPage } from "@/components/posts/PostsForumPage";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 async function getPosts(id: string, token: string) {
   try {
@@ -19,32 +20,49 @@ async function getPosts(id: string, token: string) {
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch posts: ${res.status}`);
+     return {
+      posts: [],
+      error: `Failed to fetch posts: ${res.status}`,
+     }
     }
 
     const body = await res.json();
-    return (body.posts as Post[]).map((post) => ({
-      ...post,
-      id: post.id.toString(),
-    }));
+    return {
+      posts: (body.posts as Post[]).map((post) => ({
+        ...post,
+        id: post.id.toString(),
+      })),
+      error: null,
+    }
   } catch (e) {
     console.error("Error fetching posts:", e);
-    return [];
+    return {
+      posts: [],
+      error: (e as Error).message,
+    }
   }
 }
 
-export default async function Forum({
+export default async function ForumWrapper({
   params,
 }: {
   params: Promise<{ id: string; slug: string[] | undefined }>;
 }) {
   const { id, slug } = await params;
+  return <Suspense fallback={<PostsForumPage posts={[]} initalPost={undefined} />}>
+    <Forum id={id} slug={slug} />
+  </Suspense>
+}
+
+
+async function Forum({id, slug}: {id: string, slug: string[] | undefined}){
+
   const selectPost = slug ? slug[0] : undefined;
   const supabase = await createClient();
   const token = (await supabase.auth.getSession())?.data.session?.access_token;
   if (!token) {
     redirect("auth/login");
   }
-  const posts = await getPosts(id, token);
+  const {posts} = await getPosts(id, token);
   return <PostsForumPage posts={posts} initalPost={selectPost} />;
 }

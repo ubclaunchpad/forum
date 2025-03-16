@@ -13,7 +13,9 @@ import {
   Roboto,
 } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster as OldToaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner"
+
 
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],
@@ -110,7 +112,9 @@ export default function RootLayout({
           ${nunito.variable} ${lato.variable} ${firaCode.variable} ${roboto.variable} 
           font-sans`}
       >
+        <OldToaster />
         <Toaster />
+
         {children}
       </body>
     </html>
