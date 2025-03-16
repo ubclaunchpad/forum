@@ -2,30 +2,20 @@ import { supa } from "../../_shared/db.ts";
 import { Course, DefaultRoles, studentRole } from '../../../../../shared/schema/course.ts';
 import { NotFoundError, PermissionError, InputValidationError } from '../../_shared/errors.ts';
 
-export async function addUserToCourse(
-  course_id: string,
-  user_id: string,
-  role?: DefaultRoles 
-) { 
-    const course = await getCourse(course_id);
+export async function removeCourseMember(course_id: string, user_id: string) {
+    await getCourse(course_id);
+    await checkIfUserExists(user_id);
+    await checkIfUserInCourse(user_id, course_id);
 
-    await checkIfUserExistsAndInCourse(user_id, course_id);
-
-    const roleData = await getRole(role);
-
-    const { error: joinError } = await supa
+    const { error: deleteError } = await supa
         .from("course_members")
-        .insert([{ 
-            course_id: course_id, 
-            user_id: user_id, 
-            role_id: roleData.id 
-        }]);
-
-    if (joinError) {
-        throw new Error(`Failed to add user to course: ${joinError.message}`);
+        .delete()
+        .eq("course_id", course_id)
+        .eq("user_id", user_id);
+    
+    if (deleteError) {
+        throw new Error(`Failed to remove user from course: ${deleteError.message}`);
     }
-
-    return true;
 }
 
 async function getCourse(course_id: string): Promise<Course> { 
@@ -39,15 +29,11 @@ async function getCourse(course_id: string): Promise<Course> {
     if (!course || course.length !== 1) {
         throw new NotFoundError(`Course with id ${course_id} not found`);
     }
-
-    if (course[0].access === "private") {
-        throw new PermissionError("Cannot join a private course");
-    }
     
     return course[0] as Course;
 }
 
-async function checkIfUserExistsAndInCourse(user_id: string, course_id: string) {
+async function checkIfUserExists(user_id: string) {
     const { data: user, error: userError } = await supa.from("profiles").select("*").eq("id", user_id);
 
     if (userError) {
@@ -56,7 +42,9 @@ async function checkIfUserExistsAndInCourse(user_id: string, course_id: string) 
     if (!user || user.length !== 1) {
         throw new NotFoundError(`User ${user_id} not found`);
     }
+}
 
+async function checkIfUserInCourse(user_id: string, course_id: string) {
     const { data: existingUserCourse } = await supa
         .from("course_members")
         .select("*")
@@ -64,27 +52,7 @@ async function checkIfUserExistsAndInCourse(user_id: string, course_id: string) 
         .eq("user_id", user_id)
         .single();
 
-    if (existingUserCourse) {
+    if (!existingUserCourse) {
         throw new InputValidationError(`User ${user_id} already registered in course ${course_id}`);
     }
-}
-
-async function getRole(role: DefaultRoles | undefined ): Promise<{ id: string }> {
-    if (!role) {
-        role = studentRole; // use student by default
-    }
-
-    const { data: roleData, error: roleError } = await supa.from("account_roles")
-        .select("id")
-        .eq("name", role);
-
-    if (roleError) {
-        throw new Error("Database error ")
-    }
-
-    if (!roleData || roleData.length !== 1) {
-        throw new NotFoundError(`Role ${role} not found`);
-    }
-
-    return roleData[0];
 }

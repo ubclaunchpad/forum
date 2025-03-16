@@ -38,3 +38,19 @@ export const coursePublic = {
     name: "Test Course",
     access: "public",
 };
+
+export const coursePublic2 = {
+    department: "Test Department",
+    code: 102,
+    section: "A",
+    name: "Test Course 2",
+    access: "public"
+};
+
+export const coursePrivate = {
+    department: "Test Department",
+    code: 200,
+    section: "B",
+    name: "Test Course Private",
+    access: "private"
+};

@@ -60,3 +60,9 @@ export class DuplicateBucketError  extends StorageError {
         this.name = "DuplicateBucketError"
     }
 }
+export class PermissionError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "PermissionError";
+    }
+}

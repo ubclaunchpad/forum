@@ -43,8 +43,8 @@ describe("Delete Course tests", () => {
 
     afterEach(async () => {
         await supa.from("courses").delete().not('id', 'is', null);
-        await supa.from("course_roles").delete().not('id', 'is', null);
-        await supa.from("course_members").delete().not('id', 'is', null);
+        await supa.from("course_roles").delete().not('course_id', 'is', null);
+        await supa.from("course_members").delete().not('course_id', 'is', null);
     });
 
     afterAll(async () => {
@@ -60,5 +60,15 @@ describe("Delete Course tests", () => {
         await deleteCourse(course.id);
         const { data: courseData, error: _ } = await supa.from("courses").select().eq("id", course.id).single();
         assertEquals(courseData, null);
+
+        const { data: courseRoles, error: _1 } = await supa.from("course_roles").select().eq("course_id", course.id);
+        assertExists(courseRoles);
+        assertEquals(courseRoles.length, 0);
+
+        const { data: courseMembers, error: _2 } = await supa.from("course_members").select().eq("course_id", course.id);
+        assertExists(courseMembers);
+        assertEquals(courseMembers.length, 0);
+
+        //TODO
     });
 });
