@@ -1,26 +1,18 @@
 import { supa } from "../../_shared/db.ts";
 
 import {
-  AccountStatus,
-  AccountStatusValue,
-  DbPost,
   DbPostSchema,
-  emailPasswordSchema,
   NewPost,
   NewPostOptions,
   NewPostResults,
   PostAuthor,
   postAuthorSchema,
-  ProfileWithoutId,
-  User,
-  WithEmailAndPassword,
-  WithId,
+  PostEditInfo,
 } from "@shared/mod.ts";
 import {
-  InputValidationError,
   NotFoundError,
-  UserStatusError,
 } from "../../_shared/errors.ts";
+import { postExists } from "./helpers.ts";
 
 export async function createPost(
   userId: string,
@@ -95,16 +87,59 @@ export async function getPosts(
   return data ?? [];
 }
 
-export async function deletePost(postId: string): Promise<void> {
-  const { error } = await supa.from("posts").delete().eq("id", postId);
+/**
+ * Updates content of the post
+ * @param postId UUID of post
+ * @param userId UUID of user
+ * @param postEditInfo Info that is being edited about post
+ */
+export async function updatePost(postId: string, userId: string, postEditInfo: PostEditInfo): Promise<void>{
+    // Check if post exists
 
-  if (error) {
-    throw new Error("Failed to delete post");
-  }
+    // Check if user is a part of the course
+
+    // Edit post
+    
+    // Check if user is already a part of post_authors
+    // If so, don't make any changes, otherwise add them to table
 }
 
-export async function getPostPermission(postId: string, userId: string, operation: 'create' | 'delete' | 'update' | 'get') {
-  
+/**
+ * Deletes post
+ * @param postId UUID of post
+ * @param userId UUID of user
+ * NOTE: Post can only be deleted by the poster/editors themselves
+ */
+export async function deletePost(postId: string, userId: string): Promise<void> {
+    // Check if post exists
+    const exists = await postExists(postId);
+    if (!exists) {
+      throw new Error("Post does not exist"); 
+    }
+
+    // Check if post is created by author
+    const { error : postAuthorError} = await supa.from("post_authors").select().eq("post_id", postId).eq("user_id", userId).single();
+
+    if (postAuthorError) {
+      throw new Error("Error: " + postAuthorError.message);
+    }
+    
+    // Assuming cascade from deleting post, don't need to delete others
+    const { error : deletionError } = await supa.from("posts").delete().eq("id", postId);
+
+    if (deletionError) {
+        throw new Error("Failed to delete post");
+    }
+}
+
+/**
+ * Return post given a postId
+ * @param postId UUID of post
+ */
+export async function getPostById(postId : string) {
+  const {data, error} = await supa.from("posts").select().eq("id", postId);
+
+  return data;
 }
 
 /**
@@ -180,7 +215,8 @@ export const PSEUDONYM = [
 
 export const postController = {
   createPost,
-  getPosts: getTestPosts,
+  updatePost,
   deletePost,
+  getPosts: getTestPosts,
   getPostAuthorByPostId,
 };

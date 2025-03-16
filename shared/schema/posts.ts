@@ -58,23 +58,13 @@ export const postAuthorSchema = z.object( {
 
 export type PostAuthor = z.infer<typeof postAuthorSchema>;
 
-// Schema for post edit information
-export const postEditInfoSchema = z.object({
-  new_content: z.string(),
-  edit_reason: z.string().optional(),
-});
-
-export type PostEditInfo = z.infer<typeof postEditInfoSchema>;
-
-export const postEditInfo = z.object({
-  local_id: z.number(),
-  course_id: z.string().uuid(),
+export const postEditInfoSchema = z.object( {
   title: z.string(),
   content: z.string(),
-  status: z.enum(["draft", "published", "archived", "deleted"]).optional(),
-  updated_at: z.date(),
-  created_by: z.string().uuid(),
-});
+  updated_at: z.date()
+})
+
+export type PostEditInfo = z.infer<typeof postEditInfoSchema>;
 
 export type PostMetadata = {
   views: number;
