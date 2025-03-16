@@ -13,7 +13,6 @@ import {
   NotFoundError,
 } from "../../_shared/errors.ts";
 import { generatePseudonym } from "./helpers.ts";
-import { string } from "npm:zod@^3.24.2";
 import { CommonExecOptions } from "node:child_process";
 import { getPostComments, PostComment, postExists } from "./helpers.ts";
 import { array } from "npm:zod@^3.24.2";
@@ -29,6 +28,7 @@ interface PostResponse {
   updatedAt: Date;
   comments?: PostComment[]
 }
+import { string } from "npm:zod@^3.24.2";
 
 export async function createPost(
   userId: string,
@@ -201,10 +201,9 @@ export async function updatePost(postId: string, userId: string, postEditInfo: P
     if (!exists) {
       throw new Error("Post does not exist");
     }
-  
+    
     // Retrieve the course that the post is in
     const {data, error : postError} = await supa.from("posts").select("course_id").eq("id", postId).single();
-    const { error } = await supa.from("posts").delete().eq("id", postId);
 
     if (postError) {
       throw postError;
