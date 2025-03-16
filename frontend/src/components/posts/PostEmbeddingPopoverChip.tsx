@@ -1,6 +1,6 @@
 "use client";
 
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { toast } from "@/hooks/use-toast";
 import { Post } from "@/lib/types/posts";
 import { useCourseStore } from "@/providers/courseStoreProvider";

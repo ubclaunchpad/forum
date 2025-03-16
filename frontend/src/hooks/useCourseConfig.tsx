@@ -1,9 +1,9 @@
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import { getApiUrl } from "@/utils/helpers";
 import { useContext, useState } from "react";
 import { useToast } from "./use-toast";
-import { themeContext } from "@/contexts/ThemeProvider";
+import { themeContext } from "@/providers/ThemeProvider";
 
 export default function useCourseConfig() {
   const { toast } = useToast();

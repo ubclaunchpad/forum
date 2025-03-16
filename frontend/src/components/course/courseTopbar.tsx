@@ -6,7 +6,7 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import { Searchbar } from "./searchBar";
 import {  cn } from "@/lib/utils";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import { getApiUrl } from "@/utils/helpers";
 import { useRouter } from "next/navigation";

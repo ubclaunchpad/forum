@@ -1,5 +1,5 @@
 "use client";
-import { Course } from "@/lib/types/course";
+import { Course } from "@forum/shared";
 import { MousePointer, ArrowRightCircleIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";

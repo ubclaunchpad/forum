@@ -7,12 +7,12 @@ import {
 } from "@/lib/utils";
 import { PostCard } from "./PostCard";
 import { useCallback, useContext, useEffect, useRef } from "react";
-import { forumPostsContext } from "@/contexts/PostsContext";
+import { forumPostsContext } from "@/providers/PostsContext";
 import { Button } from "../ui/button";
 import { PostWithRequiredId } from "@/lib/types/posts";
 import { MainListPanel, MainSidebar } from "../general/FourmTabs";
 import { PlusIcon } from "lucide-react";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 
 export default function PostsForumSidebar() {

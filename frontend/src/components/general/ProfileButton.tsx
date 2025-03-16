@@ -1,5 +1,5 @@
 "use client";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { cn } from "@/lib/utils";
 import {
   UserCircleIcon,

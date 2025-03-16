@@ -1,7 +1,7 @@
 "use client";
 
 import { Post } from "@/lib/types/posts";
-import { ForumContextProvider } from "@/contexts/PostsContext";
+import { ForumContextProvider } from "@/providers/PostsContext";
 import PostsForumSidebar from "./PostsForumSidebar";
 import { PostsForumViewSection } from "./PostsForumViewSection";
 

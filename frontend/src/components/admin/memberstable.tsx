@@ -5,7 +5,7 @@ import SettingsTitleHeader from "@/components/settings/SettingsTitleHeader";
 import { useContext, useState } from "react";
 import { ArrowRightIcon } from "lucide-react";
 import { getApiUrl } from "@/utils/helpers";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import UserSheet from "./usermodal";
 
 export default function MembersTable({ users }: { users: Profile[] }) {
