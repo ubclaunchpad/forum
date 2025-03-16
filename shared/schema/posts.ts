@@ -1,3 +1,4 @@
+import { string } from "npm:zod@3.24.2";
 import { z } from "../deps.ts";
 
 export const newPostSchema = z.object({
@@ -61,7 +62,9 @@ export type PostAuthor = z.infer<typeof postAuthorSchema>;
 export const postEditInfoSchema = z.object( {
   title: z.string(),
   content: z.string(),
-  updated_at: z.date()
+  updated_at: z.date(),
+  userPseudonym: z.string(),
+  userVisibility: z.string()
 })
 
 export type PostEditInfo = z.infer<typeof postEditInfoSchema>;

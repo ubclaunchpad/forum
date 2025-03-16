@@ -3,7 +3,7 @@ import {
     NewCourse,
     ProfileWithoutId,
   } from "@shared/mod.ts";
-import { PSEUDONYM } from "../../../posts/controllers/crud.ts"
+import { PSEUDONYM } from "../../../posts/controllers/helpers.ts"
 /**
  * Setup function for creating temporary users, user profiles and courses for testing
  * @param authUsers 

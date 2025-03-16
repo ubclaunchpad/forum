@@ -12,7 +12,8 @@ import {
 import {
   NotFoundError,
 } from "../../_shared/errors.ts";
-import { postExists } from "./helpers.ts";
+import { generatePseudonym, postExists } from "./helpers.ts";
+import { string } from "npm:zod@^3.24.2";
 
 export async function createPost(
   userId: string,
@@ -50,7 +51,7 @@ export async function createPost(
     pseudonym = generatePseudonym();
   }
 
-  const { data: postAuthorData, error: _ } = await supa.from(
+  const { error: _ } = await supa.from(
     "post_authors",
   ).insert({
     post_id: postData.id,
@@ -90,18 +91,75 @@ export async function getPosts(
 /**
  * Updates content of the post
  * @param postId UUID of post
- * @param userId UUID of user
+ * @param userId UUID of user, user must be a part of the course that post is in
  * @param postEditInfo Info that is being edited about post
  */
 export async function updatePost(postId: string, userId: string, postEditInfo: PostEditInfo): Promise<void>{
     // Check if post exists
+    const exists = await postExists(postId);
+    if (!exists) {
+      throw new Error("Post does not exist");
+    }
+    
+    // Retrieve the course that the post is in
+    const {data, error : postError} = await supa.from("posts").select("course_id").eq("id", postId).single();
 
+    if (postError) {
+      throw postError;
+    }
+
+    const courseId : string = data.course_id;
+  
     // Check if user is a part of the course
+    const { count: userCourseCount, error: userCourseError } = await supa
+        .from("course_members")
+        .select('*', { count: 'exact', head: true })
+        .eq("course_id", courseId)
+        .eq("user_id", userId);
+
+    if (userCourseError) {
+        throw userCourseError;
+    }
+
+    if (userCourseCount == 0) {
+      throw new Error("User is not registered in course");
+    }
 
     // Edit post
-    
+    const { error: updateError} = await supa.from('posts').update({
+      title: postEditInfo.title,
+      content: postEditInfo.content,
+      updated_at: postEditInfo.updated_at
+    }).eq('id', postId);
+
+    if (updateError) {
+      throw new Error("Error updating post information");
+    }
     // Check if user is already a part of post_authors
-    // If so, don't make any changes, otherwise add them to table
+    const { count: userAuthorCount, error: userAuthorError } = await supa
+        .from("post_authors")
+        .select('*', { count: 'exact', head: true })
+        .eq("user_id", userId)
+        .eq("post_id", postId);
+      
+    if (userAuthorError) {
+      throw userAuthorError;
+    }
+    
+    // If user is already a part of post_authors
+    if (userAuthorCount == 1) {
+      return;
+    }
+
+    // Otherwise, add them to table
+    const { error: _ } = await supa.from(
+      "post_authors",
+    ).insert({
+      post_id: postId,
+      user_id: userId,
+      visibility: postEditInfo.userVisibility,
+      pseudonym: postEditInfo.userPseudonym,
+    }).select().single();
 }
 
 /**
@@ -170,48 +228,6 @@ export async function getPostAuthorByPostId(postId: string): Promise<PostAuthor>
         visibility: postAuthor.visibility
     }
 }
-
-function generatePseudonym() {
-  const adjective =
-    PSEUDONYM[0][Math.floor(Math.random() * PSEUDONYM[0].length)];
-  const color = PSEUDONYM[1][Math.floor(Math.random() * PSEUDONYM[1].length)];
-  const animal = PSEUDONYM[2][Math.floor(Math.random() * PSEUDONYM[2].length)];
-  return `${adjective}_${color}_${animal}`;
-}
-
-export const PSEUDONYM = [
-  [
-    "Small",
-    "Smart",
-    "Curious",
-    "Adventurous",
-    "Playful",
-    "Friendly",
-    "Courageous",
-    "Clever",
-    "Quick",
-    "Clever",
-  ],
-  [
-    "Red",
-    "Blue",
-    "Green",
-    "Yellow",
-    "Orange",
-    "Purple",
-    "Pink",
-  ],
-  [
-    "Cat",
-    "Dog",
-    "Bird",
-    "Fish",
-    "Snake",
-    "Lizard",
-    "Turtle",
-    "Snake",
-  ],
-];
 
 export const postController = {
   createPost,
