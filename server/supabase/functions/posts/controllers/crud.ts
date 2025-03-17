@@ -14,6 +14,7 @@ import {
 } from "../../_shared/errors.ts";
 import { generatePseudonym, postExists } from "./helpers.ts";
 import { string } from "npm:zod@^3.24.2";
+import { CommonExecOptions } from "node:child_process";
 
 export async function createPost(
   userId: string,
@@ -88,6 +89,47 @@ export async function getPosts(
   return data ?? [];
 }
 
+export async function getPost(
+  userId: string,
+  postId: string,
+  courseId: string,
+  getRepliesComments: boolean
+){
+    const { data: courseMemberData, error: courseMemberError } = await supa
+    .from("course_members")
+    .select("course_id")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .single();
+
+    if (courseMemberError) {
+      throw new Error(
+        "Failed to get course member: " + courseMemberError.message,
+      );
+    }
+
+    if (!courseMemberData) {
+      throw new NotFoundError("User is not a member of this course");
+    }
+
+    const { data } = await supa.from("posts").select().eq("id", postId).single();
+    if (!data) {
+      throw new NotFoundError("Post not found");
+    }
+    const posts = data;
+
+    if (getRepliesComments){
+      const comments = await supa.from("post_comments").select().eq("post_id", postId);
+      if (comments.data){
+        for (const entry of comments.data){
+          // get replies to comments here
+        }
+      }
+    }
+
+    return data;
+
+}
 /**
  * Updates content of the post
  * @param postId UUID of post
@@ -100,9 +142,10 @@ export async function updatePost(postId: string, userId: string, postEditInfo: P
     if (!exists) {
       throw new Error("Post does not exist");
     }
-    
+  
     // Retrieve the course that the post is in
     const {data, error : postError} = await supa.from("posts").select("course_id").eq("id", postId).single();
+    const { error } = await supa.from("posts").delete().eq("id", postId);
 
     if (postError) {
       throw postError;
