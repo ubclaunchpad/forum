@@ -12,9 +12,23 @@ import {
 import {
   NotFoundError,
 } from "../../_shared/errors.ts";
-import { generatePseudonym, postExists } from "./helpers.ts";
+import { generatePseudonym } from "./helpers.ts";
 import { string } from "npm:zod@^3.24.2";
 import { CommonExecOptions } from "node:child_process";
+import { getPostComments, PostComment, postExists } from "./helpers.ts";
+import { array } from "npm:zod@^3.24.2";
+
+interface PostResponse {
+  id: string; // UUID
+  courseId: string; // UUID
+  title: string;
+  numberId: number;
+  content: string;
+  status: string; // Default: 'posted'
+  createdAt: Date;
+  updatedAt: Date;
+  comments?: PostComment[]
+}
 
 export async function createPost(
   userId: string,
@@ -85,8 +99,49 @@ export async function getPosts(
   courseId: string,
   getRepliesComments: boolean
 ) {
-  const { data } = await supa.from("posts").select().eq("course_id", courseId);
-  return data ?? [];
+  const { data: courseMemberData, error: courseMemberError } = await supa
+    .from("course_members")
+    .select("course_id")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .single();
+
+    if (courseMemberError) {
+      throw new Error(
+        "Failed to get course member: " + courseMemberError.message,
+      );
+    }
+
+    if (!courseMemberData) {
+      throw new NotFoundError("User is not a member of this course");
+    }
+
+    const { data } = await supa.from("posts").select()
+    .eq("course_id", courseId).single();
+
+    const retPosts: PostResponse[] = [];
+
+    if (!data) {
+      throw new NotFoundError("Posts not found");
+    }
+
+    for (const d of data){
+      const post: PostResponse = {
+        id: data.id,
+        courseId: data.course_id,
+        title: data.title,
+        numberId: data.number_id,
+        content: data.content,
+        status: data.status,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      }
+      if (getRepliesComments){
+        post["comments"] = await getPostComments(post.id);
+      }
+      retPosts.push(post)
+    }
+    return retPosts;
 }
 
 export async function getPost(
@@ -94,7 +149,7 @@ export async function getPost(
   postId: string,
   courseId: string,
   getRepliesComments: boolean
-){
+): Promise<PostResponse>{
     const { data: courseMemberData, error: courseMemberError } = await supa
     .from("course_members")
     .select("course_id")
@@ -112,23 +167,27 @@ export async function getPost(
       throw new NotFoundError("User is not a member of this course");
     }
 
-    const { data } = await supa.from("posts").select().eq("id", postId).single();
+    const { data } = await supa.from("posts").select()
+    .eq("course_id", courseId).eq("id", postId).single();
+
     if (!data) {
       throw new NotFoundError("Post not found");
     }
-    const posts = data;
-
-    if (getRepliesComments){
-      const comments = await supa.from("post_comments").select().eq("post_id", postId);
-      if (comments.data){
-        for (const entry of comments.data){
-          // get replies to comments here
-        }
-      }
+    const post: PostResponse = {
+      id: data.id,
+      courseId: data.course_id,
+      title: data.title,
+      numberId: data.number_id,
+      content: data.content,
+      status: data.status,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
     }
 
-    return data;
-
+    if (getRepliesComments){
+      post["comments"] = await getPostComments(postId);
+    }
+    return post;
 }
 /**
  * Updates content of the post

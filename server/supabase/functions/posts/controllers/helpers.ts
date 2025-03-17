@@ -1,5 +1,24 @@
 import { supa } from "../../_shared/db.ts";
 
+export interface PostComment {
+    id: string; // UUID
+    postId: string; // UUID
+    content: string;
+    numberId: number;
+    createdAt: Date;
+    updatedAt: Date;
+    replies: PostCommentReply[];
+  }
+  
+export interface PostCommentReply {
+    id: string; // UUID
+    commentId: string; // UUID
+    content: string;
+    numberId: number;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
 /**
  * Checks whether post exists or not
  * @returns True if the post exists, false otherwise
@@ -89,4 +108,61 @@ export const PSEUDONYM = [
   ],
 ];
 
+
+
+
+/**
+ * Gets comments and replies of a post.
+ * @param postId The ID of the post to get comments for
+ * @returns An array of PostComment objects with their replies
+ */
+export async function getPostComments(postId: string): Promise<PostComment[]> {
+    // Fetch all comments for the post
+    const { data: comments, error: commentsError } = await supa
+      .from("post_comments")
+      .select()
+      .eq("post_id", postId)
+      .order("number_id", {ascending: true});
+      
+    if (commentsError) {
+      throw new Error(`Error fetching comments: ${commentsError.message}`);
+    }
+    
+    if (!comments || comments.length === 0) {
+      return [];
+    }
+    
+    // Transform the comments into proper PostComment objects
+    const result: PostComment[] = [];
+    
+    for (const comment of comments) {
+      const { data: replies, error: repliesError } = await supa
+        .from("post_comment_replies")
+        .select()
+        .eq("comment_id", comment.id);
+        
+      if (repliesError) {
+        throw new Error(`Error fetching replies: ${repliesError.message}`);
+      }
+
+      result.push({
+        id: comment.id,
+        postId: comment.post_id,
+        content: comment.content,
+        numberId: comment.number_id,
+        createdAt: comment.created_at,
+        updatedAt: comment.updated_at,
+        replies: (replies || []).map(reply => ({
+          id: reply.id,
+          commentId: reply.comment_id,
+          content: reply.content,
+          numberId: reply.number_id,
+          createdAt: reply.created_at,
+          updatedAt: reply.updated_at
+        }))
+      });
+    }
+    
+    return result;
+  }
 
