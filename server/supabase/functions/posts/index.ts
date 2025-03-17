@@ -2,18 +2,17 @@ import { Context, Hono } from "jsr:@hono/hono";
 import { createMiddleware } from "jsr:@hono/hono/factory";
 import { cors } from "jsr:@hono/hono/cors";
 import {
-  ACCOUNT_STATUS_VALUES,
-  AccountStatusValue,
   newPostOptionsSchema,
   newPostSchema,
-  newUserSchema,
-  profileWithoutId,
 } from "@shared/mod.ts";
 import {
   createPost,
+  deletePost,
+  updatePost,
 } from "./controllers/crud.ts";
 import { NotFoundError } from "../_shared/errors.ts";
 import { validateUserFromToken } from "../_shared/utils/auth.ts";
+import { postEditInfoSchema } from "@shared/schema/posts.ts";
 
 const functionName = "posts";
 const app = new Hono().basePath(`/${functionName}`);
@@ -82,3 +81,38 @@ app.post("/", async (c: Context<{ Variables: UserVariables }>) => {
     return c.json({ error: (error as Error).message }, 500);
   }
 });
+
+// Delete a post by UUID
+app.delete("/:post_id", async (c: Context<{ Variables: UserVariables }>) => {
+  // try {
+  //   const {post_id} = c.req.param();
+  //   const user = c.var.user;
+
+  //   await deletePost(post_id, user.id);
+
+  //   return {"success" : true}
+  // } catch (error) {
+  //   return c.json({ error: (error as Error).message }, 500);
+  // }
+})
+
+// Update a post by UUID
+app.put("/:post_id", async (c: Context<{ Variables: UserVariables }>) => {
+  // try {
+  //   const {post_id} = c.req.param();
+  //   const { postEditArgs } = await c.req.json();
+  //   const user = c.var.user;
+
+  //   const postEditInfo = postEditInfoSchema.safeParse(postEditArgs);
+
+  //   if (!postEditInfo.success) {
+  //     return c.json({ error: postEditInfo.error.message }, 400);
+  //   }
+
+  //   await updatePost(post_id, user.id, postEditInfo);
+
+  //   return {"success" : true}
+  // } catch (error) {
+  //   return c.json({ error: (error as Error).message }, 500);
+  // }
+})

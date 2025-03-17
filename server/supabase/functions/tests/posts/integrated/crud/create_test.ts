@@ -1,12 +1,9 @@
 import { afterAll, beforeEach, describe, it } from "jsr:@std/testing/bdd";
-import { assertEquals, assertExists, assertFalse, assertInstanceOf, assertIsError } from "jsr:@std/assert";
+import { assertEquals, assertExists, assertFalse, assertIsError } from "jsr:@std/assert";
 import { postController } from "../../../../posts/controllers/crud.ts";
-import { supa } from "../../../../_shared/db.ts";
 import {
-  NewCourse,
   NewPost,
   NewPostOptions,
-  ProfileWithoutId,
 } from "@shared/mod.ts";
 import { courseTestSeedSetup, userTestSeedSetup } from "../../../../_dev/setup.ts";
 import { userCourseSeedSetup } from "../helper.ts";
@@ -326,14 +323,17 @@ describe("Posts Integration Tests", () => {
         assertExists(post1);
         assertExists(post2);
 
-        const postAuthor1 = await postController.getPostAuthorByPostId(post1.post_id);
-        const postAuthor2 = await postController.getPostAuthorByPostId(post2.post_id);
+        const postAuthor1 = await postController.getPostAuthorsByPostId(post1.post_id);
+        const postAuthor2 = await postController.getPostAuthorsByPostId(post2.post_id);
 
         assertExists(postAuthor1);
         assertExists(postAuthor2);
 
-        assertEquals(postAuthor1.visibility, "public");
-        assertEquals(postAuthor2.visibility, "private");
+        assertEquals(postAuthor1.length, 1);
+        assertEquals(postAuthor1.length, 1);
+
+        assertEquals(postAuthor1[0].visibility, "public");
+        assertEquals(postAuthor2[0].visibility, "private");
       }
       catch(e) {
         fail("Should not have thrown an error" + (e as Error).message);

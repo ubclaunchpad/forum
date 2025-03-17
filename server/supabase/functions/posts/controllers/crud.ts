@@ -6,7 +6,6 @@ import {
   NewPostOptions,
   NewPostResults,
   PostAuthor,
-  postAuthorSchema,
   PostEditInfo,
 } from "@shared/mod.ts";
 import {
@@ -15,7 +14,7 @@ import {
 import { generatePseudonym } from "./helpers.ts";
 import { CommonExecOptions } from "node:child_process";
 import { getPostComments, PostComment, postExists } from "./helpers.ts";
-import { array } from "npm:zod@^3.24.2";
+import { string } from "npm:zod@^3.24.2";
 
 interface PostResponse {
   id: string; // UUID
@@ -28,7 +27,7 @@ interface PostResponse {
   updatedAt: Date;
   comments?: PostComment[]
 }
-import { string } from "npm:zod@^3.24.2";
+
 
 export async function createPost(
   userId: string,
@@ -247,8 +246,16 @@ export async function updatePost(postId: string, userId: string, postEditInfo: P
       throw userAuthorError;
     }
     
-    // If user is already a part of post_authors
+    // If user is already a part of post_authors, update entry
     if (userAuthorCount == 1) {
+      const { error: _ } = await supa.from(
+        "post_authors",
+      ).update({
+        visibility: postEditInfo.userVisibility,
+        pseudonym: postEditInfo.userPseudonym,
+      })
+      .eq("user_id", userId)
+      .eq("post_id", postId);
       return;
     }
 
@@ -292,22 +299,12 @@ export async function deletePost(postId: string, userId: string): Promise<void> 
 }
 
 /**
- * Return post given a postId
- * @param postId UUID of post
- */
-export async function getPostById(postId : string) {
-  const {data, error} = await supa.from("posts").select().eq("id", postId);
-
-  return data;
-}
-
-/**
- * Retrieves the post author of a post
+ * Retrieves the post authors of a post
  * @param postId UUID of post
  * @return PostAuthor object
  */
-export async function getPostAuthorByPostId(postId: string): Promise<PostAuthor>{
-    const {data, error} = await supa.from("post_authors").select().eq("post_id", postId).single();
+export async function getPostAuthorsByPostId(postId: string): Promise<PostAuthor[]>{
+    const {data, error} = await supa.from("post_authors").select().eq("post_id", postId);
     if (error) {
         throw new Error(
             "Failed to retrieve post author: " + error.message,
@@ -318,22 +315,14 @@ export async function getPostAuthorByPostId(postId: string): Promise<PostAuthor>
         throw new Error("Post does not exist");
     }
 
-    const postAuthor = postAuthorSchema.parse(data);
-
-    return {
-        post_id: postAuthor.post_id,
-        user_id: postAuthor.user_id,
-        comment_id: postAuthor.comment_id,
-        reply_id: postAuthor.reply_id,
-        pseudonym: postAuthor.pseudonym,
-        visibility: postAuthor.visibility
-    }
+    return data as PostAuthor[];
 }
 
 export const postController = {
   createPost,
   updatePost,
   deletePost,
+  getPost,
   getPosts: getTestPosts,
-  getPostAuthorByPostId,
+  getPostAuthorsByPostId,
 };
