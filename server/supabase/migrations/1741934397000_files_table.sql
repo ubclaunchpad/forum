@@ -22,16 +22,16 @@ begin
     WHERE name = 'service_role_key';
 
     -- Construct request URL
-        request_url := util.project_url() || '/storage/v1/object/' || bucket || '/' || file_path;
+    request_url := util.project_url() || '/storage/v1/object/' || bucket || '/' || file_path;
     -- Construct header
     request_headers := jsonb_build_object('Authorization', service_role_key);
 
-    net.http_delete(
+    perform net.http_delete(
         request_url,
         '{}'::jsonb,  -- No query params
         request_headers,
         5000  -- Timeout in ms
-    )
+    );
 
     return OLD;
 end;
