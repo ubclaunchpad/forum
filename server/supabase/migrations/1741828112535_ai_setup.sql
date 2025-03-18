@@ -26,6 +26,7 @@ with
 
 -- Schema for utility functions
 create schema util;
+grant USAGE on schema util to service_role;
 
 -- Utility function to get the Supabase project URL (required for Edge Functions)
 create function util.project_url()
