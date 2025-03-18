@@ -71,6 +71,8 @@ export const defaultPermissionsSchema = z.object({
   }),
 });
 
+export type Permissions = z.infer<typeof defaultPermissionsSchema>;
+
 export const AccountRolesSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -86,6 +88,7 @@ export type DefaultRoles = (typeof DEFAULT_ROLES)[number];
 export const instructorRole: DefaultRoles = DEFAULT_ROLES[0];
 export const staffRole: DefaultRoles = DEFAULT_ROLES[1];
 export const studentRole: DefaultRoles = DEFAULT_ROLES[2];
+export const defaultRoleSchema = z.enum(DEFAULT_ROLES);
 
 export const CourseRolesSchema = z.object({
   course_id: z.string(),
@@ -96,6 +99,6 @@ export type NewCourse = z.infer<typeof courseBaseSchema>;
 
 export const VisibilityEnum = z.enum(["public", "private"]);
 
-export const updateCourseReqSchema = courseBaseSchema.omit({access: true});
+export const updateCourseReqSchema = courseBaseSchema.omit({access: true}).partial();
 
 export type UpdateCourseReq = z.infer<typeof updateCourseReqSchema>;
