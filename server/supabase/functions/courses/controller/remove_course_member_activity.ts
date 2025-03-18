@@ -53,6 +53,6 @@ async function checkIfUserInCourse(user_id: string, course_id: string) {
         .single();
 
     if (!existingUserCourse) {
-        throw new InputValidationError(`User ${user_id} already registered in course ${course_id}`);
+        throw new InputValidationError(`User ${user_id} not in course ${course_id}`);
     }
 }
