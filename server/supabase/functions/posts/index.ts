@@ -1,13 +1,11 @@
 import { Context, Hono } from "jsr:@hono/hono";
 import { createMiddleware } from "jsr:@hono/hono/factory";
 import { cors } from "jsr:@hono/hono/cors";
-import {
-  newPostOptionsSchema,
-  newPostSchema,
-} from "@shared/mod.ts";
+import { newPostOptionsSchema, newPostSchema } from "@shared/mod.ts";
 import {
   createPost,
   deletePost,
+  getPost,
   updatePost,
 } from "./controllers/crud.ts";
 import { NotFoundError } from "../_shared/errors.ts";
@@ -59,6 +57,38 @@ const authMiddleware = createMiddleware<{
 
 app.use("*", authMiddleware);
 
+/**
+ * Retrieves a post using course_id and post_id (both UUID)
+ * Optional query to get replies and comments of post
+ */
+app.get(
+  "/:course_id/:post_id",
+  async (c: Context<{ Variables: UserVariables }>) => {
+    try {
+      const query = c.req.query("enableCommentReplies");
+      const enableCommentReplies = query === "true";
+      const { course_id, post_id } = c.req.param();
+      const user = c.var.user;
+
+      const post = await getPost(
+        user.id,
+        post_id,
+        course_id,
+        enableCommentReplies,
+      );
+      return c.json(post);
+    } catch (error) {
+      return c.json({ error: (error as Error).message }, 500);
+    }
+  },
+);
+
+// Test route
+app.get("/", async (c: Context<{ Variables: UserVariables }>) => {
+  return c.json({ "Hello": "world" });
+});
+
+// Create post
 app.post("/", async (c: Context<{ Variables: UserVariables }>) => {
   try {
     const { postArgs, optionArgs } = await c.req.json();
@@ -82,37 +112,40 @@ app.post("/", async (c: Context<{ Variables: UserVariables }>) => {
   }
 });
 
-// Delete a post by UUID
+// Delete post using UUID of post
 app.delete("/:post_id", async (c: Context<{ Variables: UserVariables }>) => {
-  // try {
-  //   const {post_id} = c.req.param();
-  //   const user = c.var.user;
+  try {
+    const { post_id } = c.req.param();
+    const user = c.var.user;
 
-  //   await deletePost(post_id, user.id);
+    await deletePost(post_id, user.id);
+    return c.json({ "success": true });
+  } catch (error) {
+    return c.json({ error: (error as Error).message }, 500);
+  }
+});
 
-  //   return {"success" : true}
-  // } catch (error) {
-  //   return c.json({ error: (error as Error).message }, 500);
-  // }
-})
-
-// Update a post by UUID
+// Update a post using UUID of post
 app.put("/:post_id", async (c: Context<{ Variables: UserVariables }>) => {
-  // try {
-  //   const {post_id} = c.req.param();
-  //   const { postEditArgs } = await c.req.json();
-  //   const user = c.var.user;
+  try {
+    const { post_id } = c.req.param();
+    const { postEditArgs } = await c.req.json();
+    const user = c.var.user;
 
-  //   const postEditInfo = postEditInfoSchema.safeParse(postEditArgs);
+    const postEditInfo = postEditInfoSchema.safeParse(postEditArgs);
 
-  //   if (!postEditInfo.success) {
-  //     return c.json({ error: postEditInfo.error.message }, 400);
-  //   }
+    if (!postEditInfo.success) {
+      return c.json({ error: postEditInfo.error.message }, 400);
+    }
 
-  //   await updatePost(post_id, user.id, postEditInfo);
+    await updatePost(post_id, user.id, postEditInfo);
 
-  //   return {"success" : true}
-  // } catch (error) {
-  //   return c.json({ error: (error as Error).message }, 500);
-  // }
-})
+    return c.json({ "success": true });
+  } catch (error) {
+    return c.json({ error: (error as Error).message }, 500);
+  }
+});
+
+export { app };
+
+Deno.serve(app.fetch);
