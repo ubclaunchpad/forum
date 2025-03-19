@@ -33,15 +33,59 @@ export const courseSchema = courseBaseSchema.extend({
 
 export type Course = z.infer<typeof courseSchema>;
 
+export const defaultPermissionsSchema = z.object({
+  can_delete_course: z.boolean(),
+  can_invite: z.object({
+    instructor: z.boolean(),
+    staff: z.boolean(),
+    student: z.boolean(),
+  }),
+  can_remove: z.object({
+    instructor: z.boolean(),
+    staff: z.boolean(),
+    student: z.boolean(),
+  }),
+  can_change_course_visibility: z.boolean(),
+  can_create_tags: z.boolean(),
+  can_edit_tags: z.boolean(),
+  can_create_post: z.boolean(),
+  can_view_posts: z.object({
+    public: z.boolean(),
+    private: z.boolean(),
+  }),
+  can_change_post_visibility: z.object({
+    own: z.boolean(),
+    others: z.boolean(),
+  }),
+  can_edit_post: z.object({
+    own: z.boolean(),
+    others: z.boolean(),
+  }),
+  can_delete_posts: z.object({
+    own: z.boolean(),
+    others: z.boolean(),
+  }),
+  can_tag_posts: z.object({
+    own: z.boolean(),
+    others: z.boolean(),
+  }),
+});
+
 export const AccountRolesSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
   config: z.record(z.any()),
-  default_permissions: z.record(z.any()),
+  default_permissions: defaultPermissionsSchema,
   created_at: z.date(),
   updated_at: z.date(),
 });
+
+export const DEFAULT_ROLES = ["instructor", "staff", "student"] as const;
+export type DefaultRoles = (typeof DEFAULT_ROLES)[number];
+export const instructorRole: DefaultRoles = DEFAULT_ROLES[0];
+export const staffRole: DefaultRoles = DEFAULT_ROLES[1];
+export const studentRole: DefaultRoles = DEFAULT_ROLES[2];
 
 export const CourseRolesSchema = z.object({
   course_id: z.string(),
@@ -52,60 +96,6 @@ export type NewCourse = z.infer<typeof courseBaseSchema>;
 
 export const VisibilityEnum = z.enum(["public", "private"]);
 
+export const updateCourseReqSchema = courseBaseSchema.omit({access: true});
 
-// TODO: @victor: have a schema for what role permission should look like to easily cast to and from the database
-// REMOVE THIS COMMENT WHEN DONE
-// ('instructor', 'Administrator role', 
-//   '{
-//       "can_delete_course": true,
-//       "can_invite": {
-//           "instructor": true,
-//           "staff": true,
-//           "student": true
-//       },
-//       "can_remove": {
-//           "instructor": true,
-//           "staff": true,
-//           "student": true
-//       },
-//       "can_change_course_visibility": true,
-//       "can_create_tags": true,
-//       "can_edit_tags": true,
-//       "can_create_post": true,
-//       "can_view_posts": {
-//           "public": true,
-//           "private": true
-//       },
-//       "can_change_post_visibility": {
-//           "own": true,
-//           "others": true
-//       },
-//       "can_edit_post": {
-//           "own": true,
-//           "others": true
-//       },
-//       "can_delete_posts": {
-//           "own": true,
-//           "others": true
-//       },
-//       "can_tag_posts": {
-//           "own": true,
-//           "others": true
-//       }
-//   }'
-
-// Eg:
-// const permissionSchema = z.object({
-//   can_delete_course: z.boolean(),
-//   can_invite: z.object({
-//     instructor: z.boolean(),
-//     staff: z.boolean(),
-//     student: z.boolean(),
-//   }),
-//   ...
-// ...
-
-// TODO: @victor: have an as const array for the default roles:
-// const DEFAULT_ROLES = ["instructor", "staff", "student"] as const;
-// export type DefaultRoles = (typeof DEFAULT_ROLES)[number];
-// const m: DefaultRoles =  "instructor"
+export type UpdateCourseReq = z.infer<typeof updateCourseReqSchema>;
