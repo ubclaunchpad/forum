@@ -1,7 +1,5 @@
 import { supa } from "../db.ts";
-import { Context } from "jsr:@hono/hono";
 import { AuthError } from "../errors.ts";
-import { createMiddleware } from "jsr:@hono/hono/factory";
 
 export async function signUpByEmailPassword(
   email: string,
@@ -42,33 +40,3 @@ export async function validateUserFromToken(token: string) {
 
   return data.user;
 }
-
-const validateUser = async (c: Context) => {
-  const token = c.req.header("Authorization")?.split(" ")[1];
-  if (!token) {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
-  try {
-    const user = await validateUserFromToken(token);
-    return user;
-  } catch {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
-};
-
-export type UserVariables = {
-  user: any;
-};
-
-export const authMiddleware = createMiddleware<{
-  Variables: UserVariables;
-}>(
-  async (
-    c: Context<{ Variables: UserVariables }>,
-    next: () => Promise<void>,
-  ) => {
-    const user = await validateUser(c);
-    c.set("user", user);
-    await next();
-  },
-);

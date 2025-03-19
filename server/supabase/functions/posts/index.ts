@@ -1,4 +1,5 @@
 import { Context, Hono } from "jsr:@hono/hono";
+import { createMiddleware } from "jsr:@hono/hono/factory";
 import { cors } from "jsr:@hono/hono/cors";
 import {
   ACCOUNT_STATUS_VALUES,
@@ -19,7 +20,7 @@ import {
   userController,
 } from "./controller.ts";
 import { NotFoundError } from "../_shared/errors.ts";
-import { authMiddleware, UserVariables } from "../_shared/utils/auth.ts";
+import { validateUserFromToken } from "../_shared/utils/auth.ts";
 
 const functionName = "posts";
 const app = new Hono().basePath(`/${functionName}`);
@@ -32,6 +33,36 @@ app.use(
     allowHeaders: ["Authorization", "Content-Type", "*"],
     exposeHeaders: ["Authorization", "Content-Type"],
   }),
+);
+
+const validateUser = async (c: Context) => {
+  const token = c.req.header("Authorization")?.split(" ")[1];
+  if (!token) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+  try {
+    const user = await validateUserFromToken(token);
+    return user;
+  } catch {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+};
+
+type UserVariables = {
+  user: any;
+};
+
+const authMiddleware = createMiddleware<{
+  Variables: UserVariables;
+}>(
+  async (
+    c: Context<{ Variables: UserVariables }>,
+    next: () => Promise<void>,
+  ) => {
+    const user = await validateUser(c);
+    c.set("user", user);
+    await next();
+  },
 );
 
 app.use("*", authMiddleware);

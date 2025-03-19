@@ -24,6 +24,8 @@ export async function addUserToCourse(
     if (joinError) {
         throw new Error(`Failed to add user to course: ${joinError.message}`);
     }
+
+    return true;
 }
 
 async function getCourse(course_id: string): Promise<Course> { 
