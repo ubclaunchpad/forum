@@ -15,7 +15,7 @@ export async function signUpByEmailPassword(
   });
 
   if (error) {
-    console.error(error);
+    // console.error(error);
     throw new AuthError(error.message);
   }
   if (!data.user) {

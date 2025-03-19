@@ -22,9 +22,9 @@ begin
     WHERE name = 'service_role_key';
 
     -- Construct request URL
-    request_url := util.project_url() || '/storage/v1/object/' || bucket || '/' || file_path;
+    request_url := util.project_url() || '/storage/v1/object/' || file_path;
     -- Construct header
-    request_headers := jsonb_build_object('Authorization', service_role_key);
+    request_headers := jsonb_build_object('Authorization', 'Bearer ' || service_role_key);
 
     perform net.http_delete(
         request_url,
@@ -54,3 +54,36 @@ CREATE TRIGGER on_file_delete
 AFTER DELETE ON files
 FOR EACH ROW EXECUTE FUNCTION delete_file_from_storage();
 
+
+
+CREATE TABLE documents (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    description TEXT NOT NULL DEFAULT '',
+    file_id UUID NOT NULL REFERENCES files(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+    created_by UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE
+);
+
+
+CREATE OR REPLACE FUNCTION delete_document_file()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM files WHERE id = OLD.file_id;
+    RETURN OLD;
+END;
+$$;
+
+CREATE TRIGGER documents_on_delete
+AFTER DELETE ON documents
+FOR EACH ROW
+EXECUTE FUNCTION delete_document_file();
+
+
+create trigger create_embeddings_on_documents_insert
+after insert on documents
+for each row
+execute procedure util.queue_embeddings('documents', 'document', 'file_id');

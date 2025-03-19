@@ -92,8 +92,8 @@ describe("Posts Integration Tests", () => {
     for (const user of users.data.users) {
       await supa.auth.admin.deleteUser(user.id);
     }
-    const checkUsers = await supa.auth.admin.listUsers();
-    console.log("checkUsers", checkUsers);
+    // const checkUsers = await supa.auth.admin.listUsers();
+    // console.log("checkUsers", checkUsers);
   });
 
   afterAll(async () => {

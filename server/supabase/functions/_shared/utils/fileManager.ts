@@ -22,7 +22,7 @@ export type FileManager = ReturnType<FileManagerBuilder>;
 
 export const fileManager =
   (db: SupabaseClient) => (defaultOptions: FileManagerOptions) => {
-    return {
+    const manager = {
       buckets: {
         createBucket: async (bucketName: string, options: {
           public: boolean;
@@ -58,6 +58,16 @@ export const fileManager =
         usingBucket: (bucketName: string) => {
           return {
             uploadFile: async (file: File) => {
+              const { data: bucket } = await db.storage.getBucket(bucketName);
+
+              if (!bucket) {
+                await manager.buckets.createBucket(bucketName, {
+                  public: false,
+                  allowedMimeTypes: defaultOptions.supportedMimeTypes,
+                  maxFileSizeInMB: defaultOptions.maxFileSizeInMB,
+                });
+              }
+              // console.log("bucket created/ now uploading file");
               const { data: fileRecord, error: fileRecordError } = await db
                 .from("files").insert({
                   name: file.name,
@@ -71,9 +81,14 @@ export const fileManager =
                 throw new Error(fileRecordError.message);
               }
 
+              // console.log("file record created, now uploading file");
+              // console.log(fileRecord);
               const { data, error } = await db.storage.from(bucketName).upload(
-                file.name,
+                fileRecord.id,
                 file,
+                {
+                  upsert: true,
+                }
               );
 
               if (error) {
@@ -81,6 +96,7 @@ export const fileManager =
                 throw new StorageBucketNotFoundError(error.message);
               }
 
+              // console.log("file uploaded, now updating file record");
               const { data: updatedFileRecord } = await db.from("files").update(
                 {
                   path: data.fullPath,
@@ -88,7 +104,17 @@ export const fileManager =
                 },
               ).eq("id", fileRecord.id).select().single();
 
+              // console.log("file record updated");
+              // console.log(updatedFileRecord);
+
               return updatedFileRecord;
+            },
+            getFiles: async () => {
+              const { data, error } = await db.storage.from(bucketName).list();
+              if (error) {
+                throw new Error(error.message);
+              }
+              return data;
             },
             getFileSignedUrls: async (fileIds: string[]) => {
               const { data: files, error: filesError } = await db.from("files")
@@ -151,4 +177,5 @@ export const fileManager =
           }
       },
     };
+    return manager;
   };

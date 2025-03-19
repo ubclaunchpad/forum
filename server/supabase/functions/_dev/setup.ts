@@ -150,7 +150,7 @@ export async function userTestSeedSetup(
   authUsers: { email: string; password: string }[],
   profiles: ProfileWithoutId[],
 ): Promise<User[]> {
-  console.log("Setting up test seed data");
+  // console.log("Setting up test seed data");
   await emptyDatabase();
 
   const { data: image_url } = await supa.storage.from("images").getPublicUrl(
@@ -179,8 +179,8 @@ export async function userTestSeedSetup(
       users[i].id,
       profileWithImage,
     );
-    const status = await userController.getUserAccountStatus(users[i].id);
-    console.log("Status:", status);
+     await userController.getUserAccountStatus(users[i].id);
+    // console.log("Status:", status);
   }
 
   return userController.getAllUsers();

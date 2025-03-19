@@ -138,7 +138,15 @@ app.post("/", async (c: Context) => {
 
   } else if (sourceTable === "post") {
     return c.json({ error: "Post embedding not implemented" }, 501);
-  } else {
+  } else if (sourceTable === "documents") {
+    const { data } = await supa.from(sourceTable).select("*, files(*)").eq("id", entityId).single();
+    if (!data) {
+      return c.json({ error: "Document not found" }, 404);
+    }
+
+    const document = data as any;
+    const { files, ...rest } = document;
+    
     return c.json({ error: "Invalid schema" }, 400);
   }
 
