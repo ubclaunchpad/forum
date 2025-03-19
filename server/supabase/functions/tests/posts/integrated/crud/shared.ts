@@ -1,4 +1,4 @@
-import { ProfileWithoutId, NewCourse } from "@shared/mod.ts";
+import { NewCourse, ProfileWithoutId } from "@shared/mod.ts";
 import { supa } from "../../../../_shared/db.ts";
 
 export const authUsers = [
@@ -63,22 +63,22 @@ export const coursesToCreate: NewCourse[] = [
     section: "002",
     name: "Test Course 2",
     access: "public",
-  }
+  },
 ];
 
 export const beforeEachFunc = async () => {
-    const users = await supa.auth.admin.listUsers();
-    for (const user of users.data.users) {
-      await supa.auth.admin.deleteUser(user.id);
-    }
-    const checkUsers = await supa.auth.admin.listUsers();
-    console.log("checkUsers", checkUsers);
-  };
+  const users = await supa.auth.admin.listUsers();
+  for (const user of users.data.users) {
+    await supa.auth.admin.deleteUser(user.id);
+  }
+  const checkUsers = await supa.auth.admin.listUsers();
+  console.log("checkUsers", checkUsers);
+};
 
 export const afterEachFunc = async () => {
-    const users = await supa.auth.admin.listUsers();
-    for (const user of users.data.users) {
-      await supa.auth.admin.deleteUser(user.id);
-    }
-    await supa.from("courses").delete().not('id', 'is', null);
+  const users = await supa.auth.admin.listUsers();
+  for (const user of users.data.users) {
+    await supa.auth.admin.deleteUser(user.id);
   }
+  await supa.from("courses").delete().not("id", "is", null);
+};
