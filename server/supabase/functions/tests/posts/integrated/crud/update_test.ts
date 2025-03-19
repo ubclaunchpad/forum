@@ -57,7 +57,6 @@ describe("Post Integration Tests: Update Post", () => {
       const updatedPost = await postController.getPost(
         tempProfiles[0].id,
         post.post_id,
-        courseId,
         false,
       );
 
@@ -184,7 +183,6 @@ describe("Post Integration Tests: Update Post", () => {
       const updatedPost = await postController.getPost(
         tempProfiles[0].id,
         post.post_id,
-        courseId,
         false,
       );
 

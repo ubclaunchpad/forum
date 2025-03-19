@@ -10,6 +10,7 @@ import {
   PostList,
   PostResponse,
 } from "@shared/mod.ts";
+import { NotFoundError } from "../../_shared/errors.ts";
 import { generatePseudonym, userInCourse } from "./helpers.ts";
 import { getPostComments, postExists } from "./helpers.ts";
 
@@ -69,10 +70,17 @@ export async function getTestPosts(
 export async function getPost(
   userId: string,
   postId: string,
-  courseId: string,
   getRepliesComments: boolean,
 ): Promise<PostResponse> {
-  const inCourse = await userInCourse(userId, courseId);
+  const postData = await postExists(postId);
+
+  if (!postData.isFound || !postData.data) {
+    throw new NotFoundError("Post does not exist");
+  }
+
+  const { course_id } = postData.data;
+
+  const inCourse = await userInCourse(userId, course_id);
 
   if (!inCourse) {
     throw new Error("User is not registered in course");
@@ -80,7 +88,7 @@ export async function getPost(
 
   const { data, error } = await supa.from("posts").select().eq(
     "course_id",
-    courseId,
+    course_id,
   ).eq("id", postId).single();
 
   if (error) {
@@ -158,8 +166,8 @@ export async function updatePost(
   postEditInfo: PostEditInfo,
 ): Promise<void> {
   // Check if post exists
-  const exists = await postExists(postId);
-  if (!exists) {
+  const checkPost = await postExists(postId);
+  if (!checkPost.isFound) {
     throw new Error("Post does not exist");
   }
 
@@ -245,8 +253,8 @@ export async function deletePost(
   userId: string,
 ): Promise<void> {
   // Check if post exists
-  const exists = await postExists(postId);
-  if (!exists) {
+  const checkPost = await postExists(postId);
+  if (!checkPost.isFound) {
     throw new Error("Post does not exist");
   }
 

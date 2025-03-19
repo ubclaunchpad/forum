@@ -1,4 +1,4 @@
-import { PostComment, PostList } from "@shared/schema/posts.ts";
+import { PostComment } from "@shared/schema/posts.ts";
 import { supa } from "../../_shared/db.ts";
 
 /**
@@ -8,9 +8,9 @@ import { supa } from "../../_shared/db.ts";
  * @returns true if user is in course, otherwise false
  */
 export async function userInCourse(userId: string, courseId: string) {
-  const { count: userCourseCount, error: userCourseError } = await supa
+  const { data: userData, error: userCourseError } = await supa
     .from("course_members")
-    .select("*", { count: "exact", head: true })
+    .select("*")
     .eq("course_id", courseId)
     .eq("user_id", userId);
 
@@ -18,7 +18,7 @@ export async function userInCourse(userId: string, courseId: string) {
     throw userCourseError;
   }
 
-  if (userCourseCount == 0) {
+  if (!userData || userData.length == 0) {
     return false;
   }
 
@@ -27,44 +27,47 @@ export async function userInCourse(userId: string, courseId: string) {
 
 /**
  * Checks whether post exists or not
- * @returns True if the post exists, false otherwise
+ * @param postId UUID of post
+ * @returns Returns a JSON of a boolean to indicate whether post was found and course_id as data
  */
-export async function postExists(postId: string): Promise<boolean> {
-  const { count, error } = await supa.from("posts").select("*", {
-    count: "exact",
-    head: true,
-  }).eq("id", postId);
+export async function postExists(
+  postId: string,
+): Promise<{ isFound: boolean; data?: { course_id: string } }> {
+  const { data, error } = await supa.from("posts").select("*").eq("id", postId);
 
   if (error) {
     throw error;
   }
 
-  if (count == 0) {
-    return false;
+  if (!data || data.length == 0) {
+    return { isFound: false };
   }
 
-  return true;
+  const post_data = { course_id: data[0].course_id, status: data[0].status };
+
+  return { isFound: true, data: post_data };
 }
 
 /**
  * Checks whether post exists within scope of course or not
+ * @param numberId number_id of post as int
+ * @param courseId UUID of course
  * @returns True if the post does exist, false otherwise
  */
 export async function postExistsInCourse(
   numberId: string,
   courseId: string,
 ): Promise<boolean> {
-  const { count, error } = await supa.from("posts").select("*", {
-    count: "exact",
-    head: true,
-  })
-    .eq("number_id", numberId).eq("course_id", courseId);
+  const { data, error } = await supa.from("posts").select("*").eq(
+    "number_id",
+    numberId,
+  ).eq("course_id", courseId);
 
   if (error) {
     throw error;
   }
 
-  if (count == 0) {
+  if (!data || data.length == 0) {
     return false;
   }
 
