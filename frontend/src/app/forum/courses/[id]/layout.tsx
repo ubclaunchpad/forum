@@ -1,10 +1,10 @@
 import ClientWrapper from "./(core)/resources/wrapper";
 import { getApiUrl } from "@/utils/helpers";
-import { Course } from "@/lib/types/course";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { CourseStoreProvider } from "@/providers/courseStoreProvider";
 // import { getTags } from "@/lib/fetchers/tags";
+import { Course } from "@forum/shared";
 
 async function getCourse(id: string, token: string) {
   try {
@@ -24,7 +24,7 @@ async function getCourse(id: string, token: string) {
     }
 
     const body = await res.json();
-    return body as Course;
+    return body as Course
   } catch (e) {
     console.error("Error fetching course:", e);
     return null;

@@ -13,7 +13,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useContext, useState, useCallback, useEffect } from "react";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import { getApiUrl } from "@/utils/helpers";
 import { DocumentInterface } from "@/lib/types/documents";

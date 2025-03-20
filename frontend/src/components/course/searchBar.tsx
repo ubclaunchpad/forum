@@ -12,10 +12,11 @@ import {
   HTMLAttributeReferrerPolicy,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { Input } from "../ui/input";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import useDocumentQuery from "@/hooks/useDocumentQuery";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import {
@@ -23,6 +24,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -261,7 +263,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
 
   return (
     <>
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+      {/* <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent
           side="right"
           showClose={false}
@@ -289,7 +291,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
               ))}
           </div>
         </SheetContent>
-      </Sheet>
+      </Sheet> */}
       <div
         className="flex justify-center gap-1 items-center w-full p-2"
         onKeyDown={listenForEnter}
@@ -435,6 +437,7 @@ export function Searchbar() {
   const course = useCourseStore((state) => state.course);
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const searchBarRef = useRef<HTMLButtonElement>(null);
   const isDesktop = useMediaQuery("(min-width: 1000px)");
 
   const {
@@ -558,30 +561,35 @@ export function Searchbar() {
 
   return (
     <>
-      <Button
-        variant="ghost"
-        className="flex w-10 items-center font-medium text-neutral-600 rounded-full px-1 bg-white max-w-full lg:max-w-md min-w-0 lg:min-w-[500px] lg:w-full border overflow-hidden lg:absolute lg:left-1/2 lg:transform h-10 lg:-translate-x-1/2"
-        onClick={() => {
-          setIsOpen(true);
-        }}
-      >
-        <span className="relative flex w-full justify-center md:justify-end">
-          <span className="hidden lg:block lg:absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm">
-            Search documents and posts...
-          </span>
-          <span className="hidden flex-row gap-1 items-center border rounded-full p-1 px-2 lg:flex lg:absolute top-1/2 left-0 transform -translate-y-1/2 text-sm text-neutral-400">
-            <CommandIcon className="w-3 h-3" />+ K
-          </span>
-          <SearchIcon className="md:mr-2 font-normal max-w-4 max-h-4" />
-        </span>
-      </Button>
-
       {isDesktop ? (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button
+              ref={searchBarRef}
+              variant="ghost"
+              className="flex w-10 items-center font-medium text-neutral-600 rounded-full px-1 bg-white max-w-full lg:max-w-md min-w-0 lg:min-w-[500px] lg:w-full border overflow-hidden lg:absolute lg:left-1/2 lg:transform h-10 lg:-translate-x-1/2"
+              onClick={() => {
+                setIsOpen(true);
+              }}
+            >
+              <span className="relative flex w-full justify-center md:justify-end">
+                <span className="hidden lg:block lg:absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm">
+                  Search documents and posts...
+                </span>
+                {/* <span className="hidden flex-row gap-1 items-center border rounded-full p-1 px-2 lg:flex lg:absolute top-1/2 left-0 transform -translate-y-1/2 text-sm text-neutral-400">
+            <CommandIcon className="w-3 h-3" />+ K
+          </span> */}
+                <SearchIcon className="md:mr-2 font-normal max-w-4 max-h-4" />
+              </span>
+            </Button>
+          </DialogTrigger>
           <DialogContent
             position="tc"
             showClose={false}
-            className="flex  course flex-col max-w-4xl gap-2 w-full min-w-[90dvw] xl:min-w-[1000px] flex-shrink-0 max-h-[80dvh] overflow-hidden bg-white border-neutral-100 rounded-lg rounded-t-3xl p-0"
+            className="flex course flex-col max-w-4xl gap-2 bg-red-200 w-full min-w-[90dvw] xl:min-w-[1000px] flex-shrink-0 h-[calc(100dvh-1.5rem)]  overflow-hidden bg-white border-neutral-100 sm:rounded-3xl p-0"
+            style={{
+              top: searchBarRef.current?.offsetTop,
+            }}
           >
             <DialogHeader className="hidden">
               <DialogTitle>Search Documents and Posts</DialogTitle>

@@ -4,7 +4,7 @@ import { PlusIcon, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { DocumentAppendOperation } from "@/lib/types/documents";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import {

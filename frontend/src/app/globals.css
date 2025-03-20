@@ -233,7 +233,7 @@ dialog {
   }
 }
 
-/* .loading-shimmer {
+.loading-shimmer {
   position: absolute;
   top: 0;
   left: 0;
@@ -261,7 +261,7 @@ dialog {
     transparent 100%
   );
   animation: shimmer-reverse 2s infinite;
-} */
+}
 
 .react-pdf__Document {
   width: 100%;

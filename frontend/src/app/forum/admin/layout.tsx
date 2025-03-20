@@ -2,7 +2,7 @@
 
 import { ReactNode, useContext } from "react";
 import AdminLayout from "../../../components/admin/AdminLayout";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { checkPermissionInDomain, PERMISSIONS } from "@/lib/utils";
 import { Card, CardHeader } from "@/components/ui/card";
 

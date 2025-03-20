@@ -5,8 +5,8 @@ import { Fragment, useContext, useState } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { Searchbar } from "./searchBar";
-import { checkPermissionInDomain, cn, PERMISSIONS } from "@/lib/utils";
-import { userContext } from "@/contexts/userContext";
+import {  cn } from "@/lib/utils";
+import { userContext } from "@/providers/userContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import { getApiUrl } from "@/utils/helpers";
 import { useRouter } from "next/navigation";
@@ -28,7 +28,7 @@ function CourseButton() {
   const [isOpen, setIsOpen] = useState(false);
   const course = useCourseStore((state) => state.course);
   const { user, token, profile } = useContext(userContext);
-  const courseName = `${course.c_group} ${course.code} ${course.name}`;
+  const courseName = `${course.department} ${course.code} ${course.name}`;
   const router = useRouter();
 
   async function leaveCourse() {
@@ -65,12 +65,6 @@ function CourseButton() {
                 <ArrowLeftIcon className="w-4 min-h-4" />
                 Back to All Courses
               </Link>
-
-              {checkPermissionInDomain(
-                profile.permissions,
-                PERMISSIONS.MODIFY_COURSE,
-                course.id,
-              ) && (
                 <Link
                   href={`/forum/courses/${course.id}/settings`}
                   className="w-full no-underline hover:text-primary-500 p-1 px-2 text-sm flex items-center gap-2"
@@ -78,7 +72,7 @@ function CourseButton() {
                   <Settings2Icon className="w-4 min-h-4" />
                   Course Settings
                 </Link>
-              )}
+          
               <button
                 disabled={false}
                 className="w-full  disabled:hover:text-neutral-400  hover:text-red-500 p-1 px-2 text-sm flex items-center gap-2"

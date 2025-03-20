@@ -1,5 +1,5 @@
 "use client";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { useToast } from "@/hooks/use-toast";
 import { DocumentInterface } from "@/lib/types/documents";
 import { getApiUrl } from "@/utils/helpers";

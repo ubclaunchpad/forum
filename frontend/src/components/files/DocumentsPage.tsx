@@ -7,7 +7,7 @@ import { DocumentListSidebar } from "./DocumentListSidebar";
 import { getApiUrl } from "@/utils/helpers";
 import { DocumentInterface } from "@/lib/types/documents";
 import FileViewer from "./FileViewer";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { MainListPanel, MainSidebar } from "../general/FourmTabs";
 import { NewDocumentButton } from "./NewDocumentButton";
 import { cn } from "@/lib/utils";

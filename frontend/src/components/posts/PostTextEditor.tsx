@@ -5,7 +5,7 @@ import { useContext } from "react";
 import EditorComponent from "../general/EditorComponent";
 import { Button } from "../ui/button";
 import { cn, isIDTemporary } from "@/lib/utils";
-import { forumPostsContext } from "@/contexts/PostsContext";
+import { forumPostsContext } from "@/providers/PostsContext";
 import { CheckIcon, PencilIcon, XIcon } from "lucide-react";
 
 type PostTextEditorProps = {

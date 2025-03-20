@@ -4,6 +4,7 @@ import { DocumentInterface } from "@/lib/types/documents";
 import { getApiUrl } from "@/utils/helpers";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 async function getDocuments(id: string, token: string) {
   try {
@@ -20,18 +21,27 @@ async function getDocuments(id: string, token: string) {
     });
 
     if (!res.ok) {
-      throw new Error(`Failed to fetch documents: ${res.status}`);
+      return {
+        data: [],
+        error: `Failed to fetch documents: ${res.status}`,
+      };
     }
 
     const documents = await res.json();
-    return documents as DocumentInterface[];
+    return {
+      data: documents as DocumentInterface[],
+      error: null,
+    };
   } catch (e) {
     console.error("Error fetching documents:", e);
-    return [];
+    return {
+      data: [],
+      error: (e as Error).message,
+    };
   }
 }
 
-export default async function ResourcesTab({
+export default async function ResourcesTabWrapper({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -43,6 +53,20 @@ export default async function ResourcesTab({
     redirect("auth/login");
   }
 
-  const documents = await getDocuments(id, token);
+  return (
+    <Suspense fallback={<DocumentsPage initialDocuments={[]} courseId={id} />}>
+      <DocumentsTab id={id} />
+    </Suspense>
+  );
+}
+
+async function DocumentsTab({ id }: { id: string }) {
+  const supabase = await createClient();
+  const token = (await supabase.auth.getSession())?.data.session?.access_token;
+  if (!token) {
+    redirect("auth/login");
+  }
+
+  const { data: documents, error } = await getDocuments(id, token);
   return <DocumentsPage initialDocuments={documents} courseId={id} />;
 }

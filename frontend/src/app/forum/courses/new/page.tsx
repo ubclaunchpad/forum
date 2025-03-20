@@ -13,7 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, PlusCircleIcon, UsersIcon } from "lucide-react";
 import { getApiUrl } from "@/utils/helpers";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { courseSchema, CourseAccessOptions } from "@/lib/types/course";
