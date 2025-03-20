@@ -1,5 +1,4 @@
 import { Context, Hono } from "jsr:@hono/hono";
-import { createMiddleware } from "jsr:@hono/hono/factory";
 import { cors } from "jsr:@hono/hono/cors";
 import { newPostOptionsSchema, newPostSchema } from "@shared/mod.ts";
 import {
@@ -9,8 +8,8 @@ import {
   getPosts,
   updatePost,
 } from "./controllers/crud.ts";
-import { validateUserFromToken } from "../_shared/utils/auth.ts";
 import { postEditInfoSchema } from "@shared/schema/posts.ts";
+import { authMiddleware, UserVariables } from "../_shared/utils/auth.ts";
 
 const functionName = "posts";
 const app = new Hono().basePath(`/${functionName}`);
@@ -25,37 +24,7 @@ app.use(
   }),
 );
 
-const validateUser = async (c: Context) => {
-  const token = c.req.header("Authorization")?.split(" ")[1];
-  if (!token) {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
-  try {
-    const user = await validateUserFromToken(token);
-    return user;
-  } catch {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
-};
-
-type UserVariables = {
-  user: any;
-};
-
-const authMiddleware = createMiddleware<{
-  Variables: UserVariables;
-}>(
-  async (
-    c: Context<{ Variables: UserVariables }>,
-    next: () => Promise<void>,
-  ) => {
-    const user = await validateUser(c);
-    c.set("user", user);
-    await next();
-  },
-);
-
-app.use("*", authMiddleware);
+app.use("*", authMiddleware as any);
 
 /**
  * Retrieves a post using course_id and post_id (both UUID)
