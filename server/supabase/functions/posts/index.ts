@@ -24,7 +24,7 @@ app.use(
   }),
 );
 
-app.use("*", authMiddleware);
+app.use("*", authMiddleware as any);
 
 /**
  * Retrieves a post using course_id and post_id (both UUID)

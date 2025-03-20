@@ -25,7 +25,7 @@ app.use("*", cors({
   exposeHeaders: ["Authorization", "Content-Type"],
 }));
 
-app.use("*", authMiddleware);
+app.use("*", authMiddleware as any);
 
 // Get all users
 app.get("/", async (c) => {

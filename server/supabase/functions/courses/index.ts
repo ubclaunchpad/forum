@@ -37,7 +37,7 @@ app.use("*", cors({
   exposeHeaders: ["Authorization", "Content-Type"],
 }));
 
-app.use("*", authMiddleware);
+app.use("*", authMiddleware as any);
 
 // Get course by course ID
 app.get("/:course_id", async (c: Context<{ Variables: UserVariables }>) => {
