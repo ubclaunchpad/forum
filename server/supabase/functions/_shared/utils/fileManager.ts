@@ -36,6 +36,7 @@ export const fileManager =
           };
           const { data, error } = await db.storage.createBucket(bucketName, createOptions);
           if (error) {
+            console.error(error);
             throw new DuplicateBucketError(error.message);
           }
           return data;
@@ -135,6 +136,15 @@ export const fileManager =
                 );
 
               return signedUrls;
+            },
+            getFileData: async (filePath: string) => {
+              console.log("getting file data", filePath);
+              console.log("bucketName", bucketName);
+              const { data, error } = await db.storage.from(bucketName).download(filePath);
+              if (error) {
+                throw new Error(error.message);
+              }
+              return data;
             },
           };
         },

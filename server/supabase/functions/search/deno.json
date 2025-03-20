@@ -1,7 +1,9 @@
 {
   "imports": {
     "@hono/hono": "jsr:@hono/hono@^4.7.2",
+    "@openai/openai": "jsr:@openai/openai@^4.89.0",
     "@supabase/supabase-js": "jsr:@supabase/supabase-js@^2.49.1",
-    "@shared/": "../../../../shared/"
+    "@shared/": "../../../../shared/",
+    "ai": "npm:ai@^4.1.66"
   }
 }

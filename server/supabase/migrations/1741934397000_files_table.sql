@@ -55,7 +55,6 @@ AFTER DELETE ON files
 FOR EACH ROW EXECUTE FUNCTION delete_file_from_storage();
 
 
-
 CREATE TABLE documents (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     description TEXT NOT NULL DEFAULT '',
@@ -66,6 +65,8 @@ CREATE TABLE documents (
     created_by UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE
 );
 
+COMMENT ON TABLE documents IS 'Documents are files that are uploaded to a course. They are associated with a course.';
+COMMENT ON COLUMN documents.file_id IS 'The file that is associated with the document';
 
 CREATE OR REPLACE FUNCTION delete_document_file()
 RETURNS TRIGGER

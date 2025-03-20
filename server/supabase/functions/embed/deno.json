@@ -2,6 +2,12 @@
   "imports": {
     "@hono/hono": "jsr:@hono/hono@^4.7.2",
     "@supabase/supabase-js": "jsr:@supabase/supabase-js@^2.49.1",
-    "@shared/": "../../../../shared/"
+    "@shared/": "../../../../shared/",
+    "langchain": "npm:langchain@^0.3.19",
+    "pdf-parse": "npm:pdf-parse@^1.1.1"
+    },
+  "nodeModulesDir": "auto",
+  "compilerOptions": {
+    "allowJs": true
   }
 }

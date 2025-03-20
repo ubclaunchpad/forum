@@ -26,6 +26,12 @@ create table if not exists public.texts (
 
 select vault.create_secret('http://api.supabase.internal:8000', 'project_url');
 
+GRANT USAGE ON SCHEMA pgmq TO postgres, authenticated, anon, service_role;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA pgmq TO postgres, service_role;
+GRANT SELECT, INSERT ON ALL TABLES IN SCHEMA pgmq TO authenticated, anon;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA pgmq TO postgres, authenticated, anon, service_role;
+
+
 -- Generic trigger function to queue embedding jobs
 create or replace function util.queue_embeddings()
 returns trigger
@@ -40,7 +46,7 @@ begin
   perform pgmq.send(
     queue_name => 'embedding_jobs',
     msg => jsonb_build_object(
-      'schema', TG_TABLE_SCHEMA,
+      'schema', 'public',
       'sourceTable', source_table,
       'contentColumns', content_columns,
 	  'entityId', NEW.id,
@@ -50,6 +56,8 @@ begin
   return NEW;
 end;
 $$;
+
+ALTER FUNCTION util.queue_embeddings() SECURITY DEFINER;
 
 
 
@@ -112,7 +120,7 @@ $$;
 select
   cron.schedule(
     'process-embeddings',
-    '45 seconds',
+    '30 seconds',
     $$
     select util.process_embeddings();
     $$
