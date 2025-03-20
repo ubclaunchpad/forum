@@ -80,7 +80,7 @@ const courses: NewCourse[] = [
  * When you run e2e tests, your database will be reset.
  * This file will be used to reset and fill the database with any data you need that would take the pain of redoing it every time.
  */
-async function setupDevSeedData() {
+export async function setupDevSeedData() {
   console.log("Setting up dev seed data");
   await emptyDatabase();
   console.log("Database emptied");
@@ -127,13 +127,10 @@ async function setupDevSeedData() {
 
   console.log("Courses created:", course1, course2);
 
-
   console.log("Database setup complete");
-
-
 }
 
-async function emptyDatabase() {
+export async function emptyDatabase() {
   await supa.from("profiles").delete();
   await supa.from("account_status").delete();
   await supa.from("admin_users").delete();
@@ -202,11 +199,3 @@ export async function courseTestSeedSetup(
   }
   return coursesCreated;
 }
-
-
-// emptyDatabase().then(() => {
-//   console.log("Database emptied");
-//   setupDevSeedData().then(() => {
-//     console.log("Database setup complete");
-//   });
-// });
