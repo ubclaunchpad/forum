@@ -1,5 +1,10 @@
 import { courseTestSeedSetup, userTestSeedSetup } from "../../../_dev/setup.ts";
-import { NewCourse, ProfileWithoutId } from "@shared/mod.ts";
+import {
+  NewCourse,
+  NewPost,
+  NewPostOptions,
+  ProfileWithoutId,
+} from "@shared/mod.ts";
 import { PSEUDONYM } from "../../../posts/controllers/helpers.ts";
 
 /**
@@ -21,6 +26,31 @@ export async function userCourseSeedSetup(
     tempProfiles[0].id,
   );
   return { tempProfiles, tempCourses };
+}
+
+/**
+ * Setup function for creating temporary users, user profiles, courses and posts for testing
+ * @param authUsers
+ * @param profiles
+ * @param coursesToCreate
+ * @param postsToCreate
+ * @returns A list of profile objects, list of course objects and a list of posts
+ * NOTE: All courses and posts will be created (and hence only be accessible to) by user in tempProfiles[0]
+ */
+export async function postSeedSetup(
+  authUsers: { email: string; password: string }[],
+  profiles: ProfileWithoutId[],
+  coursesToCreate: NewCourse[],
+  postsToCreate: NewPost[],
+  postArgs: NewPostOptions,
+) {
+  const { tempProfiles, tempCourses } = await userCourseSeedSetup(
+    authUsers,
+    profiles,
+    coursesToCreate,
+  );
+
+  
 }
 
 /**

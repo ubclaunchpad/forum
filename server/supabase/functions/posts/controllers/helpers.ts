@@ -142,6 +142,16 @@ export async function getPostComments(postId: string): Promise<PostComment[]> {
   return result;
 }
 
+export async function getAllPosts() {
+  const { data, error } = await supa.from("posts").select("*");
+
+  if (error) {
+    throw new Error(`Database error when retrieving courses: ${error.message}`);
+  }
+
+  return data;
+}
+
 export function generatePseudonym() {
   const adjective =
     PSEUDONYM[0][Math.floor(Math.random() * PSEUDONYM[0].length)];

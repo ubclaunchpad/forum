@@ -118,30 +118,3 @@ export const postResponse = z.object({
 });
 
 export type PostResponse = z.infer<typeof postResponse>;
-
-export type PostMetadata = {
-  views: number;
-  likes: number;
-};
-
-export type PostInteractions = {
-  viewed: boolean;
-  liked: boolean;
-};
-
-export type DefaultResponse = {
-  success: boolean;
-  message: string;
-};
-
-export type PostEmbeddingMetadata = {
-  exists: boolean;
-  updated_at?: string;
-  content_length?: number;
-};
-
-export type PostTag = {
-  id: string;
-  name: string;
-  color: string;
-};

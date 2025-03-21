@@ -1,9 +1,17 @@
-import { NewCourse, ProfileWithoutId, User } from "@shared/mod.ts";
+import {
+  NewCourse,
+  NewPost,
+  NewPostOptions,
+  ProfileWithoutId,
+  User,
+} from "@shared/mod.ts";
 import { userController } from "../users/controller.ts";
 import { supa } from "../_shared/db.ts";
 import { createCourse } from "../courses/controller/create_course_activity.ts";
 import { deleteCourse } from "../courses/controller/delete_course_activity.ts";
 import { getAllCourses } from "../courses/controller/get_all_courses_activity.ts";
+import { getAllPosts } from "../posts/controllers/helpers.ts";
+import { createPost, deletePost } from "../posts/controllers/crud.ts";
 const authUsers = [
   {
     email: "admin@test.com",
@@ -73,6 +81,34 @@ const courses: NewCourse[] = [
     name: "Introduction to Computer Science",
   },
 ];
+
+const postArgs = [
+  {
+    title: "Post 1",
+    content: "This is post 1",
+  },
+  {
+    title: "Post 2",
+    content: "This is post 2",
+  },
+  {
+    title: "Post 3",
+    content: "This is post 3",
+  },
+  {
+    title: "Post 4",
+    content: "This is post 4",
+  },
+  {
+    title: "Post 5",
+    content: "This is post 5",
+  },
+];
+
+const postOptions: NewPostOptions = {
+  visibility: "public",
+  usePseudonym: true,
+};
 
 /**
  * This file is used to setup the database for development purposes.
@@ -198,4 +234,24 @@ export async function courseTestSeedSetup(
     coursesCreated.push(createdCourse);
   }
   return coursesCreated;
+}
+
+export async function postTestSeedSetup(
+  postsToCreate: NewPost[],
+  postOptions: NewPostOptions,
+  creatorId: string,
+) {
+  const posts = await getAllPosts();
+
+  // Assume all posts created by same profile
+  for (const post of posts) {
+    await deletePost(post.id, creatorId);
+  }
+
+  const postsCreated = [];
+  for (const post of postsToCreate) {
+    const createdPost = await createPost(creatorId, post, postOptions);
+    postsCreated.push(createdPost);
+  }
+  return postsCreated;
 }
