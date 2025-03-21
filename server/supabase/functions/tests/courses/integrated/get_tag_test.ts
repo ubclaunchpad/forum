@@ -21,6 +21,7 @@ import {
 import { createCourse } from "../../../courses/controller/create_course_activity.ts";
 import { createTag } from "../../../courses/controller/create_tag_activity.ts";
 import { getTag, getTagNested } from "../../../_shared/utils/tag_helper.ts";
+import { getAllTags } from "../../../courses/controller/get_all_tags_activity.ts";
 import { NestedTag, NewTag, Tag } from "@shared/schema/tag.ts";
 
 describe("Get Tag tests", () => {
@@ -89,6 +90,15 @@ describe("Get Tag tests", () => {
         assertExists(tagData.parent.parent);
         hasSameFields(tagData.parent.parent, newTagData, courseId, null);
     });
+
+    it("Should get all tags", async() => {
+        const tags = await getAllTags(courseId);
+        assertExists(tags);
+        assertEquals(tags.length, 3);
+        assertExists(tags.find((tag) => tag.id == tagId));
+        assertExists(tags.find((tag) => tag.id == tagId2));
+        assertExists(tags.find((tag) => tag.id == tagId3));
+    })
 });
 
 function hasSameFields(tag: Tag | NestedTag, referenceTag: NewTag, courseId: string, parentId: string | null) {

@@ -9,19 +9,31 @@ const allAllowed = Object.fromEntries(
     DEFAULT_ROLES.map((role) => [role, true])
 );
 
+const allAllowedSchema = z.object(rolesPermissionSchema).transform((val) => {
+    return { ...allAllowed, ...val };
+});
+
 const instructorStaffAllowed = Object.fromEntries(
     DEFAULT_ROLES.map((role, index) => [role, index < 2])
 );
+
+const instructorStaffAllowedSchema = z.object(rolesPermissionSchema).transform((val) => {
+    return { ...instructorStaffAllowed, ...val };
+});
 
 const onlyInstructorAllowed = Object.fromEntries(
     DEFAULT_ROLES.map((role, index) => [role, index < 1])
 );
 
+const onlyInstructorAllowedSchema = z.object(rolesPermissionSchema).transform((val) => {
+    return { ...onlyInstructorAllowed, ...val };
+});
+
 export const tagPermissionsSchema = z.object({
-    can_view_post: z.object(rolesPermissionSchema).default(allAllowed),
-    can_edit_post: z.object(rolesPermissionSchema).default(allAllowed),
-    can_delete_post: z.object(rolesPermissionSchema).default(instructorStaffAllowed),
-    can_change_post_visibility: z.object(rolesPermissionSchema).default(instructorStaffAllowed)
+    can_view_post: allAllowedSchema.default(allAllowed),
+    can_edit_post: allAllowedSchema.default(allAllowed),
+    can_delete_post: instructorStaffAllowedSchema.default(instructorStaffAllowed),
+    can_change_post_visibility: instructorStaffAllowedSchema.default(instructorStaffAllowed)
 });
 
 export type TagPermissions = z.infer<typeof tagPermissionsSchema>;
@@ -30,10 +42,14 @@ export const baseTagSchema = z.object({
     parent_id: z.string().optional(),
     name: z.string(),
     permissions: tagPermissionsSchema,
-    can_use_tag: z.object(rolesPermissionSchema).default(allAllowed)
+    can_use_tag: allAllowedSchema.default(allAllowed)
 });
 
 export type NewTag = z.infer<typeof baseTagSchema>;
+
+export const updateTagSchema = baseTagSchema.partial(); 
+
+export type UpdateTag = z.infer<typeof updateTagSchema>;
 
 export const tagSchema = baseTagSchema.extend({
     id: z.string(),

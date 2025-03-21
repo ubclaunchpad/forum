@@ -30,7 +30,7 @@ describe("Update Tag tests", () => {
     let user1Id: string;
     let courseId: string;
     let tagId: string;
-    const updateTagData = {...newTagData, name: "Updated tag name"}; 
+    const updateTagData = { name: "Updated tag name"}; 
     const invalidId = "00000000-0000-0000-0000-000000000000";
 
     beforeAll(async () => {
@@ -84,7 +84,7 @@ describe("Update Tag tests", () => {
         assertEquals(tagData.course_id, courseId);
         assertEquals(tagData.name, updateTagData.name);
         assertEquals(tagData.parent_id, null);
-        assertEquals(tagData.permissions, updateTagData.permissions);
-        assertEquals(tagData.can_use_tag, updateTagData.can_use_tag);
+        assertEquals(tagData.permissions, newTagData.permissions);
+        assertEquals(tagData.can_use_tag, newTagData.can_use_tag);
     });
 });

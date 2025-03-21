@@ -1,8 +1,8 @@
-import { NewTag, Tag } from "@shared/schema/tag.ts";
+import { Tag, UpdateTag } from "@shared/schema/tag.ts";
 import { supa } from "../../_shared/db.ts";
 import { NotFoundError } from "../../_shared/errors.ts";
 
-export async function updateTag(updateTagData: NewTag, tag_id: string) {
+export async function updateTag(updateTagData: UpdateTag, tag_id: string) {
     const tag = await getTag(tag_id);
     const { id, ...updatedTag } = { ...tag, ...updateTagData };
     const { error } = await supa.from("tags").update(updatedTag).eq("id", tag_id);
