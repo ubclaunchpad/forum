@@ -48,10 +48,11 @@ const sql = postgres(
   Deno.env.get("SUPABASE_DB_URL")!,
 );
 
-app.post("/", async (c: Context) => {
-  const { text } = await c.req.json();
+app.post("/courses/:courseId", async (c: Context) => {
+  const courseId = c.req.param("courseId");
+  const { query } = await c.req.json();
 
-  const { context, text: question, sources } = await delegateSearch(text);
+  const { context, text: question, sources } = await delegateSearch(query, courseId);
 
   const result = streamText({
     model: openai("gpt-4o-mini"),
@@ -65,8 +66,9 @@ app.post("/", async (c: Context) => {
   return stream(c, (stream) => stream.pipe(result.toDataStream()));
 });
 
-app.get("/", async (c: Context) => {
-  const text = c.req.query("text");
+app.get("/courses/:courseId", async (c: Context) => {
+  const courseId = c.req.param("courseId");
+  const text = c.req.query("query");
   console.log(text);
   if (!text) {
     return c.json({
@@ -76,10 +78,18 @@ app.get("/", async (c: Context) => {
 
   // const startTime = performance.now();
 
-  const { context, text: question, sources } = await delegateSearch(text);
+  const { context, text: question, sources } = await delegateSearch(text, courseId);
   // let endTime = performance.now();
   // let duration = endTime - startTime;
   // console.log(`Time taken: ${duration} milliseconds to find sources`);
+
+  if (sources.length === 0) {
+    return c.json({
+      result: "No sources found within the course",
+      sources: [],
+      text: question,
+    }, 200);
+  }
 
   const result = await generateText({
     model: openai("gpt-4o-mini"),
@@ -104,7 +114,7 @@ app.get("/", async (c: Context) => {
   });
 });
 
-async function delegateSearch(text: string) {
+async function delegateSearch(text: string, courseId: string) {
   const embedding = await session.run(text, {
     mean_pool: true,
     normalize: true,
@@ -113,15 +123,34 @@ async function delegateSearch(text: string) {
   const embeddingArray = `[${embedding.toString()}]`;
 
   const res = await sql`
-  select 
-    entity_id,
-    entity_type,
-    content,
-    (embedding <=> ${embeddingArray}) as similarity_score
-  from embeddings
-  where embedding <=> ${embeddingArray} < ${1 - MATCH_THRESHOLD}::float
-  order by embedding <=> ${embeddingArray} asc
-  limit 8
+  WITH entity_ids AS (
+    -- Get all post IDs for the course
+    SELECT id AS entity_id
+    FROM posts
+    WHERE course_id = ${courseId}
+    
+    UNION ALL
+    
+    -- Get all document IDs for the course
+    SELECT id AS entity_id
+    FROM documents
+    WHERE course_id = ${courseId}
+  )
+  
+  SELECT 
+    e.entity_id,
+    e.entity_type,
+    e.content,
+    (e.embedding <=> ${embeddingArray}) AS similarity_score
+  
+  FROM embeddings e
+  -- Join with our entity_ids to filter only relevant embeddings
+  JOIN entity_ids ei ON e.entity_id = ei.entity_id
+  -- Additional vector similarity filtering
+  WHERE e.embedding <=> ${embeddingArray} < ${1 - MATCH_THRESHOLD}::float
+  -- Order by similarity (closest matches first)
+  ORDER BY e.embedding <=> ${embeddingArray} ASC
+  LIMIT 10
   `;
 
   const sourcesWithSimilarity = res.map((r) => {
@@ -156,7 +185,7 @@ Question and extra information: ${text}
 - You are contextually aware of the course, the user and other members in the course.
 - Concise is always preferred. Only explain if user insists or the question is not straightforward.
 
-- Include citations. use the footnote style. for each footnote it has to be [number](<entity_type>_<entity_id>)
+- Only keep inline citations. number the citations. for each citation it has to be [number](<entity_type>_<entity_id>)
 - Format needs to be markdown. any markdown styles are allowed however avoid using h1, h2. only h3 and beyond. Exclude img, video, audio, etc.
 - Some questions will not have direct answers; provide your best response based on your own knowledge and the sources provided. However, if not able to answer, say so and ask a followup. Be detailed in what would help you answer the question.
 - Some questions might ask you about finding or redirecting. Give them the options hyperlinked so they can go to these. Example are finding a certain note, date range of posts, etc.

@@ -140,11 +140,20 @@ export const fileManager =
             getFileData: async (filePath: string) => {
               console.log("getting file data", filePath);
               console.log("bucketName", bucketName);
-              const { data, error } = await db.storage.from(bucketName).download(filePath);
+            const { data, error } = await db.storage.from(bucketName).download(filePath);
               if (error) {
                 throw new Error(error.message);
               }
               return data;
+            },
+            getFileSignedUrl: async (filePath: string) => {
+              const { data, error } = await db.storage.from(bucketName).createSignedUrl(filePath, defaultOptions.signedUrlExpirationSeconds);
+              if (error) {
+                throw new Error(error.message);
+              }
+              return {
+                signed_url: data.signedUrl,
+              }
             },
           };
         },
@@ -184,7 +193,15 @@ export const fileManager =
             }
         
             return data;
+        },
+        getFileData: async (fileId: string) => {
+          const {data: fileRecord, error: fileRecordError} = await db.from("files").select("*").eq("id", fileId).single();
+          if (fileRecordError) {
+            throw new Error(fileRecordError.message);
           }
+          console.log("fileRecord", fileRecord);
+          return manager.buckets.usingBucket(fileRecord.bucket).getFileData(fileRecord.path);
+        },
       },
     };
     return manager;

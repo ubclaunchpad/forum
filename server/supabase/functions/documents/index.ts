@@ -56,7 +56,9 @@ app.get("/courses/:courseId", async (c) => {
       return c.json({ error: "Invalid course ID" }, 400);
     }
     const documents = await documentController.withCourse(courseIdParsed.data).getAllDocuments();
-    return c.json(documents);
+    return c.json({
+      documents: documents
+    });
   } catch (error) {
     if (error instanceof Error) {
       return c.json({ error: error.message }, 500);
@@ -74,10 +76,10 @@ app.post("/courses/:courseId", async (c: Context<{ Variables: UserVariables }>) 
     if (!courseIdParsed.success) {
       return c.json({ error: "Invalid course ID" }, 400);
     }
-    const userid =  "89202f34-f3cf-4764-95d2-a61c32520d36"
     const formData = await c.req.formData();
     const description = formData.get("description") as string;
     const file = formData.get("file") as File;
+    const userid = c.get("user").id;
     const document = await documentController.withCourse(courseIdParsed.data).createDocument({description, file, createdBy: userid });
     return c.json(document);
   } catch (error) {
@@ -90,17 +92,29 @@ app.post("/courses/:courseId", async (c: Context<{ Variables: UserVariables }>) 
   }
 });
 
-app.get("/:id", async (c) => {
-  // TODO: get document by id - if user is in course, return document, if not, return error
+app.get("/document/:id/signed_url", async (c) => {
+  const { id } = c.req.param();
+  const document = await documentController.withCourse(id).getDocumentById(id);
+  return c.json(document);
 });
 
-app.delete("/:id", async (c) => {
-  // TODO: delete document by id - if user is in course, delete document, if not, return error
+app.delete("/document/:id", async (c) => {
+  const { id } = c.req.param();
+  const document = await documentController.withCourse(id).deleteDocument(id);
+  return c.json(document);
 });
 
-app.patch("/:id", async (c) => {
-  // TODO: update document by id - if user is in course, update document, if not, return error
-});
+// app.get("/:id", async (c) => {
+//   // TODO: get document by id - if user is in course, return document, if not, return error
+// });
+
+// app.delete("/:id", async (c) => {
+//   // TODO: delete document by id - if user is in course, delete document, if not, return error
+// });
+
+// app.patch("/:id", async (c) => {
+//   // TODO: update document by id - if user is in course, update document, if not, return error
+// });
 
 
 export { app };
