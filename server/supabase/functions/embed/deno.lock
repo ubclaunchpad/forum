@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@hono/hono@^4.7.2": "4.7.4",
     "jsr:@std/dotenv@*": "0.225.3",
+    "jsr:@supabase/functions-js@*": "2.4.4",
     "jsr:@supabase/supabase-js@2": "2.49.1",
     "jsr:@supabase/supabase-js@^2.49.1": "2.49.1",
     "npm:@langchain/community@*": "0.3.36_@browserbasehq+stagehand@1.14.0__@playwright+test@1.51.1__deepmerge@4.3.1__dotenv@16.4.7__openai@4.87.3___zod@3.24.2___ws@8.18.1__zod@3.24.2__ws@8.18.1_@ibm-cloud+watsonx-ai@1.6.0__@langchain+core@0.3.42___openai@4.87.3____zod@3.24.2___zod@3.24.2___openai@4.87.3____zod@3.24.2____ws@8.18.1__openai@4.87.3___zod@3.24.2___ws@8.18.1_@langchain+core@0.3.42__openai@4.87.3___zod@3.24.2__zod@3.24.2_ibm-cloud-sdk-core@5.3.2__axios@1.8.4_openai@4.87.3__zod@3.24.2_pdf-parse@1.1.1_openai@4.87.3__zod@3.24.2__ws@8.18.1_zod@3.24.2_@langchain+core@0.3.42__openai@4.87.3___zod@3.24.2__zod@3.24.2__openai@4.87.3___zod@3.24.2___ws@8.18.1",
@@ -17,6 +18,7 @@
     "npm:langchain@*": "0.3.19_@langchain+core@0.3.42__openai@4.87.3___zod@3.24.2__zod@3.24.2_openai@4.87.3__zod@3.24.2_zod@3.24.2",
     "npm:langchain@~0.3.19": "0.3.19_@langchain+core@0.3.42__openai@4.87.3___zod@3.24.2__zod@3.24.2_openai@4.87.3__zod@3.24.2_zod@3.24.2",
     "npm:openai@^4.52.5": "4.87.3_zod@3.24.2",
+    "npm:pdf-parse@*": "1.1.1",
     "npm:pdf-parse@^1.1.1": "1.1.1",
     "npm:zod@3.24.2": "3.24.2"
   },
@@ -27,11 +29,17 @@
     "@std/dotenv@0.225.3": {
       "integrity": "a95e5b812c27b0854c52acbae215856d9cce9d4bbf774d938c51d212711e8d4a"
     },
+    "@supabase/functions-js@2.4.4": {
+      "integrity": "38456509a6e22fb116b118464cbb36357256f9048d3580632b63af91f63769f7",
+      "dependencies": [
+        "npm:openai"
+      ]
+    },
     "@supabase/supabase-js@2.49.1": {
       "integrity": "45dff81927b876287024ff8b43de8741bfe5ddf1fbaf152dd863a367bfcbd380",
       "dependencies": [
         "npm:@supabase/auth-js",
-        "npm:@supabase/functions-js",
+        "npm:@supabase/functions-js@2.4.4",
         "npm:@supabase/node-fetch",
         "npm:@supabase/postgrest-js",
         "npm:@supabase/realtime-js",

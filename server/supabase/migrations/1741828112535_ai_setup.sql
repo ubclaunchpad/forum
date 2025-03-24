@@ -1,6 +1,3 @@
-
-
-
 -- Enable vector extension
 create extension if not exists vector
 with
@@ -91,7 +88,4 @@ begin
     return NEW;
 end;
 $$;
-
-
-
 

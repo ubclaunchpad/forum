@@ -76,58 +76,7 @@ app.post("/", async (c: Context) => {
     const { jobId, sourceTable, entityId, entityType, contentColumns } =
       jobRequest;
 
-    if (sourceTable === "texts") {
-      // const { data } = await supa.from(sourceTable).select("*").eq(
-      //   "id",
-      //   entityId,
-      // ).single();
-
-      // console.log("data", data);
-      // if (!data) {
-      //   return c.json({ error: "Text not found" }, 404);
-      // }
-
-      // const { data: embeddingData } = await supa.from("embeddings").select("*")
-      //   .eq("entity_id", entityId).eq("entity_type", entityType).single();
-
-      // const document = data as any;
-      // const contentData = [];
-      // for (const column of contentColumns.split(",")) {
-      //   contentData.push(document[column]);
-      // }
-      // const content = contentData.join("\n");
-      // const words = content.split(" ");
-      // if (words.length > 0.9 * MAX_WORDS) {
-      //   return c.json({ error: "Content is too long" }, 400);
-      // }
-
-      // const embedding = await session.run(content, {
-      //   mean_pool: true,
-      //   normalize: true,
-      // });
-
-      // const { error: updatedEmbeddingError } = await supa.from("embeddings")
-      //   .upsert({
-      //     entity_type: entityType,
-      //     entity_id: entityId,
-      //     content: content,
-      //     embedding: embedding,
-      //     created_at: embeddingData?.created_at, // original created_at
-      //     updated_at: new Date().toISOString(),
-      //   });
-
-      await sql`
-  select pgmq.delete(${QUEUE_NAME}, ${jobId}::bigint)
-  `;
-
-      // if (updatedEmbeddingError) {
-      //   console.log("Could not save embedding", updatedEmbeddingError);
-      //   console.error(updatedEmbeddingError);
-      //   return c.json({ error: "Failed to update embedding" }, 500);
-      // }
-
-      return c.json({ success: true });
-    } else if (sourceTable === "post") {
+    if (sourceTable === "post") {
       return c.json({ error: "Post embedding not implemented" }, 501);
     } else if (sourceTable === "documents") {
       try {

@@ -64,8 +64,8 @@ const courses: NewCourse[] = [
     access: "public",
     name: "Introduction to Computer Science",
     config: {
-      theme_colour: "#000000",
-      font: "Arial",
+      theme_colour: "#347370",
+      font: "Quicksand",
     },
     start_date: new Date("2024-01-01"),
   },
@@ -75,6 +75,10 @@ const courses: NewCourse[] = [
     section: "002",
     access: "public",
     name: "Introduction to Computer Science",
+    config: {
+      theme_colour: "#B2ABF2",
+      font: "Space Grotesk",
+    },
   },
 ];
 

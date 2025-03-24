@@ -1,11 +1,15 @@
 import { Context, Hono } from "jsr:@hono/hono";
-import { createMiddleware } from "jsr:@hono/hono/factory";
 import { cors } from "jsr:@hono/hono/cors";
 import postgres from "https://deno.land/x/postgresjs@v3.4.5/mod.js";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"; // This is required for the Supabase AI SDK
-import { stream } from "jsr:@hono/hono/streaming";
-import { openai } from "npm:@ai-sdk/openai";
-import { generateText, streamText } from "npm:ai";
+import { streamText } from "jsr:@hono/hono/streaming";
+import { supa } from "../_shared/db.ts";
+import OpenAI from "jsr:@openai/openai";
+import { authMiddleware } from "../_shared/utils/auth.ts";
+
+const client = new OpenAI({
+  apiKey: Deno.env.get("OPENAI_API_KEY"),
+});
 
 const functionName = "search";
 const app = new Hono().basePath(`/${functionName}`);
@@ -23,99 +27,190 @@ app.use(
   }),
 );
 
-type UserVariables = {
-  user: any;
-};
-
-const authMiddleware = createMiddleware<{
-  Variables: UserVariables;
-}>(
-  async (
-    c: Context<{ Variables: UserVariables }>,
-    next: () => Promise<void>,
-  ) => {
-    // const user = await validateUser(c);
-    // c.set('user', user);
-    console.log("authMiddleware");
-    await next();
-  },
-);
-
-app.use("*", authMiddleware);
+app.use("*", authMiddleware as any);
 
 const sql = postgres(
   // `SUPABASE_DB_URL` is a built-in environment variable
   Deno.env.get("SUPABASE_DB_URL")!,
 );
 
-app.post("/courses/:courseId", async (c: Context) => {
+app.post("/courses/:courseId/ask", async (c: Context) => {
   const courseId = c.req.param("courseId");
   const { query } = await c.req.json();
+  const shouldStream = c.req.query("stream") === "true";
+  const { threadId } = await c.req.json();
 
-  const { context, text: question, sources } = await delegateSearch(query, courseId);
+  const { context, text: question, sources } = await delegateSearch(
+    query,
+    courseId,
+    threadId,
+  );
 
-  const result = streamText({
-    model: openai("gpt-4o-mini"),
-    maxTokens: 1000,
-    messages: [{ role: "assistant", content: context }, {
-      role: "user",
-      content: question,
-    }],
+  if (!shouldStream) {
+    const result = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "assistant", content: context }, {
+        role: "user",
+        content: question,
+      }],
+    });
+    return c.json({
+      sources: sources,
+      question: question,
+      answer: result.choices[0].message.content,
+    });
+  }
+
+  return streamText(c, async (apiStream) => {
+    let fullAnswer = "";
+    const myUUID = crypto.randomUUID();
+    const partialWithSources = {
+      sources: sources,
+      question: question,
+      checkPoint: "Gathered sources",
+      thread_id: threadId || myUUID,
+    };
+    await apiStream.writeln(JSON.stringify(partialWithSources));
+
+    const stream = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "assistant", content: context }, {
+        role: "user",
+        content: question,
+      }],
+      stream: true,
+    });
+
+    for await (const chunk of stream) {
+      const partial = {
+        text: chunk.choices[0].delta.content,
+        checkPoint: "Generating response",
+      };
+      fullAnswer += chunk.choices[0].delta.content;
+      await apiStream.writeln(JSON.stringify(partial));
+    }
+
+    const { error } = await supa.from("search_history").insert({
+      thread_id: threadId || myUUID,
+      query: question,
+      answer: fullAnswer,
+      sources: sources,
+      course_id: courseId,
+      user_id: c.get("user").id,
+    });
+    if (error) {
+      console.error(error);
+    }
   });
-
-  return stream(c, (stream) => stream.pipe(result.toDataStream()));
 });
 
-app.get("/courses/:courseId", async (c: Context) => {
+app.get("/courses/:courseId/textsearch", async (c: Context) => {
   const courseId = c.req.param("courseId");
-  const text = c.req.query("query");
-  console.log(text);
-  if (!text) {
-    return c.json({
-      error: "text is required",
-    }, 400);
+  const query = c.req.query("query");
+
+  if (!query) {
+    return c.json({ error: "Query is required" }, 400);
   }
 
-  // const startTime = performance.now();
+  const formattedQuery = query.split(" ").join(" & ");
+  const { data: matches, error } = await supa.from("embeddings").select("*").eq(
+    "course_id",
+    courseId,
+  )
+    .textSearch("fts", formattedQuery).limit(15);
 
-  const { context, text: question, sources } = await delegateSearch(text, courseId);
-  // let endTime = performance.now();
-  // let duration = endTime - startTime;
-  // console.log(`Time taken: ${duration} milliseconds to find sources`);
-
-  if (sources.length === 0) {
-    return c.json({
-      result: "No sources found within the course",
-      sources: [],
-      text: question,
-    }, 200);
+  if (error) {
+    console.error(error);
+    return c.json({ error: "Error fetching matches" }, 500);
   }
 
-  const result = await generateText({
-    model: openai("gpt-4o-mini"),
-    maxTokens: 1000,
-    messages: [{ role: "assistant", content: context }, {
-      role: "user",
-      content: question,
-    }],
+  if (!matches) {
+    return c.json({ results: [] }, 200);
+  }
+
+  const docMatches = matches.filter((m) => m.entity_type === "document");
+  const postMatches = matches.filter((m) => m.entity_type === "post");
+
+  const docIds = docMatches.map((m) => m.entity_id);
+  const postIds = postMatches.map((m) => m.entity_id);
+
+  const [docResults, postResults] = await Promise.all([
+    supa.from("documents").select("*, files(*)").in("id", docIds),
+    supa.from("posts").select("*").in("id", postIds),
+  ]);
+
+  const docs = docResults.data;
+  const posts = postResults.data;
+
+  const results = matches.map((m) => {
+    if (m.entity_type === "document") {
+      const doc = docs?.find((d) => d.id === m.entity_id);
+      return {
+        ...doc,
+        content: m.content,
+        entity_type: "document",
+        course_id: courseId,
+        title: doc?.files.name,
+        type: doc?.files.type,
+        entity_id: doc?.id,
+      };
+    } else {
+      const post = posts?.find((p) => p.id === m.entity_id);
+      return {
+        ...post,
+        content: m.content,
+        entity_type: "post",
+        course_id: courseId,
+        title: post?.title,
+        type: "post",
+        entity_id: post?.id,
+      };
+    }
   });
 
-  // endTime = performance.now();
-  // duration = endTime - startTime;
-  // console.log(`Time taken: ${duration} milliseconds to generate response`);
-
-  return c.json({
-    text: question,
-    sources: sources.map((s) => ({
-      entity_id: s.entity_id,
-      entity_type: s.entity_type,
-    })),
-    result: result.text,
-  });
+  return c.json({ results: results });
 });
 
-async function delegateSearch(text: string, courseId: string) {
-  const embedding = await session.run(text, {
+async function delegateSearch(
+  text: string,
+  courseId: string,
+  threadId?: string,
+) {
+  let queryToEmbed = text;
+  let pastGist = null;
+
+  let thread = null;
+  if (threadId) {
+    const { data, error } = await supa.from("search_history").select("*").eq(
+      "thread_id",
+      threadId,
+    );
+    if (error) {
+      console.error(error);
+    }
+    thread = data || [];
+    pastGist = "Here are the past questions and answers: " +
+      thread.map((t) => `${t.query}\n${t.answer}`).join("\n");
+    const prompt = `
+  ${pastGist}
+
+  Here is the new question:
+  ${text}
+
+  Generate a new question combining the past questions and answers into a single question that breifly captures the essence of the new question and past context (question/answers).
+  The new question should be concise and to the point.
+  `;
+
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      max_tokens: 450,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    queryToEmbed = response.choices[0].message.content || text;
+  }
+
+  const embedding = await session.run(queryToEmbed, {
     mean_pool: true,
     normalize: true,
   }) as any;
@@ -173,14 +268,21 @@ async function delegateSearch(text: string, courseId: string) {
     };
   });
 
-  console.log(sourcesWithSimilarity.map((s) => s.confidence));
-  console.log(res.map((s) => s.similarity_score));
-
   const context = `
-Question and extra information: ${text}
+Original question: ${text}
+
+${
+    queryToEmbed !== text
+      ? `
+ Question that has been generated from the past questions and answers: ${queryToEmbed}
+`
+      : ""
+  }
+
+Expectations:
 
 - Answer this question with also using the sources below if relevant.
-- Your answers should be concised but when the question is asking to elaborate or a follow up use your judgment to figure out the correct manner of response.
+- Your answers should be concise but when the question is asking to elaborate or a follow up use your judgment to figure out the correct manner of response.
 - This means you should not have to end with a "conclusion" paragraph. For example questions that are like a typical search engine should be straightforward. e.g. Where is this book? answer: Yuu can find the book here.
 - You are contextually aware of the course, the user and other members in the course.
 - Concise is always preferred. Only explain if user insists or the question is not straightforward.
@@ -206,6 +308,8 @@ ${
     context,
     text,
     sources: res,
+    pastGist,
+    queryToEmbed,
   };
 }
 

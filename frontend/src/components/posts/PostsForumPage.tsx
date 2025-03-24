@@ -14,7 +14,7 @@ export const PostsForumPage = ({
 }) => {
   return (
     <ForumContextProvider initialPosts={posts} initialSelectedId={initalPost}>
-      <div className="flex flex-1 overflow-hidden bg-neutral-50 ">
+      <div className="flex flex-1 overflow-hidden  ">
         <PostsForumSidebar />
         <PostsForumViewSection />
       </div>

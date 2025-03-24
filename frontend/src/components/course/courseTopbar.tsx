@@ -4,20 +4,19 @@ import { ArrowLeftIcon, LogOutIcon, Settings2Icon } from "lucide-react";
 import { Fragment, useContext, useState } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { Searchbar } from "./searchBar";
 import {  cn } from "@/lib/utils";
 import { userContext } from "@/providers/userContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import { getApiUrl } from "@/utils/helpers";
 import { useRouter } from "next/navigation";
 import { ProfileButton } from "../general/ProfileButton";
-
+import { Searcher } from "../search/searcher";
 export function CourseTopbar() {
   return (
-    <div className="flex relative justify-between w-full items-center py-2 px-2">
+    <div className="flex flex-shrink-0  relative justify-between w-full items-center py-2 px-2">
       <CourseButton />
       <div className="flex flex-1 gap-2 justify-end">
-        <Searchbar />
+        <Searcher />
         <ProfileButton />
       </div>
     </div>
@@ -55,7 +54,7 @@ function CourseButton() {
   return (
     <Fragment>
       {isOpen && (
-        <div className="fixed text-sm flex z-30 flex-col gap-2 rounded-lg top-14 left-4 bg-white shadow-md border border-neutral-200">
+        <div className="fixed text-sm  flex z-30 flex-col gap-2 rounded-lg top-14 left-4 bg-white shadow-md border border-neutral-200">
           <section className="flex flex-col gap-1">
             <ul className="flex flex-col min-w-[200px] divide-y last:border-b">
               <Link

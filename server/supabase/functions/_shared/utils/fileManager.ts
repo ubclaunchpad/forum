@@ -11,7 +11,7 @@ interface FileManagerOptions {
 }
 
 export const DEFAULT_FILE_MANAGER_OPTIONS: FileManagerOptions = {
-  supportedMimeTypes: ["image/jpeg", "image/png", "image/gif"],
+  supportedMimeTypes: ["image/jpeg", "image/png", "image/gif", "application/pdf"],
   maxFileSizeInMB: 10,
   conflictResolution: "appendTimestamp",
   signedUrlExpirationSeconds: 600,
