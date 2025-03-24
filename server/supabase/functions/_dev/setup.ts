@@ -225,3 +225,10 @@ export async function courseTestSeedSetup(
   }
   return coursesCreated;
 }
+
+// emptyDatabase().then(() => {
+//   console.log("Database emptied");
+//   setupDevSeedData().then(() => {
+//     console.log("Database setup complete");
+//   });
+// });

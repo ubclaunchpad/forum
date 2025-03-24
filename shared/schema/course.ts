@@ -48,6 +48,7 @@ export const defaultPermissionsSchema = z.object({
   can_change_course_visibility: z.boolean(),
   can_create_tags: z.boolean(),
   can_edit_tags: z.boolean(),
+  can_delete_tags: z.boolean(),
   can_create_post: z.boolean(),
   can_view_posts: z.object({
     public: z.boolean(),

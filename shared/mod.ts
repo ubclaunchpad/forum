@@ -6,3 +6,4 @@ export * from "./schema/course.ts";
 export * from "./schema/posts.ts";
 export * from "./schema/general.ts";
 export * from "./schema/documents.ts";
+export * from "./schema/tag.ts";

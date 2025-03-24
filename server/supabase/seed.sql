@@ -267,6 +267,7 @@ VALUES
             "can_change_course_visibility": true,
             "can_create_tags": true,
             "can_edit_tags": true,
+            "can_delete_tags": true,
             "can_create_post": true,
             "can_view_posts": {
                 "public": true,
@@ -306,6 +307,7 @@ VALUES
             "can_change_course_visibility": false,
             "can_create_tags": true,
             "can_edit_tags": true,
+            "can_delete_tags": true,
             "can_create_post": true,
             "can_view_posts": {
                 "public": true,
@@ -345,6 +347,7 @@ VALUES
             "can_change_course_visibility": false,
             "can_create_tags": false,
             "can_edit_tags": false,
+            "can_delete_tags": false,
             "can_create_post": true,
             "can_view_posts": {
                 "public": true,

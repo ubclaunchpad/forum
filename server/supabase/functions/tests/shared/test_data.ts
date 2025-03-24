@@ -1,3 +1,5 @@
+import { z } from "@shared/deps.ts";
+
 export const testUser = {
   first_name: "Test",
   last_name: "User",
@@ -54,3 +56,36 @@ export const coursePrivate = {
     name: "Test Course Private",
     access: "private"
 };
+
+export const newTagPermissions = {
+    can_view_post: {
+        instructor: true,
+        staff: true,
+        student: false
+    },
+    can_edit_post: {
+        instructor: true,
+        staff: true,
+        student: true
+    },
+    can_delete_post: {
+        instructor: true,
+        staff: true,
+        student: false
+    },
+    can_change_post_visibility: {
+        instructor: true,
+        staff: true,
+        student: false
+    }
+};
+
+export const newTagData = {
+    name: "New Tag",
+    permissions: newTagPermissions,
+    can_use_tag: {
+        instructor: true,
+        staff: true,
+        student: false
+    }
+}
