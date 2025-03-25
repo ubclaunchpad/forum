@@ -23,7 +23,36 @@ import { getPostComments, postExists } from "./helpers.ts";
 export async function createPostComment(
   postId: string,
   userId: string,
+  content: string
 ): Promise<PostComment> {
+  const newCommentArg = {
+    "post_id": postId,
+    "content": content
+  }
+  const comment = await supa.from("post_comments").insert(newCommentArg).select().single();
+  if (!comment.data){
+    throw new Error("comment unsuccesfully added to post_comments");
+  }
+  const result: PostComment = {
+    id: comment.data.id,
+    postId: comment.data.post_id,
+    content: comment.data.content,
+    numberId: comment.data.number,
+    createdAt: comment.data.created_at,
+    updatedAt: comment.data.updated_at,
+    replies: []
+  }
+
+  const author = await supa.from("post_authors").insert({
+    "post_id": postId,
+    "user_id": userId,
+    "comment_id": result.id
+  })
+  if (!author.data){
+    throw new Error("entry unsuccessfully added to post_authors");
+  }
+
+  return result;
 }
 
 /**
@@ -35,6 +64,17 @@ export async function getPostComment(
   commentId: string,
   userId: string,
 ): Promise<PostComment> {
+
+  const ret: PostComment = {
+    id: "",
+    postId: "",
+    content: "",
+    numberId: 0,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    replies: []
+  }
+  return ret
 }
 
 /**
