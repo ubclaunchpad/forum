@@ -1,5 +1,3 @@
-
-
 CREATE TABLE IF NOT EXISTS public.embeddings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     entity_type VARCHAR(50) NOT NULL, --"post", "document", ...
@@ -19,8 +17,6 @@ CREATE TABLE IF NOT EXISTS public.embeddings (
 
 CREATE INDEX IF NOT EXISTS embeddings_vector_search ON public.embeddings USING HNSW (embedding vector_cosine_ops);
 CREATE INDEX IF NOT EXISTS embeddings_fts_search ON public.embeddings USING GIN (fts);
-
-select vault.create_secret('http://api.supabase.internal:8000', 'project_url');
 
 GRANT USAGE ON SCHEMA pgmq TO postgres, authenticated, anon, service_role;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA pgmq TO postgres, service_role;
@@ -69,43 +65,47 @@ as $$
 declare
   job_batches jsonb[];
   batch jsonb;
+  service_role_key text;
+  job_api text;
 begin
-  with
-    -- First get jobs and assign batch numbers
-    numbered_jobs as (
-      select
-        message || jsonb_build_object('jobId', msg_id) as job_info,
-        (row_number() over (order by 1) - 1) / batch_size as batch_num
-      from pgmq.read(
-        queue_name => 'embedding_jobs',
-        vt => timeout_milliseconds / 1000,
-        qty => max_requests * batch_size
-      )
-    ),
-
-    -- Then group jobs into batches
-    batched_jobs as (
-      select
-        jsonb_agg(job_info) as batch_array,
-        batch_num
-      from numbered_jobs
-      group by batch_num
-    )
-    
-  -- Finally aggregate all batches into array
+  -- Get jobs from queue and batch them
+  with numbered_jobs as (
+    select
+      message || jsonb_build_object('jobId', msg_id) as job_info,
+      (row_number() over ()) / batch_size as batch_num
+    from pgmq.read('embedding_jobs', timeout_milliseconds / 1000, max_requests * batch_size)
+  ),
+  batched_jobs as (
+    select
+      jsonb_agg(job_info) as batch_array,
+      batch_num
+    from numbered_jobs
+    group by batch_num
+  )
   select array_agg(batch_array)
   from batched_jobs
   into job_batches;
 
+  -- Exit if no jobs found
   if job_batches is null then
     return;
   end if;
 
-  -- Process batches only if we have them
+  -- Get secrets
+  SELECT decrypted_secret INTO service_role_key 
+  FROM vault.decrypted_secrets 
+  WHERE name = 'service_role_key';
+
+  SELECT decrypted_secret INTO job_api 
+  FROM vault.decrypted_secrets 
+  WHERE name = 'job_api';
+
+  -- Process batches
   foreach batch in array job_batches loop
-    perform util.invoke_edge_function(
-      name => 'embed',
+    perform net.http_post(
+      url => job_api || '/jobs/embed',
       body => batch,
+      headers => jsonb_build_object('Authorization', 'Bearer ' || service_role_key),
       timeout_milliseconds => timeout_milliseconds
     );
   end loop;
@@ -214,16 +214,79 @@ after insert on documents
 for each row
 execute procedure util.queue_embeddings('documents', 'document', 'file_id');
 
+CREATE TABLE IF NOT EXISTS search_threads (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+    meta JSONB NOT NULL DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 
 CREATE TABLE IF NOT EXISTS search_history (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    thread_id UUID NOT NULL,
-    user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    thread_id UUID NOT NULL REFERENCES search_threads(id) ON DELETE CASCADE,
     query TEXT NOT NULL,
     answer TEXT NOT NULL,
     sources JSONB NOT NULL,
-    course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+    meta JSONB NOT NULL DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX search_history_thread_id_idx ON search_history (thread_id);
+
+
+
+CREATE TABLE IF NOT EXISTS search_analysis (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    overview TEXT NOT NULL,
+    insights JSONB NOT NULL DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX search_analysis_course_id_idx ON search_analysis (course_id);
+
+
+-- Function to process search analysis jobs from the queue
+create or replace function util.process_search_analysis()
+returns void
+language plpgsql
+as $$
+declare
+    request_url TEXT;
+    request_headers JSONB;
+    service_role_key TEXT;
+
+begin
+    -- Fetch service role key
+    SELECT decrypted_secret INTO service_role_key 
+    FROM vault.decrypted_secrets 
+    WHERE name = 'service_role_key';
+
+    -- Call an edge function to get the search analysis
+    request_url := util.project_url() || '/analytics/search';
+    -- Construct header
+    request_headers := jsonb_build_object('Authorization', 'Bearer ' || service_role_key);
+
+    perform util.invoke_edge_function(
+      name => 'analytics',
+      body => '{}'::jsonb,
+      timeout_milliseconds => 5000
+    );
+end;
+$$;
+
+-- Schedule the search analysis processing
+select
+  cron.schedule(
+    'process-search-analysis',
+    '30 seconds',
+    $$
+    select util.process_search_analysis();
+    $$
+  );
+

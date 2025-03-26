@@ -7,12 +7,7 @@ import {
   SearchActions,
   SetState,
 } from "@/stores/searchStore";
-import {
-  type ReactNode,
-  createContext,
-  useRef,
-  useContext,
-} from "react";
+import { type ReactNode, createContext, useRef, useContext } from "react";
 import { useStore } from "zustand";
 import { useCourseStore } from "./courseStoreProvider";
 import { userContext } from "./userContext";
@@ -52,18 +47,18 @@ export const SearchStoreProvider = ({ children }: SearchStoreProviderProps) => {
     append: boolean = false,
     stream: boolean = true,
   ) {
-    
-    const query = state.followUpQuestion && append
-      ? state.followUpQuestion
-      : state.search;
+    const query =
+      state.followUpQuestion && append ? state.followUpQuestion : state.search;
 
-    const threadId = state.thread.length > 0 && append ? state.thread[0].thread_id : null;
+    const threadId =
+      state.thread.length > 0 && append ? state.thread[0].thread_id : null;
 
     if (!append) {
       set({
         loadingState: "loading ai",
         searchType: "ai",
         response: null,
+        thread: [],
       });
     } else {
       set({
@@ -71,7 +66,6 @@ export const SearchStoreProvider = ({ children }: SearchStoreProviderProps) => {
         searchType: "ai",
         response: null,
       });
-
     }
 
     if (stream) {
@@ -97,12 +91,10 @@ export const SearchStoreProvider = ({ children }: SearchStoreProviderProps) => {
       let answer = "";
       let buffer = "";
 
-      set({
-        thread: [],
+      set((state) => ({
         loadingState: "generating response",
-      });
+      }));
 
-    
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -124,17 +116,17 @@ export const SearchStoreProvider = ({ children }: SearchStoreProviderProps) => {
             const text = JSON.parse(line);
 
             if (text.sources && text.question) {
+              set((state) => {
                 const pastThread = append ? state.thread : [];
-              set({
-                thread: [
-                  ...pastThread,
-                  {
-                    question: text.question,
-                    answer: "",
-                    sources: text.sources,
-                    thread_id: text.thread_id,
-                  },
-                ],
+                const newThreadMessage = {
+                  answer: "",
+                  sources: text.sources,
+                  thread_id: text.thread_id,
+                  question: text.question,
+                };
+                return {
+                  thread: [...pastThread, newThreadMessage],
+                };
               });
             } else if (text.text) {
               answer += text.text || "";
@@ -155,59 +147,32 @@ export const SearchStoreProvider = ({ children }: SearchStoreProviderProps) => {
                 }
               });
             }
+            if (text.checkPoint && text.checkPoint === "Done") {
+              set({
+                loadingState: "idle",
+                searchType: "ai",
+              });
+            }
           } catch (e) {
             console.error("Error parsing JSON line:", e, "Line was:", line);
           }
         }
       }
 
+      console.log("Closing ai search");
       set({
         loadingState: "idle",
         searchType: "ai",
       });
     } else {
-      try {
-        const response = await fetch(
-          `${getApiUrl()}/search/courses/${course.id}/ask`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ query }),
-          },
-        );
-        const thread = append ? state.thread : [];
-        const data = await response.json();
-        set({
-          thread: [
-            ...thread,
-            {
-              question: query,
-              answer: data.answer,
-              sources: data.sources,
-              thread_id: threadId || "",
-            },
-          ],
-          loadingState: "idle",
-        });
-        if (append) {
-          set({
-            followUpQuestion: "",
-          });
-        }
-      } catch (error) {
-        console.error("Error during ai search:", error);
-      } finally {
-        set({
-          loadingState: "idle",
-        });
-      }
     }
   }
 
   async function executeTextSearch(query: string, set: SetState<SearchState>) {
+    set({
+        loadingState: "loading text",
+        searchType: "text",
+      });
     try {
       const response = await fetch(
         `${getApiUrl()}/search/courses/${course.id}/textsearch?query=${query}`,
@@ -219,6 +184,8 @@ export const SearchStoreProvider = ({ children }: SearchStoreProviderProps) => {
         },
       );
       const data = await response.json();
+
+      
       set({
         textSearchResponse: data,
         loadingState: "idle",
@@ -226,12 +193,7 @@ export const SearchStoreProvider = ({ children }: SearchStoreProviderProps) => {
       });
     } catch (error) {
       console.error("Error during text search:", error);
-    } finally {
-      set({
-        loadingState: "idle",
-        searchType: "text",
-      });
-    }
+    } 
   }
 
   async function executeSearch(
@@ -271,7 +233,8 @@ export const SearchStoreProvider = ({ children }: SearchStoreProviderProps) => {
     clearThread: () => set({ thread: [] }),
     setFollowUpQuestion: (followUpQuestion: string) =>
       set({ followUpQuestion }),
-    reset: () => set(prev => ({ ...prev, ...initState, isOpen: prev.isOpen })),
+    reset: () =>
+      set((prev) => ({ ...prev, ...initState, isOpen: prev.isOpen })),
     executeSearch: (variant: "text" | "ai" | "followup") =>
       set((state) => {
         executeSearch(state, variant, set);

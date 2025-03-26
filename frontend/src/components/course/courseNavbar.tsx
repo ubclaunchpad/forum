@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { MessagesSquare, FileText } from "lucide-react";
+import { MessagesSquare, FileText, TrendingUpIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useRef, useEffect } from "react";
@@ -21,13 +21,13 @@ const tabs = [
     href: "resources",
     disabled: false,
   },
-  // {
-  //   name: "people",
-  //   icon: UsersIcon,
-  //   label: "People",
-  //   href: "people",
-  //   disabled: false,
-  // },
+  {
+    name: "insights",
+    icon: TrendingUpIcon,
+    label: "Insights",
+    href: "insights",
+    disabled: false,
+  },
 ];
 
 export default function CourseNavbar() {
@@ -36,7 +36,7 @@ export default function CourseNavbar() {
   const path = pathname.split("/");
   if (
     path.length < 5 &&
-    !["forum", "announcements", "resources", "people"].includes(path[4])
+    !["forum", "announcements", "resources", "insights"].includes(path[4])
   ) {
     path.push("forum");
   }

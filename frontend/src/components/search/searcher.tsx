@@ -20,10 +20,12 @@ import { useSearchStore } from "@/providers/searchStoreProvider";
 export function Searcher() {
   const isDesktop = useMediaQuery("(min-width: 1000px)");
   const searchBarRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const searchStore = useSearchStore((state) => state);
-  const debouncedSearch = useDebounce(searchStore.search, 500);
+  // const debouncedSearch = useDebounce(searchStore.search, 500);
   const isSearchEmpty = searchStore.search === "";
   const debouncedIsEmpty = useDebounce(isSearchEmpty, 2000);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Handle keyboard shortcut for opening the search bar
   useEffect(() => {
@@ -37,20 +39,33 @@ export function Searcher() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Add useEffect to trigger text search whenever debouncedSearch changes
-  useEffect(() => {
-    if (debouncedSearch && searchStore.isOpen) {
-
-      if (searchStore.searchType === "ai") {
-
-        const firstThreadMessage = searchStore.thread[0];
-        if (firstThreadMessage && firstThreadMessage.question === debouncedSearch) {
-          return;
-        }
-      }
-      searchStore.executeSearch("text");
+  // Function to check if user has stopped typing
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    searchStore.setSearchQuery(newValue);
+    
+    // Clear any existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
     }
-  }, [debouncedSearch, searchStore.isOpen]);
+    
+    // Set a new timeout to detect when user stops typing
+    typingTimeoutRef.current = setTimeout(() => {
+      // Only execute search if there's actual content and not already in AI mode
+      if (newValue && searchStore.searchType !== "ai") {
+        searchStore.executeSearch("text");
+      }
+    }, 600); // Wait 600ms after user stops typing
+  };
+
+  // Cleanup typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Reset search state when search is empty for 2 seconds
   useEffect(() => {
@@ -78,11 +93,10 @@ export function Searcher() {
         </Button>
         <Input
           id="search-input"
+          ref={searchInputRef}
           value={searchStore.search}
           disabled={searchStore.loadingState !== "idle"}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            searchStore.setSearchQuery(e.target.value)
-          }
+          onChange={handleInputChange}
           type="text"
           placeholder="Write a few words to search..."
           className="px-2 h-10 text-base rounded-full border-neutral-200 bg-white border focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -101,6 +115,7 @@ export function Searcher() {
         </Button>
       </div>
       <div className="flex flex-col gap-2 overflow-y-hidden">
+      
         <SearchContent />
       </div>
     </>
@@ -113,7 +128,7 @@ export function Searcher() {
     if (searchStore.search.length > 0 && searchStore.searchType === "text") {
       return `Search for "${searchStore.search}"`;
     } else if (searchStore.search.length > 0 && searchStore.searchType === "ai") {
-      return "Continue conversation on " + searchStore.thread[searchStore.thread.length - 1].question;
+      return "Continue conversation " + (searchStore.thread[searchStore.thread.length - 1]?.question ?? "");
     } else {
       return "Search documents and posts...";
     }
@@ -163,9 +178,11 @@ export function Searcher() {
     </Drawer>
   );
 
-  if (isDesktop) {
-    return desktopSearchUI;
-  } else {
-    return mobileSearchUI;
-  }
+  // if (isDesktop) {
+  //   return desktopSearchUI;
+  // } else {
+  //   return mobileSearchUI;
+  // }
+
+  return desktopSearchUI;
 }

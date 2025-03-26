@@ -43,7 +43,7 @@ export async function validateUserFromToken(token: string) {
   return data.user;
 }
 
-const validateUser = async (c: Context) => {
+export const validateUser = async (c: Context) => {
   const token = c.req.header("Authorization")?.split(" ")[1];
   if (!token) {
     return c.json({ error: "Unauthorized" }, 401);
