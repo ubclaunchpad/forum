@@ -1,6 +1,6 @@
 "use client";
 
-import { themeContext } from "@/contexts/ThemeProvider";
+import { themeContext } from "@/providers/ThemeProvider";
 import {
   CourseState,
   CourseStore,

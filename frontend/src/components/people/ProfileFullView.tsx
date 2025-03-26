@@ -16,7 +16,7 @@ import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import { useContext, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { getApiUrl } from "@/utils/helpers";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import {

@@ -2,7 +2,7 @@
 
 import { Post, PostWithRequiredId } from "@/lib/types/posts";
 import PostView from "./PostView";
-import { forumPostsContext } from "@/contexts/PostsContext";
+import { forumPostsContext } from "@/providers/PostsContext";
 import { useContext } from "react";
 import { isIDTemporary } from "@/lib/utils";
 

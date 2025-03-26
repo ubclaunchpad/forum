@@ -1,7 +1,11 @@
 .DS_Store
 .env.local
+**/.env
+**/.env.local
+**/.env.*
 .history
 .idea
+.fleet
 
 **/outputs/
 **/coverage/

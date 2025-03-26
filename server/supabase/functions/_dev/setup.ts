@@ -1,9 +1,13 @@
 import { NewCourse, ProfileWithoutId, User } from "@shared/mod.ts";
 import { userController } from "../users/controller.ts";
-import { supa } from "../_shared/db.ts";
+import { getSupabaseClient, supa } from "../_shared/db.ts";
 import { createCourse } from "../courses/controller/create_course_activity.ts";
 import { deleteCourse } from "../courses/controller/delete_course_activity.ts";
 import { getAllCourses } from "../courses/controller/get_all_courses_activity.ts";
+import { documentHandler } from "../documents/documentController.ts";
+import { DEFAULT_FILE_MANAGER_OPTIONS, fileManager } from "../_shared/utils/fileManager.ts";
+
+
 const authUsers = [
   {
     email: "admin@test.com",
@@ -60,8 +64,8 @@ const courses: NewCourse[] = [
     access: "public",
     name: "Introduction to Computer Science",
     config: {
-      theme_colour: "#000000",
-      font: "Arial",
+      theme_colour: "#347370",
+      font: "Quicksand",
     },
     start_date: new Date("2024-01-01"),
   },
@@ -71,6 +75,10 @@ const courses: NewCourse[] = [
     section: "002",
     access: "public",
     name: "Introduction to Computer Science",
+    config: {
+      theme_colour: "#B2ABF2",
+      font: "Space Grotesk",
+    },
   },
 ];
 
@@ -118,7 +126,6 @@ export async function setupDevSeedData() {
   }
 
   console.log("Profiles created:", profiles);
-
   await userController.makeUserAdmin(users[0].id);
 
   // create two courses
@@ -126,18 +133,37 @@ export async function setupDevSeedData() {
   const course2 = await createCourse(courses[1], users[0].id);
 
   console.log("Courses created:", course1, course2);
-
   console.log("Database setup complete");
+
+  // create a document
+  const documentController = documentHandler();
+  const localFilePathRelative = "supabase/functions/_dev/test_data/bayou.pdf";
+  const localFilePath = Deno.cwd() + "/" + localFilePathRelative;
+  const localFile = Deno.readFileSync(localFilePath)
+  const file = new File([localFile], localFilePathRelative, { type: "application/pdf" });
+  const document = await documentController.withCourse(course1.id).createDocument({description: "Test document", file: file, createdBy: users[0].id }); 
+  console.log("Document created", document);
 }
 
 export async function emptyDatabase() {
-  await supa.from("profiles").delete();
-  await supa.from("account_status").delete();
-  await supa.from("admin_users").delete();
-  const users = await supa.auth.admin.listUsers();
-  for (const user of users.data.users) {
+  const fakeUUID = "00000000-0000-0000-0000-000000000000";
+
+  const {error: profilesError} = await supa.from("profiles").delete().neq("id", fakeUUID);
+  if (profilesError) {
+    console.error("Error deleting profiles:", profilesError);
+  }
+  const {error: courseRolesError} = await supa.from("courses").delete().neq("id", fakeUUID);
+  if (courseRolesError) {
+    console.error("Error deleting courses:", courseRolesError);
+  }
+
+  const courses = await supa.from("courses").select("*");
+  console.log("Courses:", courses);
+  const users2 = await supa.auth.admin.listUsers();
+  for (const user of users2.data.users) {
     await supa.auth.admin.deleteUser(user.id);
   }
+ 
 }
 
 // emptyDatabase();
@@ -147,7 +173,7 @@ export async function userTestSeedSetup(
   authUsers: { email: string; password: string }[],
   profiles: ProfileWithoutId[],
 ): Promise<User[]> {
-  console.log("Setting up test seed data");
+  // console.log("Setting up test seed data");
   await emptyDatabase();
 
   const { data: image_url } = await supa.storage.from("images").getPublicUrl(
@@ -176,8 +202,8 @@ export async function userTestSeedSetup(
       users[i].id,
       profileWithImage,
     );
-    const status = await userController.getUserAccountStatus(users[i].id);
-    console.log("Status:", status);
+     await userController.getUserAccountStatus(users[i].id);
+    // console.log("Status:", status);
   }
 
   return userController.getAllUsers();

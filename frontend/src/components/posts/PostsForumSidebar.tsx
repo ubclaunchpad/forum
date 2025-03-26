@@ -7,12 +7,12 @@ import {
 } from "@/lib/utils";
 import { PostCard } from "./PostCard";
 import { useCallback, useContext, useEffect, useRef } from "react";
-import { forumPostsContext } from "@/contexts/PostsContext";
+import { forumPostsContext } from "@/providers/PostsContext";
 import { Button } from "../ui/button";
 import { PostWithRequiredId } from "@/lib/types/posts";
 import { MainListPanel, MainSidebar } from "../general/FourmTabs";
 import { PlusIcon } from "lucide-react";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 
 export default function PostsForumSidebar() {
@@ -48,11 +48,6 @@ export default function PostsForumSidebar() {
     <>
       <MainSidebar className={selectedPost ? "hidden xl:block" : ""}>
         <div className="flex flex-row justify-center items-center w-full h-16 px-2">
-          {checkPermissionInDomain(
-            profile.permissions,
-            PERMISSIONS.CREATE_POST,
-            course.id,
-          ) && (
             <Button
               size={"sm"}
               className="w-fit  px-4 min-h-none h-fit py-2"
@@ -67,7 +62,6 @@ export default function PostsForumSidebar() {
               <PlusIcon className="h-4 w-4" />
               New Post
             </Button>
-          )}
         </div>
       </MainSidebar>
       <MainListPanel className={selectedPost ? "hidden xl:block" : ""}>

@@ -4,7 +4,7 @@ import { PlusIcon, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { DocumentAppendOperation } from "@/lib/types/documents";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import {
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
 
@@ -46,6 +47,7 @@ export default function UploadFile({
   const { toast } = useToast();
 
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -113,27 +115,33 @@ export default function UploadFile({
     if (!validateFile(file, title)) return;
 
     try {
-      const link = `${getApiUrl()}/courses/${course.id}/documents`;
+      setIsLoading(true);
+      const link = `${getApiUrl()}/documents/courses/${course.id}`;
       const data = new FormData();
       data.append("file", file);
       data.append("title", title);
       data.append("metadata", JSON.stringify({ tags: [] }));
 
-      setOpen(false);
+      // const tempId = appendToFiles({
+      //   operation: "optimistic",
+      //   id: null,
+      //   document: {
+      //     file: {
+      //       name: title,
+      //       type: file.type || "unknown",
+      //       size: file.size,
+      //       path: "",
+      //       bucket: "",
+      //       id: "",
+      //     },
+      //     description: "",
+      //     course_id: course.id,
+      //   },
+      // });
 
-      const tempId = appendToFiles({
-        operation: "optimistic",
-        id: null,
-        document: {
-          title,
-          description: "",
-          course_id: course.id,
-        },
-      });
-
-      if (!tempId) {
-        throw new Error("Failed to add document");
-      }
+      // if (!tempId) {
+      //   throw new Error("Failed to add document");
+      // }
 
       const response = await fetch(link, {
         method: "POST",
@@ -143,6 +151,7 @@ export default function UploadFile({
         },
       });
 
+      setIsLoading(false);
       if (!response.ok) {
         const errorDetails = await response.json();
         throw new Error(
@@ -150,12 +159,15 @@ export default function UploadFile({
         );
       }
 
-      const result = await response.json();
-      appendToFiles({
-        operation: "real",
-        id: tempId,
-        document: result,
-      });
+      setOpen(false);
+      
+
+      // const result = await response.json();
+      // appendToFiles({
+      //   operation: "real",
+      //   id: tempId,
+      //   document: result,
+      // });
 
       toast({
         title: "Success",
@@ -163,20 +175,19 @@ export default function UploadFile({
       });
 
       await onUploadSuccess();
-
       // Reset form
       setTitle("");
       setFile(null);
       setValidationError(null);
 
       // Revalidate the documents cache
-      fetch("/api/revalidate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ courseId: course.id, type: "documents" }),
-      });
+      // fetch("/api/revalidate", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({ courseId: course.id, type: "documents" }),
+      // });
     } catch (error) {
       toast({
         title: "Error",
@@ -196,9 +207,22 @@ export default function UploadFile({
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
+               
         <DialogHeader>
           <DialogTitle>Upload File</DialogTitle>
         </DialogHeader>
+        {isLoading?  <div className="flex flex-col gap-4 py-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>...</CardTitle>
+              <CardContent>
+                <p>Uploading file...</p>
+              </CardContent>
+            </CardHeader>
+          </Card>
+        </div>
+        : 
+        <>
         <div className="flex flex-col gap-4 py-4">
           <Input
             type="text"
@@ -284,6 +308,8 @@ export default function UploadFile({
             </Button>
           </div>
         </div>
+        </>
+        }
       </DialogContent>
     </Dialog>
   );

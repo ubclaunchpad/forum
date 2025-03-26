@@ -11,7 +11,8 @@
   },
   "deno.enablePaths": [
     "server",
-    "shared"
+    "shared",
+    "model"
   ],
   "deno.lint": true,
   "deno.unstable": [

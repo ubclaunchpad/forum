@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Course } from "@/lib/types/course";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { getApiUrl } from "@/utils/helpers";
 import { useToast } from "@/hooks/use-toast";
 

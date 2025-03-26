@@ -1,0 +1,7 @@
+
+
+export const SEARCH_PARAMS = {
+    MIN_SEARCH_LENGTH: 5,
+    MAX_SEARCH_LENGTH: 1000
+
+}

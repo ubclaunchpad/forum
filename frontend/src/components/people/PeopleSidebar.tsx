@@ -10,7 +10,7 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 
 export function PeopleSidebar({
   profiles,
