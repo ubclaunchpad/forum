@@ -14,7 +14,7 @@ const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: ["http://localhost:3000", "*"],
+    origin: ["http://localhost:3000", "https://forumai.me", "*"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowHeaders: ["Authorization", "Content-Type", "*"],
     exposeHeaders: ["Authorization", "Content-Type"],
