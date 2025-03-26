@@ -8,7 +8,8 @@ export function getApiUrl() {
   if (API_BASE_URL) {
     return API_BASE_URL;
   } else {
-    return "https://forumai.up.railway.app";
+    console.log("Using default API_BASE_URL");
+    return "https://pirtxwjlvtuazzlxlshv.supabase.co/functions/v1";
     // throw new Error("API_BASE_URL is not set");
   }
 }
