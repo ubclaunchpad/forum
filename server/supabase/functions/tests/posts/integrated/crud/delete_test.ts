@@ -2,19 +2,17 @@ import { afterAll, beforeEach, describe, it } from "jsr:@std/testing/bdd";
 import { assertEquals, assertIsError } from "jsr:@std/assert";
 import { postController } from "../../../../posts/controllers/crud.ts";
 import { NewPost, NewPostOptions } from "@shared/mod.ts";
-import { userCourseSeedSetup } from "../helper.ts";
-import { fail } from "node:assert";
 import {
-  afterEachFunc,
-  authUsers,
-  beforeEachFunc,
-  coursesToCreate,
-  profiles,
-} from "./shared.ts";
+  clearUsers,
+  clearUsersAndCourses,
+  userCourseSeedSetup,
+} from "../helper.ts";
+import { fail } from "node:assert";
+import { authUsers, coursesToCreate, profiles } from "../shared.ts";
 
 describe("Post Integration Tests: Delete Post", () => {
-  beforeEach(beforeEachFunc);
-  afterAll(afterEachFunc);
+  beforeEach(clearUsers);
+  afterAll(clearUsersAndCourses);
   it("should properly delete post from database", async () => {
     try {
       const { tempProfiles, tempCourses } = await userCourseSeedSetup(

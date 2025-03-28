@@ -1,19 +1,7 @@
 import { supa } from "../../_shared/db.ts";
 
-import {
-  DbPostSchema,
-  NewPost,
-  NewPostOptions,
-  NewPostResults,
-  PostAuthor,
-  PostComment,
-  PostEditInfo,
-  PostList,
-  PostResponse,
-} from "@shared/mod.ts";
-import { NotFoundError } from "../../_shared/errors.ts";
-import { generatePseudonym, userInCourse } from "./helpers.ts";
-import { getPostComments, postExists } from "./helpers.ts";
+import { PostComment } from "@shared/mod.ts";
+import { commentExists, postExists } from "./helpers.ts";
 
 /**
  * Create a comment under post
@@ -23,32 +11,47 @@ import { getPostComments, postExists } from "./helpers.ts";
 export async function createPostComment(
   postId: string,
   userId: string,
-  content: string
+  content: string,
 ): Promise<PostComment> {
+  // Check if post exists
+  const { isFound } = await postExists(postId);
+  if (!isFound) {
+    throw new Error("Post does not exist");
+  }
+
   const newCommentArg = {
     "post_id": postId,
-    "content": content
-  }
-  const comment = await supa.from("post_comments").insert(newCommentArg).select().single();
-  if (!comment.data){
+    "content": content,
+  };
+
+  const comment = await supa.from("post_comments").insert(newCommentArg)
+    .select().single();
+
+  if (!comment.data) {
     throw new Error("comment unsuccesfully added to post_comments");
   }
   const result: PostComment = {
     id: comment.data.id,
     postId: comment.data.post_id,
     content: comment.data.content,
-    numberId: comment.data.number,
-    createdAt: comment.data.created_at,
-    updatedAt: comment.data.updated_at,
-    replies: []
+    number_id: comment.data.number_id,
+    created_at: comment.data.created_at,
+    updated_at: comment.data.updated_at,
+    replies: [],
+  };
+
+  const { status, error: postAuthorError } = await supa.from("post_authors")
+    .insert({
+      "post_id": postId,
+      "user_id": userId,
+      "comment_id": result.id,
+    });
+
+  if (postAuthorError) {
+    throw postAuthorError;
   }
 
-  const author = await supa.from("post_authors").insert({
-    "post_id": postId,
-    "user_id": userId,
-    "comment_id": result.id
-  })
-  if (!author.data){
+  if (status !== 201) {
     throw new Error("entry unsuccessfully added to post_authors");
   }
 
@@ -64,17 +67,52 @@ export async function getPostComment(
   commentId: string,
   userId: string,
 ): Promise<PostComment> {
+  // TODO: Implement check for user in course with post
 
-  const ret: PostComment = {
-    id: "",
-    postId: "",
-    content: "",
-    numberId: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    replies: []
+  // Check if comment exists
+  const { isFound } = await commentExists(commentId);
+
+  if (!isFound) {
+    throw new Error("Comment does not exist");
   }
-  return ret
+
+  const { data, error } = await supa.from("post_comments").select("*").eq(
+    "id",
+    commentId,
+  ).single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as PostComment;
+}
+
+export async function getPostComments(
+  postId: string,
+  userId: string,
+): Promise<PostComment[]> {
+  // TODO: Implement check for user in course with post
+  // Check if post exists
+  const { isFound } = await postExists(postId);
+  if (!isFound) {
+    throw new Error("Post does not exist");
+  }
+
+  const { data: comments, error: commentsError } = await supa
+    .from("post_comments")
+    .select()
+    .eq("post_id", postId)
+    .order("number_id", { ascending: true });
+
+  if (commentsError) {
+    throw new Error(`Error fetching comments: ${commentsError.message}`);
+  }
+
+  if (!comments || comments.length === 0) {
+    return [];
+  }
+  return comments as PostComment[];
 }
 
 /**
@@ -87,6 +125,12 @@ export async function deleteComment(
   commentId: string,
   userId: string,
 ): Promise<void> {
+  // Check if comment exists
+  const { isFound } = await commentExists(commentId);
+
+  if (!isFound) {
+    throw new Error("Comment does not exist");
+  }
 }
 
 /**
@@ -99,4 +143,18 @@ export async function updateComment(
   commentId: string,
   userId: string,
 ): Promise<void> {
+  // Check if comment exists
+  const { isFound } = await commentExists(commentId);
+
+  if (!isFound) {
+    throw new Error("Comment does not exist");
+  }
 }
+
+export const postCommentController = {
+  createPostComment,
+  getPostComment,
+  getPostComments,
+  deleteComment,
+  updateComment,
+};

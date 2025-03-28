@@ -75,6 +75,32 @@ export async function postExistsInCourse(
 }
 
 /**
+ * Checks whether comment exists or not
+ * @param commentId UUID of comment
+ * @returns True if the comment does exist, false otherwise
+ */
+export async function commentExists(
+  commentId: string,
+): Promise<{ isFound: boolean; data?: { post_id: string } }> {
+  const { data, error } = await supa.from("post_comments").select("*").eq(
+    "id",
+    commentId,
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data || data.length == 0) {
+    return { isFound: false };
+  }
+
+  const comment_data = { post_id: data[0].post_id };
+
+  return { isFound: true, data: comment_data };
+}
+
+/**
  * Checks if user is able to perform operation on given post
  * @param postId
  * @param userId
@@ -125,16 +151,16 @@ export async function getPostComments(postId: string): Promise<PostComment[]> {
       id: comment.id,
       postId: comment.post_id,
       content: comment.content,
-      numberId: comment.number_id,
-      createdAt: comment.created_at,
-      updatedAt: comment.updated_at,
+      number_id: comment.number_id,
+      created_at: comment.created_at,
+      updated_at: comment.updated_at,
       replies: (replies || []).map((reply) => ({
         id: reply.id,
-        commentId: reply.comment_id,
+        comment_id: reply.comment_id,
         content: reply.content,
-        numberId: reply.number_id,
-        createdAt: reply.created_at,
-        updatedAt: reply.updated_at,
+        number_id: reply.number_id,
+        created_at: reply.created_at,
+        updated_at: reply.updated_at,
       })),
     });
   }

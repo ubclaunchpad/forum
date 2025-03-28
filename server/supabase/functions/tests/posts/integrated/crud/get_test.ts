@@ -2,19 +2,17 @@ import { afterAll, beforeEach, describe, it } from "jsr:@std/testing/bdd";
 import { assertEquals, assertExists, assertIsError } from "jsr:@std/assert";
 import { postController } from "../../../../posts/controllers/crud.ts";
 import { NewPost, NewPostOptions } from "@shared/mod.ts";
-import { userCourseSeedSetup } from "../helper.ts";
-import { fail } from "node:assert";
 import {
-  afterEachFunc,
-  authUsers,
-  beforeEachFunc,
-  coursesToCreate,
-  profiles,
-} from "./shared.ts";
+  clearUsers,
+  clearUsersAndCourses,
+  userCourseSeedSetup,
+} from "../helper.ts";
+import { fail } from "node:assert";
+import { authUsers, coursesToCreate, profiles } from "../shared.ts";
 
 describe("Posts Integration Tests: Get Post(s)", () => {
-  beforeEach(beforeEachFunc);
-  afterAll(afterEachFunc);
+  beforeEach(clearUsers);
+  afterAll(clearUsersAndCourses);
 
   it("should get an empty list of posts when there are no posts", async () => {
     try {

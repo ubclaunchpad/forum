@@ -11,19 +11,17 @@ import {
   courseTestSeedSetup,
   userTestSeedSetup,
 } from "../../../../_dev/setup.ts";
-import { userCourseSeedSetup } from "../helper.ts";
-import { fail } from "node:assert";
 import {
-  afterEachFunc,
-  authUsers,
-  beforeEachFunc,
-  coursesToCreate,
-  profiles,
-} from "./shared.ts";
+  clearUsers,
+  clearUsersAndCourses,
+  userCourseSeedSetup,
+} from "../helper.ts";
+import { fail } from "node:assert";
+import { authUsers, coursesToCreate, profiles } from "../shared.ts";
 
 describe("Posts Integration Tests: Create Post", () => {
-  beforeEach(beforeEachFunc);
-  afterAll(afterEachFunc);
+  beforeEach(clearUsers);
+  afterAll(clearUsersAndCourses);
   it("should create a post", async () => {
     try {
       const { tempProfiles, tempCourses } = await userCourseSeedSetup(

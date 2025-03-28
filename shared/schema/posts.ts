@@ -71,11 +71,11 @@ export type PostEditInfo = z.infer<typeof postEditInfoSchema>;
 
 export const postCommentReplySchema = z.object({
   id: z.string().uuid(), // UUID
-  commentId: z.string().uuid(), // UUID
+  comment_id: z.string().uuid(), // UUID
   content: z.string(),
-  numberId: z.number(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  number_id: z.number(),
+  created_at: z.date(),
+  updated_at: z.date(),
 });
 
 export type PostCommentReply = z.infer<typeof postCommentReplySchema>;
@@ -84,9 +84,9 @@ export const postCommentSchema = z.object({
   id: z.string().uuid(), // UUID
   postId: z.string().uuid(), // UUID
   content: z.string(),
-  numberId: z.number(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  number_id: z.number(),
+  created_at: z.date(),
+  updated_at: z.date(),
   replies: z.array(postCommentReplySchema),
 });
 
