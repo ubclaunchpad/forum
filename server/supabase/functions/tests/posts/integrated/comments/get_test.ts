@@ -25,14 +25,14 @@ import {
   postsToCreate,
   profiles,
 } from "../shared.ts";
-
+import { addUserToCourse } from "../../../../courses/controller/add_course_member_activity.ts";
 describe("Posts Integration Tests: Get comments", () => {
   beforeEach(clearUsers);
   afterAll(clearUsersAndCourses);
 
   it("should get a comment", async () => {
     try {
-      const { tempProfiles, tempPosts } = await postSeedSetup(
+      const { tempProfiles, tempCourses, tempPosts } = await postSeedSetup(
         authUsers,
         profiles,
         coursesToCreate,
@@ -41,6 +41,7 @@ describe("Posts Integration Tests: Get comments", () => {
       );
       const postId = tempPosts[0].post_id;
       const userId = tempProfiles[1].id;
+      await addUserToCourse(tempCourses[0].id, userId);
       const { id: commentId } = await postCommentController.createPostComment(
         postId,
         userId,
@@ -58,10 +59,7 @@ describe("Posts Integration Tests: Get comments", () => {
     }
   });
 
-  it.ignore("should get not get a comment since user is not apart of course with comment", async () => {
-  });
-
-  it("should get all comments for a post", async () => {
+  it("should get not get a comment since user is not apart of course with comment", async () => {
     try {
       const { tempProfiles, tempPosts } = await postSeedSetup(
         authUsers,
@@ -71,15 +69,44 @@ describe("Posts Integration Tests: Get comments", () => {
         postOptions,
       );
       const postId = tempPosts[0].post_id;
+      const userId = tempProfiles[1].id;
+      const { id: commentId } = await postCommentController.createPostComment(
+        postId,
+        userId,
+        "Test comment",
+      );
+      await postCommentController.getPostComment(
+        commentId,
+        userId,
+      );
+      fail("Should throw error");
+    } catch (error) {
+      assertIsError(error);
+      assertEquals(error.message, "User is not in the course with the post");
+    }
+  });
+
+  it("should get all comments for a post", async () => {
+    try {
+      const { tempProfiles, tempCourses, tempPosts } = await postSeedSetup(
+        authUsers,
+        profiles,
+        coursesToCreate,
+        postsToCreate,
+        postOptions,
+      );
+      const postId = tempPosts[0].post_id;
       const userId1 = tempProfiles[1].id;
       const userId2 = tempProfiles[2].id;
-      const { id: commentId1 } = await postCommentController.createPostComment(
+      await addUserToCourse(tempCourses[0].id, userId1);
+      await addUserToCourse(tempCourses[0].id, userId2);
+      await postCommentController.createPostComment(
         postId,
         userId1,
         "Test comment 1",
       );
 
-      const { id: commentId2 } = await postCommentController.createPostComment(
+      await postCommentController.createPostComment(
         postId,
         userId2,
         "Test comment 2",
@@ -102,6 +129,41 @@ describe("Posts Integration Tests: Get comments", () => {
     }
   });
 
-  it.ignore("should not get all comments for a post since user is not apart of course with post", async () => {
+  it("should not get all comments for a post since user is not apart of course with post", async () => {
+    try {
+      const { tempProfiles, tempCourses, tempPosts } = await postSeedSetup(
+        authUsers,
+        profiles,
+        coursesToCreate,
+        postsToCreate,
+        postOptions,
+      );
+      const postId = tempPosts[0].post_id;
+      const userId1 = tempProfiles[1].id;
+      const userId2 = tempProfiles[2].id;
+      await addUserToCourse(tempCourses[0].id, userId1);
+      await addUserToCourse(tempCourses[0].id, userId2);
+      await postCommentController.createPostComment(
+        postId,
+        userId1,
+        "Test comment 1",
+      );
+
+      await postCommentController.createPostComment(
+        postId,
+        userId2,
+        "Test comment 2",
+      );
+
+      await postCommentController.getPostComments(
+        postId,
+        "00000000-0000-0000-0000-000000000000",
+      );
+
+      fail("Should throw error");
+    } catch (error) {
+      assertIsError(error);
+      assertEquals(error.message, "User is not in the course with the post");
+    }
   });
 });

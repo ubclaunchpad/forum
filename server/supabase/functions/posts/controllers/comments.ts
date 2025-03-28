@@ -14,9 +14,26 @@ export async function createPostComment(
   content: string,
 ): Promise<PostComment> {
   // Check if post exists
-  const { isFound } = await postExists(postId);
+  const { isFound, data: postData } = await postExists(postId);
   if (!isFound) {
     throw new Error("Post does not exist");
+  }
+
+  const courseId = postData?.course_id;
+
+  // Check if user is in the course with the post
+  const { data: courseCheck, error: courseCheckError } = await supa
+    .from("course_members")
+    .select("*")
+    .eq("course_id", courseId)
+    .eq("user_id", userId);
+
+  if (courseCheckError) {
+    throw courseCheckError;
+  }
+
+  if (!courseCheck || courseCheck.length === 0) {
+    throw new Error("User is not in the course with the post");
   }
 
   const newCommentArg = {
@@ -67,13 +84,41 @@ export async function getPostComment(
   commentId: string,
   userId: string,
 ): Promise<PostComment> {
-  // TODO: Implement check for user in course with post
-
   // Check if comment exists
-  const { isFound } = await commentExists(commentId);
+  const { isFound, data: commentData } = await commentExists(commentId);
 
   if (!isFound) {
     throw new Error("Comment does not exist");
+  }
+
+  const postId = commentData?.post_id;
+
+  // Get the course_id from the post
+  const { data: postData, error: postError } = await supa
+    .from("posts")
+    .select("course_id")
+    .eq("id", postId)
+    .single();
+
+  if (postError) {
+    throw new Error(`Error fetching post: ${postError.message}`);
+  }
+
+  const courseId = postData.course_id;
+
+  // Check if user is in the course with the post
+  const { data: courseCheck, error: courseCheckError } = await supa
+    .from("course_members")
+    .select("*")
+    .eq("course_id", courseId)
+    .eq("user_id", userId);
+
+  if (courseCheckError) {
+    throw courseCheckError;
+  }
+
+  if (!courseCheck || courseCheck.length === 0) {
+    throw new Error("User is not in the course with the post");
   }
 
   const { data, error } = await supa.from("post_comments").select("*").eq(
@@ -92,18 +137,32 @@ export async function getPostComments(
   postId: string,
   userId: string,
 ): Promise<PostComment[]> {
-  // TODO: Implement check for user in course with post
   // Check if post exists
-  const { isFound } = await postExists(postId);
+  const { isFound, data: postData } = await postExists(postId);
   if (!isFound) {
     throw new Error("Post does not exist");
   }
 
+  const courseId = postData?.course_id;
+
+  // Check if user is in the course with the post
+  const { data: courseCheck, error: courseCheckError } = await supa
+    .from("course_members")
+    .select("*")
+    .eq("course_id", courseId)
+    .eq("user_id", userId);
+
+  if (courseCheckError) {
+    throw courseCheckError;
+  }
+
+  if (!courseCheck || courseCheck.length === 0) {
+    throw new Error("User is not in the course with the post");
+  }
+
   const { data: comments, error: commentsError } = await supa
     .from("post_comments")
-    .select()
-    .eq("post_id", postId)
-    .order("number_id", { ascending: true });
+    .select();
 
   if (commentsError) {
     throw new Error(`Error fetching comments: ${commentsError.message}`);
@@ -121,7 +180,7 @@ export async function getPostComments(
  * @param userId UUID of user
  * NOTE: Only the poster can delete their comment from post
  */
-export async function deleteComment(
+export async function deletePostComment(
   commentId: string,
   userId: string,
 ): Promise<void> {
@@ -130,6 +189,26 @@ export async function deleteComment(
 
   if (!isFound) {
     throw new Error("Comment does not exist");
+  }
+
+  // Check if comment is created by author
+  const { error: postAuthorError } = await supa.from("post_authors").select()
+    .eq("comment_id", commentId).eq("user_id", userId).single();
+
+  if (postAuthorError) {
+    throw new Error(
+      "Comment could not be deleted: " + postAuthorError.message,
+    );
+  }
+
+  // Assuming cascade from deleting comment, don't need to delete others
+  const { error: deletionError } = await supa.from("post_comments").delete().eq(
+    "id",
+    commentId,
+  );
+
+  if (deletionError) {
+    throw new Error("Failed to delete post");
   }
 }
 
@@ -139,22 +218,100 @@ export async function deleteComment(
  * @param userId UUID of user
  * NOTE: Only user that is apart of course with post can edit comment
  */
-export async function updateComment(
+export async function updatePostComment(
   commentId: string,
   userId: string,
+  commentEditInfo: {
+    content: string;
+    userVisibility: string;
+    userPseudonym: string;
+  },
 ): Promise<void> {
   // Check if comment exists
-  const { isFound } = await commentExists(commentId);
+  const { isFound, data: commentData } = await commentExists(commentId);
 
   if (!isFound) {
     throw new Error("Comment does not exist");
   }
+
+  const postId = commentData?.post_id;
+
+  // Get the course_id from the post
+  const { data: postData, error: postError } = await supa
+    .from("posts")
+    .select("course_id")
+    .eq("id", postId)
+    .single();
+
+  if (postError) {
+    throw new Error(`Error fetching post: ${postError.message}`);
+  }
+
+  const courseId = postData.course_id;
+
+  // Check if user is in the course with the post
+  const { data: courseCheck, error: courseCheckError } = await supa
+    .from("course_members")
+    .select("*")
+    .eq("course_id", courseId)
+    .eq("user_id", userId);
+
+  if (courseCheckError) {
+    throw courseCheckError;
+  }
+
+  if (!courseCheck || courseCheck.length === 0) {
+    throw new Error("User is not in the course with the comment");
+  }
+  const { error: updateError } = await supa.from("post_comments").update({
+    content: commentEditInfo.content,
+    updated_at: new Date(),
+  }).eq("id", commentId);
+
+  if (updateError) {
+    throw new Error("Error updating comment");
+  }
+
+  // Check if user is already a part of post_authors
+  const { count: userAuthorCount, error: userAuthorError } = await supa
+    .from("post_authors")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("comment_id", commentId);
+
+  if (userAuthorError) {
+    throw userAuthorError;
+  }
+
+  // If user is already a part of post_authors, update entry
+  if (userAuthorCount == 1) {
+    const { error: _ } = await supa.from(
+      "post_authors",
+    ).update({
+      visibility: commentEditInfo.userVisibility,
+      pseudonym: commentEditInfo.userPseudonym,
+    })
+      .eq("user_id", userId)
+      .eq("post_id", postId)
+      .eq("comment_id", commentId);
+    return;
+  }
+
+  // Otherwise, add them to table
+  const { error: _ } = await supa.from(
+    "post_authors",
+  ).insert({
+    comment_id: commentId,
+    user_id: userId,
+    visibility: commentEditInfo.userVisibility,
+    pseudonym: commentEditInfo.userPseudonym,
+  }).select().single();
 }
 
 export const postCommentController = {
   createPostComment,
   getPostComment,
   getPostComments,
-  deleteComment,
-  updateComment,
+  deletePostComment,
+  updatePostComment,
 };
