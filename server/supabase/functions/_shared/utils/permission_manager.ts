@@ -1,6 +1,8 @@
 import { supa } from '../db.ts';
 import { PermissionError } from '../errors.ts';
-import { DefaultRoles, instructorRole, Permissions } from '../../../../../shared/schema/course.ts';
+import { DEFAULT_ROLES, DefaultRoles, instructorRole, Permissions } from '../../../../../shared/schema/course.ts';
+import { getTagNested } from './tag_helper.ts';
+import { NestedTag, TagPermissions } from "@shared/schema/tag.ts";
 
 export async function isUserMemberOfCourse(user_id: string, course_id: string): Promise<boolean> {
     const { data, error } = await supa.from('course_members')
@@ -83,4 +85,47 @@ export async function getUserPermissionsInCourse(user_id: string, course_id: str
     }
 
     return roleData[0].default_permissions as Permissions;
+}
+
+export async function getUserPermissionsForPost(user_id: string, course_id: string, post_id: string) {
+    
+}
+
+export async function getPostPermissions(course_id: string, post_id: string) {
+    // const { data: tagsData, error: tagsError } = await supa.from("tags")
+    //     .select("id").eq("")
+}
+
+export function getTagPermissions(tag_id: string): Promise<TagPermissions> {
+    return getTagNested(tag_id)
+    .then((nestedTag) => {
+        const flattenPermissions = flattenTagPermissions(nestedTag);
+        const tagPermissions: TagPermissions = {
+            can_view_post: DEFAULT_ROLES.reduce((acc, role) => {
+                acc[role] = flattenPermissions.every(tp => tp.can_view_post[role]);
+                return acc;
+            }, {} as Record<DefaultRoles, boolean>),
+            can_edit_post: DEFAULT_ROLES.reduce((acc, role) => {
+                acc[role] = flattenPermissions.every(tp => tp.can_edit_post[role]);
+                return acc;
+            }, {} as Record<DefaultRoles, boolean>),
+            can_delete_post: DEFAULT_ROLES.reduce((acc, role) => {
+                acc[role] = flattenPermissions.every(tp => tp.can_delete_post[role]);
+                return acc;
+            }, {} as Record<DefaultRoles, boolean>),
+            can_change_post_visibility: DEFAULT_ROLES.reduce((acc, role) => {
+                acc[role] = flattenPermissions.every(tp => tp.can_change_post_visibility[role]);
+                return acc;
+            }, {} as Record<DefaultRoles, boolean>),
+        };
+        return tagPermissions;
+    });
+}
+
+function flattenTagPermissions(nestedTag: NestedTag): TagPermissions[] {
+    const result = [ nestedTag.permissions ];
+    if (nestedTag.parent_id === null || nestedTag.parent_id === undefined) {
+        return result;
+    }
+    return result.concat(flattenTagPermissions(nestedTag.parent));
 }
