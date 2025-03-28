@@ -43,12 +43,12 @@ export function Searcher() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     searchStore.setSearchQuery(newValue);
-    
+
     // Clear any existing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-    
+
     // Set a new timeout to detect when user stops typing
     typingTimeoutRef.current = setTimeout(() => {
       // Only execute search if there's actual content and not already in AI mode
@@ -80,7 +80,7 @@ export function Searcher() {
 
   const SearchContentSection = (
     <>
-     <div
+      <div
         className="flex justify-center gap-1 h-16 flex-shrink-0 border-b border-neutral-200 items-center w-full p-2 py-4"
         // onKeyDown={listenForEnter}
       >
@@ -115,7 +115,6 @@ export function Searcher() {
         </Button>
       </div>
       <div className="flex flex-col gap-2 overflow-y-hidden">
-      
         <SearchContent />
       </div>
     </>
@@ -127,12 +126,23 @@ export function Searcher() {
     }
     if (searchStore.search.length > 0 && searchStore.searchType === "text") {
       return `Search for "${searchStore.search}"`;
-    } else if (searchStore.search.length > 0 && searchStore.searchType === "ai") {
-      return "Continue conversation " + (searchStore.thread[searchStore.thread.length - 1]?.question ?? "");
+    } else if (
+      searchStore.search.length > 0 &&
+      searchStore.searchType === "ai"
+    ) {
+      return (
+        "Continue conversation " +
+        (searchStore.thread[searchStore.thread.length - 1]?.question ?? "")
+      );
     } else {
       return "Search documents and posts...";
     }
-  }, [searchStore.search, searchStore.searchType, searchStore.thread, searchStore.isOpen]);
+  }, [
+    searchStore.search,
+    searchStore.searchType,
+    searchStore.thread,
+    searchStore.isOpen,
+  ]);
 
   const desktopSearchUI = (
     <Dialog open={searchStore.isOpen} onOpenChange={searchStore.setIsOpen}>

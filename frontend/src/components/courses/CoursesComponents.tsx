@@ -128,11 +128,7 @@ async function getCourses(token: string) {
 
 export function CoursesCard() {
   const [shades, setShades] = useState<Record<string, Palette>>({});
-  const {
-    data,
-    error,
-    isLoading,
-  } = useFetcher({
+  const { data, error, isLoading } = useFetcher({
     fetchParams: [`${getApiUrl()}/courses`],
     options: {
       returnSchema: z.object({
@@ -151,7 +147,6 @@ export function CoursesCard() {
       });
       setShades(shadeList);
     }
-
   }, [data]);
 
   if (isLoading || !data) {

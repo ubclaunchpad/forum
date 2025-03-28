@@ -4,7 +4,12 @@ import { HighlightedText } from "@/lib/utility/highlighter";
 import AiLoader from "./ai-loader";
 import AnimatedMarkdown from "../general/AnimatedMarkdown";
 import { useContext, useEffect, useRef } from "react";
-import { ArrowRightCircleIcon, MessageCircleQuestionIcon, TrendingUpDown, TrendingUpIcon } from "lucide-react";
+import {
+  ArrowRightCircleIcon,
+  MessageCircleQuestionIcon,
+  TrendingUpDown,
+  TrendingUpIcon,
+} from "lucide-react";
 import { MessageBubbleIcon } from "../customIcons/message-bubble-icon";
 import { SourceIcon } from "../customIcons/source-icon";
 import { useRouter } from "next/navigation";
@@ -17,18 +22,24 @@ import { getApiUrl } from "@/utils/helpers";
 import { userContext } from "@/providers/userContext";
 import type { AnalyticsOutput } from "@forum/shared";
 
-
 export function SearchContent() {
   const searchStore = useSearchStore((state) => state);
-  const content = searchStore.searchType === "ai" ? <AISearchContent /> : <TextSearchContent />;
-  return <>
-  <div className="flex flex-col gap-2 overflow-y-hidden">
-    <div className="flex flex-row gap-2 items-center font-medium font-italic text-neutral-600 capitalize text-sm justify-end px-8 w-full" >
-  {searchStore.loadingState}
-  </div>
-  {content}
-  </div>
-  </>
+  const content =
+    searchStore.searchType === "ai" ? (
+      <AISearchContent />
+    ) : (
+      <TextSearchContent />
+    );
+  return (
+    <>
+      <div className="flex flex-col gap-2 overflow-y-hidden">
+        <div className="flex flex-row gap-2 items-center font-medium font-italic text-neutral-600 capitalize text-sm justify-end px-8 w-full">
+          {searchStore.loadingState}
+        </div>
+        {content}
+      </div>
+    </>
+  );
 }
 
 function AISearchContent() {
@@ -37,8 +48,7 @@ function AISearchContent() {
   const followUpRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-
-  if (searchStore.loadingState === "loading ai" ) {
+  if (searchStore.loadingState === "loading ai") {
     return <AiLoader />;
   }
 
@@ -132,7 +142,6 @@ function AISearchContent() {
   );
 }
 
-
 function TextSearchContent() {
   const searchStore = useSearchStore((state) => state);
   const textSearchResponse = searchStore.textSearchResponse;
@@ -140,28 +149,32 @@ function TextSearchContent() {
   const { profile, token } = useContext(userContext);
   const { isPending, error, data } = useQuery({
     queryKey: [`${course.id}_user_threads`, searchStore.search],
-    queryFn: () => fetch(`${getApiUrl()}/search/threads/user/${profile?.id}?course_id=${course.id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      }
-    }).then(res => res.json())
+    queryFn: () =>
+      fetch(
+        `${getApiUrl()}/search/threads/user/${profile?.id}?course_id=${course.id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      ).then((res) => res.json()),
   });
 
   const { data: analyticsData } = useQuery<{
-    insights: AnalyticsOutput
+    insights: AnalyticsOutput;
   }>({
     queryKey: [`${course.id}_analytics`],
-    queryFn: () => fetch(`${getApiUrl()}/analytics/course/${course.id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      }
-    }).then(res => res.json())
+    queryFn: () =>
+      fetch(`${getApiUrl()}/analytics/course/${course.id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }).then((res) => res.json()),
   });
-
 
   console.log(analyticsData);
 
@@ -169,57 +182,57 @@ function TextSearchContent() {
   if (!textSearchResponse) {
     return <></>;
   }
-  if (!searchStore.search ) {
+  if (!searchStore.search) {
     return (
       <div className="flex flex-col font-medium justify-center items-center px-4 w-full gap-10 py-2">
         <div className="flex flex-col w-full px-4 gap-4">
-          <h3 className="text-neutral-800 font-semibold text-lg" >
-           Popular Searches
+          <h3 className="text-neutral-800 font-semibold text-lg">
+            Popular Searches
           </h3>
-          {analyticsData && analyticsData.insights.aiInsights.popularQuestions.length > 0 ? (
-            analyticsData.insights.aiInsights.popularQuestions.map((q: any, index: number) => (
-              <div key={index} className="flex flex-row gap-2 items-center">
-                <TrendingUpIcon className="w-6 h-6 text-primary-600" />
-                <p className="text-neutral-600 ">
-                  {q.question}
-                </p>
-                <p className="text-neutral-600 text-sm">
-                  
-                </p>
-              </div>
-            ))
+          {analyticsData &&
+          analyticsData.insights.aiInsights.popularQuestions.length > 0 ? (
+            analyticsData.insights.aiInsights.popularQuestions.map(
+              (q: any, index: number) => (
+                <div key={index} className="flex flex-row gap-2 items-center">
+                  <TrendingUpIcon className="w-6 h-6 text-primary-600" />
+                  <p className="text-neutral-600 ">{q.question}</p>
+                  <p className="text-neutral-600 text-sm"></p>
+                </div>
+              ),
+            )
           ) : (
-            <p className="text-neutral-600 text-sm">No popular questions found</p>
+            <p className="text-neutral-600 text-sm">
+              No popular questions found
+            </p>
           )}
         </div>
-      
+
         <div className="flex flex-col w-full px-4 gap-4">
-          <h3 className="text-neutral-800 font-semibold text-lg" >
-           Your Conversations
+          <h3 className="text-neutral-800 font-semibold text-lg">
+            Your Conversations
           </h3>
           {data && data.threads.length > 0 ? (
             data?.threads.map((t: any, index: number) => (
-            <button key={index} className="flex flex-row gap-2 items-center">
-              <h4 className="flex-shrink-0 flex flex-row gap-2 items-center">
-                <MessageBubbleIcon />
-                {t.name}
-              </h4>
-              <div className="flex flex-1 justify-end flex-row gap-2 items-center">
-                <p className="text-neutral-600 text-sm">
-                 {`Created ${getRelativeTimeString(
-                  new Date(t.created_at).getTime(),
-                  "en",
-                  14,
-                )}`}
-              
-              </p>
-              </div>
-            </button>
-          ))
-        ) : (
-          <h1>No threads found</h1>
-        )}
-            </div>
+              <button key={index} className="flex flex-row gap-2 items-center">
+                <h4 className="flex-shrink-0 flex flex-row gap-2 items-center">
+                  <MessageBubbleIcon />
+                  {t.name}
+                </h4>
+                <div className="flex flex-1 justify-end flex-row gap-2 items-center">
+                  <p className="text-neutral-600 text-sm">
+                    {`Created ${getRelativeTimeString(
+                      new Date(t.created_at).getTime(),
+                      "en",
+                      14,
+                    )}`}
+                  </p>
+                </div>
+              </button>
+            ))
+          ) : (
+            <h1>No threads found</h1>
+          )}
+        </div>
       </div>
     );
   }

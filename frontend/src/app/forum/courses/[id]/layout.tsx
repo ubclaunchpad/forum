@@ -23,7 +23,6 @@ async function getCourse(id: string, token: string) {
       throw new Error(`Failed to fetch posts: ${res.status}`);
     }
 
-
     const body = await res.json();
     if (body.course) {
       return body.course as Course;

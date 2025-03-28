@@ -15,7 +15,7 @@ export const HighlightedText: React.FC<HighlightedTextProps> = ({
   }
 
   // Split the query into individual words and filter out empty strings
-const searchWords = wordsToHighlight
+  const searchWords = wordsToHighlight
     .toLowerCase()
     .split(" ")
     .filter((word: string) => word.trim() !== "");
@@ -66,7 +66,6 @@ const searchWords = wordsToHighlight
 
   return (
     <span>
-    
       {chunks.map((chunk, i) =>
         chunk.highlight ? (
           <span key={i} className={highlightClassName}>

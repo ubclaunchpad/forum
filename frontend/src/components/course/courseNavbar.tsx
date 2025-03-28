@@ -58,20 +58,26 @@ export default function CourseNavbar() {
   return (
     <div className="flex flex-shrink-0 justify-between items-center w-full border-b  px-2 border-b-neutral-200">
       <div className="flex relative gap-6">
-        <div ref={sliderRef} className="h-[2px] bg-primary-600 absolute bottom-0 left-0 w-0 transition-all duration-300" />
+        <div
+          ref={sliderRef}
+          className="h-[2px] bg-primary-600 absolute bottom-0 left-0 w-0 transition-all duration-300"
+        />
         {tabs.map((tab) => (
-        <Link
+          <Link
             id={`${tab.name}-tab-nav`}
             aria-disabled={tab.disabled}
             shallow={true}
             href={tab.disabled ? "#" : `/forum/courses/${courseid}/${tab.href}`}
             key={tab.name}
-            className={cn(`flex items-center no-underline  border-b-2 hover:text-primary-500 rounded-none font-semibold  normal  border-transparent gap-2 px-3 py-2 h-9 
+            className={cn(
+              `flex items-center no-underline  border-b-2 hover:text-primary-500 rounded-none font-semibold  normal  border-transparent gap-2 px-3 py-2 h-9 
             `,
-            isSelected(tab.name) ? "text-primary-600 " : "text-neutral-700 border-transparent"
+              isSelected(tab.name)
+                ? "text-primary-600 "
+                : "text-neutral-700 border-transparent",
             )}
             onClick={() => {
-              router.push(`/forum/courses/${courseid}/${tab.href}`);  
+              router.push(`/forum/courses/${courseid}/${tab.href}`);
               if (sliderRef.current) {
                 const element = document.getElementById(`${tab.name}-tab-nav`);
                 if (element) {

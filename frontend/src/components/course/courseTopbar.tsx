@@ -4,7 +4,7 @@ import { ArrowLeftIcon, LogOutIcon, Settings2Icon } from "lucide-react";
 import { Fragment, useContext, useState } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import {  cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { userContext } from "@/providers/userContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import { getApiUrl } from "@/utils/helpers";
@@ -64,14 +64,14 @@ function CourseButton() {
                 <ArrowLeftIcon className="w-4 min-h-4" />
                 Back to All Courses
               </Link>
-                <Link
-                  href={`/forum/courses/${course.id}/settings`}
-                  className="w-full no-underline hover:text-primary-500 p-1 px-2 text-sm flex items-center gap-2"
-                >
-                  <Settings2Icon className="w-4 min-h-4" />
-                  Course Settings
-                </Link>
-          
+              <Link
+                href={`/forum/courses/${course.id}/settings`}
+                className="w-full no-underline hover:text-primary-500 p-1 px-2 text-sm flex items-center gap-2"
+              >
+                <Settings2Icon className="w-4 min-h-4" />
+                Course Settings
+              </Link>
+
               <button
                 disabled={false}
                 className="w-full  disabled:hover:text-neutral-400  hover:text-red-500 p-1 px-2 text-sm flex items-center gap-2"

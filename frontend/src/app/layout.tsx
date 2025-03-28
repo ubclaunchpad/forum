@@ -14,8 +14,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { Toaster as OldToaster } from "@/components/ui/toaster";
-import { Toaster } from "@/components/ui/sonner"
-
+import { Toaster } from "@/components/ui/sonner";
 
 const sourceSans = Source_Sans_3({
   subsets: ["latin"],

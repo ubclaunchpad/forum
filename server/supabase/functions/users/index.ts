@@ -18,12 +18,16 @@ import { authMiddleware, UserVariables } from "../_shared/utils/auth.ts";
 const functionName = "users";
 const app = new Hono().basePath(`/${functionName}`); 
 
-app.use("*", cors({
-  origin: ["http://localhost:3000"],
-  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowHeaders: ["Authorization", "Content-Type", "*"],
-  exposeHeaders: ["Authorization", "Content-Type"],
-}));
+
+app.use(
+  "*",
+  cors({
+    origin: ["http://localhost:3000", "https://forumai.me", "*"],
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowHeaders: ["Authorization", "Content-Type", "*", "Origin", "Accept"],
+    exposeHeaders: ["Authorization", "Content-Type", "*"],
+  }),
+);
 
 app.use("*", authMiddleware as any);
 

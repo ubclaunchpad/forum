@@ -4,7 +4,6 @@ export type DocumentAppendOperation =
   | DocumentOptimisticOperation
   | DocumentRealOperation;
 
-
 type DocumentOptimisticOperation = {
   operation: "optimistic";
   id: null;
