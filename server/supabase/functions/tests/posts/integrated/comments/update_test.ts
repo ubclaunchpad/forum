@@ -11,6 +11,7 @@ import {
   profiles,
 } from "../shared.ts";
 import { addUserToCourse } from "../../../../courses/controller/add_course_member_activity.ts";
+import { postController } from "../../../../posts/controllers/crud.ts";
 
 describe("Posts Integration Tests: Update comments", () => {
   beforeEach(clearUsers);
@@ -50,7 +51,17 @@ describe("Posts Integration Tests: Update comments", () => {
       );
 
       assertEquals(updatedComment.content, "Updated comment");
-      // TODO: Check post_authors table
+
+      const authors = await postController.getPostAuthorsByPostId(
+        postId,
+      );
+
+      console.log("Authors", authors);
+
+      assertEquals(authors.length, 2);
+      assertEquals(authors[1].pseudonym, "Smart_Red_Turtle");
+      assertEquals(authors[1].visibility, "everyone");
+      assertEquals(authors[1].comment_id, commentId);
     } catch (error) {
       fail("Should not throw error: " + (error as Error).message);
     }

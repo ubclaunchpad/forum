@@ -1,6 +1,6 @@
 import { supa } from "../../_shared/db.ts";
 
-import { PostComment } from "@shared/mod.ts";
+import { PostAuthor, PostComment } from "@shared/mod.ts";
 import { commentExists, postExists } from "./helpers.ts";
 
 /**
@@ -308,10 +308,26 @@ export async function updatePostComment(
   }).select().single();
 }
 
+export async function getCommentAuthorsByCommentId(
+  commentId: string,
+): Promise<PostAuthor[]> {
+  const { data, error } = await supa.from("post_authors").select("*").eq(
+    "comment_id",
+    commentId,
+  );
+
+  if (error) {
+    throw error;
+  }
+
+  return data as PostAuthor[];
+}
+
 export const postCommentController = {
   createPostComment,
   getPostComment,
   getPostComments,
   deletePostComment,
   updatePostComment,
+  getCommentAuthorsByCommentId,
 };
