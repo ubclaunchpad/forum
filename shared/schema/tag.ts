@@ -29,7 +29,6 @@ const onlyInstructorAllowedSchema = z.object(rolesPermissionSchema).transform((v
     return { ...onlyInstructorAllowed, ...val };
 });
 
-// Note that changes here need to be reflected in getting the permissions of a tag in _shared/utils/permissions_manager.ts
 export const tagPermissionsSchema = z.object({
     can_view_post: allAllowedSchema.default(allAllowed),
     can_edit_post: allAllowedSchema.default(allAllowed),
@@ -38,6 +37,8 @@ export const tagPermissionsSchema = z.object({
 });
 
 export type TagPermissions = z.infer<typeof tagPermissionsSchema>;
+export type TagPermissionsKey = keyof TagPermissions; 
+export const TAG_PERMISSIONS_KEYS = tagPermissionsSchema.keyof().options as TagPermissionsKey[];
 
 export const baseTagSchema = z.object({
     parent_id: z.string().optional(),
