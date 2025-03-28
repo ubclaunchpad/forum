@@ -17,7 +17,6 @@ export const DocumentListSidebar = ({
   handleFileClick: (fileId?: string) => void;
   onUploadSuccess: () => Promise<void>;
 }) => {
-
   return (
     <section className="flex relative vt flex-col   overflow-y-auto overflow-x-hidden min-w-[500px] xl:max-w-[500px] xl:border-r">
       <div className="flex justify-center h-16 flex-shrink-0 border-b w-full gap-2"></div>

@@ -48,19 +48,16 @@ function useDocumentQuery({
       setIsLoading(true);
       setStreamedAnswer("");
       setResponse(null);
-      const response = await fetch(
-        `${getApiUrl()}/search`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            query: question,
-          }),
+      const response = await fetch(`${getApiUrl()}/search`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+        body: JSON.stringify({
+          query: question,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

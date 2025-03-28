@@ -51,7 +51,6 @@ interface SourceIconProps {
 const MIN_SEARCH_LENGTH = 5;
 const MAX_SEARCH_LENGTH = 1000;
 
-
 const SearchContent: React.FC<SearchContentProps> = ({
   search,
   setSearch,

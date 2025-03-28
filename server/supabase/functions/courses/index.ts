@@ -36,12 +36,15 @@ import { deleteTag } from "./controller/delete_tag_activity.ts";
 const functionName = "courses";
 const app = new Hono().basePath(`/${functionName}`); 
 
-app.use("*", cors({
-  origin: ["http://localhost:3000"],
-  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowHeaders: ["Authorization", "Content-Type", "*"],
-  exposeHeaders: ["Authorization", "Content-Type"],
-}));
+app.use(
+  "*",
+  cors({
+    origin: ["http://localhost:3000", "https://forumai.me", "*"],
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowHeaders: ["Authorization", "Content-Type", "*", "Origin", "Accept"],
+    exposeHeaders: ["Authorization", "Content-Type", "*"],
+  }),
+);
 
 app.use("*", authMiddleware as any);
 

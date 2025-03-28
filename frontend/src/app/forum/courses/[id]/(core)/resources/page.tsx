@@ -6,7 +6,6 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-
 async function getDocuments(id: string, token: string) {
   try {
     const res = await fetch(`${getApiUrl()}/documents/courses/${id}`, {
@@ -20,7 +19,7 @@ async function getDocuments(id: string, token: string) {
         Authorization: `Bearer ${token}`,
       },
     });
-    
+
     if (!res.ok) {
       return {
         data: [],

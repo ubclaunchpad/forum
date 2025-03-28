@@ -11,7 +11,6 @@ export default async function CourseCoreLayout({
       <CourseTopbar />
       <CourseNavbar />
       {children}
-     
     </>
   );
 }

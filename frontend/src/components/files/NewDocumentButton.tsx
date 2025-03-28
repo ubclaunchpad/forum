@@ -1,8 +1,6 @@
 "use client";
 
-import type {
-  DocumentAppendOperation,
-} from "@/lib/types/documents";
+import type { DocumentAppendOperation } from "@/lib/types/documents";
 import { Dispatch, SetStateAction } from "react";
 import FileUpload from "@/components/files/NewFileUpload";
 import { generateTempId } from "@/lib/utils";
@@ -11,11 +9,10 @@ import { GetDocument } from "@forum/shared";
 export const NewDocumentButton = ({
   setFiles,
   onUploadSuccess,
-}: {  
+}: {
   setFiles: Dispatch<SetStateAction<GetDocument[]>>;
   onUploadSuccess: () => Promise<void>;
 }) => {
-  
   function appendToFiles({ operation, id, document }: DocumentAppendOperation) {
     if (operation === "optimistic") {
       const tempId = generateTempId();

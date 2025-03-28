@@ -354,8 +354,6 @@ dialog {
   text-size-adjust: none;
 }
 
-
-
 .on-appear-animation {
   animation: on-appear 1s ease-in-out;
 }

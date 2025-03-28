@@ -16,8 +16,8 @@ app.use(
   cors({
     origin: ["http://localhost:3000", "https://forumai.me", "*"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowHeaders: ["Authorization", "Content-Type", "*"],
-    exposeHeaders: ["Authorization", "Content-Type"],
+    allowHeaders: ["Authorization", "Content-Type", "*", "Origin", "Accept"],
+    exposeHeaders: ["Authorization", "Content-Type", "*"],
   }),
 );
 

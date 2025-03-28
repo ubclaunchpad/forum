@@ -48,20 +48,20 @@ export default function PostsForumSidebar() {
     <>
       <MainSidebar className={selectedPost ? "hidden xl:block" : ""}>
         <div className="flex flex-row justify-center items-center w-full h-16 px-2">
-            <Button
-              size={"sm"}
-              className="w-fit  px-4 min-h-none h-fit py-2"
-              onClick={() => {
-                const id = generateTempId("local");
-                const post: PostWithRequiredId = { id: id, title: "" };
-                setListOfDrafts((prev) => [post, ...prev]);
-                setSelectedPost(post);
-                setIsEditing(id);
-              }}
-            >
-              <PlusIcon className="h-4 w-4" />
-              New Post
-            </Button>
+          <Button
+            size={"sm"}
+            className="w-fit  px-4 min-h-none h-fit py-2"
+            onClick={() => {
+              const id = generateTempId("local");
+              const post: PostWithRequiredId = { id: id, title: "" };
+              setListOfDrafts((prev) => [post, ...prev]);
+              setSelectedPost(post);
+              setIsEditing(id);
+            }}
+          >
+            <PlusIcon className="h-4 w-4" />
+            New Post
+          </Button>
         </div>
       </MainSidebar>
       <MainListPanel className={selectedPost ? "hidden xl:block" : ""}>

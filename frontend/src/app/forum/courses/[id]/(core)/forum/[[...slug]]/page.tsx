@@ -20,10 +20,10 @@ async function getPosts(id: string, token: string) {
     });
 
     if (!res.ok) {
-     return {
-      posts: [],
-      error: `Failed to fetch posts: ${res.status}`,
-     }
+      return {
+        posts: [],
+        error: `Failed to fetch posts: ${res.status}`,
+      };
     }
 
     const body = await res.json();
@@ -33,13 +33,13 @@ async function getPosts(id: string, token: string) {
         id: post.id.toString(),
       })),
       error: null,
-    }
+    };
   } catch (e) {
     console.error("Error fetching posts:", e);
     return {
       posts: [],
       error: (e as Error).message,
-    }
+    };
   }
 }
 
@@ -49,20 +49,20 @@ export default async function ForumWrapper({
   params: Promise<{ id: string; slug: string[] | undefined }>;
 }) {
   const { id, slug } = await params;
-  return <Suspense fallback={<PostsForumPage posts={[]} initalPost={undefined} />}>
-    <Forum id={id} slug={slug} />
-  </Suspense>
+  return (
+    <Suspense fallback={<PostsForumPage posts={[]} initalPost={undefined} />}>
+      <Forum id={id} slug={slug} />
+    </Suspense>
+  );
 }
 
-
-async function Forum({id, slug}: {id: string, slug: string[] | undefined}){
-
+async function Forum({ id, slug }: { id: string; slug: string[] | undefined }) {
   const selectPost = slug ? slug[0] : undefined;
   const supabase = await createClient();
   const token = (await supabase.auth.getSession())?.data.session?.access_token;
   if (!token) {
     redirect("auth/login");
   }
-  const {posts} = await getPosts(id, token);
+  const { posts } = await getPosts(id, token);
   return <PostsForumPage posts={posts} initalPost={selectPost} />;
 }

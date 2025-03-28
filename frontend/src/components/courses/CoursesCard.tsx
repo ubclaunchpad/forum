@@ -33,7 +33,12 @@ export default function UserCoursesComponent({
         <div className="flex items-center border-b p-4 w-full  justify-between">
           <h3 className="font-semibold">Your Courses</h3>
           <Link href="/forum/courses/new" className="hidden">
-            <Button variant="solid" size="sm" disabled className="bg-neutral-950">
+            <Button
+              variant="solid"
+              size="sm"
+              disabled
+              className="bg-neutral-950"
+            >
               Add Course
             </Button>
           </Link>

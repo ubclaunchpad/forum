@@ -3,19 +3,21 @@ import { createMiddleware } from "jsr:@hono/hono/factory";
 import { cors } from 'jsr:@hono/hono/cors';
 import { validateUserFromToken } from "../_shared/utils/auth.ts";
 import { documentHandler } from "./documentController.ts";
-import { supa } from "../_shared/db.ts";
 import { uuidSchema } from "@shared/mod.ts";
 const functionName = "documents";
 const app = new Hono().basePath(`/${functionName}`); 
 
-const documentController = documentHandler(supa);
+const documentController = documentHandler();
 
-app.use("*", cors({
-  origin: ["http://localhost:3000"],
-  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowHeaders: ["Authorization", "Content-Type", "*"],
-  exposeHeaders: ["Authorization", "Content-Type"],
-}));
+app.use(
+  "*",
+  cors({
+    origin: ["http://localhost:3000", "https://forumai.me", "*"],
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowHeaders: ["Authorization", "Content-Type", "*", "Origin", "Accept"],
+    exposeHeaders: ["Authorization", "Content-Type", "*"],
+  }),
+);
 
 const validateUser = async (c: Context) => {
   const token = c.req.header("Authorization")?.split(" ")[1];

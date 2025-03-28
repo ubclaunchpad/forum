@@ -47,9 +47,7 @@ export default function DocumentRow({
         <div
           className={cn(
             "flex items-center justify-center   flex-shrink-0",
-            isSelected
-              ? "bg-inherit border-primary-100 text-primary-400"
-              : "",
+            isSelected ? "bg-inherit border-primary-100 text-primary-400" : "",
           )}
         >
           {getFileIcon(document.file?.type)}
@@ -62,9 +60,7 @@ export default function DocumentRow({
               isSelected ? "text-primary-700" : "text-neutral-800",
             )}
           >
-           
             {document.file.name}
-       
           </span>
           {document.description && (
             <p className="text-sm text-neutral-500 truncate">

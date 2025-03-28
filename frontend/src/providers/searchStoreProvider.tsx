@@ -170,9 +170,9 @@ export const SearchStoreProvider = ({ children }: SearchStoreProviderProps) => {
 
   async function executeTextSearch(query: string, set: SetState<SearchState>) {
     set({
-        loadingState: "loading text",
-        searchType: "text",
-      });
+      loadingState: "loading text",
+      searchType: "text",
+    });
     try {
       const response = await fetch(
         `${getApiUrl()}/search/courses/${course.id}/textsearch?query=${query}`,
@@ -185,7 +185,6 @@ export const SearchStoreProvider = ({ children }: SearchStoreProviderProps) => {
       );
       const data = await response.json();
 
-      
       set({
         textSearchResponse: data,
         loadingState: "idle",
@@ -193,7 +192,7 @@ export const SearchStoreProvider = ({ children }: SearchStoreProviderProps) => {
       });
     } catch (error) {
       console.error("Error during text search:", error);
-    } 
+    }
   }
 
   async function executeSearch(
