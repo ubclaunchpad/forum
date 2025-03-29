@@ -134,3 +134,18 @@ function flattenTagPermissions(nestedTag: NestedTag): TagPermissions[] {
     }
     return result.concat(flattenTagPermissions(nestedTag.parent));
 }
+
+export async function isUserPostAuthor(user_id: string, post_id: string): Promise<boolean> {
+    const { data: authorData, error: authorError } = await supa.from("post_authors")
+        .select("*")
+        .eq("post_id", post_id)
+        .is("comment_id", null)
+        .is("reply_id", null);
+    
+    if (authorError) {
+        console.error(authorError);
+        throw new Error(`Failed to retrieve authors of post ${post_id}: ${authorError.message}`);
+    }
+
+    return authorData.find(entry => entry.user_id === user_id);
+}

@@ -13,6 +13,9 @@ import {
   mutatePostPartialSchema,
   mutatePostSchema,
 } from "@shared/mod.ts";
+import { getUserPermissionsInCourse, isUserMemberOfCourse, isUserPostAuthor } from "../_shared/utils/permission_manager.ts";
+import { postTagController } from "./controllers/tags.ts";
+import { NotFoundError, PermissionError } from "../_shared/errors.ts";
 
 const functionName = "posts";
 const app = new Hono().basePath(`/${functionName}`);
@@ -147,6 +150,82 @@ app.patch("/:post_id", async (c: Context<{ Variables: UserVariables }>) => {
     return c.json({ error: (error as Error).message }, 500);
   }
 });
+
+// Add tag to post
+app.post("/:course_id/:post_id/tags/:tag_id", async (c: Context<{ Variables: UserVariables }>) => {
+  try {
+    const { course_id, post_id, tag_id } = c.req.param();
+    const user = c.var.user;
+
+    const userPermissions = await getUserPermissionsInCourse(user.id, course_id);
+    const postOwner = await isUserPostAuthor(user.id, post_id) ? "own" : "others"; 
+    if (!userPermissions.can_tag_posts[postOwner]) {
+      return c.json({ error: "User does not have permission to tag posts" }, 401);
+    }
+
+    await postTagController.addTagToPost(post_id, tag_id);
+    return c.json(200);
+  } catch (error) {
+    console.error(error);
+    if (error instanceof NotFoundError) {
+      return c.json({ error: error.message }, 404);
+    }
+    if (error instanceof PermissionError) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+// Delete tag from post
+app.delete("/:course_id/:post_id/tags/:tag_id", async (c: Context<{ Variables: UserVariables }>) => {
+  try {
+    const { course_id, post_id, tag_id } = c.req.param();
+    const user = c.var.user;
+
+    const userPermissions = await getUserPermissionsInCourse(user.id, course_id);
+    const postOwner = await isUserPostAuthor(user.id, post_id) ? "own" : "others"; 
+    if (!userPermissions.can_tag_posts[postOwner]) {
+      return c.json({ error: "User does not have permission to remove tags from posts" }, 401);
+    }
+
+    await postTagController.removeTagFromPost(post_id, tag_id);
+    return c.json(200);
+  } catch(error) {
+    console.error(error);
+    if (error instanceof NotFoundError) {
+      return c.json({ error: error.message }, 404);
+    }
+    if (error instanceof PermissionError) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+// Get tags from post
+app.get("/:course_id/:post_id/tags", async (c: Context<{ Variables: UserVariables }>) => {
+  try {
+    const { course_id, post_id } = c.req.param();
+    const user = c.var.user;
+
+    if (!await isUserMemberOfCourse(user.id, course_id)) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const tags = await postTagController.getPostTags(post_id);
+    return c.json({ tags: tags }, 200);
+  } catch(error) {
+    console.error(error);
+    if (error instanceof NotFoundError) {
+      return c.json({ error: error.message }, 404);
+    }
+    if (error instanceof PermissionError) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+    return c.json({ error: "Internal server error" }, 500);
+  }
+})
 
 export { app };
 
