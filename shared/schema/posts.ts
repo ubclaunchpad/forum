@@ -29,7 +29,7 @@ export const mutatePostSchema = postSchema.pick({
 });
 
 export const mutatePostPartialSchema = postSchema.partial().extend({
-  course_id: z.string().uuid()
+  course_id: z.string().uuid(),
 });
 
 export const mutatePostOptionsSchema = z.object({
@@ -42,7 +42,6 @@ export const mutatePostArgumentsSchema = z.object({
   optionArgs: mutatePostOptionsSchema,
 });
 
-
 export type MutatePost = z.infer<typeof mutatePostSchema>;
 export type MutatePostEdit = z.infer<typeof mutatePostPartialSchema>;
 export type MutatePostOptions = z.infer<typeof mutatePostOptionsSchema>;
@@ -50,29 +49,33 @@ export type MutatePostArguments = z.infer<typeof mutatePostArgumentsSchema>;
 export type Post = z.infer<typeof postSchema>;
 export type PostAuthor = z.infer<typeof postSchema.shape.authors.element>;
 
+export const postCommentReplySchema = z.object({
+  id: z.string().uuid(), // UUID
+  comment_id: z.string().uuid(), // UUID
+  content: z.string(),
+  number_id: z.number(),
+  created_at: z.date(),
+  updated_at: z.date(),
+});
 
+export type PostCommentReply = z.infer<typeof postCommentReplySchema>;
 
-// export const postCommentReplySchema = z.object({
-//   id: z.string().uuid(), // UUID
-//   comment_id: z.string().uuid(), // UUID
-//   content: z.string(),
-//   number_id: z.number(),
-//   created_at: z.date(),
-//   updated_at: z.date(),
-// });
+export const postCommentSchema = z.object({
+  id: z.string().uuid(), // UUID
+  postId: z.string().uuid(), // UUID
+  content: z.string(),
+  number_id: z.number(),
+  created_at: z.date(),
+  updated_at: z.date(),
+  replies: z.array(postCommentReplySchema),
+});
 
-// export type PostCommentReply = z.infer<typeof postCommentReplySchema>;
+export type PostComment = z.infer<typeof postCommentSchema>;
 
-// export const postCommentSchema = z.object({
-//   id: z.string().uuid(), // UUID
-//   postId: z.string().uuid(), // UUID
-//   content: z.string(),
-//   number_id: z.number(),
-//   created_at: z.date(),
-//   updated_at: z.date(),
-//   replies: z.array(postCommentReplySchema),
-// });
+export const mutatePostCommentSchema = z.object({
+  content: z.string(),
+  visibility: z.enum(["public", "private", "unlisted"]),
+  use_pseudonym: z.boolean(),
+});
 
-// export type PostComment = z.infer<typeof postCommentSchema>;
-
-
+export type MutatePostComment = z.infer<typeof mutatePostCommentSchema>;
