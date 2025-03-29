@@ -1,157 +1,163 @@
-import { supa } from "../../_shared/db.ts";
+import { sqlClient, supa } from "../../_shared/db.ts";
 
 import {
-  DbPostSchema,
-  NewPost,
-  NewPostOptions,
-  NewPostResults,
-  PostAuthor,
-  PostEditInfo,
-  PostList,
-  PostResponse,
+  type MutatePost,
+  type MutatePostEdit,
+  type MutatePostOptions,
+  type Post,
+  type PostAuthor,
 } from "@shared/mod.ts";
-import { NotFoundError } from "../../_shared/errors.ts";
 import { generatePseudonym, userInCourse } from "./helpers.ts";
-import { getPostComments, postExists } from "./helpers.ts";
+import { postExists } from "./helpers.ts";
 
 export async function createPost(
   userId: string,
-  newPostArgs: NewPost,
-  options: NewPostOptions,
-): Promise<NewPostResults> {
-  const inCourse = await userInCourse(userId, newPostArgs.course_id);
+  newPostArgs: MutatePost,
+  options: MutatePostOptions,
+): Promise<Post> {
+  const sql = sqlClient();
 
+  const inCourse = await userInCourse(userId, newPostArgs.course_id);
   if (!inCourse) {
     throw new Error("User is not registered in course");
   }
 
-  const { data, error } = await supa.from("posts").insert(newPostArgs).select()
-    .single();
+  const pseudonym = generatePseudonym();
 
-  if (error) {
-    throw new Error("Failed to create post");
-  }
-  const postData = DbPostSchema.parse(data);
+  const post = await sql.begin(async (tx) => {
+    const [createdPost] = await tx`
+      INSERT INTO posts (course_id, title, content, status, visibility)
+      VALUES (${newPostArgs.course_id}, ${newPostArgs.title}, ${newPostArgs.content}, 'published', ${
+      options.visibility ?? "public"
+    })
+      RETURNING *
+    `;
 
-  let pseudonym = undefined;
+    if (!createdPost || createdPost.length === 0) {
+      throw new Error("Failed to create post");
+    }
 
-  if (options.usePseudonym) {
-    pseudonym = generatePseudonym();
-  }
+    const [authorPseudonym] = await tx`
+      INSERT INTO post_author_pseudonyms (post_id, user_id, pseudonym)
+      VALUES (${createdPost.id}, ${userId}, ${pseudonym})
+      RETURNING *
+    `;
 
-  const { error: _ } = await supa.from(
-    "post_authors",
-  ).insert({
-    post_id: postData.id,
-    user_id: userId,
-    visibility: options.visibility,
-    pseudonym: pseudonym,
-  }).select().single();
+    if (!authorPseudonym || authorPseudonym.length === 0) {
+      throw new Error("Failed to create author pseudonym");
+    }
 
-  return {
-    post_id: postData.id,
-    course_id: newPostArgs.course_id,
-    pseudonym: pseudonym,
-    title: postData.title,
-    number_id: postData.number_id,
-    status: postData.status,
-    created_at: postData.created_at,
-    updated_at: postData.updated_at,
-  };
-}
+    const [author] = await tx`
+      INSERT INTO post_authors (post_id, user_id, is_anonymous)
+      VALUES (${createdPost.id}, ${userId}, ${options.use_pseudonym ?? false})
+      RETURNING *
+    `;
 
-export async function getTestPosts(
-  courseId: string,
-) {
-  const { data } = await supa.from("posts").select().eq("course_id", courseId);
-  return data ?? [];
+    if (!author || author.length === 0) {
+      throw new Error("Failed to create author");
+    }
+
+    return {
+      ...createdPost,
+      authors: [{
+        ...author,
+        pseudonym: authorPseudonym.pseudonym,
+      }],
+    };
+  });
+
+  await sql.end();
+  return post as Post;
 }
 
 export async function getPost(
   userId: string,
   postId: string,
   getRepliesComments: boolean,
-): Promise<PostResponse> {
-  const postData = await postExists(postId);
+): Promise<Post> {
+  const sql = sqlClient();
+  const post = await sql.begin(async (tx) => {
+    const [post] = await tx`
+      SELECT * FROM posts WHERE id = ${postId}
+    `;
+    if (!post || post.length === 0) {
+      throw new Error("Post does not exist");
+    }
+    const [member] = await tx`
+      SELECT * FROM course_members WHERE course_id = ${post.course_id} AND user_id = ${userId}
+    `;
+    if (!member || member.length === 0) {
+      throw new Error("User is not registered in course");
+    }
 
-  if (!postData.isFound || !postData.data) {
-    throw new NotFoundError("Post does not exist");
-  }
+    const authors = await tx`
+    SELECT pa.user_id, pa.post_id, pa.is_anonymous, pa.visibility, pap.pseudonym 
+    FROM post_authors pa 
+    INNER JOIN post_author_pseudonyms pap 
+    ON pa.user_id = pap.user_id AND pa.post_id = pap.post_id 
+    WHERE pa.post_id = ${postId}
+    `;
 
-  const { course_id } = postData.data;
-
-  const inCourse = await userInCourse(userId, course_id);
-
-  if (!inCourse) {
-    throw new Error("User is not registered in course");
-  }
-
-  const { data, error } = await supa.from("posts").select().eq(
-    "course_id",
-    course_id,
-  ).eq("id", postId).single();
-
-  if (error) {
-    throw error;
-  }
-
-  const post: PostResponse = {
-    id: data.id,
-    course_id: data.course_id,
-    title: data.title,
-    number_id: data.number_id,
-    content: data.content,
-    status: data.status,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
-  };
-
-  if (getRepliesComments) {
-    post["comments"] = await getPostComments(postId);
-  }
+    return {
+      ...post,
+      authors: authors,
+    } as unknown as Post;
+  });
+  await sql.end();
   return post;
 }
 
 export async function getPosts(
   userId: string,
   courseId: string,
+  fullPost: boolean = false,
   getRepliesComments: boolean,
-): Promise<PostList[]> {
-  // Check if user is apart of course
+): Promise<Post[]> {
+  const sql = sqlClient();
   const inCourse = await userInCourse(userId, courseId);
 
   if (!inCourse) {
     throw new Error("User is not registered in course");
   }
 
-  // Get all posts with course_id
-  const { data } = await supa.from("posts").select().eq("course_id", courseId);
+  const posts = await sql.begin(async (tx) => {
+    const contentClause = fullPost
+      ? sql`posts.content as content`
+      : sql`SUBSTRING(posts.content, 1, 200) as content`;
+    const posts = await tx`
+      SELECT id, course_id, title, number_id, ${contentClause}, status, created_at, updated_at, visibility,
+        (
+          SELECT json_agg(row_to_json(post_authors))
+          FROM post_authors
+          WHERE post_authors.post_id = posts.id
+        ) as authors
+      FROM posts WHERE course_id = ${courseId} 
+    `;
 
-  const retPosts: PostList[] = [];
+    const postAuthors = await tx`
+      SELECT post_id, user_id, is_anonymous, visibility, 
+        (
+          SELECT pseudonym FROM post_author_pseudonyms WHERE post_id = post_authors.post_id AND user_id = post_authors.user_id
+        ) as pseudonym
+      FROM post_authors WHERE post_id IN (SELECT id FROM posts)
+    `;
 
-  // If there are no posts, return an empty list
-  if (!data || data.length == 0) {
-    return retPosts;
-  }
+    const postAuthorsMap = new Map<string, PostAuthor[]>();
+    postAuthors.forEach((postAuthor) => {
+      if (!postAuthorsMap.has(postAuthor.post_id)) {
+        postAuthorsMap.set(postAuthor.post_id, []);
+      }
+      postAuthorsMap.get(postAuthor.post_id)?.push(postAuthor as PostAuthor);
+    });
 
-  // Parse through data, changing type and getting comments and replies
-  for (const entry of data) {
-    const post: PostList = {
-      id: entry.id,
-      course_id: entry.course_id,
-      title: entry.title,
-      number_id: entry.number_id,
-      status: entry.status,
-      createdAt: entry.created_at,
-      updatedAt: entry.updated_at,
-    };
-    if (getRepliesComments) {
-      post["comments"] = await getPostComments(post.id);
-    }
-    retPosts.push(post);
-  }
+    posts.forEach((post) => {
+      post.authors = postAuthorsMap.get(post.id) ?? [];
+    });
+    return posts as unknown as Post[];
+  });
 
-  return retPosts;
+  await sql.end();
+  return posts;
 }
 
 /**
@@ -163,83 +169,59 @@ export async function getPosts(
 export async function updatePost(
   postId: string,
   userId: string,
-  postEditInfo: PostEditInfo,
-): Promise<void> {
-  // Check if post exists
-  const checkPost = await postExists(postId);
-  if (!checkPost.isFound) {
-    throw new Error("Post does not exist");
-  }
+  postEditInfo: MutatePostEdit,
+  postEditOptions: Pick<MutatePostOptions, "use_pseudonym">,
+): Promise<Post> {
+  const sql = sqlClient();
 
-  // Retrieve the course that the post is in
-  const { data, error: postError } = await supa.from("posts").select(
-    "course_id",
-  ).eq("id", postId).single();
+  await sql.begin(async (tx) => {
+    const [post] = await tx`
+      SELECT * FROM posts WHERE id = ${postId}
+    `;
+    if (!post || post.length === 0) {
+      throw new Error("Post does not exist");
+    }
 
-  if (postError) {
-    throw postError;
-  }
+    const [member] = await tx`
+      SELECT * FROM course_members WHERE course_id = ${post.course_id} AND user_id = ${userId}
+    `;
+    if (!member || member.length === 0) {
+      throw new Error("User is not a member of the post");
+    }
 
-  const courseId: string = data.course_id;
+    const queries = [];
+    if (postEditInfo.title) {
+      queries.push(sql`title = ${postEditInfo.title},`);
+    } else {
+      queries.push(sql``);
+    }
+    
+    if (postEditInfo.content) {
+      queries.push(sql`content = ${postEditInfo.content},`);
+    } else {
+      queries.push(sql``);
+    }
+    
+    queries.push(sql`updated_at = ${new Date()}`);
 
-  // Check if user is a part of the course
-  const { count: userCourseCount, error: userCourseError } = await supa
-    .from("course_members")
-    .select("*", { count: "exact", head: true })
-    .eq("course_id", courseId)
-    .eq("user_id", userId);
+    const [updatedPost] = await tx`UPDATE posts SET ${queries[0]} ${queries[1]} ${queries[2]} WHERE id = ${postId} RETURNING *`;
+    if (!updatedPost || updatedPost.length === 0) {
+      throw new Error("Failed to update post");
+    }
+    // If new author, create author and pseudonym
+    const [author] = await tx`
+      SELECT * FROM post_authors WHERE post_id = ${postId} AND user_id = ${userId}
+    `;
+    if (!author || author.length === 0) {
+      await tx`
+        INSERT INTO post_authors (post_id, user_id, is_anonymous)
+        VALUES (${postId}, ${userId}, ${postEditOptions.use_pseudonym ?? false})
+      `;
+    }
+  });
 
-  if (userCourseError) {
-    throw userCourseError;
-  }
-
-  if (userCourseCount == 0) {
-    throw new Error("User is not registered in course");
-  }
-
-  // Edit post
-  const { error: updateError } = await supa.from("posts").update({
-    title: postEditInfo.title,
-    content: postEditInfo.content,
-    updated_at: postEditInfo.updated_at,
-  }).eq("id", postId);
-
-  if (updateError) {
-    throw new Error("Error updating post information");
-  }
-  // Check if user is already a part of post_authors
-  const { count: userAuthorCount, error: userAuthorError } = await supa
-    .from("post_authors")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .eq("post_id", postId);
-
-  if (userAuthorError) {
-    throw userAuthorError;
-  }
-
-  // If user is already a part of post_authors, update entry
-  if (userAuthorCount == 1) {
-    const { error: _ } = await supa.from(
-      "post_authors",
-    ).update({
-      visibility: postEditInfo.userVisibility,
-      pseudonym: postEditInfo.userPseudonym,
-    })
-      .eq("user_id", userId)
-      .eq("post_id", postId);
-    return;
-  }
-
-  // Otherwise, add them to table
-  const { error: _ } = await supa.from(
-    "post_authors",
-  ).insert({
-    post_id: postId,
-    user_id: userId,
-    visibility: postEditInfo.userVisibility,
-    pseudonym: postEditInfo.userPseudonym,
-  }).select().single();
+  await sql.end();
+  return getPost(userId, postId, false);
 }
 
 /**

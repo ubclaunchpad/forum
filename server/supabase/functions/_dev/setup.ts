@@ -1,7 +1,5 @@
 import {
   NewCourse,
-  NewPost,
-  NewPostOptions,
   ProfileWithoutId,
   User,
 } from "@shared/mod.ts";
@@ -11,7 +9,7 @@ import { createCourse } from "../courses/controller/create_course_activity.ts";
 import { deleteCourse } from "../courses/controller/delete_course_activity.ts";
 import { getAllCourses } from "../courses/controller/get_all_courses_activity.ts";
 import { getAllPosts } from "../posts/controllers/helpers.ts";
-import { createPost, deletePost } from "../posts/controllers/crud.ts";
+import { createPost, deletePost, getPosts } from "../posts/controllers/crud.ts";
 import { documentHandler } from "../documents/documentController.ts";
 import { DEFAULT_FILE_MANAGER_OPTIONS, fileManager } from "../_shared/utils/fileManager.ts";
 
@@ -97,7 +95,7 @@ const postArgs = [
   },
   {
     title: "Post 2",
-    content: "This is post 2",
+    content: "this is a very long post that is more than 200 characters" + "a".repeat(200)
   },
   {
     title: "Post 3",
@@ -112,11 +110,6 @@ const postArgs = [
     content: "This is post 5",
   },
 ];
-
-const postOptions: NewPostOptions = {
-  visibility: "public",
-  usePseudonym: true,
-};
 
 /**
  * This file is used to setup the database for development purposes.
@@ -172,13 +165,27 @@ export async function setupDevSeedData() {
   console.log("Database setup complete");
 
   // create a document
-  const documentController = documentHandler();
-  const localFilePathRelative = "supabase/functions/_dev/test_data/bayou.pdf";
-  const localFilePath = Deno.cwd() + "/" + localFilePathRelative;
-  const localFile = Deno.readFileSync(localFilePath)
-  const file = new File([localFile], localFilePathRelative, { type: "application/pdf" });
-  const document = await documentController.withCourse(course1.id).createDocument({description: "Test document", file: file, createdBy: users[0].id }); 
-  console.log("Document created", document);
+  // const documentController = documentHandler();
+  // const localFilePathRelative = "supabase/functions/_dev/test_data/bayou.pdf";
+  // const localFilePath = Deno.cwd() + "/" + localFilePathRelative;
+  // const localFile = Deno.readFileSync(localFilePath)
+  // const file = new File([localFile], localFilePathRelative, { type: "application/pdf" });
+  // const document = await documentController.withCourse(course1.id).createDocument({description: "Test document", file: file, createdBy: users[0].id }); 
+  // console.log("Document created", document);
+
+  // create posts
+  const post1 = await createPost(users[0].id, {title: "Post 1", content: "This is post 1", course_id: course1.id}, {visibility: "public", usePseudonym: true});
+  console.log("Post created", post1);
+
+  const post2 = await createPost(users[0].id, {title: "Post 2", content: "This is post 2 " + "a".repeat(200) + "b".repeat(500), course_id: course1.id}, {visibility: "public", usePseudonym: true});
+  console.log("Post created", post2);
+
+  const post3 = await createPost(users[0].id, {title: "Post 3", content: "This is post 3", course_id: course1.id}, {visibility: "public", usePseudonym: true});
+  console.log("Post created", post3);
+
+  console.log("--------------------------------");
+  const listPosts = await getPosts(users[0].id, course1.id, false, false);
+  console.log("List of posts", listPosts);
 }
 
 export async function emptyDatabase() {

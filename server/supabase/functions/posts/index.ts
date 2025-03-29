@@ -1,6 +1,5 @@
 import { Context, Hono } from "jsr:@hono/hono";
 import { cors } from "jsr:@hono/hono/cors";
-import { newPostOptionsSchema, newPostSchema } from "@shared/mod.ts";
 import {
   createPost,
   deletePost,
@@ -8,12 +7,15 @@ import {
   getPosts,
   updatePost,
 } from "./controllers/crud.ts";
-import { postEditInfoSchema } from "@shared/schema/posts.ts";
 import { authMiddleware, UserVariables } from "../_shared/utils/auth.ts";
+import {
+  mutatePostOptionsSchema,
+  mutatePostPartialSchema,
+  mutatePostSchema,
+} from "@shared/mod.ts";
 
 const functionName = "posts";
 const app = new Hono().basePath(`/${functionName}`);
-
 
 app.use(
   "*",
@@ -64,6 +66,7 @@ app.get(
       const post = await getPosts(
         user.id,
         course_id,
+        false,
         enableCommentReplies,
       );
       return c.json(post);
@@ -76,26 +79,25 @@ app.get(
 // Create post
 app.post("/", async (c: Context<{ Variables: UserVariables }>) => {
   try {
-    const { postArgs, optionArgs } = await c.req.json();
+    const { post, options } = await c.req.json();
     const user = c.var.user;
 
-    const newPostArgs = newPostSchema.safeParse(postArgs);
-    const newPostOptions = newPostOptionsSchema.safeParse(optionArgs);
-
-    if (!newPostOptions.success) {
-      return c.json({ error: newPostOptions.error.message }, 400);
-    }
-
+    const newPostArgs = mutatePostSchema.safeParse(post);
     if (!newPostArgs.success) {
       return c.json({ error: newPostArgs.error.message }, 400);
     }
 
-    const post = await createPost(
+    const newPostOptions = mutatePostOptionsSchema.safeParse(options);
+    if (!newPostOptions.success) {
+      return c.json({ error: newPostOptions.error.message }, 400);
+    }
+
+    const newPost = await createPost(
       user.id,
       newPostArgs.data,
       newPostOptions.data,
     );
-    return c.json(post);
+    return c.json(newPost);
   } catch (error) {
     return c.json({ error: (error as Error).message }, 500);
   }
@@ -115,21 +117,32 @@ app.delete("/:post_id", async (c: Context<{ Variables: UserVariables }>) => {
 });
 
 // Update a post using UUID of post
-app.put("/:post_id", async (c: Context<{ Variables: UserVariables }>) => {
+app.patch("/:post_id", async (c: Context<{ Variables: UserVariables }>) => {
   try {
     const { post_id } = c.req.param();
-    const { postEditArgs } = await c.req.json();
+    const { post, options } = await c.req.json();
     const user = c.var.user;
 
-    const postEditInfo = postEditInfoSchema.safeParse(postEditArgs);
+    const postEditInfo = mutatePostPartialSchema.safeParse(post);
 
     if (!postEditInfo.success) {
       return c.json({ error: postEditInfo.error.message }, 400);
     }
 
-    await updatePost(post_id, user.id, postEditInfo.data);
+    const postEditOptions = mutatePostOptionsSchema.pick({
+      use_pseudonym: true,
+    }).safeParse(options);
+    if (!postEditOptions.success) {
+      return c.json({ error: postEditOptions.error.message }, 400);
+    }
 
-    return c.json({ "success": true });
+    const updatedPost = await updatePost(
+      post_id,
+      user.id,
+      postEditInfo.data,
+      postEditOptions.data,
+    );
+    return c.json(updatedPost);
   } catch (error) {
     return c.json({ error: (error as Error).message }, 500);
   }
