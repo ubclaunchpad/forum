@@ -1,9 +1,15 @@
-import { NewCourse, NewPost, ProfileWithoutId, User } from "@shared/mod.ts";
+import {
+  NewCourse,
+  ProfileWithoutId,
+  User,
+} from "@shared/mod.ts";
 import { userController } from "../users/controller.ts";
 import { getSupabaseClient, supa } from "../_shared/db.ts";
 import { createCourse } from "../courses/controller/create_course_activity.ts";
 import { deleteCourse } from "../courses/controller/delete_course_activity.ts";
 import { getAllCourses } from "../courses/controller/get_all_courses_activity.ts";
+import { getAllPosts } from "../posts/controllers/helpers.ts";
+import { createPost, deletePost, getPosts } from "../posts/controllers/crud.ts";
 import { documentHandler } from "../documents/documentController.ts";
 import { DEFAULT_FILE_MANAGER_OPTIONS, fileManager } from "../_shared/utils/fileManager.ts";
 import { createPost } from "../posts/controllers/crud.ts";
@@ -83,17 +89,26 @@ const courses: NewCourse[] = [
   },
 ];
 
-const posts: Omit<NewPost, "course_id">[] = [
+const postArgs = [
   {
     title: "Post 1",
-    content: "Post 1 content",
-    status: "published",
-
+    content: "This is post 1",
   },
   {
     title: "Post 2",
-    content: "Post 2 content",
-    status: "published",
+    content: "this is a very long post that is more than 200 characters" + "a".repeat(200)
+  },
+  {
+    title: "Post 3",
+    content: "This is post 3",
+  },
+  {
+    title: "Post 4",
+    content: "This is post 4",
+  },
+  {
+    title: "Post 5",
+    content: "This is post 5",
   },
 ];
 
@@ -151,30 +166,27 @@ export async function setupDevSeedData() {
   console.log("Database setup complete");
 
   // create a document
-  const documentController = documentHandler();
-  const localFilePathRelative = "supabase/functions/_dev/test_data/bayou.pdf";
-  const localFilePath = Deno.cwd() + "/" + localFilePathRelative;
-  const localFile = Deno.readFileSync(localFilePath)
-  const file = new File([localFile], localFilePathRelative, { type: "application/pdf" });
-  const document = await documentController.withCourse(course1.id).createDocument({description: "Test document", file: file, createdBy: users[0].id }); 
-  console.log("Document created", document);
+  // const documentController = documentHandler();
+  // const localFilePathRelative = "supabase/functions/_dev/test_data/bayou.pdf";
+  // const localFilePath = Deno.cwd() + "/" + localFilePathRelative;
+  // const localFile = Deno.readFileSync(localFilePath)
+  // const file = new File([localFile], localFilePathRelative, { type: "application/pdf" });
+  // const document = await documentController.withCourse(course1.id).createDocument({description: "Test document", file: file, createdBy: users[0].id }); 
+  // console.log("Document created", document);
 
   // create posts
-  const post1 = await createPost(users[0].id, {
-    ...posts[0],
-    course_id: course1.id,
-  }, {
-    visibility: "public",
-    usePseudonym: false,
-  });
-  const post2 = await createPost(users[0].id, {
-    ...posts[1],
-    course_id: course1.id,
-  }, {
-    visibility: "public",
-    usePseudonym: false,
-  });
-  console.log("Posts created", post1, post2);
+  const post1 = await createPost(users[0].id, {title: "Post 1", content: "This is post 1", course_id: course1.id}, {visibility: "public", usePseudonym: true});
+  console.log("Post created", post1);
+
+  const post2 = await createPost(users[0].id, {title: "Post 2", content: "This is post 2 " + "a".repeat(200) + "b".repeat(500), course_id: course1.id}, {visibility: "public", usePseudonym: true});
+  console.log("Post created", post2);
+
+  const post3 = await createPost(users[0].id, {title: "Post 3", content: "This is post 3", course_id: course1.id}, {visibility: "public", usePseudonym: true});
+  console.log("Post created", post3);
+
+  console.log("--------------------------------");
+  const listPosts = await getPosts(users[0].id, course1.id, false, false);
+  console.log("List of posts", listPosts);
 }
 
 export async function emptyDatabase() {
@@ -258,6 +270,25 @@ export async function courseTestSeedSetup(
   return coursesCreated;
 }
 
+export async function postTestSeedSetup(
+  postsToCreate: NewPost[],
+  postOptions: NewPostOptions,
+  creatorId: string,
+) {
+  const posts = await getAllPosts();
+
+  // Assume all posts created by same profile
+  for (const post of posts) {
+    await deletePost(post.id, creatorId);
+  }
+
+  const postsCreated = [];
+  for (const post of postsToCreate) {
+    const createdPost = await createPost(creatorId, post, postOptions);
+    postsCreated.push(createdPost);
+  }
+  return postsCreated;
+}
 // emptyDatabase().then(() => {
 //   console.log("Database emptied");
 //   setupDevSeedData().then(() => {

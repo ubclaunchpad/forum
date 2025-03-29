@@ -1,6 +1,16 @@
-import { courseTestSeedSetup, userTestSeedSetup } from "../../../_dev/setup.ts";
-import { NewCourse, ProfileWithoutId } from "@shared/mod.ts";
+import {
+  courseTestSeedSetup,
+  postTestSeedSetup,
+  userTestSeedSetup,
+} from "../../../_dev/setup.ts";
+import {
+  NewCourse,
+  NewPost,
+  NewPostOptions,
+  ProfileWithoutId,
+} from "@shared/mod.ts";
 import { PSEUDONYM } from "../../../posts/controllers/helpers.ts";
+import { supa } from "../../../_shared/db.ts";
 
 /**
  * Setup function for creating temporary users, user profiles and courses for testing
@@ -22,6 +32,61 @@ export async function userCourseSeedSetup(
   );
   return { tempProfiles, tempCourses };
 }
+
+/**
+ * Setup function for creating temporary users, user profiles, courses and posts for testing
+ * @param authUsers
+ * @param profiles
+ * @param coursesToCreate
+ * @param postsToCreate
+ * @param postOptions
+ * @returns A list of profile objects, list of course objects and a list of posts
+ * NOTE: All courses and posts will be created (and hence only be accessible to) by user in tempProfiles[0]
+ */
+export async function postSeedSetup(
+  authUsers: { email: string; password: string }[],
+  profiles: ProfileWithoutId[],
+  coursesToCreate: NewCourse[],
+  postsToCreate: NewPost[],
+  postOptions: NewPostOptions,
+) {
+  const { tempProfiles, tempCourses } = await userCourseSeedSetup(
+    authUsers,
+    profiles,
+    coursesToCreate,
+  );
+
+  for (const post of postsToCreate) {
+    post.course_id = tempCourses[0].id;
+  }
+
+  const tempPosts = await postTestSeedSetup(
+    postsToCreate,
+    postOptions,
+    tempProfiles[0].id,
+  );
+
+  console.log("tempPosts", tempPosts);
+
+  return { tempProfiles, tempCourses, tempPosts };
+}
+
+export const clearUsers = async () => {
+  const users = await supa.auth.admin.listUsers();
+  for (const user of users.data.users) {
+    await supa.auth.admin.deleteUser(user.id);
+  }
+  const checkUsers = await supa.auth.admin.listUsers();
+  console.log("checkUsers", checkUsers);
+};
+
+export const clearUsersAndCourses = async () => {
+  const users = await supa.auth.admin.listUsers();
+  for (const user of users.data.users) {
+    await supa.auth.admin.deleteUser(user.id);
+  }
+  await supa.from("courses").delete().not("id", "is", null);
+};
 
 /**
  * Checks if given string is a possible pseudonym

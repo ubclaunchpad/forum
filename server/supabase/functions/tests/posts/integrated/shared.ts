@@ -1,5 +1,9 @@
-import { NewCourse, ProfileWithoutId } from "@shared/mod.ts";
-import { supa } from "../../../../_shared/db.ts";
+import {
+  NewCourse,
+  NewPost,
+  NewPostOptions,
+  ProfileWithoutId,
+} from "@shared/mod.ts";
 
 export const authUsers = [
   {
@@ -66,19 +70,30 @@ export const coursesToCreate: NewCourse[] = [
   },
 ];
 
-export const beforeEachFunc = async () => {
-  const users = await supa.auth.admin.listUsers();
-  for (const user of users.data.users) {
-    await supa.auth.admin.deleteUser(user.id);
-  }
-  const checkUsers = await supa.auth.admin.listUsers();
-  console.log("checkUsers", checkUsers);
-};
+export const postsToCreate: NewPost[] = [
+  {
+    title: "Test Post",
+    content: "Test Content",
+    course_id: "",
+  },
+  {
+    title: "Test Post 2",
+    content: "Test Content 2",
+    course_id: "",
+  },
+  {
+    title: "Test Post 3",
+    content: "Test Content 3",
+    course_id: "",
+  },
+  {
+    title: "Test Post 4",
+    content: "Test Content 4",
+    course_id: "",
+  },
+];
 
-export const afterEachFunc = async () => {
-  const users = await supa.auth.admin.listUsers();
-  for (const user of users.data.users) {
-    await supa.auth.admin.deleteUser(user.id);
-  }
-  await supa.from("courses").delete().not("id", "is", null);
+export const postOptions: NewPostOptions = {
+  visibility: "public",
+  usePseudonym: true,
 };
