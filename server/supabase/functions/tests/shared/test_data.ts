@@ -97,5 +97,5 @@ export const newPost = {
 
 export const newPostOptions = {
     visibility: "public",
-    usePseudonym: true,
+    use_pseudonym: true,
 };

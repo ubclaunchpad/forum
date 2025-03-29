@@ -43,9 +43,8 @@ describe("Get Post Permissions tests", () => {
 
     beforeAll(async () => {
         await supa.from("tags").delete().not('id', 'is', 0);
-        const {data,error} = await supa.from("courses").delete().not('id', 'is', null);
-        console.log(data);
-        console.log(error);
+        await supa.from("posts").delete().not('id', 'is', 0);
+        await supa.from("courses").delete().not('id', 'is', null);
         await supa.from("course_roles").delete().not('id', 'is', null);
         await supa.from("course_members").delete().not('id', 'is', null);
         const users = await supa.auth.admin.listUsers();
@@ -80,11 +79,12 @@ describe("Get Post Permissions tests", () => {
 
         const newPostData = { ...newPost, course_id: courseId};
         const post = await postController.createPost(user1Id, newPostData, newPostOptions);
-        postId = post.post_id;
+        postId = post.id;
     });
 
     afterEach(async () => {
         await supa.from("tags").delete().not('id', 'is', null);
+        await supa.from("posts").delete().not('id', 'is', null);
         await supa.from("courses").delete().not('id', 'is', null);
         await supa.from("course_roles").delete().not('course_id', 'is', null);
         await supa.from("course_members").delete().not('course_id', 'is', null);
@@ -124,7 +124,7 @@ describe("Get Post Permissions tests", () => {
         assertEquals(postPerms.can_delete_post["student"], false); // tag1 disallows this
         assertEquals(postPerms.can_view_post["student"], false); // tag3 disallows this
         assertEquals(postPerms.can_view_post["instructor"], true); // no tag disallows this
-    })
+    });
 });
 
 function andPerms(permKey: TagPermissionsKey, role: DefaultRoles, perms: TagPermissions[]) {
