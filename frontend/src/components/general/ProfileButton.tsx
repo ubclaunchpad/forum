@@ -10,8 +10,7 @@ import {
 import { useState, useContext, Fragment } from "react";
 import { signOut } from "../course/actions";
 import Link from "next/link";
-
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import ProfileAvatarIcon from "../customIcons/profile-avatar";
 
 const LINKS = {
   FEATURE:
@@ -77,17 +76,11 @@ export function ProfileButton() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "text-neutral-500 flex p-0.5 border border-neutral-200 w-10 h-10  justify-center items-center  rounded-full bg-neutral-50 gap-2",
-          isOpen ? "shadow-lg" : "shadow-md",
+          "text-neutral-500 flex border-none w-10 h-10  justify-center items-center p-0 rounded-full bg-transparent gap-2",
+          isOpen ? "shadow-sm" : "shadow-none",
         )}
       >
-        <Avatar className="w-9 h-9">
-          <AvatarImage src={profile.avatar_url} className="object-cover" />
-          <AvatarFallback>
-            {profile.first_name[0]}
-            {profile.last_name[0]}
-          </AvatarFallback>
-        </Avatar>
+        <ProfileAvatarIcon className="w-8 h-8" />
       </button>
     </Fragment>
   );

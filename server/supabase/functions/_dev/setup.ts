@@ -1,4 +1,4 @@
-import { NewCourse, ProfileWithoutId, User } from "@shared/mod.ts";
+import { NewCourse, NewPost, ProfileWithoutId, User } from "@shared/mod.ts";
 import { userController } from "../users/controller.ts";
 import { getSupabaseClient, supa } from "../_shared/db.ts";
 import { createCourse } from "../courses/controller/create_course_activity.ts";
@@ -6,6 +6,7 @@ import { deleteCourse } from "../courses/controller/delete_course_activity.ts";
 import { getAllCourses } from "../courses/controller/get_all_courses_activity.ts";
 import { documentHandler } from "../documents/documentController.ts";
 import { DEFAULT_FILE_MANAGER_OPTIONS, fileManager } from "../_shared/utils/fileManager.ts";
+import { createPost } from "../posts/controllers/crud.ts";
 
 
 const authUsers = [
@@ -82,6 +83,20 @@ const courses: NewCourse[] = [
   },
 ];
 
+const posts: Omit<NewPost, "course_id">[] = [
+  {
+    title: "Post 1",
+    content: "Post 1 content",
+    status: "published",
+
+  },
+  {
+    title: "Post 2",
+    content: "Post 2 content",
+    status: "published",
+  },
+];
+
 /**
  * This file is used to setup the database for development purposes.
  * It is gitignored so it is not committed to the repo.
@@ -143,6 +158,23 @@ export async function setupDevSeedData() {
   const file = new File([localFile], localFilePathRelative, { type: "application/pdf" });
   const document = await documentController.withCourse(course1.id).createDocument({description: "Test document", file: file, createdBy: users[0].id }); 
   console.log("Document created", document);
+
+  // create posts
+  const post1 = await createPost(users[0].id, {
+    ...posts[0],
+    course_id: course1.id,
+  }, {
+    visibility: "public",
+    usePseudonym: false,
+  });
+  const post2 = await createPost(users[0].id, {
+    ...posts[1],
+    course_id: course1.id,
+  }, {
+    visibility: "public",
+    usePseudonym: false,
+  });
+  console.log("Posts created", post1, post2);
 }
 
 export async function emptyDatabase() {

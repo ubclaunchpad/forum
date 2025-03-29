@@ -1,20 +1,21 @@
-import { Post, PostType, PostWithRequiredId } from "@/lib/types/posts";
+import { PostType, PostWithRequiredId } from "@/lib/types/posts";
 import { Suspense, useContext, useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { getApiUrl } from "@/utils/helpers";
 import { useToast } from "@/hooks/use-toast";
 import { userContext } from "@/providers/userContext";
-import { ArrowRightFromLine, DotIcon } from "lucide-react";
+import { ArrowRightFromLine, DotIcon, MessageSquareReplyIcon } from "lucide-react";
 import { getRelativeTimeString, isIDTemporary } from "@/lib/utils";
 import { forumPostsContext } from "@/providers/PostsContext";
 import PostTextEditor from "./PostTextEditor";
-import PostEmbeddingPopoverChip from "./PostEmbeddingPopoverChip";
 import { useCourseStore } from "@/providers/courseStoreProvider";
+import { PostResponse } from "@forum/shared";
+import Link from "next/link";
 
 export default function PostView<T extends PostType>({
   post,
 }: {
-  post: T extends "draft" ? PostWithRequiredId : Post;
+  post: T extends "draft" ? PostResponse : PostResponse;
 }) {
   const {
     setListOfPosts,
@@ -116,7 +117,7 @@ export default function PostView<T extends PostType>({
       post_id: post.id,
       title: title,
       new_content: content,
-      edit_reason: "Post edited",
+      userVisibility: "public",
     };
 
     if (isTemporary) {
@@ -190,33 +191,31 @@ export default function PostView<T extends PostType>({
 
   return (
     <div
-      className={`flex justify-center flex-1 lg:border-l  flex-shrink-0 w-full transition-all duration-300 ${selectedPost ? "border-neutral-200" : "border-neutral-200"}`}
+      className={`flex justify-center pb-10 flex-1 h-full lg:border-l px-4 overflow-auto  shrink-0 w-full transition-all duration-300 ${selectedPost ? "border-neutral-200" : "border-neutral-200"}`}
     >
-      <div className="flex-1 relative flex flex-col overflow-auto p-4 pt-0 ">
-        <div className=" w-full h-16   flex-shrink-0 px-2 flex items-center  gap-2">
+      <div className="flex-1 relative flex flex-col p-4 pt-0 ">
+        <div className=" w-full h-16   shrink-0 px-2 flex items-center  gap-2">
           <div className="flex  item-center gap-6 flex-1 text-primary-700 ">
-            <Button
+            <Link
+              href={`/forum/courses/${course.id}/forum`}
               className="p-0"
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedPost(null)}
             >
               <ArrowRightFromLine className="min-w-5 min-h-5 " />
-            </Button>
+            </Link>
           </div>
           <div className="flex justify-end item-center gap-0.5 text-neutral-700 flex-1">
             {isTemporary ? (
               <></>
             ) : (
               <>
-                <h2 className=" font-medium text-sm ">Post #{post.local_id}</h2>
+                <h2 className=" font-medium text-sm ">Post #{post.number_id}</h2>
                 <span>
                   <DotIcon className="opacity-50 min-w-5 min-h-5 " />
                 </span>
                 <h2 className=" font-medium text-sm ">
-                  {post.applied_at &&
+                  {post.updatedAt &&
                     getRelativeTimeString(
-                      new Date(post.applied_at).getTime(),
+                      new Date(post.updatedAt).getTime(),
                       "en",
                       30,
                     )}
@@ -229,6 +228,7 @@ export default function PostView<T extends PostType>({
         {isSaving && <div className="shimmer-reverse"></div>}
         <Suspense fallback={null}>
           <PostTextEditor
+          readonly={true}
             post={post}
             title={title}
             content={content}
@@ -237,11 +237,12 @@ export default function PostView<T extends PostType>({
             handleSave={handleSaveAction}
           />
         </Suspense>
-        {!isTemporary && (
-          <div className="flex w-full justify-end p-2">
-            <PostEmbeddingPopoverChip post={post as Post} />
-          </div>
-        )}
+        <div className="flex justify-center items-center h-16 shrink-0 border-b py-2 w-full gap-2">
+          <Button variant="outline" size="sm">  
+            <MessageSquareReplyIcon className="min-w-5 min-h-5" />
+            Reply
+          </Button>
+        </div>
       </div>
     </div>
   );

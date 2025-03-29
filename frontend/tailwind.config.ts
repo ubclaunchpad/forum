@@ -101,6 +101,8 @@ const config: Config = {
           800: "var(--primary-800)",
           900: "var(--primary-900)",
           950: "var(--primary-950)",
+          border: "var(--primary-border)",
+          muted: "var(--primary-border)",
         },
         neutral: {
           50: "var(--neutral-50)",

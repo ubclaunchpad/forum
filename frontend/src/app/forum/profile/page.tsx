@@ -16,7 +16,7 @@ export default function ProfilePage() {
               router.push("/forum");
             }
           }}
-          className="flex items-center gap-2 text-primary-600 flex-shrink-0"
+          className="flex items-center gap-2 text-primary-600 shrink-0"
         >
           <ArrowLeftCircleIcon className="w-6 h-6" />
         </button>

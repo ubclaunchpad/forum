@@ -18,8 +18,8 @@ import { DeleteIcon, LinkIcon, MoreHorizontal, ThumbsUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { userContext } from "@/providers/userContext";
 import { getApiUrl } from "@/utils/helpers";
-import { forumPostsContext } from "@/providers/PostsContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
+import Link from "next/link";
 
 type PostCardProps<T extends PostType> = {
   post: T extends "draft" ? PostWithRequiredId : Post;
@@ -30,12 +30,10 @@ export const PostCard = <T extends PostType>({
   post,
   isSelected,
 }: PostCardProps<T>) => {
-  const { setListOfPosts, setSelectedPost, isEditing } =
-    useContext(forumPostsContext);
 
   const user = useContext(userContext);
   const course = useCourseStore((state) => state.course);
-  const { updatePost } = useContext(forumPostsContext);
+  // const { updatePost } = useContext(forumPostsContext);
   const { toast } = useToast();
   const postType = getIdType(post.id);
   const handleMoreClick = (e: React.MouseEvent) => {
@@ -86,27 +84,27 @@ export const PostCard = <T extends PostType>({
     method: string,
     endpoint: string,
   ) {
-    const response = await fetch(
-      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/${endpoint}`,
-      {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-      },
-    );
-    fetch("/api/revalidate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ courseId: course.id }),
-    });
+    // const response = await fetch(
+    //   `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/${endpoint}`,
+    //   {
+    //     method: method,
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       Authorization: `Bearer ${user.token}`,
+    //     },
+    //   },
+    // );
+    // fetch("/api/revalidate", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({ courseId: course.id }),
+    // });
 
-    if (!response.ok) {
-      throw new Error(`Failed to mark post as unliked`);
-    }
+    // if (!response.ok) {
+    //   throw new Error(`Failed to mark post as unliked`);
+    // }
   }
 
   const handleLikeClick = async (post: Post, addLike: boolean) => {
@@ -187,23 +185,15 @@ export const PostCard = <T extends PostType>({
   };
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={(e) => {
-        const container = e.currentTarget.closest('[class*="overflow-y-auto"]');
-        if (container instanceof HTMLElement) {
-          sessionStorage.setItem("forumlist", container.scrollTop.toString());
-        }
-        handleView(post as Post);
-        setSelectedPost(post);
-      }}
+    <Link
+      href={`/forum/courses/${course.id}/forum/${post.id}`}
+      shallow={true}
       className={cn(
-        "text-left relative border transition-all duration-500   rounded-lg flex flex-col w-full",
+        "text-left relative border transition-all duration-1000   rounded-lg flex flex-col w-full",
         isSelected
-          ? "bg-primary-50 border-primary-200 shadow-sm shadow-primary-200"
+          ? "bg-primary-50 border-primary-200 shadow-xs shadow-primary-200"
           : "border-neutral-200 bg-white",
-        isPendingId(post.id) || isEditing === post.id
+        isPendingId(post.id) || false === post.id
           ? "cursor-wait border-dashed border-neutral-200 bg-neutral-100"
           : "cursor-pointer",
       )}
@@ -220,7 +210,7 @@ export const PostCard = <T extends PostType>({
         </p>
 
         {/* Right-aligned container for time and "Not Viewed" indicator */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {post.applied_at && (
             <h2 className="font-medium text-xs whitespace-nowrap">
               {getRelativeTimeString(
@@ -239,7 +229,7 @@ export const PostCard = <T extends PostType>({
 
       <section className="max-h-40 overflow-hidden px-4">
         <p className="text-xs py-2  text-wrap text-neutral-500 select-none line-clamp-4 break-words">
-          {isEditing === post.id
+          {false === post.id
             ? "Editing..."
             : removeMarkdown((post.content ?? "").trim().slice(0, 200) + "...")}
         </p>
@@ -279,7 +269,7 @@ export const PostCard = <T extends PostType>({
               align="start"
               alignOffset={-10}
               sideOffset={20}
-              className=" bg-white border  w-fit p-0 border-neutral-200 rounded-lg shadow-sm"
+              className=" bg-white border  w-fit p-0 border-neutral-200 rounded-lg shadow-xs"
             >
               <ul className="flex p-0 flex-col text-neutral-700 w-full ">
                 {post.id && !isPendingId(post.id) && (
@@ -317,7 +307,7 @@ export const PostCard = <T extends PostType>({
               <button
                 type="button"
                 onClick={handleMoreClick}
-                className="focus:outline-none"
+                className="focus:outline-hidden"
               >
                 <MoreHorizontal className="h-5 w-5 opacity-70" />
               </button>
@@ -325,6 +315,6 @@ export const PostCard = <T extends PostType>({
           </Popover>
         </div>
       )}
-    </div>
+    </Link>
   );
 };

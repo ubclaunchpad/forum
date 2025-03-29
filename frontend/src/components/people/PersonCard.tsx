@@ -44,14 +44,14 @@ export const PersonCard = ({
       className={cn(
         "text-left relative border transition-all duration-500   rounded-lg flex flex-col w-full",
         isSelected
-          ? "bg-primary-50 border-primary-200 shadow-sm shadow-primary-200"
+          ? "bg-primary-50 border-primary-200 shadow-xs shadow-primary-200"
           : "border-neutral-200 bg-white",
       )}
     >
       <div className="flex items-center  p-2 px-4 w-full gap-4 pb-2">
         <div
           className={cn(
-            "w-12 h-12  relative overflow-hidden flex items-center justify-center flex-shrink-0 text-neutral-300 bg-neutral-50  rounded-full",
+            "w-12 h-12  relative overflow-hidden flex items-center justify-center shrink-0 text-neutral-300 bg-neutral-50  rounded-full",
             isSelected
               ? "border-primary-200  text-primary-200"
               : "border-neutral-200",
@@ -69,10 +69,10 @@ export const PersonCard = ({
           <p className="text-sm font-semibold">{getDisplayname(profile)}</p>
           <p className="text-sm font-medium">{profile.email}</p>
 
-          <p className=" font-medium text-xs flex-shrink-0 ">
+          <p className=" font-medium text-xs shrink-0 ">
             {profile.pronouns && profile.pronouns}
           </p>
-          <p className=" font-medium text-xs flex-shrink-0 ">
+          <p className=" font-medium text-xs shrink-0 ">
             {profile.status && profile.status}
           </p>
         </div>

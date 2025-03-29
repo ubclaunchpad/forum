@@ -11,13 +11,20 @@ import { getApiUrl } from "@/utils/helpers";
 import { useRouter } from "next/navigation";
 import { ProfileButton } from "../general/ProfileButton";
 import { Searcher } from "../search/searcher";
+import DoubleAngleDownIcon from "../customIcons/double-angle-down";
+import NotificationIcon from "../customIcons/notification-icon";
 export function CourseTopbar() {
   return (
-    <div className="flex flex-shrink-0  relative justify-between w-full items-center py-2 px-2">
+    <div className="flex shrink-0  relative justify-between w-full items-center py-2 px-2">
       <CourseButton />
       <div className="flex flex-1 gap-2 justify-end">
         <Searcher />
-        <ProfileButton />
+        <div className="flex items-center gap-4">
+          <button className="text-neutral-500 hover:border hover:border-neutral-200 flex border-none w-10 h-10  justify-center items-center p-0 rounded-full bg-transparent gap-2">
+            <NotificationIcon className="w-6 h-6" />
+          </button>
+          <ProfileButton />
+        </div>
       </div>
     </div>
   );
@@ -26,7 +33,7 @@ export function CourseTopbar() {
 function CourseButton() {
   const [isOpen, setIsOpen] = useState(false);
   const course = useCourseStore((state) => state.course);
-  const { user, token, profile } = useContext(userContext);
+  const { user, token } = useContext(userContext);
   const courseName = `${course.department} ${course.code} ${course.name}`;
   const router = useRouter();
 
@@ -87,16 +94,17 @@ function CourseButton() {
       <div className={cn("relative", isOpen ? "z-20" : "")}>
         <Button
           variant="outline"
-          size="md"
+          size="lg"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "border-neutral-200 border h-10 px-4 text-neutral-600 text-left overflow-hidden transition-all",
-            isOpen ? "shadow-lg max-w-none" : "shadow-sm max-w-[28rem]",
+            " border font-medium   border-primary-border bg-white shadow-xs max-h-10 px-4 text-neutral-600 text-left overflow-hidden transition-all",
+            isOpen ? "shadow-md max-w-none" : "max-w-[20rem]",
           )}
         >
           <span className={cn("block", isOpen ? "" : "truncate")}>
             {courseName}
           </span>
+          <DoubleAngleDownIcon className="min-w-5 min-h-5" />
         </Button>
       </div>
     </Fragment>

@@ -19,7 +19,7 @@ export function Header() {
   }, [darkMode]);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xs">
       <div className="container mx-auto flex h-14 items-center">
         <Link
           href="/"

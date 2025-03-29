@@ -1,12 +1,11 @@
 "use client";
 
 import { Post, PostWithRequiredId } from "@/lib/types/posts";
-import { useContext } from "react";
 import EditorComponent from "../general/EditorComponent";
 import { Button } from "../ui/button";
 import { cn, isIDTemporary } from "@/lib/utils";
-import { forumPostsContext } from "@/providers/PostsContext";
 import { CheckIcon, PencilIcon, XIcon } from "lucide-react";
+import { useState } from "react";
 
 type PostTextEditorProps = {
   post: Post | PostWithRequiredId;
@@ -30,9 +29,8 @@ export default function PostTextEditor({
   readonly = false,
   showTitle = true,
 }: PostTextEditorProps) {
-  const { isEditing, setIsEditing } = useContext(forumPostsContext);
   const isTemporary = isIDTemporary(post?.id);
-
+  const [isEditing, setIsEditing] = useState(false);
   if (!post || post === null) {
     return <></>;
   }
@@ -45,9 +43,9 @@ export default function PostTextEditor({
   }
 
   return (
-    <div className="flex flex-col relative  bg-white rounded-xl border border-primary-50 h-fit overflow-auto h-full  w-full pb-4  gap-4 items-center ">
+    <div className="flex flex-col relative  bg-white rounded-xl border border-[#BDCFCC]     w-full pb-4  gap-4 items-center ">
       <div className=" w-full pt-2  justify-center flex items-center ">
-        <div className="flex-col w-full flex px-4 items-center  gap-1">
+        <div className="flex-col w-full flex px-4  pt-4 items-center  gap-1">
           {!readonly && (
             <div className="flex-1 w-full   top-0 right-0 m-2 flex justify-end gap-2">
               {isEditing ? (
@@ -99,7 +97,7 @@ export default function PostTextEditor({
             (isEditing === post.id ? (
               <input
                 className={cn(
-                  "w-full p-2 max-w-4xl rounded-lg outline-none font-semibold text-lg text-primary-600 bg-neutral-50",
+                  "w-full p-2 max-w-4xl rounded-lg outline-hidden font-semibold text-lg text-primary-600 bg-neutral-50",
                 )}
                 placeholder="Post Title"
                 value={title}
@@ -112,7 +110,7 @@ export default function PostTextEditor({
             ))}
         </div>
       </div>
-      <div className="flex max-w-4xl  flex-1 p-2 px-6  w-full flex-col gap-2">
+      <div className="flex max-w-4xl overflow-hidden flex-1 p-2 px-4 pt-0 mt-0 w-full flex-col gap-2">
         <EditorComponent
           markdown={content ?? ""}
           onMarkdownChange={setContent}

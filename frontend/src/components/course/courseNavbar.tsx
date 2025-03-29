@@ -56,7 +56,7 @@ export default function CourseNavbar() {
   }, [tab]);
 
   return (
-    <div className="flex flex-shrink-0 justify-between items-center w-full border-b  px-2 border-b-neutral-200">
+    <div className="flex shrink-0 justify-between items-center w-full border-b  px-2 border-b-neutral-200">
       <div className="flex relative gap-6">
         <div
           ref={sliderRef}

@@ -61,6 +61,7 @@ export default async function CoursePage({
     course: course,
     pendingCourse: course,
     tags: [],
+    posts: [],
   };
 
   return (

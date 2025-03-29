@@ -3,13 +3,15 @@ import DocumentOptionsPopover from "../course/documents/DocumentOptionsPopover";
 import { GetDocument } from "@forum/shared";
 import { FileText } from "lucide-react";
 import PDFIcon from "../customIcons/PDFIcon";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
 
-const getFileIcon = (fileType: string) => {
+const getFileIcon = (fileType: string, className?: string) => {
   switch (fileType) {
     case "application/pdf":
-      return <PDFIcon className="h-8 w-8 text-primary-600" />;
+      return <PDFIcon className={cn("h-8 w-8 text-primary-600", className)} />;
     default:
-      return <FileText className="h-4 w-4" />;
+      return <FileText className={cn("h-4 w-4", className)} />;
   }
 };
 export default function DocumentRow({
@@ -26,58 +28,56 @@ export default function DocumentRow({
   setDocuments: React.Dispatch<React.SetStateAction<GetDocument[]>>;
 }) {
   return (
-    <div
-      role="button"
+    <Button
       tabIndex={0}
+      size={"sm"}
       onClick={onClick}
       className={cn(
-        "text-left border transition-all duration-500 rounded-lg w-full relative overflow-hidden",
-        "flex items-center",
+        "text-left border transition-all py-8 duration-500 rounded-md shadow-xs hover:bg-primary/10  w-full relative overflow-hidden",
+        "flex flex-col w-full items-center",
         isSelected
-          ? "bg-primary-50 border-primary-200 shadow-sm shadow-primary-200"
+          ? "bg-primary-50 border-primary-200 shadow-xs shadow-primary-200"
           : "border-neutral-200 bg-white",
         disabled
           ? "cursor-wait border-dashed border-neutral-200 bg-neutral-100"
           : "cursor-pointer",
       )}
     >
-      {/* Main content container */}
-      <div className="flex flex-1 p-1 px-2 items-center min-w-0">
-        {/* Icon container */}
+      <div className="flex flex-1 w-full items-center min-w-0">
         <div
           className={cn(
-            "flex items-center justify-center   flex-shrink-0",
+            "flex items-center justify-center h-10  p-0 w-10 shrink-0",
             isSelected ? "bg-inherit border-primary-100 text-primary-400" : "",
           )}
         >
-          {getFileIcon(document.file?.type)}
+          {getFileIcon(document.file?.type, "min-w-8 min-h-8")}
         </div>
         {/* Text content container */}
-        <div className="flex flex-col min-w-0 flex-1 px-2">
+        <div className="flex flex-col min-w-0 flex-1 justify-start   px-2">
           <span
             className={cn(
-              "truncate",
+              "truncate text-sm",
               isSelected ? "text-primary-700" : "text-neutral-800",
             )}
           >
             {document.file.name}
           </span>
-          {document.description && (
-            <p className="text-sm text-neutral-500 truncate">
-              {document.description}
+         
+            <p className="text-xs text-neutral-500 flex-shrink-0   truncate">
+              {document.description? document.description : "no description"}
             </p>
-          )}
+      
         </div>
       </div>
 
-      <DocumentOptionsPopover document={document} setDocuments={setDocuments} />
+      {/* <DocumentOptionsPopover document={document} setDocuments={setDocuments} /> */}
 
       {/* Loading overlay */}
       {disabled && (
         <div className="absolute inset-0 animate-[shimmer_2s_infinite]">
-          <div className="w-1/2 h-full bg-gradient-to-r from-transparent via-primary-500/10 to-transparent" />
+          <div className="w-1/2 h-full bg-linear-to-r from-transparent via-primary-500/10 to-transparent" />
         </div>
       )}
-    </div>
+    </Button>
   );
 }
