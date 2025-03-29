@@ -83,7 +83,8 @@ CREATE TABLE post_authors (
     is_anonymous BOOLEAN NOT NULL DEFAULT FALSE,
     visibility TEXT NOT NULL DEFAULT 'everyone', -- everyone, all_members, only_instructors, anonymous
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE SET NULL
+    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE SET NULL,
+    UNIQUE (post_id, user_id, comment_id, reply_id)
 );
 
 CREATE INDEX post_authors_post_id_idx ON post_authors (post_id);

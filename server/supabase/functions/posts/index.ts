@@ -12,10 +12,12 @@ import {
   mutatePostOptionsSchema,
   mutatePostPartialSchema,
   mutatePostSchema,
+  z,
 } from "@shared/mod.ts";
-import { getUserPermissionsInCourse, isUserMemberOfCourse, isUserPostAuthor } from "../_shared/utils/permission_manager.ts";
+import { getUserPermissionsInCourse, isUserMemberOfCourse, isUserPostAuthor, isUserReplyAuthor } from "../_shared/utils/permission_manager.ts";
 import { postTagController } from "./controllers/tags.ts";
 import { NotFoundError, PermissionError } from "../_shared/errors.ts";
+import { postCommentReplyController } from "./controllers/replies.ts";
 
 const functionName = "posts";
 const app = new Hono().basePath(`/${functionName}`);
@@ -225,7 +227,138 @@ app.get("/:course_id/:post_id/tags", async (c: Context<{ Variables: UserVariable
     }
     return c.json({ error: "Internal server error" }, 500);
   }
-})
+});
+
+// Create reply
+app.post("/reply/:comment_id", async (c: Context<{ Variables: UserVariables }>) => {
+  try {
+    const { comment_id } = c.req.param();
+    const { reply_content, options, course_id_data } = await c.req.json();
+    const user = c.var.user;
+
+    const content = z.string().safeParse(reply_content);
+    if (!content.success) {
+      return c.json({ error: content.error.message }, 400);
+    }
+    const mutatePostOptions = mutatePostOptionsSchema.safeParse(options);
+    if (!mutatePostOptions.success) {
+      return c.json({ error: mutatePostOptions.error.message }, 400);
+    }
+    const course_id_parsed = z.string().uuid().safeParse(course_id_data);
+    if (!course_id_parsed.success) {
+      return c.json({ error: course_id_parsed.error.message }, 400);
+    }
+    const course_id = course_id_parsed.data;
+  
+    const userPermissions = await getUserPermissionsInCourse(user.id, course_id);
+    if (!userPermissions.can_create_post) {
+      return c.json({ error: "User does not have permission to create reply" }, 401);
+    }
+
+    const reply = await postCommentReplyController.createReply(user.id, comment_id, content.data, mutatePostOptions.data);
+    return c.json({ reply: reply }, 200);
+  } catch(error) {
+    console.error(error);
+    if (error instanceof NotFoundError) {
+      return c.json({ error: error.message }, 404);
+    }
+    if (error instanceof PermissionError) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+// Delete reply
+app.delete("/:course_id/reply/:reply_id", async (c: Context<{ Variables: UserVariables }>) => {
+  try {
+    const { course_id, reply_id } = c.req.param();
+    const user = c.var.user;
+
+    const userPermissions = await getUserPermissionsInCourse(user.id, course_id);
+    const replyOwner = await isUserReplyAuthor(user.id, reply_id) ? "own" : "others"; 
+    if (!userPermissions.can_delete_posts[replyOwner]) {
+      return c.json({ error: "User does not have permission to delete reply" }, 401);
+    }
+
+    await postCommentReplyController.deleteReply(reply_id);
+    return c.json(200);
+  } catch(error) {
+    console.error(error);
+    if (error instanceof NotFoundError) {
+      return c.json({ error: error.message }, 404);
+    }
+    if (error instanceof PermissionError) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+// Update reply
+app.patch("/reply/:reply_id", async (c: Context<{ Variables: UserVariables }>) => {
+  try {
+    const { reply_id } = c.req.param();
+    const { reply_content, options, course_id_data } = await c.req.json();
+    const user = c.var.user;
+
+    const content = z.string().safeParse(reply_content);
+    if (!content.success) {
+      return c.json({ error: content.error.message }, 400);
+    }
+    const mutatePostOptions = mutatePostOptionsSchema.safeParse(options);
+    if (!mutatePostOptions.success) {
+      return c.json({ error: mutatePostOptions.error.message }, 400);
+    }
+    const course_id_parsed = z.string().uuid().safeParse(course_id_data);
+    if (!course_id_parsed.success) {
+      return c.json({ error: course_id_parsed.error.message }, 400);
+    }
+    const course_id = course_id_parsed.data;
+  
+    const userPermissions = await getUserPermissionsInCourse(user.id, course_id);
+    const replyOwner = await isUserReplyAuthor(user.id, reply_id) ? "own" : "others"; 
+    if (!userPermissions.can_edit_post[replyOwner]) {
+      return c.json({ error: "User does not have permission to update reply" }, 401);
+    }
+
+    const reply = await postCommentReplyController.updateReply(reply_id, user.id, content.data, mutatePostOptions.data);
+    return c.json({ reply: reply }, 200);
+  } catch(error) {
+    console.error(error);
+    if (error instanceof NotFoundError) {
+      return c.json({ error: error.message }, 404);
+    }
+    if (error instanceof PermissionError) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+// Get reply
+app.get("/:course_id/reply/:reply_id", async (c: Context<{ Variables: UserVariables }>) => {
+  try {
+    const { course_id, reply_id } = c.req.param();
+    const user = c.var.user;
+    
+    if (!await isUserMemberOfCourse(user.id, course_id)) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const reply = await postCommentReplyController.getReply(reply_id);
+    return c.json({ reply: reply }, 200);
+  } catch(error) {
+    console.error(error);
+    if (error instanceof NotFoundError) {
+      return c.json({ error: error.message }, 404);
+    }
+    if (error instanceof PermissionError) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
 
 export { app };
 
