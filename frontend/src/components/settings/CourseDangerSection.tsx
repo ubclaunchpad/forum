@@ -3,7 +3,7 @@
 import { SettingsSubSection } from "@/components/settings/SettingsTitleHeader";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { getApiUrl } from "@/utils/helpers";
 import { useContext, useState } from "react";
 import {

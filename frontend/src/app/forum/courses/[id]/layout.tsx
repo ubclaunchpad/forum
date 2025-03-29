@@ -1,10 +1,10 @@
 import ClientWrapper from "./(core)/resources/wrapper";
 import { getApiUrl } from "@/utils/helpers";
-import { Course } from "@/lib/types/course";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { CourseStoreProvider } from "@/providers/courseStoreProvider";
-// import { getTags } from "@/lib/fetchers/tags";
+import { Course } from "@forum/shared";
+import { SearchStoreProvider } from "@/providers/searchStoreProvider";
 
 async function getCourse(id: string, token: string) {
   try {
@@ -24,7 +24,10 @@ async function getCourse(id: string, token: string) {
     }
 
     const body = await res.json();
-    return body as Course;
+    if (body.course) {
+      return body.course as Course;
+    }
+    return null;
   } catch (e) {
     console.error("Error fetching course:", e);
     return null;
@@ -62,9 +65,11 @@ export default async function CoursePage({
 
   return (
     <CourseStoreProvider initState={store}>
-      <div className="course flex flex-col h-dvh w-dvw overflow-hidden">
-        <ClientWrapper>{children}</ClientWrapper>
-      </div>
+      <SearchStoreProvider>
+        <div className="course flex flex-col h-dvh w-dvw bg-[#FBFAF9]">
+          <ClientWrapper>{children}</ClientWrapper>
+        </div>
+      </SearchStoreProvider>
     </CourseStoreProvider>
   );
 }

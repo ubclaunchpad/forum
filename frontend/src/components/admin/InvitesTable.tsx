@@ -6,7 +6,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useContext, useState } from "react";
 import { ArrowRightIcon, Plus } from "lucide-react";
 import { getApiUrl } from "@/utils/helpers";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import InvitedUserModal from "./invitedUserModal";
 import { Button } from "@/components/ui/button";
 import InviteModal from "./InviteModal";

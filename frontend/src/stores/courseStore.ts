@@ -1,4 +1,5 @@
-import { Course, coursePartialUpdateSchema } from "@/lib/types/course";
+// import {  coursePartialUpdateSchema } from "@/lib/types/course";
+import { Course } from "@forum/shared";
 import { Tag } from "@/lib/types/tags";
 import { createStore } from "zustand";
 
@@ -23,15 +24,15 @@ export const createCourseStore = (initState: CourseState) => {
     pendingCourse: initState.course,
     updatePendingCourse: (courseDetails: Partial<Course>) =>
       set((state) => {
-        const result = coursePartialUpdateSchema.safeParse(courseDetails);
+        // // const result = coursePartialUpdateSchema.safeParse(courseDetails);
 
-        if (!result.success) {
-          console.error("Invalid course update:", result.error);
-          return { pendingCourse: state.pendingCourse };
-        }
+        // if (!result.success) {
+        //   console.error("Invalid course update:", result.error);
+        //   return { pendingCourse: state.pendingCourse };
+        // }
 
         return {
-          pendingCourse: { ...state.pendingCourse, ...result.data },
+          // pendingCourse: { ...state.pendingCourse, ...result.data },
         };
       }),
     resetPendingChanges: () =>

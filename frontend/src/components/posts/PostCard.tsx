@@ -16,9 +16,9 @@ import {
 } from "@/components/ui/popover";
 import { DeleteIcon, LinkIcon, MoreHorizontal, ThumbsUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { getApiUrl } from "@/utils/helpers";
-import { forumPostsContext } from "@/contexts/PostsContext";
+import { forumPostsContext } from "@/providers/PostsContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 
 type PostCardProps<T extends PostType> = {

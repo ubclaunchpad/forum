@@ -4,7 +4,7 @@ import { PlusIcon, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { DocumentAppendOperation } from "@/lib/types/documents";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import {
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
 
@@ -46,6 +47,7 @@ export default function UploadFile({
   const { toast } = useToast();
 
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -113,27 +115,33 @@ export default function UploadFile({
     if (!validateFile(file, title)) return;
 
     try {
-      const link = `${getApiUrl()}/courses/${course.id}/documents`;
+      setIsLoading(true);
+      const link = `${getApiUrl()}/documents/courses/${course.id}`;
       const data = new FormData();
       data.append("file", file);
       data.append("title", title);
       data.append("metadata", JSON.stringify({ tags: [] }));
 
-      setOpen(false);
+      // const tempId = appendToFiles({
+      //   operation: "optimistic",
+      //   id: null,
+      //   document: {
+      //     file: {
+      //       name: title,
+      //       type: file.type || "unknown",
+      //       size: file.size,
+      //       path: "",
+      //       bucket: "",
+      //       id: "",
+      //     },
+      //     description: "",
+      //     course_id: course.id,
+      //   },
+      // });
 
-      const tempId = appendToFiles({
-        operation: "optimistic",
-        id: null,
-        document: {
-          title,
-          description: "",
-          course_id: course.id,
-        },
-      });
-
-      if (!tempId) {
-        throw new Error("Failed to add document");
-      }
+      // if (!tempId) {
+      //   throw new Error("Failed to add document");
+      // }
 
       const response = await fetch(link, {
         method: "POST",
@@ -143,6 +151,7 @@ export default function UploadFile({
         },
       });
 
+      setIsLoading(false);
       if (!response.ok) {
         const errorDetails = await response.json();
         throw new Error(
@@ -150,12 +159,14 @@ export default function UploadFile({
         );
       }
 
-      const result = await response.json();
-      appendToFiles({
-        operation: "real",
-        id: tempId,
-        document: result,
-      });
+      setOpen(false);
+
+      // const result = await response.json();
+      // appendToFiles({
+      //   operation: "real",
+      //   id: tempId,
+      //   document: result,
+      // });
 
       toast({
         title: "Success",
@@ -163,20 +174,19 @@ export default function UploadFile({
       });
 
       await onUploadSuccess();
-
       // Reset form
       setTitle("");
       setFile(null);
       setValidationError(null);
 
       // Revalidate the documents cache
-      fetch("/api/revalidate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ courseId: course.id, type: "documents" }),
-      });
+      // fetch("/api/revalidate", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({ courseId: course.id, type: "documents" }),
+      // });
     } catch (error) {
       toast({
         title: "Error",
@@ -199,91 +209,112 @@ export default function UploadFile({
         <DialogHeader>
           <DialogTitle>Upload File</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-4 py-4">
-          <Input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Document title"
-            className="text-md"
-          />
+        {isLoading ? (
+          <div className="flex flex-col gap-4 py-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>...</CardTitle>
+                <CardContent>
+                  <p>Uploading file...</p>
+                </CardContent>
+              </CardHeader>
+            </Card>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col gap-4 py-4">
+              <Input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Document title"
+                className="text-md"
+              />
 
-          <div
-            className={cn(
-              "relative flex flex-col  items-center justify-center border-2 border-dashed rounded-lg p-8 gap-2 min-h-[200px] md:min-h-[300px]",
-              "transition-all duration-200 ease-in-out",
-              isDragging ? "border-primary bg-primary/5" : "border-neutral-200",
-              "hover:border-primary/50 hover:bg-neutral-50",
-            )}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <Input
-              type="file"
-              id="file-upload"
-              className="hidden"
-              accept=".pdf"
-              onChange={handleFileChange}
-            />
-            {file ? (
-              <div className="text-center space-y-1.5">
-                <p className="font-medium text-sm">{file.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {(file.size / 1024 / 1024).toFixed(2)} MB
-                </p>
+              <div
+                className={cn(
+                  "relative flex flex-col  items-center justify-center border-2 border-dashed rounded-lg p-8 gap-2 min-h-[200px] md:min-h-[300px]",
+                  "transition-all duration-200 ease-in-out",
+                  isDragging
+                    ? "border-primary bg-primary/5"
+                    : "border-neutral-200",
+                  "hover:border-primary/50 hover:bg-neutral-50",
+                )}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <Input
+                  type="file"
+                  id="file-upload"
+                  className="hidden"
+                  accept=".pdf"
+                  onChange={handleFileChange}
+                />
+                {file ? (
+                  <div className="text-center space-y-1.5">
+                    <p className="font-medium text-sm">{file.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {(file.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setFile(null)}
+                      className="h-8 text-xs"
+                    >
+                      Change file
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="w-6 h-6 text-muted-foreground/50 mb-2" />
+                    <div className="text-center space-y-1">
+                      <div className="text-sm text-muted-foreground">
+                        <label
+                          htmlFor="file-upload"
+                          className="text-primary font-medium cursor-pointer hover:text-primary/80"
+                        >
+                          Choose a file
+                        </label>{" "}
+                        or drag and drop
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        PDF only, up to 15MB
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {validationError && (
+                <p className="text-sm text-destructive">{validationError}</p>
+              )}
+
+              <div className="flex justify-end gap-2 mt-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setFile(null)}
-                  className="h-8 text-xs"
+                  onClick={() => {
+                    setOpen(false);
+                    setTitle("");
+                    setFile(null);
+                    setValidationError(null);
+                  }}
                 >
-                  Change file
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  disabled={!title || !file}
+                  onClick={handleSubmit}
+                >
+                  Upload
                 </Button>
               </div>
-            ) : (
-              <>
-                <Upload className="w-6 h-6 text-muted-foreground/50 mb-2" />
-                <div className="text-center space-y-1">
-                  <div className="text-sm text-muted-foreground">
-                    <label
-                      htmlFor="file-upload"
-                      className="text-primary font-medium cursor-pointer hover:text-primary/80"
-                    >
-                      Choose a file
-                    </label>{" "}
-                    or drag and drop
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    PDF only, up to 15MB
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
-
-          {validationError && (
-            <p className="text-sm text-destructive">{validationError}</p>
-          )}
-
-          <div className="flex justify-end gap-2 mt-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setOpen(false);
-                setTitle("");
-                setFile(null);
-                setValidationError(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button size="sm" disabled={!title || !file} onClick={handleSubmit}>
-              Upload
-            </Button>
-          </div>
-        </div>
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

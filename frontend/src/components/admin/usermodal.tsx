@@ -28,7 +28,7 @@ import {
 import { UserX, UserCog, Mail, User, ChevronDown } from "lucide-react";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { getApiUrl } from "@/utils/helpers";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 interface UserSheetProps {
   profile: Profile;
   isOpen: boolean;

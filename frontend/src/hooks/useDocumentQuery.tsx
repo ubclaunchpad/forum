@@ -14,12 +14,9 @@ interface Source {
 }
 
 interface QueryResponse {
-  answer: string;
-  sources: Source[];
-  checkpoint?: {
-    label: string;
-    expanded?: string;
-  };
+  text: string;
+  sources: any[];
+  result: string;
 }
 
 interface StreamChunk {
@@ -51,20 +48,16 @@ function useDocumentQuery({
       setIsLoading(true);
       setStreamedAnswer("");
       setResponse(null);
-      const response = await fetch(
-        `${getApiUrl()}/courses/${courseId}/documents/querystream`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            question,
-            template_name: "default.txt",
-          }),
+      const response = await fetch(`${getApiUrl()}/search`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+        body: JSON.stringify({
+          query: question,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

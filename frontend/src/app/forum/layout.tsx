@@ -2,9 +2,9 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { UserContextProvider } from "@/contexts/userContext";
+import { UserContextProvider } from "@/providers/userContext";
 import { Suspense } from "react";
-import { ThemeProvider } from "@/contexts/ThemeProvider";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 
 export default async function RootLayout({
   children,

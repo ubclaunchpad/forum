@@ -1,24 +1,16 @@
 "use client";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { useToast } from "@/hooks/use-toast";
-import { DocumentInterface } from "@/lib/types/documents";
 import { getApiUrl } from "@/utils/helpers";
 import { FileText, Frown } from "lucide-react";
 import { useState, useEffect, useContext } from "react";
-// import { Document, Page, pdfjs } from "react-pdf";
-// import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-// import "react-pdf/dist/esm/Page/TextLayer.css";
+import { Document, Page, pdfjs, Thumbnail } from "react-pdf";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import "react-pdf/dist/esm/Page/TextLayer.css";
 import { IsLoadingView } from "../general/IsLoadingView";
 import { useCourseStore } from "@/providers/courseStoreProvider";
-
-// pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-//   "pdfjs-dist/build/pdf.worker.mjs",
-//   import.meta.url,
-// ).toString();
-
-// if (typeof window !== "undefined" && !pdfjs.GlobalWorkerOptions.workerSrc) {
-//   pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-// }
+import { GetDocument } from "@forum/shared";
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface DocumentViewerInterface {
   signedUrl: string;
@@ -28,7 +20,7 @@ interface DocumentViewerInterface {
 export default function FileViewer({
   document,
 }: {
-  document: DocumentInterface | undefined;
+  document: GetDocument | undefined;
 }) {
   const { token } = useContext(userContext);
   const [doc, setDoc] = useState<DocumentViewerInterface | null>(null);
@@ -43,7 +35,7 @@ export default function FileViewer({
       setIsLoading(true);
       try {
         const response = await fetch(
-          `${getApiUrl()}/courses/${course.id}/documents/${document.id}/signed_url`,
+          `${getApiUrl()}/documents/document/${document.id}/signed_url`,
           {
             method: "GET",
             headers: {
@@ -58,9 +50,27 @@ export default function FileViewer({
           );
         }
         const result = await response.json();
+        let signedUrl = result.signed_url;
+        const apiUrl = getApiUrl();
+
+        // Extract base from apiUrl (protocol + domain)
+        const baseUrlRegex = /^(https?:\/\/[^\/]+)/;
+        const apiUrlMatch = apiUrl.match(baseUrlRegex);
+        const apiBase = apiUrlMatch ? apiUrlMatch[1] : apiUrl;
+
+        // Extract path from signedUrl (everything after the domain)
+        const pathRegex = /^https?:\/\/[^\/]+(\/.*)/;
+        const signedUrlMatch = signedUrl.match(pathRegex);
+
+        if (signedUrlMatch && signedUrlMatch[1]) {
+          // Combine the API base with the signed URL path
+          const path = signedUrlMatch[1];
+          signedUrl = `${apiBase}${path}`;
+        }
+
         setDoc({
-          signedUrl: result.signed_url,
-          fileType: document.document_type || "unknown",
+          signedUrl: signedUrl, // Use the combined URL
+          fileType: result.file_type || "unknown",
         });
       } catch (error: unknown) {
         if (error instanceof Error) {
@@ -109,42 +119,7 @@ export default function FileViewer({
 
   // PDF viewer
   if (doc.fileType === "application/pdf") {
-    // const { isIOS, isAndroid } = isMobileOS();
-
-    // // Use native handling for mobile OS
-    // if (isIOS || isAndroid) {
-    //   return (
-    //     <div className="w-full h-full flex items-center justify-center">
-    //       <a
-    //         href={doc.signedUrl}
-    //         className="px-4 py-2 bg-primary-500 text-white rounded-md"
-    //       >
-    //         Open PDF
-    //       </a>
-    //     </div>
-    //   );
-    // }
-
-    if (doc.fileType === "application/pdf") {
-      const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(doc.signedUrl)}&embedded=true`;
-      return (
-        <div className="w-full h-full overflow-hidden rounded-md">
-          <iframe
-            src={googleViewerUrl}
-            className="w-full h-full border-0"
-            title="PDF viewer"
-          />
-        </div>
-      );
-    }
-
-    // Use PDFViewer for desktop
-    // FIXME: This is not working
-    // return (
-    //   <>
-    //     <PDFViewer url={doc.signedUrl} />
-    //   </>
-    // );
+    return <NativePDFViewer url={doc.signedUrl} />;
   }
 
   // Text viewer
@@ -172,7 +147,7 @@ export default function FileViewer({
       <div className="w-full h-full flex items-center justify-center bg-black/5">
         <img
           src={doc.signedUrl}
-          alt={document.title}
+          alt={document.description || "Document image"}
           className="max-w-full max-h-full object-contain"
         />
       </div>
@@ -219,11 +194,44 @@ export default function FileViewer({
   );
 }
 
+function NativePDFViewer({ url }: { url: string }) {
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    async function fetchPDF() {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Failed to fetch PDF");
+        const blob = await response.blob();
+        // Convert blob to File object
+        const file = new File([blob], "document.pdf", {
+          type: "application/pdf",
+        });
+        setPdfFile(file);
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Error fetching PDF:", err);
+        setError(err instanceof Error ? err : new Error("Failed to load PDF"));
+      }
+    }
+    fetchPDF();
+  }, [url]);
+  return (
+    <iframe
+      src={url + "#toolbar=0&navpanes=0"}
+      className="w-full h-full border-0"
+    />
+  );
+}
+
 // function PDFViewer({ url }: { url: string }) {
 //   const [numPages, setNumPages] = useState<number | null>(null);
 //   const [error, setError] = useState<Error | null>(null);
 //   const [isLoading, setIsLoading] = useState(true);
 //   const [pdfFile, setPdfFile] = useState<File | null>(null);
+//   const [pageNumber, setPageNumber] = useState<number>();
 
 //   useEffect(() => {
 //     async function fetchPDF() {
@@ -248,6 +256,7 @@ export default function FileViewer({
 //   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
 //     setIsLoading(false);
 //     setNumPages(numPages);
+//     setPageNumber(1);
 //   }
 
 //   if (error) {
@@ -267,43 +276,62 @@ export default function FileViewer({
 //   }
 
 //   return (
-//     <div className="flex-1 flex-shrink-0 border overflow-auto relative">
+//     <div className="flex flex-col items-center justify-center p-10  flex-1 overflow-hidden">
 //       <Document
 //         file={pdfFile}
-//         loading={<IsLoadingView />}
+//         // loading={<IsLoadingView />}
 //         onError={(error) => {
 //           console.error("PDF loading error:", error);
 //           setError(new Error("Failed to load PDF"));
 //         }}
-//         className="absolute inset-0"
+//         className="min-h-0    bg-neutral-100 flex flex-1 bg-red-500 items-center justify-center"
 //         error={
-//           <div className="flex items-center justify-center h-full">
+//           <div className="flex items-center justify-center ">
 //             <p>Failed to load PDF</p>
 //           </div>
 //         }
 //         onLoadSuccess={onDocumentLoadSuccess}
 //       >
-//         {!isLoading &&
-//           numPages &&
-//           Array.from(new Array(numPages), (el, index) => (
-//             <Page
-//               key={`page_${index + 1}`}
+//         {/* <div className="bg-neutral-100 flex flex-col items-center justify-center">
+//           {Array.from(new Array(numPages), (_el, index) => (
+//             <Thumbnail
+//               key={`thumbnail_${index + 1}`}
+//               className="custom-classname-thumbnail"
 //               pageNumber={index + 1}
-//               loading={<IsLoadingView />}
-//               // renderTextLayer={true}
-//               renderAnnotationLayer={false}
-//               className="mx-auto mb-4"
-//               onLoadError={(error) => {
-//                 console.error("Page loading error:", error);
-//                 setError(new Error("Failed to load page"));
-//               }}
-//               error={
-//                 <div className="flex items-center justify-center h-full">
-//                   <p>Failed to load page</p>
-//                 </div>
-//               }
+//               width={100}
 //             />
 //           ))}
+//         </div> */}
+//         <div className="flex flex-1 flex-col overflow-scroll">
+//           {!isLoading &&
+//             numPages &&
+//             Array.from(new Array(numPages), (el, index) => (
+//               <Page
+//                 key={`page_${index + 1}`}
+//                 loading={<IsLoadingView />}
+//                 renderTextLayer={true}
+//                 renderAnnotationLayer={false}
+//                 // className="mx-auto mb-4"
+//                 inputRef={
+//                   pageNumber === index + 1
+//                     ? (ref: HTMLDivElement) => {
+//                         ref?.scrollIntoView();
+//                       }
+//                     : null
+//                 }
+//                 pageNumber={index + 1}
+//                 onLoadError={(error) => {
+//                   console.error("Page loading error:", error);
+//                   setError(new Error("Failed to load page"));
+//                 }}
+//                 error={
+//                   <div className="flex items-center justify-center h-full">
+//                     <p>Failed to load page</p>
+//                   </div>
+//                 }
+//               />
+//             ))}
+//         </div>
 //       </Document>
 //     </div>
 //   );

@@ -4,20 +4,19 @@ import { ArrowLeftIcon, LogOutIcon, Settings2Icon } from "lucide-react";
 import { Fragment, useContext, useState } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { Searchbar } from "./searchBar";
-import { checkPermissionInDomain, cn, PERMISSIONS } from "@/lib/utils";
-import { userContext } from "@/contexts/userContext";
+import { cn } from "@/lib/utils";
+import { userContext } from "@/providers/userContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import { getApiUrl } from "@/utils/helpers";
 import { useRouter } from "next/navigation";
 import { ProfileButton } from "../general/ProfileButton";
-
+import { Searcher } from "../search/searcher";
 export function CourseTopbar() {
   return (
-    <div className="flex relative justify-between w-full items-center py-2 px-2">
+    <div className="flex flex-shrink-0  relative justify-between w-full items-center py-2 px-2">
       <CourseButton />
       <div className="flex flex-1 gap-2 justify-end">
-        <Searchbar />
+        <Searcher />
         <ProfileButton />
       </div>
     </div>
@@ -28,7 +27,7 @@ function CourseButton() {
   const [isOpen, setIsOpen] = useState(false);
   const course = useCourseStore((state) => state.course);
   const { user, token, profile } = useContext(userContext);
-  const courseName = `${course.c_group} ${course.code} ${course.name}`;
+  const courseName = `${course.department} ${course.code} ${course.name}`;
   const router = useRouter();
 
   async function leaveCourse() {
@@ -55,7 +54,7 @@ function CourseButton() {
   return (
     <Fragment>
       {isOpen && (
-        <div className="fixed text-sm flex z-30 flex-col gap-2 rounded-lg top-14 left-4 bg-white shadow-md border border-neutral-200">
+        <div className="fixed text-sm  flex z-30 flex-col gap-2 rounded-lg top-14 left-4 bg-white shadow-md border border-neutral-200">
           <section className="flex flex-col gap-1">
             <ul className="flex flex-col min-w-[200px] divide-y last:border-b">
               <Link
@@ -65,20 +64,14 @@ function CourseButton() {
                 <ArrowLeftIcon className="w-4 min-h-4" />
                 Back to All Courses
               </Link>
+              <Link
+                href={`/forum/courses/${course.id}/settings`}
+                className="w-full no-underline hover:text-primary-500 p-1 px-2 text-sm flex items-center gap-2"
+              >
+                <Settings2Icon className="w-4 min-h-4" />
+                Course Settings
+              </Link>
 
-              {checkPermissionInDomain(
-                profile.permissions,
-                PERMISSIONS.MODIFY_COURSE,
-                course.id,
-              ) && (
-                <Link
-                  href={`/forum/courses/${course.id}/settings`}
-                  className="w-full no-underline hover:text-primary-500 p-1 px-2 text-sm flex items-center gap-2"
-                >
-                  <Settings2Icon className="w-4 min-h-4" />
-                  Course Settings
-                </Link>
-              )}
               <button
                 disabled={false}
                 className="w-full  disabled:hover:text-neutral-400  hover:text-red-500 p-1 px-2 text-sm flex items-center gap-2"

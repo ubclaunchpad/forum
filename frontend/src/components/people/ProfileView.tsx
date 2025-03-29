@@ -22,7 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import { getApiUrl } from "@/utils/helpers";
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { checkPermissionInDomain, PERMISSIONS } from "@/lib/utils";
 
 type ReadonlyProfileFieldProps = {

@@ -1,4 +1,4 @@
-import { userContext } from "@/contexts/userContext";
+import { userContext } from "@/providers/userContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import { getApiUrl } from "@/utils/helpers";
 import { useContext, useState } from "react";

@@ -1,7 +1,17 @@
-import { DocumentInterface } from "@/lib/types/documents";
 import { cn } from "@/lib/utils";
 import DocumentOptionsPopover from "../course/documents/DocumentOptionsPopover";
+import { GetDocument } from "@forum/shared";
+import { FileText } from "lucide-react";
+import PDFIcon from "../customIcons/PDFIcon";
 
+const getFileIcon = (fileType: string) => {
+  switch (fileType) {
+    case "application/pdf":
+      return <PDFIcon className="h-8 w-8 text-primary-600" />;
+    default:
+      return <FileText className="h-4 w-4" />;
+  }
+};
 export default function DocumentRow({
   document,
   isSelected = false,
@@ -9,11 +19,11 @@ export default function DocumentRow({
   disabled = false,
   setDocuments,
 }: {
-  document: DocumentInterface;
+  document: GetDocument;
   isSelected?: boolean;
   onClick?: () => void;
   disabled?: boolean;
-  setDocuments: React.Dispatch<React.SetStateAction<DocumentInterface[]>>;
+  setDocuments: React.Dispatch<React.SetStateAction<GetDocument[]>>;
 }) {
   return (
     <div
@@ -34,16 +44,14 @@ export default function DocumentRow({
       {/* Main content container */}
       <div className="flex flex-1 p-1 px-2 items-center min-w-0">
         {/* Icon container */}
-        {/* <div
+        <div
           className={cn(
-            "flex items-center justify-center border-r p-2 flex-shrink-0",
-            isSelected
-              ? "bg-inherit border-primary-100 text-primary-400"
-              : "bg-neutral-50",
+            "flex items-center justify-center   flex-shrink-0",
+            isSelected ? "bg-inherit border-primary-100 text-primary-400" : "",
           )}
         >
-          <FileText className="h-4 w-4" />
-        </div> */}
+          {getFileIcon(document.file?.type)}
+        </div>
         {/* Text content container */}
         <div className="flex flex-col min-w-0 flex-1 px-2">
           <span
@@ -52,7 +60,7 @@ export default function DocumentRow({
               isSelected ? "text-primary-700" : "text-neutral-800",
             )}
           >
-            {document.title}
+            {document.file.name}
           </span>
           {document.description && (
             <p className="text-sm text-neutral-500 truncate">
