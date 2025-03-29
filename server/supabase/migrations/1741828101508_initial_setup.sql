@@ -67,23 +67,35 @@ CREATE TABLE posts (
     title TEXT NOT NULL,
     number_id INTEGER NOT NULL,
     content TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'posted',
+    status TEXT NOT NULL DEFAULT 'published',
+    visibility TEXT NOT NULL DEFAULT 'public',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );
 
 CREATE TABLE post_authors (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     post_id UUID NOT NULL,
     user_id UUID,
     comment_id UUID,
     reply_id UUID,
-    pseudonym TEXT, -- optional pseudonym for the author
+    is_anonymous BOOLEAN NOT NULL DEFAULT FALSE,
     visibility TEXT NOT NULL DEFAULT 'everyone', -- everyone, all_members, only_instructors, anonymous
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE SET NULL
+);
+
+CREATE INDEX post_authors_post_id_idx ON post_authors (post_id);
+
+CREATE TABLE post_author_pseudonyms (
+    post_id UUID NOT NULL,
+    user_id UUID NOT NULL,
+    pseudonym TEXT NOT NULL,
     PRIMARY KEY (post_id, user_id),
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE,
-    CHECK (user_id IS NOT NULL OR pseudonym IS NOT NULL)
+    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE SET NULL,
+    UNIQUE (post_id, pseudonym)
 );
 
 CREATE TABLE post_comments (

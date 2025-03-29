@@ -2,22 +2,20 @@ import { afterAll, beforeEach, describe, it } from "jsr:@std/testing/bdd";
 import { assertEquals, assertExists, assertIsError } from "jsr:@std/assert";
 import { postController } from "../../../../posts/controllers/crud.ts";
 import { NewPost, NewPostOptions, PostEditInfo } from "@shared/mod.ts";
-import { userCourseSeedSetup } from "../helper.ts";
-import { fail } from "node:assert";
 import {
-  afterEachFunc,
-  authUsers,
-  beforeEachFunc,
-  coursesToCreate,
-  profiles,
-} from "./shared.ts";
+  clearUsers,
+  clearUsersAndCourses,
+  userCourseSeedSetup,
+} from "../helper.ts";
+import { fail } from "node:assert";
+import { authUsers, coursesToCreate, profiles } from "../shared.ts";
 import { addUserToCourse } from "../../../../courses/controller/add_course_member_activity.ts";
 
 const testUUID = "00000000-0000-0000-0000-000000000000";
 
 describe("Post Integration Tests: Update Post", () => {
-  beforeEach(beforeEachFunc);
-  afterAll(afterEachFunc);
+  beforeEach(clearUsers);
+  afterAll(clearUsersAndCourses);
   it("should update the post to be edited by poster, updating posts and post_author tables", async () => {
     try {
       const { tempProfiles, tempCourses } = await userCourseSeedSetup(
