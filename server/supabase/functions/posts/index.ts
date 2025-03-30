@@ -42,15 +42,12 @@ app.get(
   "/:post_id",
   async (c: Context<{ Variables: UserVariables }>) => {
     try {
-      const query = c.req.query("enableCommentReplies");
-      const enableCommentReplies = query === "true";
       const { post_id } = c.req.param();
       const user = c.var.user;
 
       const post = await getPost(
         user.id,
         post_id,
-        enableCommentReplies,
       );
       return c.json(post);
     } catch (error) {
@@ -63,8 +60,6 @@ app.get(
   "/courses/:course_id",
   async (c: Context<{ Variables: UserVariables }>) => {
     try {
-      const query = c.req.query("enableCommentReplies");
-      const enableCommentReplies = query === "true";
       const { course_id } = c.req.param();
       const user = c.var.user;
 
@@ -72,7 +67,6 @@ app.get(
         user.id,
         course_id,
         false,
-        enableCommentReplies,
       );
       return c.json(post);
     } catch (error) {

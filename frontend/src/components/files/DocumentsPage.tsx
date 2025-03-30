@@ -66,7 +66,9 @@ export function DocumentsPage({
             onUploadSuccess={handleUploadSuccess}
           />
         </MainSidebar>
-        <MainListPanel className={selectedFile ? "hidden  xl:flex" : ""}>
+        <MainListPanel
+          className={cn(selectedFile ? "hidden  xl:flex" : "", "bg-white")}
+        >
           <DocumentListSidebar
             files={files}
             setFiles={setFiles}

@@ -2,7 +2,7 @@
 
 import PostsForumSidebar from "./PostsForumSidebar";
 import { PostsForumViewSection } from "./PostsForumViewSection";
-import { PostList } from "@forum/shared";
+import { Post } from "@forum/shared";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import { useContext, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -13,6 +13,7 @@ export const PostsForumPage = ({ initalPost }: { initalPost?: string }) => {
   const setPosts = useCourseStore((state) => state.setPosts);
   const { token } = useContext(userContext);
   const course = useCourseStore((state) => state.course);
+  const tags = useCourseStore((state) => state.tags);
   const { data } = useQuery({
     queryKey: ["posts", course.id],
     queryFn: () => getPosts(course.id, token),
@@ -34,16 +35,10 @@ export const PostsForumPage = ({ initalPost }: { initalPost?: string }) => {
 async function getPosts(id: string, token: string) {
   try {
     const res = await fetch(`${getApiUrl()}/posts/courses/${id}`, {
-      // next: {
-      //   revalidate: 3600,
-      //   tags: [`course-${id}-posts`],
-      // },
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-
-    console.log(res.status);
 
     if (!res.ok) {
       return {
@@ -53,9 +48,8 @@ async function getPosts(id: string, token: string) {
     }
 
     const body = await res.json();
-    console.log(body);
     return {
-      posts: (body as PostList[]).map((post) => ({
+      posts: (body as Post[]).map((post) => ({
         ...post,
         id: post.id.toString(),
       })),

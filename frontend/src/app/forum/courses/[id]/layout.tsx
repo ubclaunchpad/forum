@@ -5,16 +5,15 @@ import { redirect } from "next/navigation";
 import { CourseStoreProvider } from "@/providers/courseStoreProvider";
 import { Course } from "@forum/shared";
 import { SearchStoreProvider } from "@/providers/searchStoreProvider";
+import { getTags } from "@/lib/fetchers/tags";
 
 async function getCourse(id: string, token: string) {
   try {
     const res = await fetch(`${getApiUrl()}/courses/${id}`, {
       next: {
-        revalidate: 3600,
         tags: [`course-${id}`],
       },
       headers: {
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
         Authorization: `Bearer ${token}`,
       },
     });
@@ -48,9 +47,9 @@ export default async function CoursePage({
     redirect("/auth/login");
   }
 
-  const [course] = await Promise.all([
+  const [course, tags] = await Promise.all([
     getCourse(id, token!),
-    // getTags(id, token),
+    getTags(id, token),
   ]);
 
   if (!course) {
@@ -60,8 +59,9 @@ export default async function CoursePage({
   const store = {
     course: course,
     pendingCourse: course,
-    tags: [],
+    tags: tags,
     posts: [],
+    postDraft: null,
   };
 
   return (

@@ -44,6 +44,7 @@ lowlight.register("ts", ts);
 const editorClasses = cn(
   "w-full flex flex-col",
   "prose",
+  "[&_.ProseMirror_p]:text-[16px]",
   "[&_.ProseMirror]:w-full",
   "[&_.ProseMirror]:h-full",
   "[&_.ProseMirror]:p-0",

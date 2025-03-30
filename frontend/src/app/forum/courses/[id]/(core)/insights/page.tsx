@@ -6,6 +6,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import AnalyticsPage from "./analyticsPage";
+import { MainSidebar } from "@/components/general/FourmTabs";
 
 async function getAnalytics(id: string, token: string) {
   try {
@@ -58,9 +59,17 @@ export default async function AnalyticsTabWrapper({
   const { id } = await params;
 
   return (
-    <Suspense fallback={<AnalyticsPage analytics={null} loading={true} />}>
-      <AnalyticsTab id={id} />
-    </Suspense>
+    <div className="flex flex-1 overflow-hidden  ">
+      <MainSidebar>
+        <></>
+      </MainSidebar>
+      <div className="flex flex-col w-full justify-center items-center flex-1 overflow-hidden">
+        <p className="text-sm text-neutral-500">We are working on it...</p>
+      </div>
+    </div>
+    // <Suspense fallback={<AnalyticsPage analytics={null} loading={true} />}>
+    //   <AnalyticsTab id={id} />
+    // </Suspense>
   );
 }
 

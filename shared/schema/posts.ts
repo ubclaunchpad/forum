@@ -51,6 +51,9 @@ export type MutatePostArguments = z.infer<typeof mutatePostArgumentsSchema>;
 export type Post = z.infer<typeof postSchema>;
 export type PostAuthor = z.infer<typeof postSchema.shape.authors.element>;
 
+export type PostWithComments = Post & {
+  comments: PostComment[];
+}
 
 
 export const postCommentReplySchema = z.object({

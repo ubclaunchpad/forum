@@ -122,27 +122,6 @@ export default function UploadFile({
       data.append("title", title);
       data.append("metadata", JSON.stringify({ tags: [] }));
 
-      // const tempId = appendToFiles({
-      //   operation: "optimistic",
-      //   id: null,
-      //   document: {
-      //     file: {
-      //       name: title,
-      //       type: file.type || "unknown",
-      //       size: file.size,
-      //       path: "",
-      //       bucket: "",
-      //       id: "",
-      //     },
-      //     description: "",
-      //     course_id: course.id,
-      //   },
-      // });
-
-      // if (!tempId) {
-      //   throw new Error("Failed to add document");
-      // }
-
       const response = await fetch(link, {
         method: "POST",
         body: data,
@@ -160,14 +139,6 @@ export default function UploadFile({
       }
 
       setOpen(false);
-
-      // const result = await response.json();
-      // appendToFiles({
-      //   operation: "real",
-      //   id: tempId,
-      //   document: result,
-      // });
-
       toast({
         title: "Success",
         description: `"${title}" has been uploaded`,
@@ -178,15 +149,6 @@ export default function UploadFile({
       setTitle("");
       setFile(null);
       setValidationError(null);
-
-      // Revalidate the documents cache
-      // fetch("/api/revalidate", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({ courseId: course.id, type: "documents" }),
-      // });
     } catch (error) {
       toast({
         title: "Error",
@@ -200,8 +162,11 @@ export default function UploadFile({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size={"lg"} className="w-fit  px-4 min-h-none h-fit py-2">
-          <PlusIcon className="h-4 w-4" />
+        <Button
+          size={"lg"}
+          className="w-fit font-semibold px-4 min-h-none h-fit py-2"
+        >
+          <PlusIcon className="min-h-5 min-w-5" />
           Upload File
         </Button>
       </DialogTrigger>

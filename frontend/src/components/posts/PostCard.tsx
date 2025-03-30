@@ -1,186 +1,18 @@
 "use client";
-import { useContext } from "react";
-import { Post, PostType, PostWithRequiredId } from "@/lib/types/posts";
-import {
-  cn,
-  getIdType,
-  getRelativeTimeString,
-  isIDTemporary,
-  isPendingId,
-} from "@/lib/utils";
+import { cn, getIdType, getRelativeTimeString } from "@/lib/utils";
 import removeMarkdown from "markdown-to-text";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { DeleteIcon, LinkIcon, MoreHorizontal, ThumbsUp } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { userContext } from "@/providers/userContext";
-import { getApiUrl } from "@/utils/helpers";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import Link from "next/link";
+import { Post } from "@forum/shared";
 
-type PostCardProps<T extends PostType> = {
-  post: T extends "draft" ? PostWithRequiredId : Post;
+type PostCardProps = {
+  post: Post;
   isSelected: boolean;
 };
 
-export const PostCard = <T extends PostType>({
-  post,
-  isSelected,
-}: PostCardProps<T>) => {
-  const user = useContext(userContext);
+export const PostCard = ({ post, isSelected }: PostCardProps) => {
   const course = useCourseStore((state) => state.course);
-  // const { updatePost } = useContext(forumPostsContext);
-  const { toast } = useToast();
   const postType = getIdType(post.id);
-  const handleMoreClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
-  async function handleDelete() {
-    if (isIDTemporary(post.id)) {
-      return;
-    }
-
-    const confirmDelete = confirm("Are you sure you want to delete this post?");
-    if (!confirmDelete) return;
-    const toDelete = post;
-    setListOfPosts((prev) => prev.filter((p) => p.id !== post.id));
-    if (isSelected) {
-      setSelectedPost(null);
-    }
-    const res = await fetch(
-      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-      },
-    );
-
-    fetch("/api/revalidate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ courseId: course.id }),
-    });
-
-    if (!res.ok) {
-      toast({
-        title: "Failed to delete post",
-      });
-      setListOfPosts((prev) => [...prev, toDelete as Post]);
-    }
-  }
-
-  async function updateInteraction(
-    post: Post,
-    method: string,
-    endpoint: string,
-  ) {
-    // const response = await fetch(
-    //   `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}/events/${endpoint}`,
-    //   {
-    //     method: method,
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${user.token}`,
-    //     },
-    //   },
-    // );
-    // fetch("/api/revalidate", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ courseId: course.id }),
-    // });
-    // if (!response.ok) {
-    //   throw new Error(`Failed to mark post as unliked`);
-    // }
-  }
-
-  const handleLikeClick = async (post: Post, addLike: boolean) => {
-    const likeVal = addLike ? 1 : -1;
-    const updatedPost = {
-      ...post,
-      user_interactions: {
-        ...post.user_interactions,
-        liked: addLike,
-      },
-      stats: {
-        ...post.stats,
-        likes: (post.stats?.likes || 0) + likeVal,
-      },
-    };
-
-    // Update UI optimistically
-    updatePost(updatedPost);
-
-    try {
-      if (addLike) {
-        await updateInteraction(post, "POST", "like");
-      } else {
-        await updateInteraction(post, "DELETE", "like");
-      }
-    } catch (error) {
-      // Revert state if API call fails
-      updatePost({
-        ...post,
-        user_interactions: {
-          ...post.user_interactions,
-          liked: false,
-        },
-        stats: {
-          ...post.stats,
-          likes: (post.stats?.likes || 0) - likeVal,
-        },
-      });
-      console.error("Error updating like status:", error);
-    }
-  };
-
-  const handleView = async (post: Post) => {
-    // Optimistically update the view count
-    if (!post.user_interactions?.viewed) {
-      const updatedPost = {
-        ...post,
-        user_interactions: {
-          ...post.user_interactions,
-          viewed: true,
-        },
-        stats: {
-          ...post.stats,
-          views: (post.stats?.views || 0) + 1,
-        },
-      };
-
-      updatePost(updatedPost);
-
-      try {
-        await updateInteraction(post, "PUT", "view");
-      } catch (error) {
-        // In case of failure, revert the optimistic update
-        updatePost({
-          ...post,
-          user_interactions: {
-            ...post.user_interactions,
-            viewed: false,
-          },
-          stats: {
-            ...post.stats,
-            views: (post.stats?.views || 0) - 1,
-          },
-        });
-        console.error("Error updating view status:", error);
-      }
-    }
-  };
 
   return (
     <Link
@@ -191,13 +23,10 @@ export const PostCard = <T extends PostType>({
         isSelected
           ? "bg-primary-50 border-primary-200 shadow-xs shadow-primary-200"
           : "border-neutral-200 bg-white",
-        isPendingId(post.id) || false === post.id
-          ? "cursor-wait border-dashed border-neutral-200 bg-neutral-100"
-          : "cursor-pointer",
+        "cursor-pointer",
       )}
     >
       <div className="flex items-center justify-between p-2 px-4 w-full gap-2 pb-2">
-        {/* Title aligned to the left */}
         <p className="text-sm font-semibold flex-1 truncate">
           {postType === "local" && (
             <span className="border text-xs rounded-md text-neutral-600 dashed p-1 uppercase">
@@ -207,112 +36,47 @@ export const PostCard = <T extends PostType>({
           {post.title}
         </p>
 
-        {/* Right-aligned container for time and "Not Viewed" indicator */}
         <div className="flex items-center gap-2 shrink-0">
-          {post.applied_at && (
+          {post.updated_at && (
             <h2 className="font-medium text-xs whitespace-nowrap">
               {getRelativeTimeString(
-                new Date(post.applied_at).getTime(),
+                new Date(post.updated_at).getTime(),
                 "en",
                 30,
               )}
             </h2>
           )}
-
-          {/* {!post.user_interactions?.viewed && (
-            <span className="w-2.5 h-2.5 rounded-full bg-primary-600 inline-block"></span>
-          )} */}
         </div>
       </div>
 
       <section className="max-h-40 overflow-hidden px-4">
         <p className="text-xs py-2  text-wrap text-neutral-500 select-none line-clamp-4 break-words">
-          {false === post.id
-            ? "Editing..."
-            : removeMarkdown((post.content ?? "").trim().slice(0, 200) + "...")}
+          {removeMarkdown((post.content ?? "").trim().slice(0, 200) + "...")}
         </p>
       </section>
 
-      {!isIDTemporary(post.id) && (
-        <div
-          className={cn(
-            "flex-row w-full flex px-4 h-10 border-t  items-center  gap-1",
-            isSelected ? "border-t-primary-100" : "border-t-neutral-100",
-          )}
-        >
-          <div className="flex flex-1 " />
-
-          {/* Display likes, and allow user to like post */}
-          {/* <div className="flex items-center gap-2">
-            {post.user_interactions?.liked ? (
-              <ThumbsUp
-                className="h-5 w-5 text-primary-600 cursor-pointer"
-                fill="currentColor"
-                onClick={() => handleLikeClick(post as Post, false)}
-              />
-            ) : (
-              <ThumbsUp
-                className="h-5 w-5 text-primary-600 cursor-pointer"
-                onClick={() => handleLikeClick(post as Post, true)}
-              />
-            )}
-            <span className="text-xs text-neutral-700">
-              {post.stats?.likes || 0}
-            </span>
-          </div> */}
-
-          {/* <Popover>
-            <PopoverContent
-              side="right"
-              align="start"
-              alignOffset={-10}
-              sideOffset={20}
-              className=" bg-white border  w-fit p-0 border-neutral-200 rounded-lg shadow-xs"
-            >
-              <ul className="flex p-0 flex-col text-neutral-700 w-full ">
-                {post.id && !isPendingId(post.id) && (
-                  <li>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          `${window.location.origin}/forum/courses/${course.id}/forum/${post.local_id}`,
-                        );
-                        toast({
-                          title: "Copied link to post",
-                        });
-                      }}
-                      className=" flex gap-6 font-medium items-center border-b text-sm p-4 py-1 w-full "
-                    >
-                      <LinkIcon className="h-4 w-4 " />
-                      <span>Copy link to post</span>
-                    </button>
-                  </li>
-                )}
-                <li>
-                  <button
-                    type="button"
-                    onClick={handleDelete}
-                    className="text-sm flex gap-6 font-medium items-center p-4 py-1 w-full hover:text-red-500"
-                  >
-                    <DeleteIcon className="h-4 w-4 " />
-                    <span>Delete</span>
-                  </button>
-                </li>
-              </ul>
-            </PopoverContent>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                onClick={handleMoreClick}
-                className="focus:outline-hidden"
-              >
-                <MoreHorizontal className="h-5 w-5 opacity-70" />
-              </button>
-            </PopoverTrigger>
-          </Popover> */}
+      <div
+        className={cn(
+          "flex-row w-full flex px-4  pb-2  items-center  gap-1",
+          isSelected ? "border-t-primary-100" : "border-t-neutral-100",
+        )}
+      >
+        <div className="flex flex-1 " />
+        <div className="flex flex-1 justify-end ">
+          <p className="text-xs text-neutral-700">
+            {`Post #${post.number_id} by ${post.authors.map((author) => author.pseudonym).join(", ")}`}
+          </p>
         </div>
-      )}
+      </div>
+
+      <div
+        className={cn(
+          "flex-row w-full flex px-4 h-10 border-t  items-center  gap-1",
+          isSelected ? "border-t-primary-100" : "border-t-neutral-100",
+        )}
+      >
+        <div className="flex flex-1 " />
+      </div>
     </Link>
   );
 };

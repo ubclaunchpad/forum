@@ -1,10 +1,19 @@
 "use client";
 
 import { Suspense, useContext, useState } from "react";
-import { CheckIcon, DotIcon, XIcon } from "lucide-react";
+import {
+  CheckIcon,
+  DotIcon,
+  ThumbsUpIcon,
+  ReplyIcon,
+  MoreHorizontalIcon,
+  XIcon,
+  BookMarkedIcon,
+  BookmarkIcon,
+} from "lucide-react";
 import { getRelativeTimeString } from "@/lib/utils";
 import { useCourseStore } from "@/providers/courseStoreProvider";
-import { Post } from "@forum/shared";
+import { PostWithComments } from "@forum/shared";
 import {
   PostTitleSection,
   PostTextBoxSection,
@@ -13,6 +22,8 @@ import {
   PostContentWrapper,
   PostPopoverOptions,
   PostContentWrapperFooter,
+  PostCommentsSection,
+  PostActionRow,
 } from "./post-editor-sections";
 import { Button } from "../ui/button";
 import { getApiUrl } from "@/utils/helpers";
@@ -20,9 +31,10 @@ import { userContext } from "@/providers/userContext";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-export default function PostView({ post }: { post: Post }) {
+export default function PostView({ post }: { post: PostWithComments }) {
   const course = useCourseStore((state) => state.course);
   const [isEditing, setIsEditing] = useState(false);
+  const [isCommenting, setIsCommenting] = useState(false);
   const [title, setTitle] = useState(post?.title ?? "");
   const [content, setContent] = useState(post?.content ?? "");
   const { token } = useContext(userContext);
@@ -78,7 +90,10 @@ export default function PostView({ post }: { post: Post }) {
         }}
       >
         <div className="flex justify-end item-center gap-0.5 text-neutral-700 flex-1">
-          <h2 className=" font-medium text-sm ">Post #{post.number_id}</h2>
+          <h2 className=" font-medium text-sm ">
+            Post #{post.number_id} by{" "}
+            {post.authors?.map((author) => author.pseudonym).join(", ")}
+          </h2>
           <span>
             <DotIcon className="opacity-50 min-w-5 min-h-5 " />
           </span>
@@ -115,7 +130,34 @@ export default function PostView({ post }: { post: Post }) {
             setContent={setContent}
             options={{ isEditing: isEditing }}
           />
+          {!isEditing && (
+            <PostActionRow>
+              <div className="flex flex-row w-full">
+                <div className="flex flex-row flex-1 justify-end text-primary-700 font-semibold stroke-2 gap-8 px-4 w-full">
+                  <button className="flex flex-row items-center gap-1">
+                    <ThumbsUpIcon className="max-w-5 max-h-5" />
+                  </button>
+                  <button
+                    className="flex flex-row items-center gap-1"
+                    onClick={() => setIsCommenting(!isCommenting)}
+                  >
+                    <ReplyIcon className="max-w-5 max-h-5" />
+                  </button>
+                  <button className="flex flex-row items-center gap-1">
+                    <BookmarkIcon className="max-w-5 max-h-5" />
+                  </button>
+                </div>
+              </div>
+            </PostActionRow>
+          )}
         </PostContentWrapper>
+        <PostNewCommentSection
+          postId={post.id}
+          isCommenting={isCommenting}
+          setIsCommenting={setIsCommenting}
+        />
+
+        {!isEditing && <PostCommentsSection comments={post.comments} />}
         <PostContentWrapperFooter options={{ show: isEditing }}>
           <div className="flex gap-2 justify-end w-full">
             <Button
@@ -247,5 +289,77 @@ export function PostMutatationEditor() {
         </div>
       </PostContentWrapperFooter>
     </PostViewWrapper>
+  );
+}
+
+function PostNewCommentSection({
+  isCommenting,
+  setIsCommenting,
+  postId,
+}: {
+  isCommenting: boolean;
+  setIsCommenting: (isCommenting: boolean) => void;
+  postId: string;
+}) {
+  const [commentContent, setCommentContent] = useState("");
+  const { token } = useContext(userContext);
+
+  if (!isCommenting) {
+    return null;
+  }
+
+  async function handlePostComment() {
+    toast.info("Working on it...");
+    // const res = await fetch(`${getApiUrl()}/posts/${postId}/comments`, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${token}`,
+    //   },
+    //   body: JSON.stringify({
+    //     comment: {
+    //       content: commentContent,
+    //     },
+    //   }),
+    // });
+
+    // if (res.ok) {
+    //   toast.success("Comment posted successfully");
+    //   setIsCommenting(false);
+    // } else {
+    //   toast.error("Failed to post comment");
+    // }
+  }
+  return (
+    <div className="flex flex-col px-4 py-8 gap-2">
+      <PostContentWrapper options={{ isEditing: isCommenting }}>
+        <PostTextBoxSection
+          content={commentContent}
+          setContent={setCommentContent}
+          options={{ isEditing: isCommenting, editorClass: "text-sm min-h-40" }}
+        />
+        <PostContentWrapperFooter options={{ show: true }}>
+          <div className="flex gap-2 justify-end w-full">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => setIsCommenting(false)}
+            >
+              <XIcon />
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="lg"
+              onClick={handlePostComment}
+              disabled={commentContent.length <= 2}
+            >
+              <CheckIcon />
+              Post Comment
+            </Button>
+          </div>
+        </PostContentWrapperFooter>
+      </PostContentWrapper>
+    </div>
   );
 }

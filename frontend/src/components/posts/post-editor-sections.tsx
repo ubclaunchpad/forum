@@ -1,15 +1,13 @@
-import { cn } from "@/lib/utils";
+import { cn, getRelativeTimeString } from "@/lib/utils";
 import EditorComponent from "../general/EditorComponent";
-import { useContext, useState } from "react";
-import { userContext } from "@/providers/userContext";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { Post } from "@forum/shared";
-import { getApiUrl } from "@/utils/helpers";
+import { useState } from "react";
+import { Post, PostComment } from "@forum/shared";
 import {
   ArrowRightFromLine,
   MoreHorizontalIcon,
   PencilIcon,
+  ReplyIcon,
+  ThumbsUpIcon,
   TrashIcon,
 } from "lucide-react";
 import { Button } from "../ui/button";
@@ -23,6 +21,7 @@ type PostTextBoxSectionProps = {
     isEditing?: boolean;
     placeholder?: string;
     editable?: boolean;
+    editorClass?: string;
   };
 };
 
@@ -38,16 +37,17 @@ export function PostTextBoxSection({
   return (
     <div
       className={cn(
-        "flex flex-col relative   rounded-xl border  w-full border-[#BDCFCC] pb-4  gap-4 items-center ",
+        "flex flex-col relative   rounded-xl border  w-full border-[#BDCFCC]  gap-4 items-center ",
         options.isEditing ? "bg-white" : "bg-transparent border-transparent  ",
       )}
     >
       <div
         className={cn(
-          "flex  w-full overflow-hidden flex-1 p-2 px-4 pt-0 mt-0 w-full flex-col gap-2 border rounded-lg border-transparent",
+          "flex  w-full overflow-hidden flex-1 p-2 px-4 py-0 mt-0 w-full flex-col gap-2 border rounded-lg border-transparent",
         )}
       >
         <EditorComponent
+          className={options.editorClass}
           markdown={content ?? ""}
           onMarkdownChange={setContent}
           editable={options.editable ?? true}
@@ -245,6 +245,67 @@ export function PostContentWrapperFooter({
         !options.show ? "hidden" : "",
       )}
     >
+      {children}
+    </div>
+  );
+}
+
+export function PostCommentsSection({ comments }: { comments: PostComment[] }) {
+  return (
+    <div className="flex gap-2 flex-col py-6 w-full">
+      {comments.map((comment) => (
+        <PostCommentBox key={comment.id} comment={comment} />
+      ))}
+    </div>
+  );
+}
+export function PostCommentBox({ comment }: { comment: PostComment }) {
+  return (
+    <div className="flex flex-col w-full">
+      <div className="flex flex-row justify-between items-center w-full">
+        <div className="flex bg-white border border-primary-muted rounded-full  w-fit p-2 px-4">
+          <span className="text-sm text-neutral-800 font-medium">
+            {comment.authors.map((author) => author.pseudonym).join(", ")}
+          </span>
+        </div>
+        <div className="flex flex-row justify-end text-sm text-neutral-500 w-full">
+          {getRelativeTimeString(new Date(comment.created_at))}
+        </div>
+      </div>
+      <div className="flex flex-col px-1 w-full">
+        <div className="flex flex-col  border-l-2 border-primary-muted min-h-10 w-full">
+          <PostTextBoxSection
+            content={comment.content}
+            setContent={() => {}}
+            options={{
+              isEditing: false,
+              editable: false,
+              editorClass: "text-sm",
+            }}
+          />
+          <div className="flex flex-row w-full">
+            <div className="flex flex-row text-primary-700 font-semibold stroke-2 gap-6 px-4 w-full">
+              <button className="flex flex-row items-center gap-1">
+                <ThumbsUpIcon className="max-w-4 max-h-4" />
+              </button>
+              <button className="flex flex-row items-center gap-1">
+                <ReplyIcon className="max-w-4 max-h-4" />
+                <span className="text-sm font-semibold">Reply</span>
+              </button>
+              <button className="flex flex-row items-center gap-1">
+                <MoreHorizontalIcon className="max-w-4 max-h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function PostActionRow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-row text-primary-700 font-semibold stroke-2 gap-6 px-4 w-full">
       {children}
     </div>
   );

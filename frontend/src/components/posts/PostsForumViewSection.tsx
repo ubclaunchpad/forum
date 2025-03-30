@@ -36,7 +36,7 @@ export const PostsForumViewSection = ({
 };
 
 function PostToView({ initialPost }: { initialPost?: string }) {
-  const { posts } = useCourseStore((state) => state);
+  const posts = useCourseStore((state) => state.posts);
   const id = posts.find((post) => post.id === initialPost)?.id;
   const { token } = useContext(userContext) as { token: string };
   const {
@@ -54,7 +54,7 @@ function PostToView({ initialPost }: { initialPost?: string }) {
       }).then((res) => res.json()),
   });
 
-  if (!post && isLoading) {
+  if (isLoading) {
     return (
       <div className="flex w-full border-l border-neutral-200 justify-center items-center">
         <Loader2 className="h-4 w-4 animate-spin" />
@@ -70,5 +70,5 @@ function PostToView({ initialPost }: { initialPost?: string }) {
     );
   }
 
-  return <PostView<"published"> post={post} />;
+  return <PostView post={post} />;
 }
