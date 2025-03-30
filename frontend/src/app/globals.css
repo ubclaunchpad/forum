@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @config '../../tailwind.config.ts';
 
@@ -70,9 +70,6 @@
     --primary-800: #264948;
     --primary-900: #233e3d;
     --primary-950: #102223;
-
-
-
 
     --course-font-title: var(--font-quicksand);
     --course-font-body: var(--font-source-sans);
@@ -188,9 +185,6 @@ dialog {
   margin-top: 1rem;
 }
 
-
-
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -219,8 +213,7 @@ dialog {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
 
-    --primary-border: #BDCFCC;
-
+    --primary-border: #bdcfcc;
   }
 
   .dark {
@@ -249,12 +242,9 @@ dialog {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
 
-    --primary-border: #BDCFCC;
-
+    --primary-border: #bdcfcc;
   }
 }
-
-
 
 .tiptap-math.latex {
   display: inline-flex;

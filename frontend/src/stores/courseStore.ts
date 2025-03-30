@@ -1,5 +1,5 @@
 // import {  coursePartialUpdateSchema } from "@/lib/types/course";
-import { Course, PostList } from "@forum/shared";
+import { Course, MutatePostArguments, Post } from "@forum/shared";
 import { Tag } from "@/lib/types/tags";
 import { createStore } from "zustand";
 import { persist } from "zustand/middleware";
@@ -8,8 +8,9 @@ import { createJSONStorage } from "zustand/middleware";
 export type CourseState = {
   course: Course;
   pendingCourse: Course;
-  posts: PostList[];
+  posts: Post[];
   tags: Tag[];
+  postDraft: MutatePostArguments | null;
 };
 
 export type CourseActions = {
@@ -17,7 +18,8 @@ export type CourseActions = {
   saveCourseChanges: () => boolean;
   resetPendingChanges: () => void;
   addTag: (tag: Tag) => void;
-  setPosts: (posts: PostList[]) => void;
+  setPosts: (posts: Post[]) => void;
+  setPostDraft: (postDraft: MutatePostArguments | null) => void;
 };
 
 export type CourseStore = CourseState & CourseActions;
@@ -26,8 +28,10 @@ export const createCourseStore = (initState: CourseState) => {
   return createStore<CourseStore>()(
     persist(
       (set) => ({
-      ...initState,
-        setPosts: (posts: PostList[]) => set({ posts }),
+        ...initState,
+        setPosts: (posts: Post[]) => set({ posts }),
+        setPostDraft: (postDraft: MutatePostArguments | null) =>
+          set({ postDraft }),
         pendingCourse: initState.course,
         updatePendingCourse: (courseDetails: Partial<Course>) =>
           set((state) => {

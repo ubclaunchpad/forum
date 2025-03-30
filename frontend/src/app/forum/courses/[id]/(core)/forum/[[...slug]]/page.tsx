@@ -6,7 +6,5 @@ export default async function ForumWrapper({
   params: Promise<{ id: string; slug: string[] | undefined }>;
 }) {
   const { slug } = await params;
-  return (
-    <PostsForumPage initalPost={slug ? slug[0] : undefined} />
-  );
+  return <PostsForumPage initalPost={slug ? slug[0] : undefined} />;
 }

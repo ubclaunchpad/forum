@@ -30,7 +30,6 @@ export const PostCard = <T extends PostType>({
   post,
   isSelected,
 }: PostCardProps<T>) => {
-
   const user = useContext(userContext);
   const course = useCourseStore((state) => state.course);
   // const { updatePost } = useContext(forumPostsContext);
@@ -101,7 +100,6 @@ export const PostCard = <T extends PostType>({
     //   },
     //   body: JSON.stringify({ courseId: course.id }),
     // });
-
     // if (!response.ok) {
     //   throw new Error(`Failed to mark post as unliked`);
     // }
@@ -221,9 +219,9 @@ export const PostCard = <T extends PostType>({
             </h2>
           )}
 
-          {!post.user_interactions?.viewed && (
+          {/* {!post.user_interactions?.viewed && (
             <span className="w-2.5 h-2.5 rounded-full bg-primary-600 inline-block"></span>
-          )}
+          )} */}
         </div>
       </div>
 
@@ -245,7 +243,7 @@ export const PostCard = <T extends PostType>({
           <div className="flex flex-1 " />
 
           {/* Display likes, and allow user to like post */}
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             {post.user_interactions?.liked ? (
               <ThumbsUp
                 className="h-5 w-5 text-primary-600 cursor-pointer"
@@ -261,9 +259,9 @@ export const PostCard = <T extends PostType>({
             <span className="text-xs text-neutral-700">
               {post.stats?.likes || 0}
             </span>
-          </div>
+          </div> */}
 
-          <Popover>
+          {/* <Popover>
             <PopoverContent
               side="right"
               align="start"
@@ -312,7 +310,7 @@ export const PostCard = <T extends PostType>({
                 <MoreHorizontal className="h-5 w-5 opacity-70" />
               </button>
             </PopoverTrigger>
-          </Popover>
+          </Popover> */}
         </div>
       )}
     </Link>

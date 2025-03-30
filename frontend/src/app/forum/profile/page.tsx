@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 export default function ProfilePage() {
   const router = useRouter();
   return (
-    <div className="flex flex-col w-full min-h-dvh items-center justify-center ">
+    <div className="flex flex-col w-full  items-center justify-center ">
       <div className="flex w-full p-4">
         <button
           onClick={() => {

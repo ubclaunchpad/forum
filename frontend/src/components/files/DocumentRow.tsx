@@ -3,7 +3,13 @@ import DocumentOptionsPopover from "../course/documents/DocumentOptionsPopover";
 import { GetDocument } from "@forum/shared";
 import { FileText } from "lucide-react";
 import PDFIcon from "../customIcons/PDFIcon";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 import { Button } from "../ui/button";
 
 const getFileIcon = (fileType: string, className?: string) => {
@@ -62,11 +68,10 @@ export default function DocumentRow({
           >
             {document.file.name}
           </span>
-         
-            <p className="text-xs text-neutral-500 flex-shrink-0   truncate">
-              {document.description? document.description : "no description"}
-            </p>
-      
+
+          <p className="text-xs text-neutral-500 flex-shrink-0   truncate">
+            {document.description ? document.description : "no description"}
+          </p>
         </div>
       </div>
 

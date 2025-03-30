@@ -1,249 +1,251 @@
-import { PostType, PostWithRequiredId } from "@/lib/types/posts";
-import { Suspense, useContext, useEffect, useState } from "react";
+"use client";
+
+import { Suspense, useContext, useState } from "react";
+import { CheckIcon, DotIcon, XIcon } from "lucide-react";
+import { getRelativeTimeString } from "@/lib/utils";
+import { useCourseStore } from "@/providers/courseStoreProvider";
+import { Post } from "@forum/shared";
+import {
+  PostTitleSection,
+  PostTextBoxSection,
+  PostViewWrapper,
+  PostViewHeaderWrapper,
+  PostContentWrapper,
+  PostPopoverOptions,
+  PostContentWrapperFooter,
+} from "./post-editor-sections";
 import { Button } from "../ui/button";
 import { getApiUrl } from "@/utils/helpers";
-import { useToast } from "@/hooks/use-toast";
 import { userContext } from "@/providers/userContext";
-import { ArrowRightFromLine, DotIcon, MessageSquareReplyIcon } from "lucide-react";
-import { getRelativeTimeString, isIDTemporary } from "@/lib/utils";
-import { forumPostsContext } from "@/providers/PostsContext";
-import PostTextEditor from "./PostTextEditor";
-import { useCourseStore } from "@/providers/courseStoreProvider";
-import { PostResponse } from "@forum/shared";
-import Link from "next/link";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-export default function PostView<T extends PostType>({
-  post,
-}: {
-  post: T extends "draft" ? PostResponse : PostResponse;
-}) {
-  const {
-    setListOfPosts,
-    selectedPost,
-    setDrafts: setListOfDrafts,
-    setSelectedPost,
-    setIsEditing,
-  } = useContext(forumPostsContext);
-
+export default function PostView({ post }: { post: Post }) {
   const course = useCourseStore((state) => state.course);
-  const user = useContext(userContext);
-
-  const oldContent = post?.content;
-
+  const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(post?.title ?? "");
   const [content, setContent] = useState(post?.content ?? "");
-
-  const isTemporary = isIDTemporary(post?.id);
-
-  const { toast } = useToast();
-  const [isSaving, setIsSaving] = useState(false);
-
-  async function handleSaveAction() {
-    if (isIDTemporary(post.id)) {
-      await handlePublish();
-    } else {
-      await handleSave();
-    }
-  }
-
-  async function handlePublish() {
-    setIsSaving(true);
-    const requestData = {
-      title: title,
-      content: content,
-    };
-
-    try {
-      const res = await fetch(
-        `${getApiUrl()}/courses/${course.id as string}/posts`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-          body: JSON.stringify(requestData),
-        },
-      );
-
-      if (res.ok) {
-        const newPost = await res.json();
-
-        // Remove from drafts
-        setListOfDrafts((prev) => prev.filter((p) => p.id !== post.id));
-
-        // Add to list of posts
-        setListOfPosts((prev) => [newPost, ...prev]);
-
-        // Update selected post to the new published version
-        setSelectedPost(newPost);
-
-        // Clear editing state
-        setIsEditing(null);
-
-        // Revalidate
-        await fetch("/api/revalidate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ courseId: course.id }),
-        });
-
-        toast({
-          title: "Success",
-          description: "Post published successfully",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to publish post",
-        });
-      }
-    } catch (error) {
-      console.error("Error publishing post:", error);
-      toast({
-        title: "Error",
-        description: "Failed to publish post",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  }
+  const { token } = useContext(userContext);
+  const router = useRouter();
 
   async function handleSave() {
-    setIsSaving(true);
-    const requestData = {
-      post_id: post.id,
-      title: title,
-      new_content: content,
-      userVisibility: "public",
-    };
-
-    if (isTemporary) {
-      setIsSaving(false);
-      setListOfDrafts((prev) => {
-        return prev.map((p) => {
-          if (p.id === post.id) {
-            return { ...p, content: content };
-          }
-          return p;
-        });
-      });
-
-      return;
-    } else {
-      setListOfPosts((prev) => {
-        return prev.map((p) => {
-          if (p.id === post.id) {
-            return { ...p, content: content } as Post;
-          }
-          return p;
-        });
-      });
-    }
-    const res = await fetch(
-      `${getApiUrl()}/courses/${course.id as string}/posts/${post.local_id}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify({
-          ...requestData,
-          post_id: parseInt(requestData.post_id),
-        }),
+    const res = await fetch(`${getApiUrl()}/posts/${post.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-    );
+      body: JSON.stringify({
+        post: {
+          title,
+          content,
+          course_id: course.id,
+        },
+        options: {},
+      }),
+    });
+
     if (res.ok) {
-      if (res.ok) {
-        fetch("/api/revalidate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ courseId: course.id }),
-        });
-      }
+      toast.success("Post updated successfully");
+      setIsEditing(false);
     } else {
-      toast({
-        title: "Error",
-        description: "Failed to save post",
-      });
-      setListOfPosts((prev) => {
-        return prev.map((p) => {
-          if (p.id === post.id) {
-            return { ...p, content: oldContent } as Post;
-          }
-          return p;
-        });
-      });
-      console.log("Error");
+      toast.error("Failed to update post");
     }
-    setIsSaving(false);
   }
 
-  useEffect(() => {
-    setContent(post.content ?? "");
-    setTitle(post.title ?? "");
-  }, [post]);
+  async function handleDelete() {
+    const res = await fetch(`${getApiUrl()}/posts/${post.id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.ok) {
+      toast.success("Post deleted successfully");
+      router.push(`/forum/courses/${course.id}/forum`);
+    } else {
+      toast.error("Failed to delete post");
+    }
+  }
 
   return (
-    <div
-      className={`flex justify-center pb-10 flex-1 h-full lg:border-l px-4 overflow-auto  shrink-0 w-full transition-all duration-300 ${selectedPost ? "border-neutral-200" : "border-neutral-200"}`}
-    >
-      <div className="flex-1 relative flex flex-col p-4 pt-0 ">
-        <div className=" w-full h-16   shrink-0 px-2 flex items-center  gap-2">
-          <div className="flex  item-center gap-6 flex-1 text-primary-700 ">
-            <Link
-              href={`/forum/courses/${course.id}/forum`}
-              className="p-0"
-            >
-              <ArrowRightFromLine className="min-w-5 min-h-5 " />
-            </Link>
-          </div>
-          <div className="flex justify-end item-center gap-0.5 text-neutral-700 flex-1">
-            {isTemporary ? (
-              <></>
-            ) : (
-              <>
-                <h2 className=" font-medium text-sm ">Post #{post.number_id}</h2>
-                <span>
-                  <DotIcon className="opacity-50 min-w-5 min-h-5 " />
-                </span>
-                <h2 className=" font-medium text-sm ">
-                  {post.updatedAt &&
-                    getRelativeTimeString(
-                      new Date(post.updatedAt).getTime(),
-                      "en",
-                      30,
-                    )}
-                </h2>
-              </>
-            )}
-          </div>
+    <PostViewWrapper>
+      <PostViewHeaderWrapper
+        options={{
+          canNavigateBack: true,
+          navigateBackUrl: `/forum/courses/${course.id}/forum`,
+        }}
+      >
+        <div className="flex justify-end item-center gap-0.5 text-neutral-700 flex-1">
+          <h2 className=" font-medium text-sm ">Post #{post.number_id}</h2>
+          <span>
+            <DotIcon className="opacity-50 min-w-5 min-h-5 " />
+          </span>
+          <h2 className=" font-medium text-sm ">
+            {post.updated_at &&
+              getRelativeTimeString(
+                new Date(post.updated_at).getTime(),
+                "en",
+                30,
+              )}
+          </h2>
         </div>
+      </PostViewHeaderWrapper>
 
-        {isSaving && <div className="shimmer-reverse"></div>}
-        <Suspense fallback={null}>
-          <PostTextEditor
-          readonly={true}
-            post={post}
+      <Suspense fallback={null}>
+        <PostContentWrapper options={{ isEditing: isEditing }}>
+          <PostTitleSection
             title={title}
-            content={content}
             setTitle={setTitle}
+            options={{ placeholder: "Post Title", isEditing: isEditing }}
+          >
+            <PostPopoverOptions
+              post={post}
+              isEditing={isEditing}
+              setIsEditing={setIsEditing}
+              actions={{
+                handleSave,
+                handleDelete,
+              }}
+            />
+          </PostTitleSection>
+          <PostTextBoxSection
+            content={content}
             setContent={setContent}
-            handleSave={handleSaveAction}
+            options={{ isEditing: isEditing }}
           />
-        </Suspense>
-        <div className="flex justify-center items-center h-16 shrink-0 border-b py-2 w-full gap-2">
-          <Button variant="outline" size="sm">  
-            <MessageSquareReplyIcon className="min-w-5 min-h-5" />
-            Reply
+        </PostContentWrapper>
+        <PostContentWrapperFooter options={{ show: isEditing }}>
+          <div className="flex gap-2 justify-end w-full">
+            <Button
+              variant="outline"
+              className="border-primary-muted cursor-pointer"
+              size="lg"
+              onClick={() => {
+                setTitle(post.title ?? "");
+                setContent(post.content ?? "");
+                setIsEditing(false);
+              }}
+            >
+              <XIcon />
+              Cancel
+            </Button>
+            <Button
+              className="px-4 cursor-pointer "
+              variant={`${isEditing ? "default" : "ghost"}`}
+              onClick={handleSave}
+              disabled={
+                (content === post.content && title === post.title) ||
+                content.length <= 2 ||
+                title.length <= 2
+              }
+              size="lg"
+            >
+              <CheckIcon />
+              Save
+            </Button>
+          </div>
+        </PostContentWrapperFooter>
+      </Suspense>
+    </PostViewWrapper>
+  );
+}
+
+export function PostMutatationEditor() {
+  const postDraft = useCourseStore((state) => state.postDraft);
+  const setPostDraft = useCourseStore((state) => state.setPostDraft);
+  const router = useRouter();
+  const course = useCourseStore((state) => state.course);
+  if (!postDraft) {
+    return null;
+  }
+
+  const { token } = useContext(userContext);
+  async function handleCreatePost() {
+    if (!postDraft) {
+      return;
+    }
+    const res = await fetch(`${getApiUrl()}/posts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        post: postDraft.postArgs,
+        options: postDraft.optionArgs,
+      }),
+    });
+
+    if (res.ok) {
+      const newPost = await res.json();
+      setPostDraft(null);
+      router.prefetch(`/forum/courses/${course.id}/forum/${newPost.id}`);
+      toast.success("Post created successfully");
+      router.push(`/forum/courses/${course.id}/forum/${newPost.id}`);
+    } else {
+      toast.error("Failed to create post");
+    }
+  }
+
+  return (
+    <PostViewWrapper>
+      <PostViewHeaderWrapper
+        options={{
+          canNavigateBack: false,
+          navigateBackUrl: "",
+          onNavigateBack: () => setPostDraft(null),
+        }}
+      >
+        <div className="flex justify-end items-center 2 w-full gap-2">
+          <h2 className=" font-medium text-sm ">Draft</h2>
+        </div>
+      </PostViewHeaderWrapper>
+      <PostContentWrapper options={{ isEditing: true }}>
+        <PostTitleSection
+          title={postDraft.postArgs.title ?? ""}
+          setTitle={(title) =>
+            setPostDraft({
+              ...postDraft,
+              postArgs: { ...postDraft.postArgs, title },
+            })
+          }
+          options={{ placeholder: "Post Title", isEditing: true }}
+        />
+        <PostTextBoxSection
+          content={postDraft.postArgs.content ?? ""}
+          setContent={(content) =>
+            setPostDraft({
+              ...postDraft,
+              postArgs: { ...postDraft.postArgs, content },
+            })
+          }
+          options={{ editable: true, isEditing: true }}
+        />
+      </PostContentWrapper>
+      <PostContentWrapperFooter options={{ show: true }}>
+        <div className="flex gap-2 justify-end w-full">
+          <Button
+            variant="outline"
+            className="border-primary-muted cursor-pointer"
+            size="lg"
+            onClick={() => setPostDraft(null)}
+          >
+            <XIcon />
+            Discard
+          </Button>
+          <Button
+            variant="default"
+            className="cursor-pointer"
+            size="lg"
+            onClick={handleCreatePost}
+          >
+            <CheckIcon />
+            Create Post
           </Button>
         </div>
-      </div>
-    </div>
+      </PostContentWrapperFooter>
+    </PostViewWrapper>
   );
 }

@@ -1,20 +1,28 @@
 "use client";
 
-import PostView from "./PostView";
+import PostView, { PostMutatationEditor } from "./PostView";
 import { useContext } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getApiUrl } from "@/utils/helpers";
-import { PostResponse } from "@forum/shared";
+import { Post } from "@forum/shared";
 import { Loader2 } from "lucide-react";
 import { userContext } from "@/providers/userContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 
+export const PostsForumViewSection = ({
+  initialPost,
+}: {
+  initialPost?: string;
+}) => {
+  const postDraft = useCourseStore((state) => state.postDraft);
 
-export const PostsForumViewSection = ({initialPost}: {initialPost?: string}) => {
-  
+  if (postDraft) {
+    return <PostMutatationEditor />;
+  }
+
   if (!initialPost) {
-  return (
-    <>
+    return (
+      <>
         <div
           className={`xl:flex hidden justify-center flex-1 lg:border-l items-center text-neutral-500 flex-shrink-0 w-full transition-all duration-300 border-neutral-200`}
         >
@@ -27,20 +35,23 @@ export const PostsForumViewSection = ({initialPost}: {initialPost?: string}) => 
   return <PostToView initialPost={initialPost} />;
 };
 
-
-function PostToView({initialPost}: {initialPost?: string}) {
+function PostToView({ initialPost }: { initialPost?: string }) {
   const { posts } = useCourseStore((state) => state);
   const id = posts.find((post) => post.id === initialPost)?.id;
   const { token } = useContext(userContext) as { token: string };
-  const { data: post, isLoading, error } = useQuery({
+  const {
+    data: post,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["post", id],
-    
+
     queryFn: () =>
       fetch(`${getApiUrl()}/posts/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }).then((res) => res.json()),
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }).then((res) => res.json()),
   });
 
   if (!post && isLoading) {
@@ -59,5 +70,5 @@ function PostToView({initialPost}: {initialPost?: string}) {
     );
   }
 
-  return <PostView<"published"> post={post as PostResponse} />;
+  return <PostView<"published"> post={post} />;
 }

@@ -9,15 +9,11 @@ import { useQuery } from "@tanstack/react-query";
 import { userContext } from "@/providers/userContext";
 import { getApiUrl } from "@/utils/helpers";
 
-export const PostsForumPage = ({
-  initalPost,
-}: {
-  initalPost?: string;
-}) => {
-  const  setPosts = useCourseStore((state) => state.setPosts);
-  const {token} = useContext(userContext);
+export const PostsForumPage = ({ initalPost }: { initalPost?: string }) => {
+  const setPosts = useCourseStore((state) => state.setPosts);
+  const { token } = useContext(userContext);
   const course = useCourseStore((state) => state.course);
-  const {data} = useQuery({
+  const { data } = useQuery({
     queryKey: ["posts", course.id],
     queryFn: () => getPosts(course.id, token),
   });
@@ -28,13 +24,12 @@ export const PostsForumPage = ({
   }, [data]);
 
   return (
-      <div className="flex flex-1 overflow-hidden  ">
-        <PostsForumSidebar selectedPost={initalPost} />
-        <PostsForumViewSection initialPost={initalPost} />
-      </div>
+    <div className="flex flex-1 overflow-hidden  ">
+      <PostsForumSidebar selectedPost={initalPost} />
+      <PostsForumViewSection initialPost={initalPost} />
+    </div>
   );
 };
-
 
 async function getPosts(id: string, token: string) {
   try {
@@ -66,9 +61,6 @@ async function getPosts(id: string, token: string) {
       })),
       error: null,
     };
-
-
-
   } catch (e) {
     console.error("Error fetching posts:", e);
     return {

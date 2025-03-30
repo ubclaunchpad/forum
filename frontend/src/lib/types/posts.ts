@@ -1,6 +1,5 @@
 import { PostList } from "@forum/shared";
 
-
 export type PostWithRequiredId = { id: string } & Partial<Omit<PostList, "id">>;
 
 type OptimisticOperation = {
