@@ -37,6 +37,8 @@ export const tagPermissionsSchema = z.object({
 });
 
 export type TagPermissions = z.infer<typeof tagPermissionsSchema>;
+export type TagPermissionsKey = keyof TagPermissions; 
+export const TAG_PERMISSIONS_KEYS = tagPermissionsSchema.keyof().options as TagPermissionsKey[];
 
 export const baseTagSchema = z.object({
     parent_id: z.string().optional(),

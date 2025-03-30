@@ -89,3 +89,13 @@ export const newTagData = {
         student: false
     }
 }
+
+export const newPost = {
+    title: "Test Post",
+    content: "Test Content"
+};
+
+export const newPostOptions = {
+    visibility: "public",
+    use_pseudonym: true,
+};

@@ -1,6 +1,8 @@
 import { supa } from '../db.ts';
 import { PermissionError } from '../errors.ts';
-import { DefaultRoles, instructorRole, Permissions } from '../../../../../shared/schema/course.ts';
+import { DEFAULT_ROLES, DefaultRoles, instructorRole, Permissions } from '../../../../../shared/schema/course.ts';
+import { getTagNested } from './tag_helper.ts';
+import { NestedTag, TAG_PERMISSIONS_KEYS, TagPermissions, tagPermissionsSchema, TagPermissionsKey, Tag } from "@shared/schema/tag.ts";
 
 export async function isUserMemberOfCourse(user_id: string, course_id: string): Promise<boolean> {
     const { data, error } = await supa.from('course_members')
@@ -83,4 +85,80 @@ export async function getUserPermissionsInCourse(user_id: string, course_id: str
     }
 
     return roleData[0].default_permissions as Permissions;
+}
+
+export async function getPostPermissions(post_id: string) {
+    const { data: postTagsData, error: postTagsError } = await supa.from("post_tags")
+        .select("tags(*)")
+        .eq("post_id", post_id);
+    
+    if (postTagsError) {
+        console.error(postTagsError.message);
+        throw new Error(`Internal server error: ${postTagsError.message}`);
+    }
+    if (!postTagsData || postTagsData.length === 0) {
+        return tagPermissionsSchema.parse({});
+    }
+
+    const tags = postTagsData.flatMap(entry => entry.tags) as Tag[];
+    const tagPermissionsPromises = tags.map(tag => getTagPermissions(tag.id));
+    const tagPermissions = await Promise.all(tagPermissionsPromises);
+    const postPermissions = mergePermissions(tagPermissions);
+    return postPermissions;
+}
+
+export function getTagPermissions(tag_id: string): Promise<TagPermissions> {
+    return getTagNested(tag_id)
+    .then((nestedTag) => {
+        const flattenPermissions = flattenTagPermissions(nestedTag);
+        const tagPermissions = mergePermissions(flattenPermissions);
+        return tagPermissions;
+    });
+}
+
+function mergePermissions(permissionsArray: TagPermissions[]): TagPermissions {
+    const mergedPermissions = tagPermissionsSchema.parse({});
+    TAG_PERMISSIONS_KEYS.forEach((permKey: TagPermissionsKey) => {
+        mergedPermissions[permKey] = DEFAULT_ROLES.reduce((acc, role) => {
+            acc[role] = permissionsArray.every(perms => perms[permKey][role]);
+            return acc;
+        }, {} as Record<DefaultRoles, boolean>);
+    });
+    return mergedPermissions;
+}
+
+function flattenTagPermissions(nestedTag: NestedTag): TagPermissions[] {
+    const result = [ nestedTag.permissions ];
+    if (nestedTag.parent_id === null || nestedTag.parent_id === undefined) {
+        return result;
+    }
+    return result.concat(flattenTagPermissions(nestedTag.parent));
+}
+
+export async function isUserPostAuthor(user_id: string, post_id: string): Promise<boolean> {
+    const { data: authorData, error: authorError } = await supa.from("post_authors")
+        .select("*")
+        .eq("post_id", post_id)
+        .is("comment_id", null)
+        .is("reply_id", null);
+    
+    if (authorError) {
+        console.error(authorError);
+        throw new Error(`Failed to retrieve authors of post ${post_id}: ${authorError.message}`);
+    }
+
+    return authorData.find(entry => entry.user_id === user_id);
+}
+
+export async function isUserReplyAuthor(user_id: string, reply_id: string): Promise<boolean> {
+    const { data: authorData, error: authorError } = await supa.from("post_authors")
+        .select("*")
+        .eq("reply_id", reply_id);
+    
+    if (authorError) {
+        console.error(authorError);
+        throw new Error(`Failed to retrieve authors of reply ${reply_id}: ${authorError.message}`);
+    }
+
+    return authorData.find(entry => entry.user_id === user_id);
 }
