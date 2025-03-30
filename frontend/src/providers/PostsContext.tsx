@@ -34,7 +34,8 @@ export function ForumContextProvider({
   const router = useRouter();
   const foundPost = initialSelectedId
     ? initialPosts.find(
-        (post) => post.local_id.toString() === initialSelectedId,
+        // (post) => post.local_id.toString() === initialSelectedId,
+        (post) => post.id === initialSelectedId,
       )
     : null;
 
@@ -100,11 +101,11 @@ export function ForumContextProvider({
 
     if (!["local", "pending"].includes(getIdType(post.id))) {
       if (selectedPost) {
-        router.push(`/forum/courses/${course.id}/forum/${post.local_id}`, {
+        router.push(`/forum/courses/${course.id}/forum/${post.id}`, {
           scroll: false,
         });
       } else {
-        router.push(`/forum/courses/${course.id}/forum/${post.local_id}`, {
+        router.push(`/forum/courses/${course.id}/forum/${post.id}`, {
           scroll: false,
         });
       }

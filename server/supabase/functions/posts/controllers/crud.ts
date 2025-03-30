@@ -1,6 +1,7 @@
 import { sqlClient, supa } from "../../_shared/db.ts";
 
 import {
+PostComment,
   type MutatePost,
   type MutatePostEdit,
   type MutatePostOptions,
@@ -73,16 +74,65 @@ export async function createPost(
 export async function getPost(
   userId: string,
   postId: string,
-  getRepliesComments: boolean,
 ): Promise<Post> {
   const sql = sqlClient();
   const post = await sql.begin(async (tx) => {
     const [post] = await tx`
-      SELECT * FROM posts WHERE id = ${postId}
+      SELECT p.*,
+        (
+          SELECT COALESCE(json_agg(
+            json_build_object(
+              'id', pc.id,
+              'postId', pc.post_id,
+              'content', pc.content,
+              'number_id', pc.number_id,
+              'created_at', pc.created_at,
+              'updated_at', pc.updated_at,
+              'authors', COALESCE((
+                SELECT json_agg(
+                  json_build_object(
+                    'user_id', CASE WHEN pa.is_anonymous THEN NULL ELSE pa.user_id END,
+                    'post_id', pa.post_id,
+                    'comment_id', pa.comment_id,
+                    'reply_id', pa.reply_id,
+                    'is_anonymous', pa.is_anonymous,
+                    'visibility', pa.visibility,
+                    'created_at', pc.created_at,
+                    'updated_at', pc.updated_at,
+                    'pseudonym', pap.pseudonym
+                  )
+                )
+                FROM post_authors pa
+                INNER JOIN post_author_pseudonyms pap
+                ON pa.user_id = pap.user_id AND pa.post_id = pap.post_id
+                WHERE pa.post_id = p.id AND pa.comment_id = pc.id
+              ), '[]'::json)
+            )
+          ), '[]'::json)
+          FROM post_comments pc
+          WHERE pc.post_id = p.id
+        ) as comments,
+        (
+          SELECT COALESCE(json_agg(
+            json_build_object(
+              'user_id', CASE WHEN pa.is_anonymous THEN NULL ELSE pa.user_id END,
+              'post_id', pa.post_id,
+              'is_anonymous', pa.is_anonymous,
+              'visibility', pa.visibility,
+              'pseudonym', pap.pseudonym
+            )
+          ), '[]'::json)
+          FROM post_authors pa
+          LEFT JOIN post_author_pseudonyms pap
+          ON pa.user_id = pap.user_id AND pa.post_id = pap.post_id
+          WHERE pa.post_id = p.id AND pa.comment_id IS NULL AND pa.reply_id IS NULL
+        ) as authors
+      FROM posts p WHERE p.id = ${postId}
     `;
     if (!post || post.length === 0) {
       throw new Error("Post does not exist");
     }
+    
     const [member] = await tx`
       SELECT * FROM course_members WHERE course_id = ${post.course_id} AND user_id = ${userId}
     `;
@@ -90,17 +140,10 @@ export async function getPost(
       throw new Error("User is not registered in course");
     }
 
-    const authors = await tx`
-    SELECT pa.user_id, pa.post_id, pa.is_anonymous, pa.visibility, pap.pseudonym 
-    FROM post_authors pa 
-    INNER JOIN post_author_pseudonyms pap 
-    ON pa.user_id = pap.user_id AND pa.post_id = pap.post_id 
-    WHERE pa.post_id = ${postId}
-    `;
-
     return {
       ...post,
-      authors: authors,
+      comments: post.comments || [],
+      authors: post.authors || [],
     } as unknown as Post;
   });
   await sql.end();
@@ -111,7 +154,6 @@ export async function getPosts(
   userId: string,
   courseId: string,
   fullPost: boolean = false,
-  getRepliesComments: boolean,
 ): Promise<Post[]> {
   const sql = sqlClient();
   const inCourse = await userInCourse(userId, courseId);
@@ -122,37 +164,29 @@ export async function getPosts(
 
   const posts = await sql.begin(async (tx) => {
     const contentClause = fullPost
-      ? sql`posts.content as content`
-      : sql`SUBSTRING(posts.content, 1, 200) as content`;
+      ? sql`p.content as content`
+      : sql`SUBSTRING(p.content, 1, 200) as content`;
     const posts = await tx`
-      SELECT id, course_id, title, number_id, ${contentClause}, status, created_at, updated_at, visibility,
+      SELECT p.id, p.course_id, p.title, p.number_id, ${contentClause}, p.status, p.created_at, p.updated_at, p.visibility,
         (
-          SELECT json_agg(row_to_json(post_authors))
-          FROM post_authors
-          WHERE post_authors.post_id = posts.id
+          SELECT COALESCE(json_agg(
+            json_build_object(
+              'user_id', CASE WHEN pa.is_anonymous THEN NULL ELSE pa.user_id END,
+              'post_id', pa.post_id,
+              'comment_id', pa.comment_id,
+              'reply_id', pa.reply_id,
+              'is_anonymous', pa.is_anonymous,
+              'visibility', pa.visibility,
+              'pseudonym', pap.pseudonym
+            )
+          ), '[]'::json)
+          FROM post_authors pa
+          LEFT JOIN post_author_pseudonyms pap
+          ON pa.user_id = pap.user_id AND pa.post_id = pap.post_id
+          WHERE pa.post_id = p.id AND pa.comment_id IS NULL AND pa.reply_id IS NULL
         ) as authors
-      FROM posts WHERE course_id = ${courseId} 
+      FROM posts p WHERE p.course_id = ${courseId} 
     `;
-
-    const postAuthors = await tx`
-      SELECT post_id, user_id, is_anonymous, visibility, 
-        (
-          SELECT pseudonym FROM post_author_pseudonyms WHERE post_id = post_authors.post_id AND user_id = post_authors.user_id
-        ) as pseudonym
-      FROM post_authors WHERE post_id IN (SELECT id FROM posts)
-    `;
-
-    const postAuthorsMap = new Map<string, PostAuthor[]>();
-    postAuthors.forEach((postAuthor) => {
-      if (!postAuthorsMap.has(postAuthor.post_id)) {
-        postAuthorsMap.set(postAuthor.post_id, []);
-      }
-      postAuthorsMap.get(postAuthor.post_id)?.push(postAuthor as PostAuthor);
-    });
-
-    posts.forEach((post) => {
-      post.authors = postAuthorsMap.get(post.id) ?? [];
-    });
     return posts as unknown as Post[];
   });
 
@@ -221,7 +255,7 @@ export async function updatePost(
   });
 
   await sql.end();
-  return getPost(userId, postId, false);
+  return getPost(userId, postId);
 }
 
 /**
@@ -240,13 +274,15 @@ export async function deletePost(
     throw new Error("Post does not exist");
   }
 
+  // TODO: ADD BACK IN LATER
+  // console.log("postId", postId);
   // Check if post is created by author
-  const { error: postAuthorError } = await supa.from("post_authors").select()
-    .eq("post_id", postId).eq("user_id", userId).single();
+  // const { error: postAuthorError } = await supa.from("post_authors").select()
+  //   .eq("post_id", postId).eq("user_id", userId).single();
 
-  if (postAuthorError) {
-    throw new Error("Error: " + postAuthorError.message);
-  }
+  // if (postAuthorError) {
+  //   throw new Error("Error: " + postAuthorError.message);
+  // }
 
   // Assuming cascade from deleting post, don't need to delete others
   const { error: deletionError } = await supa.from("posts").delete().eq(

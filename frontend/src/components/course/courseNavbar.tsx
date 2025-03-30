@@ -1,12 +1,24 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { MessagesSquare, FileText, TrendingUpIcon } from "lucide-react";
+import {
+  MessagesSquare,
+  TrendingUpIcon,
+  StarIcon,
+  FolderIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useRef, useEffect } from "react";
 
 const tabs = [
+  {
+    name: "announcements",
+    icon: StarIcon,
+    label: "Announcements",
+    href: "announcements",
+    disabled: false,
+  },
   {
     name: "forum",
     icon: MessagesSquare,
@@ -16,7 +28,7 @@ const tabs = [
   },
   {
     name: "resources",
-    icon: FileText,
+    icon: FolderIcon,
     label: "Resources",
     href: "resources",
     disabled: false,
@@ -56,7 +68,7 @@ export default function CourseNavbar() {
   }, [tab]);
 
   return (
-    <div className="flex flex-shrink-0 justify-between items-center w-full border-b  px-2 border-b-neutral-200">
+    <div className="flex shrink-0 justify-between items-center w-full border-b  px-2 border-b-neutral-200">
       <div className="flex relative gap-6">
         <div
           ref={sliderRef}
@@ -70,7 +82,7 @@ export default function CourseNavbar() {
             href={tab.disabled ? "#" : `/forum/courses/${courseid}/${tab.href}`}
             key={tab.name}
             className={cn(
-              `flex items-center no-underline  border-b-2 hover:text-primary-500 rounded-none font-semibold  normal  border-transparent gap-2 px-3 py-2 h-9 
+              `flex items-center no-underline text-sm border-b-2 hover:text-primary-500 rounded-none font-semibold  normal  border-transparent gap-2 px-3 py-2 h-9 
             `,
               isSelected(tab.name)
                 ? "text-primary-600 "

@@ -10,8 +10,8 @@ export function MainSidebar({
   return (
     <div
       className={cn(
-        "relative flex flex-col",
-        "hidden md:block md:min-w-[min(280px,100%)] w-full max-w-0 lg:max-w-[280px] border-r",
+        "relative flex flex-col flex-1 ",
+        "hidden md:flex md:min-w-[min(280px,100%)] w-full max-w-0 lg:max-w-[280px] border-r",
         className,
       )}
     >
@@ -30,7 +30,7 @@ export function MainListPanel({
   return (
     <div
       className={cn(
-        "relative flex flex-1 flex-col",
+        "bg-white relative flex flex-1 flex-col",
         "min-w-[min(500px,100%)] w-full xl:max-w-[500px]",
         className,
       )}

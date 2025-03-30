@@ -1,105 +1,123 @@
 "use client";
-import {
-  checkPermissionInDomain,
-  cn,
-  generateTempId,
-  PERMISSIONS,
-} from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { PostCard } from "./PostCard";
-import { useCallback, useContext, useEffect, useRef } from "react";
-import { forumPostsContext } from "@/providers/PostsContext";
 import { Button } from "../ui/button";
-import { PostWithRequiredId } from "@/lib/types/posts";
 import { MainListPanel, MainSidebar } from "../general/FourmTabs";
-import { PlusIcon } from "lucide-react";
-import { userContext } from "@/providers/userContext";
+import {
+  BookmarkIcon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  FlagIcon,
+  PlusIcon,
+  SettingsIcon,
+} from "lucide-react";
 import { useCourseStore } from "@/providers/courseStoreProvider";
-
-export default function PostsForumSidebar() {
-  const {
-    selectedPost,
-    drafts,
-    setIsEditing,
-    setSelectedPost,
-    listofPosts: posts,
-    setDrafts: setListOfDrafts,
-  } = useContext(forumPostsContext);
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const scrollPositionRef = useRef(0);
+import { useRouter } from "next/navigation";
+import { TagsSidebar } from "../tags/TagsSidebar";
+export default function PostsForumSidebar({
+  selectedPost,
+}: {
+  selectedPost?: string;
+}) {
+  const posts = useCourseStore((state) => state.posts);
+  const router = useRouter();
+  const setPostDraft = useCourseStore((state) => state.setPostDraft);
   const course = useCourseStore((state) => state.course);
-  const { profile } = useContext(userContext);
-
-  useEffect(() => {
-    const savedScroll = sessionStorage.getItem("forumlist");
-    if (savedScroll && scrollRef.current) {
-      scrollRef.current.scrollTop = parseInt(savedScroll);
-    }
-  }, []);
-
-  // Track current scroll position in ref
-  const handleScroll = useCallback(() => {
-    if (scrollRef.current) {
-      scrollPositionRef.current = scrollRef.current.scrollTop;
-    }
-  }, []);
+  const focusedPost = posts.find((post) => post.id === selectedPost)?.id;
 
   return (
     <>
-      <MainSidebar className={selectedPost ? "hidden xl:block" : ""}>
+      <MainSidebar className={false ? "hidden xl:block" : "flex flex-col"}>
         <div className="flex flex-row justify-center items-center w-full h-16 px-2">
           <Button
-            size={"sm"}
-            className="w-fit  px-4 min-h-none h-fit py-2"
+            size="lg"
+            className="w-fit font-semibold px-4 min-h-none h-fit py-2"
             onClick={() => {
-              const id = generateTempId("local");
-              const post: PostWithRequiredId = { id: id, title: "" };
-              setListOfDrafts((prev) => [post, ...prev]);
-              setSelectedPost(post);
-              setIsEditing(id);
+              setPostDraft({
+                postArgs: {
+                  course_id: course.id,
+                  title: "",
+                  content: "",
+                },
+                optionArgs: {
+                  visibility: "public",
+                  usePseudonym: false,
+                },
+              });
+
+              router.push(`/forum/courses/${course.id}/forum`);
             }}
           >
-            <PlusIcon className="h-4 w-4" />
+            <PlusIcon className="min-h-5 min-w-5" />
             New Post
           </Button>
         </div>
+        <TagsSidebar />
+        <div className="flex flex-col text-primary-600 gap-2 p-2 px-3 justify-end font-semibold flex-1 items-stretch">
+          <Button variant="ghost" className="w-full">
+            <div className="flex flex-1 flex-row items-center gap-2">
+              Drafts
+            </div>
+            <span className="text-xs text-neutral-500">0</span>
+          </Button>
+          <Button variant="ghost" className="w-full">
+            <div className="flex flex-1 flex-row items-center gap-2">
+              Saved Posts
+              <BookmarkIcon className="min-h-3 min-w-3" />
+            </div>
+            <span className="text-xs text-neutral-500">0</span>
+          </Button>
+          <Button variant="ghost" className="w-full">
+            <div className="flex flex-1 flex-row items-center gap-2">
+              Flagged Posts
+              <FlagIcon className="min-h-3 min-w-3" />
+            </div>
+            <span className="text-xs text-neutral-500">0</span>
+          </Button>
+          <Button variant="ghost" className="w-full">
+            <div className="flex flex-1 flex-row items-center gap-2">
+              Course Settings
+            </div>
+            <SettingsIcon className="min-h-3 min-w-3" />
+          </Button>
+          <Button variant="ghost" className="w-full">
+            <div className="flex flex-1 flex-row items-center gap-2">
+              Collapse Sidebar
+            </div>
+            <ChevronLeftIcon className="min-h-3 min-w-3" />
+          </Button>
+        </div>
       </MainSidebar>
-      <MainListPanel className={selectedPost ? "hidden xl:block" : ""}>
+      <MainListPanel className={false ? "hidden xl:block" : "b"}>
         <section
-          ref={scrollRef}
-          onScroll={handleScroll}
-          style={{ scrollBehavior: "auto" }}
-          className={cn("flex relative flex-col h-full overflow-y-auto")}
+          className={cn(
+            "flex bg-white relative flex-col h-full overflow-y-auto",
+          )}
         >
-          <div className="flex justify-center items-center h-16 flex-shrink-0 border-b py-2 w-full gap-2">
-            <Button
-              className="flex md:hidden w-full max-w-[150px] min-h-none h-fit py-2"
-              onClick={() => {
-                const id = generateTempId("local");
-                const post: PostWithRequiredId = { id: id, title: "" };
-                setListOfDrafts((prev) => [post, ...prev]);
-                setSelectedPost(post);
-                setIsEditing(id);
-              }}
-            >
-              New Post
-            </Button>
+          <div className="flex justify-center items-center h-14 shrink-0  py-2 pt-4 w-full gap-2">
+            <div className="flex flex-row items-center px-4 gap-2 w-full">
+              <span className="text-xs ">Sort by</span>
+              <div className="flex flex-1 flex-row gap-2">
+                <Button variant="ghost" className="font-semibold" size="sm">
+                  Most Recent
+                  <ChevronDownIcon className="h-4 w-4" />
+                </Button>
+
+                <div className="flex flex-1 flex-shrink-0 items-center gap-2">
+                  <div className="min-h-[1px] rounded-full w-full bg-neutral-400" />
+                </div>
+
+                <Button variant="ghost" className="font-semibold" size="sm">
+                  All Posts
+                  <ChevronDownIcon className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
-          <ul className="flex flex-col gap-2 p-2">
-            {drafts.map((post) => (
-              <li key={post.id}>
-                <PostCard<"draft">
-                  post={post}
-                  isSelected={selectedPost?.id === post.id}
-                />
-              </li>
-            ))}
+          <ul className="flex flex-col  gap-2 p-2">
             {posts.map((post) => (
               <li key={post.id}>
-                <PostCard<"published">
-                  post={post}
-                  isSelected={selectedPost?.id === post.id}
-                />
+                <PostCard post={post} isSelected={focusedPost === post.id} />
               </li>
             ))}
           </ul>

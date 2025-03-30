@@ -70,12 +70,12 @@ export default function ProfileView({
 
   return (
     <div
-      className={`flex justify-center select-none flex-1 lg:border-l flex-shrink-0 w-full transition-all duration-300 ${
+      className={`flex justify-center select-none flex-1 lg:border-l shrink-0 w-full transition-all duration-300 ${
         true ? "border-neutral-200" : "border-neutral-200"
       }`}
     >
       <div className="flex-1 relative flex flex-col overflow-auto p-4 pt-0 items-center mx-auto">
-        <div className="w-full h-16 flex-shrink-0 px-2 flex items-center gap-2">
+        <div className="w-full h-16 shrink-0 px-2 flex items-center gap-2">
           <div className="flex items-center justify-between w-full">
             <Button
               className="p-2"
@@ -216,7 +216,7 @@ function ProfileMoreOptions({
         align="start"
         // alignOffset={-10}
         // sideOffset={20}
-        className=" bg-white border  w-fit p-0 border-neutral-200 rounded-lg shadow-sm"
+        className=" bg-white border  w-fit p-0 border-neutral-200 rounded-lg shadow-xs"
       >
         <ul className="flex p-0 flex-col text-neutral-700 w-full ">
           <li>
@@ -258,7 +258,7 @@ function ProfileMoreOptions({
         <button
           type="button"
           onClick={handleMoreClick}
-          className="focus:outline-none"
+          className="focus:outline-hidden"
         >
           <MoreHorizontal className="h-5 w-5 opacity-70" />
         </button>

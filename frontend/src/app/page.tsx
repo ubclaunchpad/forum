@@ -19,7 +19,7 @@ export default function Home() {
   return (
     <div className="w-full bg-primary-200 dark:bg-gray-900">
       <Header />
-      <section className="relative flex flex-col items-center justify-center space-y-6 min-h-screen py-24 px-4 text-center md:py-32 lg:py-48 bg-gradient-to-b from-primary-200 to-gray-100 dark:from-gray-800 dark:to-gray-900">
+      <section className="relative flex flex-col items-center justify-center space-y-6 min-h-screen py-24 px-4 text-center md:py-32 lg:py-48 bg-linear-to-b from-primary-200 to-gray-100 dark:from-gray-800 dark:to-gray-900">
         <HeroMouseEffect />
         <div className="relative z-10 space-y-4">
           <div className="inline-block rounded-full px-3 py-1 text-xs sm:text-sm border border-gray-700 bg-gray-800 text-white">

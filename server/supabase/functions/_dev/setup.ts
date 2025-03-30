@@ -195,7 +195,7 @@ export async function setupDevSeedData() {
   console.log("Post created", post3);
 
   console.log("--------------------------------");
-  const listPosts = await getPosts(users[0].id, course1.id, false, false);
+  const listPosts = await getPosts(users[0].id, course1.id, false);
   console.log("List of posts", listPosts);
 }
 

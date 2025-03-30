@@ -80,7 +80,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
       >
         <Button
           variant="ghost"
-          className="rounded-full h-10 w-10 flex-shrink-0 border p-0 border-neutral-200"
+          className="rounded-full h-10 w-10 shrink-0 border p-0 border-neutral-200"
           onClick={onClose}
         >
           <XIcon />
@@ -94,10 +94,10 @@ const SearchContent: React.FC<SearchContentProps> = ({
           }
           type="text"
           placeholder="Write a few words to search..."
-          className="px-2 h-10 text-base rounded-full border-neutral-200 bg-white border focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-2 h-10 text-base rounded-full border-neutral-200 bg-white border focus:outline-hidden focus:border-primary focus:ring-3 focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
         />
         <Button
-          className="w-10 p-0 rounded-full flex-shrink-0 h-10"
+          className="w-10 p-0 rounded-full shrink-0 h-10"
           variant="solid"
           disabled={
             isLoading ||
@@ -109,7 +109,7 @@ const SearchContent: React.FC<SearchContentProps> = ({
           Text Search
         </Button>
         <Button
-          className="w-10 p-0 rounded-full flex-shrink-0 h-10"
+          className="w-10 p-0 rounded-full shrink-0 h-10"
           variant="solid"
           disabled={
             isLoading ||

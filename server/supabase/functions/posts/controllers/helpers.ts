@@ -161,6 +161,7 @@ export async function getPostComments(postId: string): Promise<PostComment[]> {
         number_id: reply.number_id,
         created_at: reply.created_at,
         updated_at: reply.updated_at,
+        authors: reply.authors
       })),
     });
   }

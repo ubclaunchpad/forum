@@ -42,12 +42,13 @@ lowlight.register("js", js);
 lowlight.register("ts", ts);
 
 const editorClasses = cn(
-  "w-full h-full flex flex-col",
+  "w-full flex flex-col",
   "prose",
+  "[&_.ProseMirror_p]:text-[16px]",
   "[&_.ProseMirror]:w-full",
   "[&_.ProseMirror]:h-full",
   "[&_.ProseMirror]:p-0",
-  "[&_.ProseMirror]:outline-none",
+  "[&_.ProseMirror]:outline-hidden",
   "[&_.ProseMirror_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)]",
   "[&_.ProseMirror_p.is-editor-empty:first-child]:before:text-neutral-400",
   "[&_.ProseMirror_p.is-editor-empty:first-child]:before:float-left",
