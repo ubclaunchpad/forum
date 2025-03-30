@@ -84,7 +84,7 @@ export function DocumentsPage({
         >
           {selectedFile ? (
             <>
-              <nav className="flex flex-shrink-0 items-center gap-1 h-16 border-b border-transparent p-2">
+              <nav className="flex shrink-0 items-center gap-1 h-16 border-b border-transparent p-2">
                 <Button
                   className="p-0"
                   variant="ghost"
@@ -106,7 +106,7 @@ export function DocumentsPage({
               </div>
             </>
           ) : (
-            <div className="xl:flex hidden justify-center flex-1 items-center text-neutral-500 flex-shrink-0 w-full transition-all duration-300 border-l border-neutral-200">
+            <div className="xl:flex hidden justify-center flex-1 items-center text-neutral-500 shrink-0 w-full transition-all duration-300 border-l border-neutral-200">
               Select a document to view
             </div>
           )}

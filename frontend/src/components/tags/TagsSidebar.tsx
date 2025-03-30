@@ -157,7 +157,7 @@ function TagList({ tags, level }: { tags: Tag[]; level: number }) {
                   <div className="w-2 h-2 bg-primary-100 rounded-[2px]"></div>
                 )}
                 <span className="flex-1 truncate">{tag.name}</span>
-                <span className="text-sm flex-shrink-0 text-neutral-400 h-4 min-w-4 ml-auto ">
+                <span className="text-sm shrink-0 text-neutral-400 h-4 min-w-4 ml-auto ">
                   {tag.count?.total}
                 </span>
               </button>

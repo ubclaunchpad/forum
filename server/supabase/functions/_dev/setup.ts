@@ -12,6 +12,7 @@ import { getAllPosts } from "../posts/controllers/helpers.ts";
 import { createPost, deletePost, getPosts } from "../posts/controllers/crud.ts";
 import { documentHandler } from "../documents/documentController.ts";
 import { DEFAULT_FILE_MANAGER_OPTIONS, fileManager } from "../_shared/utils/fileManager.ts";
+import { createPost } from "../posts/controllers/crud.ts";
 
 
 const authUsers = [

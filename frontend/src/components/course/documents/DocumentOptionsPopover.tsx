@@ -66,7 +66,7 @@ export default function DocumentOptionsPopover({
         align="start"
         alignOffset={-10}
         sideOffset={6}
-        className="bg-white border w-fit p-0 border-neutral-200 rounded-lg shadow-sm"
+        className="bg-white border w-fit p-0 border-neutral-200 rounded-lg shadow-xs"
       >
         <ul className="flex p-0 flex-col text-neutral-700 w-full">
           <li>
@@ -97,7 +97,7 @@ export default function DocumentOptionsPopover({
         </ul>
       </PopoverContent>
       <PopoverTrigger asChild>
-        <button type="button" className="focus:outline-none flex-shrink-0 px-2">
+        <button type="button" className="focus:outline-hidden shrink-0 px-2">
           <MoreHorizontal className="h-4 w-4" />
         </button>
       </PopoverTrigger>

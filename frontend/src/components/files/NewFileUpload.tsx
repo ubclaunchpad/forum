@@ -200,7 +200,7 @@ export default function UploadFile({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size={"sm"} className="w-fit  px-4 min-h-none h-fit py-2">
+        <Button size={"lg"} className="w-fit  px-4 min-h-none h-fit py-2">
           <PlusIcon className="h-4 w-4" />
           Upload File
         </Button>

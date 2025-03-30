@@ -1,26 +1,17 @@
-export type Post = {
-  title: string;
-  content: string;
-  created_by: string | null;
-  id: string;
-  local_id: number;
-  applied_at: string;
-  stats: PostStats;
-  user_interactions: UserInteractions;
-};
+import { PostList } from "@forum/shared";
 
-export type PostWithRequiredId = { id: string } & Partial<Omit<Post, "id">>;
+export type PostWithRequiredId = { id: string } & Partial<Omit<PostList, "id">>;
 
 type OptimisticOperation = {
   operation: "optimistic";
   id: null;
-  post: Omit<Post, "id" | "created_by">;
+  post: Omit<PostList, "id">;
 };
 
 type RealOperation = {
   operation: "real";
   id: string;
-  post: Pick<Post, "id">;
+  post: Pick<PostList, "id">;
 };
 
 type PostStats = {

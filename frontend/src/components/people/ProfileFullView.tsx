@@ -141,7 +141,7 @@ export default function ProfileFullView() {
   }
 
   return (
-    <div className="flex justify-center select-none flex-1  flex-shrink-0 w-full transition-all duration-300 border-neutral-200">
+    <div className="flex justify-center select-none flex-1  shrink-0 w-full transition-all duration-300 border-neutral-200">
       <div className="space-y-8 px-4 flex flex-col items-center w-full flex-1 p-4 ">
         <div className="space-y-4 px-4 max-w-4xl w-full p-4">
           <div className="flex flex-col items-center space-y-2">
@@ -230,7 +230,7 @@ export default function ProfileFullView() {
             </div>
           )}
         </div>
-        <div className="w-full max-w-4xl h-16 flex-shrink-0 px-2 flex  justify-end items-center gap-2">
+        <div className="w-full max-w-4xl h-16 shrink-0 px-2 flex  justify-end items-center gap-2">
           {isEditMode && (
             <Button
               variant="outline"
@@ -286,7 +286,7 @@ export const ProfileViewPage = ({
           <p className="text-muted-foreground font-medium">
             @{profile.username}
           </p>
-          <div className="flex flex-row  [&>*]:max-w-[150px] [&>*]:min-w-[150px] gap-4">
+          <div className="flex flex-row  *:max-w-[150px] *:min-w-[150px] gap-4">
             <div className="flex flex-col gap-2">
               <div className="flex flex-row items-center font-medium text-primary-600 gap-2">
                 <p>Pronouns</p>
@@ -327,7 +327,7 @@ export const ProfileViewPage = ({
         </section>
       </div>
       <div className="flex w-full flex-col gap-8">
-        <Card className="shadow-sm">
+        <Card className="shadow-xs">
           <CardHeader>
             <CardTitle className="text-lg font-semibold">Bio</CardTitle>
           </CardHeader>
@@ -336,7 +336,7 @@ export const ProfileViewPage = ({
           </CardContent>
         </Card>
 
-        {/* <Card className="shadow-sm">
+        {/* <Card className="shadow-xs">
                   <CardHeader>
                     <CardTitle className="text-lg font-semibold">Enrolled courses</CardTitle>
                   </CardHeader>
@@ -403,7 +403,7 @@ function AvatarEditButton() {
 
   return (
     <div className="flex relative rounded-full border flex-col items-center gap-4">
-      <Avatar className="h-40 w-40 border shadow-sm ">
+      <Avatar className="h-40 w-40 border shadow-xs ">
         <AvatarImage src={profile.avatar_url} className="object-cover  " />
         <AvatarFallback>
           {profile.first_name[0]}
@@ -427,7 +427,7 @@ function AvatarEditButton() {
 
           <div className="flex flex-col items-center gap-2 gap-y-4 pt-12">
             <div className="flex relative rounded-full border flex-col items-center  gap-4">
-              <Avatar className="h-40 w-40 border shadow-sm ">
+              <Avatar className="h-40 w-40 border shadow-xs ">
                 <AvatarImage src={photo ? URL.createObjectURL(photo) : ""} />
                 <AvatarFallback className="bg-neutral-100 text-neutral-500"></AvatarFallback>
               </Avatar>

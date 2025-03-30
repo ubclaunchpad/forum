@@ -16,7 +16,7 @@ export default function SettingsTopBar() {
   const { updateCourseRequest, isLoading } = useCourseConfig();
 
   return (
-    <div className="h-20 fixed top-2 flex-shrink-0 max-w-4xl flex justify-center items-center p-4 w-full">
+    <div className="h-20 fixed top-2 shrink-0 max-w-4xl flex justify-center items-center p-4 w-full">
       {isDifferent && (
         <div className="  flex justify-end gap-4  rounded-full  w-full  p-2">
           <Button

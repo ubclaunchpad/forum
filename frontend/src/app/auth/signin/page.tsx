@@ -14,7 +14,7 @@ import { signInSchema, SignInFormValues } from "@/lib/schemas/auth";
 import { isAuthProviderSupported, supportedAnyAuthProvider } from "@/lib/utils";
 
 const signinInputStyle =
-  "rounded-full w-full px-3 py-4 h-12 border border-neutral-200 focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
+  "rounded-full w-full px-3 py-4 h-12 border border-neutral-200 focus:outline-hidden focus:border-primary focus:ring-3 focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
 
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
@@ -108,7 +108,7 @@ export default function SignIn() {
         <div className="flex  justify-center">
           <Button
             onClick={handleGoogleSignIn}
-            className="relative flex min-w-[250px] w-full h-12 items-center justify-center rounded-full border border-neutral-200 bg-white text-[#1f1f1f]  text-md font-medium shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none active:bg-gray-200"
+            className="relative flex min-w-[250px] w-full h-12 items-center justify-center rounded-full border border-neutral-200 bg-white text-[#1f1f1f]  text-md font-medium shadow-xs transition-all duration-200 hover:shadow-md focus:outline-hidden active:bg-gray-200"
           >
             <div className="absolute inset-0 opacity-0 transition-opacity duration-200 group-active:opacity-10 group-focus:opacity-10 bg-grey"></div>
             <div className="flex items-center">

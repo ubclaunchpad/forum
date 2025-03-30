@@ -103,7 +103,7 @@ export default function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           ></iframe>
         </noscript>
-        {/* <script src="https://unpkg.com/react-scan/dist/auto.global.js" async /> */}
+        <script src="https://unpkg.com/react-scan/dist/auto.global.js" async />
       </head>
       <body
         className={`${sourceSans.variable} ${quicksand.variable} ${spaceGrotesk.variable} 

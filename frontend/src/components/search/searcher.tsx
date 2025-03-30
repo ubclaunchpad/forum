@@ -18,7 +18,7 @@ import { Input } from "../ui/input";
 import { useSearchStore } from "@/providers/searchStoreProvider";
 
 export function Searcher() {
-  const isDesktop = useMediaQuery("(min-width: 1000px)");
+  // const isDesktop = useMediaQuery("(min-width: 1000px)");
   const searchBarRef = useRef<HTMLButtonElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchStore = useSearchStore((state) => state);
@@ -81,12 +81,12 @@ export function Searcher() {
   const SearchContentSection = (
     <>
       <div
-        className="flex justify-center gap-1 h-16 flex-shrink-0 border-b border-neutral-200 items-center w-full p-2 py-4"
+        className="flex justify-center gap-1 h-16 shrink-0 border-b border-neutral-200 items-center w-full p-2 py-4"
         // onKeyDown={listenForEnter}
       >
         <Button
           variant="ghost"
-          className="rounded-full h-10 w-10 flex-shrink-0 border p-0 border-neutral-200"
+          className="rounded-full h-10 w-10 shrink-0 border p-0 border-neutral-200"
           onClick={handleClose}
         >
           <XIcon />
@@ -99,11 +99,11 @@ export function Searcher() {
           onChange={handleInputChange}
           type="text"
           placeholder="Write a few words to search..."
-          className="px-2 h-10 text-base rounded-full border-neutral-200 bg-white border focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-2 h-10 text-base rounded-full border-neutral-200 bg-white border focus:outline-hidden focus:border-primary focus:ring-3 focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
         />
         <Button
-          className="w-fit p-0 px-4 rounded-full border border-primary-700 flex-shrink-0 h-10"
-          variant="solid"
+          className="w-fit p-0 px-4 rounded-full border border-primary-700 shrink-0 h-10"
+          variant="default"
           disabled={
             searchStore.loadingState !== "idle" ||
             searchStore.search.length < SEARCH_PARAMS.MIN_SEARCH_LENGTH ||
@@ -149,8 +149,8 @@ export function Searcher() {
       <DialogTrigger className="flex-1" asChild>
         <Button
           ref={searchBarRef}
-          variant="ghost"
-          className="flex w-10 flex-shrink-0 items-center font-medium text-neutral-600 rounded-full px-1 bg-white max-w-full lg:max-w-md min-w-0 lg:min-w-[500px] lg:w-full border overflow-hidden lg:absolute lg:left-1/2 lg:transform h-10 lg:-translate-x-1/2"
+          variant="default"
+          className="flex w-10 border-primary-border shadow-xs shrink-0 items-center font-medium text-neutral-600 rounded-full px-1 bg-white max-w-full lg:max-w-md min-w-0 lg:min-w-[500px] lg:w-full border overflow-hidden lg:absolute lg:left-1/2 lg:transform h-10 lg:-translate-x-1/2"
           onClick={() => {
             searchStore.setIsOpen(true);
           }}
@@ -166,7 +166,7 @@ export function Searcher() {
       <DialogContent
         position="tc"
         showClose={false}
-        className="flex flex-1 overflow-hidden course flex-col max-w-4xl gap-2 w-full min-w-[90dvw] xl:min-w-[1000px] flex-shrink-0 h-[calc(100dvh-1.5rem)]  overflow-hidden bg-white border-neutral-100 sm:rounded-3xl p-0"
+        className="flex flex-1 overflow-hidden course flex-col max-w-4xl gap-2 w-full min-w-[90dvw] xl:min-w-[1000px] shrink-0 h-[calc(100dvh-1.5rem)]  overflow-hidden bg-white border-neutral-100 sm:rounded-3xl p-0"
         style={{
           top: searchBarRef.current?.offsetTop,
         }}

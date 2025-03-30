@@ -75,7 +75,7 @@ function AISearchContent() {
             <div className="flex flex-row overflow-x-auto gap-3 py-4 on-appear-animation ">
               {t.sources.map((s, index) => (
                 <button
-                  className="text-primary-600 text-neutral-800 p-4 overflow-hidden w-52 max-h-32 bg-neutral-0 shadow-sm flex flex-col flex-shrink-0 border rounded-3xl border-primary-100 hover:bg-primary-50 hover:border-primary-200 hover:shadow-md transition-all duration-300"
+                  className="text-primary-600 text-neutral-800 p-4 overflow-hidden w-52 max-h-32 bg-neutral-0 shadow-xs flex flex-col shrink-0 border rounded-3xl border-primary-100 hover:bg-primary-50 hover:border-primary-200 hover:shadow-md transition-all duration-300"
                   key={index}
                   onClick={() => {
                     if (s.entity_type === "document") {
@@ -125,7 +125,7 @@ function AISearchContent() {
           <input
             ref={followUpRef}
             type="text"
-            className="w-full border rounded-full shadow-sm px-8 border-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:ring-offset-2 transition-all duration-300 p-2 "
+            className="w-full border rounded-full shadow-xs px-8 border-neutral-200 focus:outline-hidden focus:ring-2 focus:ring-primary-200 focus:ring-offset-2 transition-all duration-300 p-2 "
             placeholder="Ask a follow up question"
             value={searchStore.followUpQuestion}
             onChange={(e) => searchStore.setFollowUpQuestion(e.target.value)}
@@ -214,7 +214,7 @@ function TextSearchContent() {
           {data && data.threads.length > 0 ? (
             data?.threads.map((t: any, index: number) => (
               <button key={index} className="flex flex-row gap-2 items-center">
-                <h4 className="flex-shrink-0 flex flex-row gap-2 items-center">
+                <h4 className="shrink-0 flex flex-row gap-2 items-center">
                   <MessageBubbleIcon />
                   {t.name}
                 </h4>
@@ -241,7 +241,7 @@ function TextSearchContent() {
       <div className="flex flex-col  gap-2 w-full">
         {textSearchResponse.results?.map((result, index) => (
           <button
-            className="flex  border rounded-xl shadow-sm border-neutral-200  p-2 gap-4 hover:bg-primary-100 hover:shadow-md hover:border-primary-200 transition-all duration-300"
+            className="flex  border rounded-xl shadow-xs border-neutral-200  p-2 gap-4 hover:bg-primary-100 hover:shadow-md hover:border-primary-200 transition-all duration-300"
             key={index}
             onClick={() => {
               if (result.entity_type === "document") {
