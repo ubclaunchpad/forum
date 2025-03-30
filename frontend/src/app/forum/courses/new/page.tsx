@@ -21,7 +21,7 @@ import FindCoursesToJoin from "@/components/courses/FindCoursesToJoin";
 import { checkPermissionInDomain, PERMISSIONS } from "@/lib/utils";
 
 const inputStyle =
-  "rounded-full w-full px-3 py-4 h-12 border border-neutral-200 focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
+  "rounded-full w-full px-3 py-4 h-12 border border-neutral-200 focus:outline-hidden focus:border-primary focus:ring-3 focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed";
 
 const formSchema = courseSchema.omit({ id: true, config: true }).extend({
   name: z.string().min(4, {

@@ -68,7 +68,7 @@
 //     <CardContent className="flex-1 px-0 py-0 w-full relative flex flex-col  ">
 
 //     <div className="flex flex-col w-full justify-center items-center flex-1">
-//       <div className="w-fit p-2 border shadow-sm flex items-center gap-3 rounded-lg">
+//       <div className="w-fit p-2 border shadow-xs flex items-center gap-3 rounded-lg">
 //         <Loader2 className="w-4 h-4 animate-spin" />
 //         <p>Getting your courses...</p>
 //       </div>
@@ -162,7 +162,7 @@ export function CourseCardSkeleton() {
   return (
     <CardContent className="flex-1 px-0 py-0 w-full relative flex flex-col  ">
       <div className="flex flex-col w-full justify-center items-center flex-1">
-        <div className="w-fit p-2 border shadow-sm flex items-center gap-3 rounded-lg">
+        <div className="w-fit p-2 border shadow-xs flex items-center gap-3 rounded-lg">
           <Loader2 className="w-4 h-4 animate-spin" />
           <p>Getting your courses...</p>
         </div>

@@ -19,7 +19,7 @@ export default function UserCoursesComponent({
     return (
       <>
         <div className="flex flex-col w-full justify-center items-center flex-1">
-          <div className="w-fit p-2 border shadow-sm flex items-center gap-3 rounded-lg">
+          <div className="w-fit p-2 border shadow-xs flex items-center gap-3 rounded-lg">
             <p>Error loading courses</p>
           </div>
         </div>
@@ -46,7 +46,7 @@ export default function UserCoursesComponent({
         {!courses ||
           (courses.length == 0 && (
             <div className="flex  flex-col w-full justify-center items-center flex-1">
-              <div className="w-fit p-2 border shadow-sm flex items-center gap-3 rounded-lg">
+              <div className="w-fit p-2 border shadow-xs flex items-center gap-3 rounded-lg">
                 <MousePointer className="w-4 h-4" />
                 <p>Click the add course button to join your first course</p>
               </div>

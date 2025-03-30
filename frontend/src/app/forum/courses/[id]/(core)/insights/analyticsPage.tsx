@@ -43,7 +43,7 @@ function PopularQuestionItem({
   return (
     <div className="flex flex-col gap-1 py-2 border-b border-neutral-100 last:border-0">
       <div className="flex flex-row gap-2 items-center">
-        <TrendingUpIcon className="w-5 h-5 text-primary-600 flex-shrink-0" />
+        <TrendingUpIcon className="w-5 h-5 text-primary-600 shrink-0" />
         <p className="text-neutral-800">{question}</p>
         <Badge
           variant="outline"

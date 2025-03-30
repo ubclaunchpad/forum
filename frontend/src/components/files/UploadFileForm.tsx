@@ -61,7 +61,7 @@ export function UploadDocumentForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Enter document title"
-            className="rounded-full w-full px-3 py-4 h-12 border border-neutral-200   focus:outline-none focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-full w-full px-3 py-4 h-12 border border-neutral-200   focus:outline-hidden focus:border-primary focus:ring-3 focus:ring-primary focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
             required
           />
         </div>

@@ -92,7 +92,7 @@ const DialogContent = React.forwardRef<
       >
         {children}
         {showClose && (
-          <DialogPrimitive.Close className="absolute right-3 sm:right-6 md:right-9 top-3 sm:top-6 md:top-9 rounded-full opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-neutral-100 data-[state=open]:text-neutral-500 dark:ring-offset-neutral-950 dark:focus:ring-neutral-300 dark:data-[state=open]:bg-neutral-800 dark:data-[state=open]:text-neutral-400">
+          <DialogPrimitive.Close className="absolute right-3 sm:right-6 md:right-9 top-3 sm:top-6 md:top-9 rounded-full opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-neutral-100 data-[state=open]:text-neutral-500 dark:ring-offset-neutral-950 dark:focus:ring-neutral-300 dark:data-[state=open]:bg-neutral-800 dark:data-[state=open]:text-neutral-400">
             <X className="size-4" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
