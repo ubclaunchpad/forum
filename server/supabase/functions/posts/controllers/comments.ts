@@ -1,6 +1,6 @@
-import { supa } from "../../_shared/db.ts";
+import { sqlClient, supa } from "../../_shared/db.ts";
 
-import { PostAuthor, PostComment } from "@shared/mod.ts";
+import { MutatePostComment, PostComment } from "@shared/mod.ts";
 import { commentExists, postExists } from "./helpers.ts";
 
 /**
@@ -221,106 +221,82 @@ export async function deletePostComment(
 export async function updatePostComment(
   commentId: string,
   userId: string,
-  commentEditInfo: {
-    content: string;
-    userVisibility: string;
-    userPseudonym: string;
-  },
-): Promise<void> {
-  // Check if comment exists
-  const { isFound, data: commentData } = await commentExists(commentId);
+  commentEditInfo: MutatePostComment,
+): Promise<PostComment> {
+  const sql = sqlClient();
 
-  if (!isFound) {
-    throw new Error("Comment does not exist");
-  }
+  await sql.begin(async (tx) => {
+    // Check if comment exists
+    const [comment] = await tx`
+        SELECT * FROM post_comments WHERE id = ${commentId}
+      `;
 
-  const postId = commentData?.post_id;
+    if (!comment || comment.length === 0) {
+      throw new Error("Comment does not exist");
+    }
 
-  // Get the course_id from the post
-  const { data: postData, error: postError } = await supa
-    .from("posts")
-    .select("course_id")
-    .eq("id", postId)
-    .single();
+    const postId = comment.post_id;
 
-  if (postError) {
-    throw new Error(`Error fetching post: ${postError.message}`);
-  }
+    // Get the course_id from the post
+    const [post] = await tx`
+        SELECT * FROM posts WHERE id = ${postId}
+      `;
 
-  const courseId = postData.course_id;
+    if (!post || post.length === 0) {
+      throw new Error("Post does not exist");
+    }
 
-  // Check if user is in the course with the post
-  const { data: courseCheck, error: courseCheckError } = await supa
-    .from("course_members")
-    .select("*")
-    .eq("course_id", courseId)
-    .eq("user_id", userId);
+    const courseId = post.course_id;
 
-  if (courseCheckError) {
-    throw courseCheckError;
-  }
+    // Check if user is in the course with the post
+    const [member] = await tx`
+        SELECT * FROM course_members 
+        WHERE course_id = ${courseId} AND user_id = ${userId}
+      `;
 
-  if (!courseCheck || courseCheck.length === 0) {
-    throw new Error("User is not in the course with the comment");
-  }
-  const { error: updateError } = await supa.from("post_comments").update({
-    content: commentEditInfo.content,
-    updated_at: new Date(),
-  }).eq("id", commentId);
+    if (!member || member.length === 0) {
+      throw new Error("User is not in the course with the comment");
+    }
 
-  if (updateError) {
-    throw new Error("Error updating comment");
-  }
+    const [updatedComment] = await tx`
+        UPDATE post_comments 
+        SET content = ${commentEditInfo.content}, updated_at = ${new Date()}
+        WHERE id = ${commentId}
+        RETURNING *
+      `;
 
-  // Check if user is already a part of post_authors
-  const { count: userAuthorCount, error: userAuthorError } = await supa
-    .from("post_authors")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .eq("comment_id", commentId);
+    if (!updatedComment || updatedComment.length === 0) {
+      throw new Error("Failed to update comment");
+    }
 
-  if (userAuthorError) {
-    throw userAuthorError;
-  }
+    const [author] = await tx`
+        SELECT * FROM post_authors 
+        WHERE user_id = ${userId}
+      `;
 
-  // If user is already a part of post_authors, update entry
-  if (userAuthorCount == 1) {
-    const { error: _ } = await supa.from(
-      "post_authors",
-    ).update({
-      visibility: commentEditInfo.userVisibility,
-      pseudonym: commentEditInfo.userPseudonym,
-    })
-      .eq("user_id", userId)
-      .eq("post_id", postId)
-      .eq("comment_id", commentId);
-    return;
-  }
+    // If user is not a part of post_authors, add to table
+    if (author && author.length > 0) {
+      await tx`
+        UPDATE post_authors
+        SET visibility = ${commentEditInfo.visibility}
+        WHERE user_id = ${userId} 
+        AND post_id = ${postId}
+        AND comment_id = ${commentId}
+      `;
+    } else {
+      // Otherwise, add them to table
+      await tx`
+        INSERT INTO post_authors (comment_id, user_id, post_id, visibility, is_anonymous)
+        VALUES (${commentId}, ${userId}, ${postId}, ${commentEditInfo.visibility}, ${
+        commentEditInfo.use_pseudonym ?? false
+      })
+      `;
+    }
+  });
 
-  // Otherwise, add them to table
-  const { error: _ } = await supa.from(
-    "post_authors",
-  ).insert({
-    comment_id: commentId,
-    user_id: userId,
-    visibility: commentEditInfo.userVisibility,
-    pseudonym: commentEditInfo.userPseudonym,
-  }).select().single();
-}
-
-export async function getCommentAuthorsByCommentId(
-  commentId: string,
-): Promise<PostAuthor[]> {
-  const { data, error } = await supa.from("post_authors").select("*").eq(
-    "comment_id",
-    commentId,
-  );
-
-  if (error) {
-    throw error;
-  }
-
-  return data as PostAuthor[];
+  // Get and return the updated comment
+  await sql.end();
+  return await getPostComment(commentId, userId);
 }
 
 export const postCommentController = {
@@ -329,5 +305,4 @@ export const postCommentController = {
   getPostComments,
   deletePostComment,
   updatePostComment,
-  getCommentAuthorsByCommentId,
 };

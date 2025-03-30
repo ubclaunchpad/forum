@@ -9,11 +9,13 @@ import {
 } from "./controllers/crud.ts";
 import { authMiddleware, UserVariables } from "../_shared/utils/auth.ts";
 import {
+  mutatePostCommentSchema,
   mutatePostOptionsSchema,
   mutatePostPartialSchema,
   mutatePostSchema,
   z,
 } from "@shared/mod.ts";
+import { postCommentController } from "./controllers/comments.ts";
 import { getUserPermissionsInCourse, isUserMemberOfCourse, isUserPostAuthor, isUserReplyAuthor } from "../_shared/utils/permission_manager.ts";
 import { postTagController } from "./controllers/tags.ts";
 import { NotFoundError, PermissionError } from "../_shared/errors.ts";
@@ -147,6 +149,109 @@ app.patch("/:post_id", async (c: Context<{ Variables: UserVariables }>) => {
   }
 });
 
+// Create post comment
+app.post(
+  "/:post_id/comments",
+  async (c: Context<{ Variables: UserVariables }>) => {
+    try {
+      const { post_id } = c.req.param();
+      const user = c.var.user;
+
+      const { comment } = await c.req.json();
+
+      const newComment = await postCommentController.createPostComment(
+        post_id,
+        user.id,
+        comment,
+      );
+      return c.json(newComment);
+    } catch (error) {
+      return c.json({ error: (error as Error).message }, 500);
+    }
+  },
+);
+
+// Get post comments
+app.get(
+  "/:post_id/comments",
+  async (c: Context<{ Variables: UserVariables }>) => {
+    try {
+      const { post_id } = c.req.param();
+      const user = c.var.user;
+
+      const comments = await postCommentController.getPostComments(
+        post_id,
+        user.id,
+      );
+      return c.json(comments);
+    } catch (error) {
+      return c.json({ error: (error as Error).message }, 500);
+    }
+  },
+);
+
+// Get specific comment
+app.get(
+  "/:post_id/comments/:comment_id",
+  async (c: Context<{ Variables: UserVariables }>) => {
+    try {
+      const { comment_id } = c.req.param();
+      const user = c.var.user;
+
+      const comment = await postCommentController.getPostComment(
+        comment_id,
+        user.id,
+      );
+      return c.json(comment);
+    } catch (error) {
+      return c.json({ error: (error as Error).message }, 500);
+    }
+  },
+);
+
+// Update comment
+app.patch(
+  "/:post_id/comments/:comment_id",
+  async (c: Context<{ Variables: UserVariables }>) => {
+    try {
+      const { comment_id } = c.req.param();
+      const user = c.var.user;
+
+      const options = await c.req.json();
+
+      console.log(options);
+      const commentEditInfo = mutatePostCommentSchema.safeParse(options);
+      if (!commentEditInfo.success) {
+        return c.json({ error: commentEditInfo.error.message, options }, 400);
+      }
+
+      const updatedComment = await postCommentController.updatePostComment(
+        comment_id,
+        user.id,
+        commentEditInfo.data,
+      );
+      return c.json(updatedComment);
+    } catch (error) {
+      return c.json({ error: (error as Error).message }, 500);
+    }
+  },
+);
+
+// Delete comment
+app.delete(
+  "/:post_id/comments/:comment_id",
+  async (c: Context<{ Variables: UserVariables }>) => {
+    try {
+      const { comment_id } = c.req.param();
+      const user = c.var.user;
+
+      await postCommentController.deletePostComment(comment_id, user.id);
+      return c.json({ "success": true });
+    } catch (error) {
+      return c.json({ error: (error as Error).message }, 500);
+    }
+  },
+);
 // Add tag to post
 app.post("/:course_id/:post_id/tags/:tag_id", async (c: Context<{ Variables: UserVariables }>) => {
   try {

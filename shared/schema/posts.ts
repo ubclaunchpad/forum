@@ -31,7 +31,7 @@ export const mutatePostSchema = postSchema.pick({
 });
 
 export const mutatePostPartialSchema = postSchema.partial().extend({
-  course_id: z.string().uuid()
+  course_id: z.string().uuid(),
 });
 
 export const mutatePostOptionsSchema = z.object({
@@ -55,18 +55,26 @@ export type PostWithComments = Post & {
   comments: PostComment[];
 }
 
+// Define the type for the schema first to avoid circular reference issues
+export type PostCommentReply = {
+  id: string;
+  comment_id: string;
+  content: string;
+  number_id: number;
+  created_at: Date;
+  updated_at: Date;
+  replies: PostCommentReply[];
+};
 
-export const postCommentReplySchema = z.object({
+export const postCommentReplySchema: z.ZodType<PostCommentReply> = z.object({
   id: z.string().uuid(), // UUID
   comment_id: z.string().uuid(), // UUID
   content: z.string(),
   number_id: z.number(),
   created_at: z.date(),
   updated_at: z.date(),
-  authors: z.array(authorSchema)
+  replies: z.lazy(() => z.array(postCommentReplySchema)),
 });
-
-export type PostCommentReply = z.infer<typeof postCommentReplySchema>;
 
 export const postCommentSchema = z.object({
   id: z.string().uuid(), // UUID
@@ -74,10 +82,17 @@ export const postCommentSchema = z.object({
   content: z.string(),
   number_id: z.number(),
   created_at: z.date(),
-  updated_at: z.date(),
+  updated_at: z.date(), 
+   authors: z.array(authorSchema),
   replies: z.array(postCommentReplySchema),
 });
 
 export type PostComment = z.infer<typeof postCommentSchema>;
 
+export const mutatePostCommentSchema = z.object({
+  content: z.string(),
+  visibility: z.enum(["public", "private", "unlisted"]),
+  use_pseudonym: z.boolean(),
+});
 
+export type MutatePostComment = z.infer<typeof mutatePostCommentSchema>;

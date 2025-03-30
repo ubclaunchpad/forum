@@ -1,8 +1,4 @@
-import {
-  NewCourse,
-  ProfileWithoutId,
-  User,
-} from "@shared/mod.ts";
+import { NewCourse, ProfileWithoutId, User } from "@shared/mod.ts";
 import { userController } from "../users/controller.ts";
 import { getSupabaseClient, supa } from "../_shared/db.ts";
 import { createCourse } from "../courses/controller/create_course_activity.ts";
@@ -11,8 +7,10 @@ import { getAllCourses } from "../courses/controller/get_all_courses_activity.ts
 import { getAllPosts } from "../posts/controllers/helpers.ts";
 import { createPost, deletePost, getPosts } from "../posts/controllers/crud.ts";
 import { documentHandler } from "../documents/documentController.ts";
-import { DEFAULT_FILE_MANAGER_OPTIONS, fileManager } from "../_shared/utils/fileManager.ts";
-
+import {
+  DEFAULT_FILE_MANAGER_OPTIONS,
+  fileManager,
+} from "../_shared/utils/fileManager.ts";
 
 const authUsers = [
   {
@@ -95,7 +93,8 @@ const postArgs = [
   },
   {
     title: "Post 2",
-    content: "this is a very long post that is more than 200 characters" + "a".repeat(200)
+    content: "this is a very long post that is more than 200 characters" +
+      "a".repeat(200),
   },
   {
     title: "Post 3",
@@ -170,32 +169,50 @@ export async function setupDevSeedData() {
   // const localFilePath = Deno.cwd() + "/" + localFilePathRelative;
   // const localFile = Deno.readFileSync(localFilePath)
   // const file = new File([localFile], localFilePathRelative, { type: "application/pdf" });
-  // const document = await documentController.withCourse(course1.id).createDocument({description: "Test document", file: file, createdBy: users[0].id }); 
+  // const document = await documentController.withCourse(course1.id).createDocument({description: "Test document", file: file, createdBy: users[0].id });
   // console.log("Document created", document);
 
   // create posts
-  const post1 = await createPost(users[0].id, {title: "Post 1", content: "This is post 1", course_id: course1.id}, {visibility: "public", usePseudonym: true});
+  const post1 = await createPost(users[0].id, {
+    title: "Post 1",
+    content: "This is post 1",
+    course_id: course1.id,
+  }, { visibility: "public", use_pseudonym: true });
   console.log("Post created", post1);
 
-  const post2 = await createPost(users[0].id, {title: "Post 2", content: "This is post 2 " + "a".repeat(200) + "b".repeat(500), course_id: course1.id}, {visibility: "public", usePseudonym: true});
+  const post2 = await createPost(users[0].id, {
+    title: "Post 2",
+    content: "This is post 2 " + "a".repeat(200) + "b".repeat(500),
+    course_id: course1.id,
+  }, { visibility: "public", use_pseudonym: true });
   console.log("Post created", post2);
 
-  const post3 = await createPost(users[0].id, {title: "Post 3", content: "This is post 3", course_id: course1.id}, {visibility: "public", usePseudonym: true});
+  const post3 = await createPost(users[0].id, {
+    title: "Post 3",
+    content: "This is post 3",
+    course_id: course1.id,
+  }, { visibility: "public", use_pseudonym: true });
   console.log("Post created", post3);
 
   console.log("--------------------------------");
-  const listPosts = await getPosts(users[0].id, course1.id, false, false);
+  const listPosts = await getPosts(users[0].id, course1.id, false);
   console.log("List of posts", listPosts);
 }
 
 export async function emptyDatabase() {
   const fakeUUID = "00000000-0000-0000-0000-000000000000";
 
-  const {error: profilesError} = await supa.from("profiles").delete().neq("id", fakeUUID);
+  const { error: profilesError } = await supa.from("profiles").delete().neq(
+    "id",
+    fakeUUID,
+  );
   if (profilesError) {
     console.error("Error deleting profiles:", profilesError);
   }
-  const {error: courseRolesError} = await supa.from("courses").delete().neq("id", fakeUUID);
+  const { error: courseRolesError } = await supa.from("courses").delete().neq(
+    "id",
+    fakeUUID,
+  );
   if (courseRolesError) {
     console.error("Error deleting courses:", courseRolesError);
   }
@@ -206,7 +223,6 @@ export async function emptyDatabase() {
   for (const user of users2.data.users) {
     await supa.auth.admin.deleteUser(user.id);
   }
- 
 }
 
 // emptyDatabase();
@@ -245,7 +261,7 @@ export async function userTestSeedSetup(
       users[i].id,
       profileWithImage,
     );
-     await userController.getUserAccountStatus(users[i].id);
+    await userController.getUserAccountStatus(users[i].id);
     // console.log("Status:", status);
   }
 
@@ -269,25 +285,25 @@ export async function courseTestSeedSetup(
   return coursesCreated;
 }
 
-export async function postTestSeedSetup(
-  postsToCreate: NewPost[],
-  postOptions: NewPostOptions,
-  creatorId: string,
-) {
-  const posts = await getAllPosts();
+// export async function postTestSeedSetup(
+//   postsToCreate: NewPost[],
+//   postOptions: NewPostOptions,
+//   creatorId: string,
+// ) {
+//   const posts = await getAllPosts();
 
-  // Assume all posts created by same profile
-  for (const post of posts) {
-    await deletePost(post.id, creatorId);
-  }
+//   // Assume all posts created by same profile
+//   for (const post of posts) {
+//     await deletePost(post.id, creatorId);
+//   }
 
-  const postsCreated = [];
-  for (const post of postsToCreate) {
-    const createdPost = await createPost(creatorId, post, postOptions);
-    postsCreated.push(createdPost);
-  }
-  return postsCreated;
-}
+//   const postsCreated = [];
+//   for (const post of postsToCreate) {
+//     const createdPost = await createPost(creatorId, post, postOptions);
+//     postsCreated.push(createdPost);
+//   }
+//   return postsCreated;
+// }
 // emptyDatabase().then(() => {
 //   console.log("Database emptied");
 //   setupDevSeedData().then(() => {
