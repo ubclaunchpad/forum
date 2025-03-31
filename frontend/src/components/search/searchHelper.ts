@@ -4,7 +4,7 @@ export function getLink(
   courseId: string,
 ) {
   if (type === "document") {
-    return `/forum/courses/${courseId}/resources?fileId=${id}`;
+    return `/forum/courses/${courseId}/resources/${id}`;
   } else {
     return `/forum/courses/${courseId}/posts/${id}`;
   }

@@ -1,6 +1,6 @@
 import { cn, getRelativeTimeString } from "@/lib/utils";
 import EditorComponent from "../general/EditorComponent";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Post, PostComment } from "@forum/shared";
 import {
   ArrowRightFromLine,
@@ -13,6 +13,10 @@ import {
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import Link from "next/link";
+import { getApiUrl } from "@/utils/helpers";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { userContext } from "@/providers/userContext";
 
 type PostTextBoxSectionProps = {
   content: string;
@@ -43,7 +47,7 @@ export function PostTextBoxSection({
     >
       <div
         className={cn(
-          "flex  w-full overflow-hidden flex-1 p-2 px-4 py-0 mt-0 w-full flex-col gap-2 border rounded-lg border-transparent",
+          "flex  w-full overflow-hidden flex-1 p-2 px-4 py-0 mt-0  flex-col gap-2 border rounded-lg border-transparent",
         )}
       >
         <EditorComponent
@@ -252,7 +256,7 @@ export function PostContentWrapperFooter({
 
 export function PostCommentsSection({ comments }: { comments: PostComment[] }) {
   return (
-    <div className="flex gap-2 flex-col py-6 w-full">
+    <div className="flex gap-10 flex-col py-6 px-4 w-full">
       {comments.map((comment) => (
         <PostCommentBox key={comment.id} comment={comment} />
       ))}
@@ -260,20 +264,63 @@ export function PostCommentsSection({ comments }: { comments: PostComment[] }) {
   );
 }
 export function PostCommentBox({ comment }: { comment: PostComment }) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const queryClient = useQueryClient();
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const { token } = useContext(userContext);
+
+  async function handleDeleteComment() {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    const res = await fetch(
+      `${getApiUrl()}/posts/${comment.post_id}/comments/${comment.id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    if (res.ok) {
+      await queryClient.invalidateQueries({ queryKey: ["post"] });
+      toast.success("Comment deleted");
+    } else {
+      toast.error("Failed to delete comment");
+    }
+    setIsDeleting(false);
+  }
   return (
-    <div className="flex flex-col w-full">
+    <div
+      className={cn(
+        "flex relative pb-4 flex-col w-full",
+        isOptionsOpen
+          ? "bg-primary-muted/10 rounded-2xl border-primary-muted  rounded-tl-3xl rounded-bl-none"
+          : "",
+      )}
+    >
+      {isDeleting && (
+        <div className="flex flex-col z-20    h-full w-full absolute left-0  bg-primary-muted/10 backdrop-blur-xs rounded-2xl border-primary-muted  rounded-tl-xl rounded-bl-none">
+          <div className="flex flex-col border-primary-muted flex-1  w-full">
+            <div className="flex flex-col border-primary-muted flex-1 justify-center items-center  w-full">
+              <span className="text-sm text-primary-900 font-medium">
+                Deleting...
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex flex-row justify-between items-center w-full">
-        <div className="flex bg-white border border-primary-muted rounded-full  w-fit p-2 px-4">
+        <div className="flex bg-white border border-primary-muted rounded-full  w-fit p-1 px-3">
           <span className="text-sm text-neutral-800 font-medium">
             {comment.authors.map((author) => author.pseudonym).join(", ")}
           </span>
         </div>
-        <div className="flex flex-row justify-end text-sm text-neutral-500 w-full">
+        <div className="flex flex-row justify-end text-sm text-neutral-500 px-2 w-full">
           {getRelativeTimeString(new Date(comment.created_at))}
         </div>
       </div>
-      <div className="flex flex-col px-1 w-full">
-        <div className="flex flex-col  border-l-2 border-primary-muted min-h-10 w-full">
+      <div className="flex flex-col z-10 px-1 w-full">
+        <div className="flex flex-col border-primary-muted  w-full">
           <PostTextBoxSection
             content={comment.content}
             setContent={() => {}}
@@ -292,13 +339,30 @@ export function PostCommentBox({ comment }: { comment: PostComment }) {
                 <ReplyIcon className="max-w-4 max-h-4" />
                 <span className="text-sm font-semibold">Reply</span>
               </button>
-              <button className="flex flex-row items-center gap-1">
-                <MoreHorizontalIcon className="max-w-4 max-h-4" />
-              </button>
+              <Popover open={isOptionsOpen} onOpenChange={setIsOptionsOpen}>
+                <PopoverTrigger asChild>
+                  <button className="flex flex-row items-center gap-1">
+                    <MoreHorizontalIcon className="max-w-4 max-h-4" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="p-0 w-fit  py-1">
+                  <div className="flex flex-col items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      className="flex flex-row w-full justify-start items-center gap-1"
+                      onClick={handleDeleteComment}
+                    >
+                      <TrashIcon className="max-w-4 max-h-4" />
+                      <span className="text-sm font-semibold">Delete</span>
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </div>
       </div>
+      <div className="flex flex-col z-0  border-l border-primary-muted h-[calc(100%-1rem)] absolute left-0 top-4 rounded-xs rounded-b-none w-full"></div>
     </div>
   );
 }

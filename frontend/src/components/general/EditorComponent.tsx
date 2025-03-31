@@ -25,14 +25,14 @@ import TableRow from "@tiptap/extension-table-row";
 import Placeholder from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
 import MathExtension from "@aarkue/tiptap-math-extension";
-import StarterKit from "@tiptap/starter-kit";
 import Superscript from "@tiptap/extension-superscript";
 import Subscript from "@tiptap/extension-subscript";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import Image from "@tiptap/extension-image";
+import { Markdown } from "tiptap-markdown";
 
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 
 // Create lowlight instance
 const lowlight = createLowlight();
@@ -80,6 +80,11 @@ const Editor: FC<EditorProps> = ({
   className,
   onMarkdownChange,
 }) => {
+  const [text, setText] = useState("");
+  useEffect(() => {
+    setText(markdown);
+  }, []);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -129,20 +134,20 @@ const Editor: FC<EditorProps> = ({
         nocookie: true,
         inline: true,
       }),
-      StarterKit,
       Subscript,
       Superscript,
       TaskList,
+      Markdown,
       TaskItem.configure({
         nested: true,
       }),
       Image,
     ],
-    content: markdown,
+    content: text,
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
+      const markdown = editor.storage.markdown.getMarkdown();
       if (onMarkdownChange) {
-        onMarkdownChange(html);
+        onMarkdownChange(markdown);
       }
     },
 
@@ -154,10 +159,10 @@ const Editor: FC<EditorProps> = ({
   });
 
   useEffect(() => {
-    if (editor && markdown !== editor.getHTML()) {
-      editor.commands.setContent(markdown);
+    if (editor && text !== editor.getHTML()) {
+      editor.commands.setContent(text);
     }
-  }, [markdown, editor]);
+  }, [text, editor]);
 
   useEffect(() => {
     if (editor) {

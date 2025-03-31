@@ -1,6 +1,6 @@
 import { sqlClient, supa } from "../../_shared/db.ts";
 
-import { MutatePostComment, PostComment } from "@shared/mod.ts";
+import { MutatePostOptions, MutatePostComment, PostComment } from "@shared/mod.ts";
 import { commentExists, postExists } from "./helpers.ts";
 
 /**
@@ -12,67 +12,66 @@ export async function createPostComment(
   postId: string,
   userId: string,
   content: string,
+  commentEditInfo: MutatePostOptions  ,
 ): Promise<PostComment> {
   // Check if post exists
-  const { isFound, data: postData } = await postExists(postId);
+  const { isFound } = await postExists(postId);
   if (!isFound) {
     throw new Error("Post does not exist");
   }
 
-  const courseId = postData?.course_id;
+  const sql = sqlClient();
+  const commentRes = await sql.begin(async (tx) => {
+    const [comment] = await tx`
+      INSERT INTO post_comments (post_id, content)
+      VALUES (${postId}, ${content})
+      RETURNING *
+    `;
 
-  // Check if user is in the course with the post
-  const { data: courseCheck, error: courseCheckError } = await supa
-    .from("course_members")
-    .select("*")
-    .eq("course_id", courseId)
-    .eq("user_id", userId);
+    if (!comment || comment.length === 0) {
+      throw new Error("Failed to create comment");
+    }
 
-  if (courseCheckError) {
-    throw courseCheckError;
-  }
+    let pseudonym = null;
+     const [hasPseudonym] = await tx`
+      SELECT * FROM post_author_pseudonyms WHERE user_id = ${userId} AND post_id = ${postId}
+     `;
 
-  if (!courseCheck || courseCheck.length === 0) {
-    throw new Error("User is not in the course with the post");
-  }
+    
 
-  const newCommentArg = {
-    "post_id": postId,
-    "content": content,
-  };
+    const [author] = await tx`
+      INSERT INTO post_authors (comment_id, user_id, post_id, visibility, is_anonymous)
+      VALUES (${comment.id}, ${userId}, ${postId}, ${commentEditInfo.visibility}, ${
+        commentEditInfo.use_pseudonym ?? false
+      })
+      RETURNING *
+    `;
 
-  const comment = await supa.from("post_comments").insert(newCommentArg)
-    .select().single();
 
-  if (!comment.data) {
-    throw new Error("comment unsuccesfully added to post_comments");
-  }
-  const result: PostComment = {
-    id: comment.data.id,
-    postId: comment.data.post_id,
-    content: comment.data.content,
-    number_id: comment.data.number_id,
-    created_at: comment.data.created_at,
-    updated_at: comment.data.updated_at,
-    replies: [],
-  };
+    if (!hasPseudonym) {
+      const [newPseudonym] = await tx`
+        INSERT INTO post_author_pseudonyms (user_id, post_id, pseudonym)
+        VALUES (${userId}, ${postId}, ${commentEditInfo.use_pseudonym ?? false})
+        RETURNING *
+      `;
 
-  const { status, error: postAuthorError } = await supa.from("post_authors")
-    .insert({
-      "post_id": postId,
-      "user_id": userId,
-      "comment_id": result.id,
-    });
+      pseudonym = newPseudonym.pseudonym;
+    }
 
-  if (postAuthorError) {
-    throw postAuthorError;
-  }
+    return {
+      ...comment,
+      authors: [
+        {
+          ...author,
+          pseudonym: hasPseudonym ? pseudonym : null,
+        },
+      ],
+    } as PostComment;
+  });
 
-  if (status !== 201) {
-    throw new Error("entry unsuccessfully added to post_authors");
-  }
 
-  return result;
+  await sql.end();
+  return commentRes;
 }
 
 /**
@@ -184,32 +183,30 @@ export async function deletePostComment(
   commentId: string,
   userId: string,
 ): Promise<void> {
-  // Check if comment exists
-  const { isFound } = await commentExists(commentId);
+  const sql = sqlClient();
+  // First get the matching post id
+  const [postResult] = await sql`
+    SELECT post_comments.post_id 
+    FROM post_comments
+    INNER JOIN posts ON post_comments.post_id = posts.id
+    WHERE post_comments.id = ${commentId}
+    AND posts.course_id IN (
+      SELECT course_id FROM course_members WHERE user_id = ${userId}
+    )
+  `;
 
-  if (!isFound) {
-    throw new Error("Comment does not exist");
+  // Check if we found a matching post
+  if (!postResult || !postResult.post_id) {
+    throw new Error("Comment not found or you don't have permission to delete it");
   }
 
-  // Check if comment is created by author
-  const { error: postAuthorError } = await supa.from("post_authors").select()
-    .eq("comment_id", commentId).eq("user_id", userId).single();
+  // Now delete the comment
+  await sql`
+    DELETE FROM post_comments 
+    WHERE id = ${commentId}
+  `;
 
-  if (postAuthorError) {
-    throw new Error(
-      "Comment could not be deleted: " + postAuthorError.message,
-    );
-  }
-
-  // Assuming cascade from deleting comment, don't need to delete others
-  const { error: deletionError } = await supa.from("post_comments").delete().eq(
-    "id",
-    commentId,
-  );
-
-  if (deletionError) {
-    throw new Error("Failed to delete post");
-  }
+  return;
 }
 
 /**

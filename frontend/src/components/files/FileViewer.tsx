@@ -2,15 +2,15 @@
 import { userContext } from "@/providers/userContext";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
-import { FileText, Frown } from "lucide-react";
+import { FileText, Frown, Loader2 } from "lucide-react";
 import { useState, useEffect, useContext } from "react";
-import { Document, Page, pdfjs, Thumbnail } from "react-pdf";
-import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import "react-pdf/dist/esm/Page/TextLayer.css";
+// import { pdfjs } from "react-pdf";
+// import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+// import "react-pdf/dist/esm/Page/TextLayer.css";
 import { IsLoadingView } from "../general/IsLoadingView";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import { GetDocument } from "@forum/shared";
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface DocumentViewerInterface {
   signedUrl: string;
@@ -106,7 +106,11 @@ export default function FileViewer({
   }
 
   if (isLoading) {
-    return <IsLoadingView />;
+    return (
+      <div className="flex w-full flex-1  border-neutral-200 justify-center items-center">
+        <Loader2 className="h-4 w-4 animate-spin" />
+      </div>
+    );
   }
   // Error state - no document data
   if (!doc) {
@@ -218,11 +222,49 @@ function NativePDFViewer({ url }: { url: string }) {
     }
     fetchPDF();
   }, [url]);
+
+  // If we're loading or have an error, show appropriate UI
+  if (isLoading) return <IsLoadingView />;
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 h-full">
+        <Frown className="h-8 w-8 text-muted-foreground" />
+        <p>Error loading PDF: {error.message}</p>
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline mt-2"
+        >
+          Open PDF in new tab
+        </a>
+      </div>
+    );
+  }
+
+  // Use object tag instead of iframe for better PDF compatibility
   return (
-    <iframe
-      src={url + "#toolbar=0&navpanes=0"}
-      className="w-full h-full border-0"
-    />
+    <div className="pdf-container w-full h-full">
+      <object
+        data={URL.createObjectURL(pdfFile!)}
+        type="application/pdf"
+        className="w-full h-full"
+        // Add parameters to control viewer appearance
+        data-params="toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0&view=FitH"
+      >
+        <div className="flex flex-col items-center justify-center gap-2 h-full">
+          <p>Unable to display PDF directly.</p>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:underline mt-2"
+          >
+            Open PDF in new tab
+          </a>
+        </div>
+      </object>
+    </div>
   );
 }
 

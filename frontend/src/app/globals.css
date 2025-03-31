@@ -392,3 +392,18 @@ dialog {
   );
   animation: shimmer-reverse 2s infinite;
 }
+
+/* Add to your global CSS file */
+.pdf-container {
+  --pdf-viewer-bg: white;
+  background-color: white;
+}
+
+/* Target Chrome's PDF viewer - these selectors might change with browser updates */
+.pdf-container :deep(embed),
+.pdf-container :deep(#plugin),
+.pdf-container :deep(.pdfViewer),
+.pdf-container :deep(#viewer) {
+  background-color: white !important;
+  filter: invert(0) !important; /* Prevents dark mode inversion */
+}

@@ -4,7 +4,6 @@ import PostView, { PostMutatationEditor } from "./PostView";
 import { useContext } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getApiUrl } from "@/utils/helpers";
-import { Post } from "@forum/shared";
 import { Loader2 } from "lucide-react";
 import { userContext } from "@/providers/userContext";
 import { useCourseStore } from "@/providers/courseStoreProvider";
@@ -44,8 +43,8 @@ function PostToView({ initialPost }: { initialPost?: string }) {
     isLoading,
     error,
   } = useQuery({
+    enabled: true,
     queryKey: ["post", id],
-
     queryFn: () =>
       fetch(`${getApiUrl()}/posts/${id}`, {
         headers: {

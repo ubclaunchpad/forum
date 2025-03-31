@@ -242,7 +242,7 @@ export const SearchStoreProvider = ({ children }: SearchStoreProviderProps) => {
   });
 
   if (!storeRef.current) {
-    storeRef.current = createSearchStore(initActions);
+    storeRef.current = createSearchStore(initActions, course.id);
   }
 
   return (

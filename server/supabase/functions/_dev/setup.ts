@@ -29,13 +29,13 @@ const authUsers = [
 
 const profiles: ProfileWithoutId[] = [
   {
-    first_name: "Admin",
-    last_name: "Test",
-    email: "admin@test.com",
-    username: "admin",
-    display_name: "Admin Test",
+    first_name: "Jacob",
+    last_name: "Baker",
+    email: "jacob@forum.ai",
+    username: "jacob",
+    display_name: "Jacob Baker",
     pronouns: "he/him",
-    avatar_url: "https://example.com/avatar.png",
+    // avatar_url: "https://example.com/avatar.png",
     bio: "I am an admin",
     social_links: [],
   },
@@ -63,10 +63,10 @@ const profiles: ProfileWithoutId[] = [
 const courses: NewCourse[] = [
   {
     code: 301,
-    department: "CS",
+    department: "Forum",
     section: "001",
     access: "public",
-    name: "Introduction to Computer Science",
+    name: "Introduction to Forum AI",
     config: {
       theme_colour: "#347370",
       font: "Quicksand",

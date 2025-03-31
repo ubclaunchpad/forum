@@ -105,6 +105,7 @@ type SearchPersistOptions = PersistOptions<SearchStore, SearchState>;
 
 export const createSearchStore = (
   initActions: (set: SetState<SearchState>) => SearchActions,
+  courseId: string,
 ) => {
   const initState: SearchState = {
     search: "",
@@ -127,7 +128,7 @@ export const createSearchStore = (
         ...initActions(set as SetState<SearchState>),
       }),
       {
-        name: "searchStore",
+        name: `searchStore-${courseId}`,
         storage: createJSONStorage(() => sessionStorage),
       } as SearchPersistOptions,
     ),

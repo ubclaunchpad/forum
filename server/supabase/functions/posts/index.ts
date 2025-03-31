@@ -157,12 +157,13 @@ app.post(
       const { post_id } = c.req.param();
       const user = c.var.user;
 
-      const { comment } = await c.req.json();
+      const { comment, options } = await c.req.json();
 
       const newComment = await postCommentController.createPostComment(
         post_id,
         user.id,
-        comment,
+        comment.content,
+        options,
       );
       return c.json(newComment);
     } catch (error) {
