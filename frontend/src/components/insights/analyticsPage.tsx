@@ -467,10 +467,10 @@ export default function AnalyticsDashboard({
                           <div className="flex items-center justify-between mb-1">
                             <span>{lang}</span>
                             <span className="text-sm text-muted-foreground">
-                              {Math.round(100 - i * 20)}%
+                              {/* {Math.round(100 - i * 20)}% */}
                             </span>
                           </div>
-                          <Progress value={100 - i * 20} />
+                          {/* <Progress value={100 - i * 20} /> */}
                         </div>
                       </div>
                     ))}

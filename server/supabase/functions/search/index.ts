@@ -109,7 +109,6 @@ app.post("/courses/:courseId/ask", async (c: Context) => {
     }
 
     await apiStream.writeln(JSON.stringify({
-      text: fullAnswer,
       checkPoint: "Done",
     }));
 
@@ -307,7 +306,7 @@ Expectations:
 - You are contextually aware of the course, the user and other members in the course.
 - Concise is always preferred. Only explain if user insists or the question is not straightforward.
 
-- Do not include citations in your response.
+- Do not include citations in your response or footnotes or sources.
 - Format needs to be markdown. any markdown styles are allowed however avoid using h1, h2. only h3 and beyond. Exclude img, video, audio, etc.
 - Some questions will not have direct answers; provide your best response based on your own knowledge and the sources provided. However, if not able to answer, say so and ask a followup. Be detailed in what would help you answer the question.
 - Some questions might ask you about finding or redirecting. Give them the options hyperlinked so they can go to these. Example are finding a certain note, date range of posts, etc.
@@ -329,7 +328,6 @@ ${
   }
   `;
 
-  // console.log("context", context);
 
   return {
     context,

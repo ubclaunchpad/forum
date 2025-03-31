@@ -3,7 +3,7 @@ import IconFetcher from "@/lib/iconFetcher";
 import { HighlightedText } from "@/lib/utility/highlighter";
 import AiLoader from "./ai-loader";
 import AnimatedMarkdown from "../general/AnimatedMarkdown";
-import { useContext, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { ArrowRightCircleIcon, TrendingUpIcon } from "lucide-react";
 import { MessageBubbleIcon } from "../customIcons/message-bubble-icon";
 import { SourceIcon } from "../customIcons/source-icon";
@@ -54,13 +54,23 @@ function AISearchContent() {
       </div>
     );
   }
+
+  useEffect(() => {
+    if (followUpRef.current) {
+      followUpRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [searchStore.thread.length, searchStore.loadingState]);
+
   return (
     <div className="flex flex-col px-10 overflow-y-scroll w-full gap-4 py-4">
       {searchStore.thread.map((t, index) => (
         <div key={index} className="flex flex-col gap-2">
-          <h3 className="text-neutral-800 capitalize font-semibold text-xl">
+          <h3 className="text-neutral-800 capitalize font-semibold line-clamp-1 truncate text-xl">
             {t.question}{" "}
-            <span className="text-neutral-600 text-xs">({t.thread_id})</span>
+            {/* <span className="text-neutral-600 text-xs">({t.thread_id})</span> */}
           </h3>
           <div className="flex flex-col gap-2 py-4">
             <h4 className="text-neutral-800 font-semibold text-lg flex flex-row gap-2 items-center">
@@ -115,7 +125,7 @@ function AISearchContent() {
 
       <div
         className={cn(
-          "flex fixed bottom-0 max-w-xl  w-full justify-center left-1/2 -translate-x-1/2 items-center transition-all ",
+          "flex  max-w-xl  w-full justify-center  items-center transition-all ",
           searchStore.loadingState !== "idle" ? "opacity-0" : "opacity-100",
         )}
       >
@@ -123,7 +133,7 @@ function AISearchContent() {
           <input
             ref={followUpRef}
             type="text"
-            className="w-full border rounded-full shadow-xs px-8 border-neutral-200 focus:outline-hidden focus:ring-2 focus:ring-primary-200 focus:ring-offset-2 transition-all duration-300 p-2 "
+            className="w-full bg-white border rounded-full shadow-xs px-8 border-neutral-200 focus:outline-hidden focus:ring-2 focus:ring-primary-200 focus:ring-offset-2 transition-all duration-300 p-2 "
             placeholder="Ask a follow up question"
             value={searchStore.followUpQuestion}
             onChange={(e) => searchStore.setFollowUpQuestion(e.target.value)}
