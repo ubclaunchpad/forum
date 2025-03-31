@@ -66,7 +66,7 @@ function AISearchContent() {
 
   return (
     <div className="flex flex-col px-10 overflow-y-scroll w-full gap-4 py-4">
-      {searchStore.thread.map((t, index) => (
+      {searchStore.thread?.map((t, index) => (
         <div key={index} className="flex flex-col gap-2">
           <h3 className="text-neutral-800 capitalize font-semibold line-clamp-1 truncate text-xl">
             {t.question}{" "}
@@ -78,7 +78,7 @@ function AISearchContent() {
               Sources
             </h4>
             <div className="flex flex-row overflow-x-auto gap-3 py-4 on-appear-animation ">
-              {t.sources.map((s, index) => (
+              {t.sources?.map((s, index) => (
                 <button
                   className="text-primary-600  p-4 overflow-hidden w-52 max-h-32 bg-neutral-0 shadow-xs flex flex-col shrink-0 border rounded-3xl border-primary-100 hover:bg-primary-50 hover:border-primary-200 hover:shadow-md transition-all duration-300"
                   key={index}
@@ -98,7 +98,7 @@ function AISearchContent() {
                   }}
                 >
                   <p className="text-neutral-800 text-sm line-clamp-3">
-                    {s.content.slice(0, 100)}...
+                    {s.content?.slice(0, 100)}...
                   </p>
                 </button>
               ))}
@@ -155,7 +155,7 @@ function TextSearchContent() {
   const textSearchResponse = searchStore.textSearchResponse;
   const course = useCourseStore((state) => state.course);
   const { profile, token } = useContext(userContext);
-  const { isPending, error, data } = useQuery({
+  const { data } = useQuery({
     queryKey: [`${course.id}_user_threads`, searchStore.search],
     queryFn: () =>
       fetch(
