@@ -14,7 +14,7 @@ import {
 
 const authUsers = [
   {
-    email: "admin@test.com",
+    email: "jacob@forum.ai",
     password: "Test123!",
   },
   {
@@ -35,7 +35,7 @@ const profiles: ProfileWithoutId[] = [
     username: "jacob",
     display_name: "Jacob Baker",
     pronouns: "he/him",
-    // avatar_url: "https://example.com/avatar.png",
+    avatar_url: "https://example.com/avatar.png",
     bio: "I am an admin",
     social_links: [],
   },
