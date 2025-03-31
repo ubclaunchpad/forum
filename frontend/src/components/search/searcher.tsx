@@ -150,7 +150,7 @@ export function Searcher() {
         <Button
           ref={searchBarRef}
           variant="default"
-          className="flex w-10 border-primary-border shadow-xs shrink-0 items-center font-medium text-neutral-600 rounded-full px-1 bg-white max-w-full lg:max-w-md min-w-0 lg:min-w-[500px] lg:w-full border overflow-hidden lg:absolute lg:left-1/2 lg:transform h-10 lg:-translate-x-1/2"
+          className="flex w-10 hover:bg-neutral-100 border-primary-border shadow-xs shrink-0 items-center font-medium text-neutral-600 rounded-full px-1 bg-white max-w-full lg:max-w-md min-w-0 lg:min-w-[500px] lg:w-full border overflow-hidden lg:absolute lg:left-1/2 lg:transform h-10 lg:-translate-x-1/2"
           onClick={() => {
             searchStore.setIsOpen(true);
           }}

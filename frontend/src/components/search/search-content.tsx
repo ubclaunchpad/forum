@@ -240,7 +240,10 @@ function TextSearchContent() {
             className="flex  border rounded-xl shadow-xs border-neutral-200  p-2 gap-4 hover:bg-primary-100 hover:shadow-md hover:border-primary-200 transition-all duration-300"
             key={index}
             onClick={() => {
-              if (result.entity_type === "document" || result.entity_type === "post") {
+              if (
+                result.entity_type === "document" ||
+                result.entity_type === "post"
+              ) {
                 const id = result.entity_id;
                 router.push(getLink(result.entity_type, id, course.id), {
                   scroll: false,
