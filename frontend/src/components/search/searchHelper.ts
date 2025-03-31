@@ -6,6 +6,6 @@ export function getLink(
   if (type === "document") {
     return `/forum/courses/${courseId}/resources/${id}`;
   } else {
-    return `/forum/courses/${courseId}/posts/${id}`;
+    return `/forum/courses/${courseId}/forum/${id}`;
   }
 }
