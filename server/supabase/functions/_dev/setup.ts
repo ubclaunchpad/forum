@@ -93,8 +93,7 @@ const postArgs = [
   },
   {
     title: "Post 2",
-    content: "this is a very long post that is more than 200 characters" +
-      "a".repeat(200),
+    content: "Another post",
   },
   {
     title: "Post 3",
@@ -182,7 +181,7 @@ export async function setupDevSeedData() {
 
   const post2 = await createPost(users[0].id, {
     title: "Post 2",
-    content: "This is post 2 " + "a".repeat(200) + "b".repeat(500),
+    content: "This is post 2",
     course_id: course1.id,
   }, { visibility: "public", use_pseudonym: true });
   console.log("Post created", post2);

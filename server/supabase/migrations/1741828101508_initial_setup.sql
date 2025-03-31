@@ -95,7 +95,7 @@ CREATE TABLE post_author_pseudonyms (
     pseudonym TEXT NOT NULL,
     PRIMARY KEY (post_id, user_id),
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE SET NULL,
+    FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE,
     UNIQUE (post_id, pseudonym)
 );
 
