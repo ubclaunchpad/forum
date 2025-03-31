@@ -257,7 +257,7 @@ export function PostContentWrapperFooter({
 export function PostCommentsSection({ comments }: { comments: PostComment[] }) {
   return (
     <div className="flex gap-10 flex-col py-6 px-4 w-full">
-      {comments.map((comment) => (
+      {comments?.map((comment) => (
         <PostCommentBox key={comment.id} comment={comment} />
       ))}
     </div>

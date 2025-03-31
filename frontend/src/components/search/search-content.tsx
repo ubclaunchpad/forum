@@ -129,7 +129,7 @@ function AISearchContent() {
           searchStore.loadingState !== "idle" ? "opacity-0" : "opacity-100",
         )}
       >
-        <div className="flex flex-col relative gap-2 max-w-xl  w-full py-4">
+        <div className="flex flex-col relative gap-2 max-w-xl justify-center  items-center w-full py-4">
           <input
             ref={followUpRef}
             type="text"

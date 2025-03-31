@@ -95,7 +95,7 @@ export function Searcher() {
           id="search-input"
           ref={searchInputRef}
           value={searchStore.search}
-          disabled={searchStore.loadingState !== "idle"}
+          // disabled={searchStore.loadingState !== "idle"}
           onChange={handleInputChange}
           type="text"
           placeholder="Write a few words to search..."
