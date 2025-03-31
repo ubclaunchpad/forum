@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { PlusIcon, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Textarea } from "../ui/textarea";
+import { useQueryClient } from "@tanstack/react-query";
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
 
 const fileSchema = z.object({
@@ -38,7 +40,8 @@ export default function UploadFile() {
   const { token } = useContext(userContext);
   const course = useCourseStore((state) => state.course);
   const { toast } = useToast();
-
+  const queryClient = useQueryClient();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState("");
@@ -46,6 +49,12 @@ export default function UploadFile() {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open) {
+      router.push(`/forum/courses/${course.id}/resources`);
+    }
+  }, [open]);
 
   const validateFile = (file: File, title: string) => {
     try {
@@ -142,6 +151,9 @@ export default function UploadFile() {
       setTitle("");
       setFile(null);
       setValidationError(null);
+      await queryClient.invalidateQueries({
+        queryKey: ["documents", course.id],
+      });
     } catch (error) {
       toast({
         title: "Error",
