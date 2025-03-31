@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS public.embeddings (
     parent_chunk_id UUID,
     supplementary_content TEXT DEFAULT '',
     course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-    embedding vector(384),
+    embedding vector(1536),
     fts tsvector generated always as (to_tsvector('english', content || ' ' || supplementary_content)) stored,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

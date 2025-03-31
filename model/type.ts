@@ -1,6 +1,5 @@
 import { z } from "@forum/shared";
 
-const MAX_WORDS = 512;
 
 export const jobSchema = z.object({
     jobId: z.number(),

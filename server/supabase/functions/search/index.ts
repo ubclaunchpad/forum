@@ -8,7 +8,6 @@ import OpenAI from "jsr:@openai/openai";
 import { z } from "@shared/mod.ts";
 import { authMiddleware } from "../_shared/utils/auth.ts";
 import { zodResponseFormat } from "jsr:@openai/openai/helpers/zod";
-const session = new Supabase.ai.Session("gte-small");
 
 const client = new OpenAI({
   apiKey: Deno.env.get("OPENAI_API_KEY"),
@@ -16,7 +15,7 @@ const client = new OpenAI({
 
 const functionName = "search";
 const app = new Hono().basePath(`/${functionName}`);
-const MATCH_THRESHOLD = 0.1;
+const MATCH_THRESHOLD = 0.35;
 
 const ThreadOutput = z.object({
   name: z.string().describe(
@@ -35,7 +34,6 @@ const ThreadOutput = z.object({
 });
 
 // const session = new Supabase.ai.Session("gte-small");
-
 
 app.use(
   "*",
@@ -170,12 +168,15 @@ app.get("/courses/:courseId/searches/report", async (c: Context) => {
 
 app.post("/courses/:courseId/searches/report", async (c: Context) => {
   const courseId = c.req.param("courseId");
-  const req = await fetch(`${Deno.env.get("JOB_API")}/jobs/reports/course/${courseId}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const req = await fetch(
+    `${Deno.env.get("JOB_API")}/jobs/reports/course/${courseId}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
     },
-  });
+  );
   return c.json({ success: true });
 });
 
@@ -227,41 +228,23 @@ async function delegateSearch(
 
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini",
-      max_tokens: 500,
+      max_tokens: 850,
       messages: [{ role: "user", content: prompt }],
     });
 
     queryToEmbed = response.choices[0].message.content || text;
   }
 
-  // console.log("queryToEmbed", queryToEmbed);
-  // const embedding = await client.embeddings.create({
-  //   model: "text-embedding-3-small",
-  //   input: queryToEmbed,
-  //   encoding_format: "float",
-  //   dimensions: 384,
-  // });
+  const embedding = await client.embeddings.create({
+    model: "text-embedding-3-small",
+    input: queryToEmbed,
+    encoding_format: "float",
+  });
 
-  const embedding = await session.run(queryToEmbed, {
-    mean_pool: true,
-    normalize: true,
-  }) as any;
+  const embeddingArray = `[${embedding.data[0].embedding.toString()}]`;
 
-  const embeddingArray = `[${embedding.toString()}]`;
-  // const embeddingArray = `[${embedding.data[0].embedding.toString()}]`;
-
-  // console.log("embeddingArray", embeddingArray);
-
-  const res = await sql`
-  WITH entity_ids AS (
-    -- Get all post IDs for the course
-    SELECT id AS entity_id
-    FROM posts
-    WHERE course_id = ${courseId}
-    
-    UNION ALL
-    
-    -- Get all document IDs for the course
+  const matchedDocuments = await sql`
+  WITH document_entity_ids AS (
     SELECT id AS entity_id
     FROM documents
     WHERE course_id = ${courseId}
@@ -275,34 +258,30 @@ async function delegateSearch(
   
   FROM embeddings e
   -- Join with our entity_ids to filter only relevant embeddings
-  JOIN entity_ids ei ON e.entity_id = ei.entity_id
+  JOIN document_entity_ids dei ON e.entity_id = dei.entity_id
   -- Additional vector similarity filtering
   WHERE e.embedding <=> ${embeddingArray} < ${1 - MATCH_THRESHOLD}::float
   -- Order by similarity (closest matches first)
   ORDER BY e.embedding <=> ${embeddingArray} ASC
-  LIMIT 20
+  LIMIT 10
   `;
 
-  const sourcesWithSimilarity = res.map((r) => {
-    const { similarity_score, ...rest } = r;
-    let confidence = "";
-    if (similarity_score < 0.1) {
-      confidence = "Very relevant";
-    } else if (similarity_score < 0.3) {
-      confidence = "Relevant";
-    } else if (similarity_score < 0.5) {
-      confidence = "Somewhat relevant";
-    } else {
-      confidence = "Probaly not relevant";
-    }
-    return { ...rest, confidence } as {
-      entity_id: string;
-      entity_type: string;
-      content: string;
-      confidence: string;
-    };
-  });
+  const matchedPosts = await sql`
+  WITH post_entity_ids AS (
+   SELECT id AS entity_id
+    FROM posts
+    WHERE course_id = ${courseId}
+  )
 
+  SELECT e.entity_id, e.entity_type, e.content, (e.embedding <=> ${embeddingArray}) AS similarity_score
+  FROM embeddings e
+  JOIN post_entity_ids pei ON e.entity_id = pei.entity_id
+  WHERE e.embedding <=> ${embeddingArray} < ${1 - MATCH_THRESHOLD}::float
+  ORDER BY e.embedding <=> ${embeddingArray} ASC
+  LIMIT 10
+  `;
+
+  const res = [...matchedDocuments, ...matchedPosts];
   const textSearchResults = [];
 
   if (res.length === 0) {
@@ -328,7 +307,7 @@ Expectations:
 - You are contextually aware of the course, the user and other members in the course.
 - Concise is always preferred. Only explain if user insists or the question is not straightforward.
 
-- Only keep inline citations. number the citations. for each citation it has to be [number](<entity_type>_<entity_id>)
+- Do not include citations in your response.
 - Format needs to be markdown. any markdown styles are allowed however avoid using h1, h2. only h3 and beyond. Exclude img, video, audio, etc.
 - Some questions will not have direct answers; provide your best response based on your own knowledge and the sources provided. However, if not able to answer, say so and ask a followup. Be detailed in what would help you answer the question.
 - Some questions might ask you about finding or redirecting. Give them the options hyperlinked so they can go to these. Example are finding a certain note, date range of posts, etc.
@@ -339,8 +318,8 @@ Expectations:
 
 SOURCES:
 ${
-    sourcesWithSimilarity.map((r) =>
-      `- ${r.entity_id} of type ${r.entity_type} is ${r.confidence} and content: ${r.content}`
+    res.map((r) =>
+      `- ${r.entity_id} of type ${r.entity_type} is and content: ${r.content}`
     ).join("\n")
   }
   ${

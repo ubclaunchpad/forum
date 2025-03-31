@@ -5,7 +5,7 @@ import { getOpenAIClient, getSupabaseClient, sql } from "../util.ts";
 import type { Job, PageResult } from "../type.ts";
 
 const EMBEDDING_QUEUE_NAME = "embedding_jobs";
-const MAX_WORDS = 500;
+const MAX_WORDS = 5000;
 
 const client = getOpenAIClient();
 const supa = getSupabaseClient();
@@ -145,7 +145,6 @@ async function handlePage(document: Document): Promise<PageResult> {
   //       model: "text-embedding-3-small",
   //       input: part,
   //       encoding_format: "float",
-  //       dimensions: 384,
   //     });
   //     console.log("HERE");
   //     console.log("embedding", embedding);
@@ -169,7 +168,6 @@ async function handlePage(document: Document): Promise<PageResult> {
         model: "text-embedding-3-small",
         input: part,
         encoding_format: "float",
-        dimensions: 384,
       });
       // console.log("embedding", embedding);
       return {
@@ -274,7 +272,6 @@ export async function postJobHandler(job: Job) {
       model: "text-embedding-3-small",
       input: `${title}: ${part}`,
       encoding_format: "float",
-      dimensions: 384,
     });
     embeddingsEntries.push({
       entity_type: entityType,
