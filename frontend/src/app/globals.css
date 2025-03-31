@@ -407,3 +407,16 @@ dialog {
   background-color: white !important;
   filter: invert(0) !important; /* Prevents dark mode inversion */
 }
+
+.blur-to-max {
+  animation: blur-to-max-animation 1s forwards;
+}
+
+@keyframes blur-to-max-animation {
+  from {
+    backdrop-filter: blur(0px);
+  }
+  to {
+    backdrop-filter: blur(40px);
+  }
+}

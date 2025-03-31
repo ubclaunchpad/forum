@@ -11,23 +11,16 @@ const client = getOpenAIClient();
 const supa = getSupabaseClient();
 
 export async function documentJobHandler(job: Job) {
-  console.log("documentJobHandler", job);
   const { sourceTable, entityId, entityType } = job;
-  // Get the file id and other metadata
-  // console.log("sourceTable", sourceTable);
-  // console.log("entityId", entityId);
-  // console.log("entityType", entityType);
   const { data, error } = await supa.from(sourceTable).select("*, files(*)").eq(
     "id",
     entityId,
   ).single();
-  // console.log("data", data);
-  // console.log("error", error);
 
   if (error) {
-    console.warn(
-      `Error fetching ${sourceTable} - ${entityId} - ${error.message}`,
-    );
+    // console.warn(
+    //   `Error fetching ${sourceTable} - ${entityId} - ${error.message}`,
+    // );
     return;
   }
 
@@ -62,11 +55,16 @@ export async function documentJobHandler(job: Job) {
 
   // Insert the page embeddings into the database
   const flattenedEmbeddingEntries = pageEmbeddings.flatMap((page) =>
-    page.chunks.map((chunk: { content: string; embedding: number[] }) => ({
+    page.chunks.map((
+      chunk: { content: string | string[]; embedding: number[] },
+      index,
+    ) => ({
       entity_type: entityType,
       entity_id: entityId,
-      chunk_index: page.pageNumber,
-      content: chunk.content,
+      chunk_index: index,
+      content: typeof chunk.content === "string"
+        ? chunk.content
+        : chunk.content.join(" "),
       embedding: chunk.embedding,
       course_id: data.course_id,
     }))
@@ -75,8 +73,6 @@ export async function documentJobHandler(job: Job) {
   const { error: embeddingError } = await supa.from("embeddings").insert(
     flattenedEmbeddingEntries,
   );
-  console.log("embeddingError", embeddingError);
-
   if (embeddingError) {
     console.warn(
       `Error inserting embeddings - ${embeddingError.message}`,
@@ -205,25 +201,99 @@ async function handlePage(document: Document): Promise<PageResult> {
   }
 }
 
-export async function processDocumentJob(parsedJobs: any) {
+export async function processAllJob(parsedJobs: any) {
   const jobRequests = parsedJobs.data;
   for (const jobRequest of jobRequests) {
-    const { jobId, sourceTable, entityId, entityType, contentColumns } =
-      jobRequest;
+    
+    const { jobId, sourceTable, entityId, entityType, contentColumns} = jobRequest;
 
-    if (sourceTable === "post") {
-      // return c.json({ error: "Post embedding not implemented" }, 501);
+    console.log(
+      `jobId: ${jobId} failed, entityId: ${entityId}, entityType: ${entityType} contentColumns: ${contentColumns}`,
+    );
+    if (sourceTable === "posts") {
+      try {
+        await postJobHandler(jobRequest);
+        await sql`
+      select pgmq.delete(${EMBEDDING_QUEUE_NAME}, ${jobId}::bigint)
+      `;
+      } catch (error) {
+        console.log(
+          `jobId: ${jobId} failed, entityId: ${entityId}, entityType: ${entityType}`,
+        );
+        console.error(error);
+      }
     } else if (sourceTable === "documents") {
       try {
-        console.log("processing document job", jobRequest);
         await documentJobHandler(jobRequest);
         await sql`
       select pgmq.delete(${EMBEDDING_QUEUE_NAME}, ${jobId}::bigint)
       `;
       } catch (error) {
+        console.log(
+          `jobId: ${jobId} failed, entityId: ${entityId}, entityType: ${entityType}`,
+        );
         console.error(error);
         // return c.json({ error: "Failed to process document" }, 500);
       }
     }
+  }
+}
+
+export async function postJobHandler(job: Job) {
+  const { entityId, entityType, sourceTable} = job;
+  const { data, error } = await supa
+    .from(sourceTable)
+    .select("*")
+    .eq("id", entityId)
+    .single();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  if (!data) {
+    console.info("No data found");
+    return;
+  }
+
+  const { content, title } = data;
+
+  const contentWords = content.split(" ");
+  const ACTUAL_MAX_WORDS = MAX_WORDS * 0.8;
+  const parts = Math.ceil(contentWords.length / ACTUAL_MAX_WORDS);
+  const contentParts = [];
+  const embeddingsEntries = [];
+  for (let i = 0; i < parts; i++) {
+    const part = contentWords.slice(
+      i * ACTUAL_MAX_WORDS,
+      (i + 1) * ACTUAL_MAX_WORDS,
+    ).join(" ");
+    contentParts.push(part);
+    const embedding = await client.embeddings.create({
+      model: "text-embedding-3-small",
+      input: `${title}: ${part}`,
+      encoding_format: "float",
+      dimensions: 384,
+    });
+    embeddingsEntries.push({
+      entity_type: entityType,
+      entity_id: entityId,
+      chunk_index: i,
+      content: part,
+      course_id: data.course_id,
+      embedding: embedding.data[0].embedding as number[],
+    });
+  }
+
+  const { error: embeddingError } = await supa.from("embeddings").insert(
+    embeddingsEntries,
+  );
+
+  if (embeddingError) {
+    console.log("embeddingError", embeddingError);
+    console.warn(
+      `Error inserting embeddings - ${embeddingError.message}`,
+    );
   }
 }

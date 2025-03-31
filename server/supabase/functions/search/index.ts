@@ -234,7 +234,7 @@ async function delegateSearch(
     queryToEmbed = response.choices[0].message.content || text;
   }
 
-  console.log("queryToEmbed", queryToEmbed);
+  // console.log("queryToEmbed", queryToEmbed);
   // const embedding = await client.embeddings.create({
   //   model: "text-embedding-3-small",
   //   input: queryToEmbed,
@@ -280,7 +280,7 @@ async function delegateSearch(
   WHERE e.embedding <=> ${embeddingArray} < ${1 - MATCH_THRESHOLD}::float
   -- Order by similarity (closest matches first)
   ORDER BY e.embedding <=> ${embeddingArray} ASC
-  LIMIT 100
+  LIMIT 20
   `;
 
   const sourcesWithSimilarity = res.map((r) => {

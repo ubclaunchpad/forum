@@ -161,7 +161,7 @@ function DocumentsPage({
           )}
         >
           {isDeleting && (
-            <div className="flex flex-col z-20    h-full w-full absolute left-0  bg-primary-muted/30 backdrop-blur-xs border-primary-muted  ">
+            <div className="flex flex-col z-20    h-full w-full absolute left-0  blur-to-max border-primary-muted  ">
               <div className="flex flex-col border-primary-muted flex-1  w-full">
                 <div className="flex flex-col border-primary-muted flex-1 justify-center items-center  w-full">
                   <span className="text-md text-primary-900 font-medium">

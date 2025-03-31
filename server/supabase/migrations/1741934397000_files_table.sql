@@ -214,6 +214,12 @@ after insert on documents
 for each row
 execute procedure util.queue_embeddings('documents', 'document', 'file_id');
 
+
+create trigger create_embeddings_on_posts_insert_or_update
+after insert or update on posts
+for each row
+execute procedure util.queue_embeddings('posts', 'post', 'content');
+
 CREATE TABLE IF NOT EXISTS search_threads (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
@@ -284,7 +290,7 @@ $$;
 select
   cron.schedule(
     'process-search-analysis',
-    '30 seconds',
+    '0 1 * * *',
     $$
     select util.process_search_analysis();
     $$

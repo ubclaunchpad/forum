@@ -70,7 +70,7 @@ function AISearchContent() {
             <div className="flex flex-row overflow-x-auto gap-3 py-4 on-appear-animation ">
               {t.sources.map((s, index) => (
                 <button
-                  className="text-primary-600 text-neutral-800 p-4 overflow-hidden w-52 max-h-32 bg-neutral-0 shadow-xs flex flex-col shrink-0 border rounded-3xl border-primary-100 hover:bg-primary-50 hover:border-primary-200 hover:shadow-md transition-all duration-300"
+                  className="text-primary-600  p-4 overflow-hidden w-52 max-h-32 bg-neutral-0 shadow-xs flex flex-col shrink-0 border rounded-3xl border-primary-100 hover:bg-primary-50 hover:border-primary-200 hover:shadow-md transition-all duration-300"
                   key={index}
                   onClick={() => {
                     if (s.entity_type === "document") {
@@ -80,7 +80,10 @@ function AISearchContent() {
                       });
                       searchStore.setIsOpen(false);
                     } else {
-                      alert("Post redirect not implemented yet");
+                      const id = s.entity_id;
+                      router.push(getLink(s.entity_type, id, course.id), {
+                        scroll: false,
+                      });
                     }
                   }}
                 >
@@ -237,7 +240,7 @@ function TextSearchContent() {
             className="flex  border rounded-xl shadow-xs border-neutral-200  p-2 gap-4 hover:bg-primary-100 hover:shadow-md hover:border-primary-200 transition-all duration-300"
             key={index}
             onClick={() => {
-              if (result.entity_type === "document") {
+              if (result.entity_type === "document" || result.entity_type === "post") {
                 const id = result.entity_id;
                 router.push(getLink(result.entity_type, id, course.id), {
                   scroll: false,

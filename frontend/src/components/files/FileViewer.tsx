@@ -7,7 +7,6 @@ import { useState, useEffect, useContext } from "react";
 // import { pdfjs } from "react-pdf";
 // import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 // import "react-pdf/dist/esm/Page/TextLayer.css";
-import { IsLoadingView } from "../general/IsLoadingView";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import { GetDocument } from "@forum/shared";
 // pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -224,7 +223,14 @@ function NativePDFViewer({ url }: { url: string }) {
   }, [url]);
 
   // If we're loading or have an error, show appropriate UI
-  if (isLoading) return <IsLoadingView />;
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 h-full">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <p>Loading PDF...</p>
+      </div>
+    );
+  }
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 h-full">

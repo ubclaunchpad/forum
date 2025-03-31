@@ -2,7 +2,7 @@ import { Context, Hono } from "jsr:@hono/hono";
 import { createMiddleware } from "jsr:@hono/hono/factory";
 import { cors } from "jsr:@hono/hono/cors";
 import { jobSchema } from "./type.ts";
-import { processDocumentJob } from "./runners/embed.ts";
+import { processAllJob } from "./runners/embed.ts";
 import {
   generateReport,
   generateReportForAllCourses,
@@ -47,7 +47,7 @@ app.get("/", async (c: Context) => {
 app.use("/jobs/*", authMiddleware);
 
 app.post("/jobs/embed", async (c: Context) => {
-  console.log("embed job received");
+  console.log("New embed job received at /jobs/embed");
   let body = null;
 
   try {
@@ -65,7 +65,7 @@ app.post("/jobs/embed", async (c: Context) => {
     );
   }
 
-  await processDocumentJob(parsedJobs);
+  await processAllJob(parsedJobs);
   return c.json({ success: true });
 });
 

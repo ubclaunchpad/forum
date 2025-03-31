@@ -8,7 +8,7 @@ export function getApiUrl() {
   if (API_BASE_URL) {
     return API_BASE_URL;
   } else {
-    console.log("Using default API_BASE_URL");
+    // console.log("Using default API_BASE_URL");
     return "https://pirtxwjlvtuazzlxlshv.supabase.co/functions/v1";
     // throw new Error("API_BASE_URL is not set");
   }
