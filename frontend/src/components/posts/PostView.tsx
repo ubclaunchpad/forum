@@ -30,6 +30,7 @@ import { getApiUrl } from "@/utils/helpers";
 import { userContext } from "@/providers/userContext";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function PostView({ post }: { post: PostWithComments }) {
   const course = useCourseStore((state) => state.course);
@@ -128,7 +129,7 @@ export default function PostView({ post }: { post: PostWithComments }) {
           <PostTextBoxSection
             content={content}
             setContent={setContent}
-            options={{ isEditing: isEditing }}
+            options={{ isEditing: isEditing, editable: isEditing }}
           />
           {!isEditing && (
             <PostActionRow>
@@ -303,32 +304,37 @@ function PostNewCommentSection({
 }) {
   const [commentContent, setCommentContent] = useState("");
   const { token } = useContext(userContext);
+  const queryClient = useQueryClient();
 
   if (!isCommenting) {
     return null;
   }
 
   async function handlePostComment() {
-    toast.info("Working on it...");
-    // const res = await fetch(`${getApiUrl()}/posts/${postId}/comments`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: `Bearer ${token}`,
-    //   },
-    //   body: JSON.stringify({
-    //     comment: {
-    //       content: commentContent,
-    //     },
-    //   }),
-    // });
+    const res = await fetch(`${getApiUrl()}/posts/${postId}/comments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        comment: {
+          content: commentContent,
+        },
+        options: {
+          use_pseudonym: false,
+          visibility: "public",
+        },
+      }),
+    });
 
-    // if (res.ok) {
-    //   toast.success("Comment posted successfully");
-    //   setIsCommenting(false);
-    // } else {
-    //   toast.error("Failed to post comment");
-    // }
+    if (res.ok) {
+      await queryClient.invalidateQueries({ queryKey: ["post"] });
+      toast.success("Comment posted successfully");
+      setIsCommenting(false);
+    } else {
+      toast.error("Failed to post comment");
+    }
   }
   return (
     <div className="flex flex-col px-4 py-8 gap-2">

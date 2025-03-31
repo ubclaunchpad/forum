@@ -78,7 +78,7 @@ export const postCommentReplySchema: z.ZodType<PostCommentReply> = z.object({
 
 export const postCommentSchema = z.object({
   id: z.string().uuid(), // UUID
-  postId: z.string().uuid(), // UUID
+  post_id: z.string().uuid(), // UUID
   content: z.string(),
   number_id: z.number(),
   created_at: z.date(),

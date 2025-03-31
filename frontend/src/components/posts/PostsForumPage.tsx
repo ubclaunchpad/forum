@@ -13,7 +13,6 @@ export const PostsForumPage = ({ initalPost }: { initalPost?: string }) => {
   const setPosts = useCourseStore((state) => state.setPosts);
   const { token } = useContext(userContext);
   const course = useCourseStore((state) => state.course);
-  const tags = useCourseStore((state) => state.tags);
   const { data } = useQuery({
     queryKey: ["posts", course.id],
     queryFn: () => getPosts(course.id, token),

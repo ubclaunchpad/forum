@@ -1,4 +1,4 @@
-import ClientWrapper from "./(core)/resources/wrapper";
+import ClientWrapper from "./(core)/wrapper";
 import { getApiUrl } from "@/utils/helpers";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
@@ -62,6 +62,7 @@ export default async function CoursePage({
     tags: tags,
     posts: [],
     postDraft: null,
+    documents: [],
   };
 
   return (

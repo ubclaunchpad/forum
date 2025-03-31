@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { getApiUrl } from "@/utils/helpers";
 import { userContext } from "@/providers/userContext";
-import { DocumentAppendOperation } from "@/lib/types/documents";
 import { useCourseStore } from "@/providers/courseStoreProvider";
 import {
   Dialog,
@@ -17,7 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-
+import { Textarea } from "../ui/textarea";
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
 
 const fileSchema = z.object({
@@ -35,13 +34,7 @@ const fileSchema = z.object({
   title: z.string().min(1, "Title is required"),
 });
 
-export default function UploadFile({
-  appendToFiles,
-  onUploadSuccess,
-}: {
-  appendToFiles: (args: DocumentAppendOperation) => string | undefined;
-  onUploadSuccess: () => Promise<void>;
-}) {
+export default function UploadFile() {
   const { token } = useContext(userContext);
   const course = useCourseStore((state) => state.course);
   const { toast } = useToast();
@@ -49,6 +42,7 @@ export default function UploadFile({
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -120,6 +114,7 @@ export default function UploadFile({
       const data = new FormData();
       data.append("file", file);
       data.append("title", title);
+      data.append("description", description);
       data.append("metadata", JSON.stringify({ tags: [] }));
 
       const response = await fetch(link, {
@@ -144,8 +139,6 @@ export default function UploadFile({
         description: `"${title}" has been uploaded`,
       });
 
-      await onUploadSuccess();
-      // Reset form
       setTitle("");
       setFile(null);
       setValidationError(null);
@@ -191,10 +184,31 @@ export default function UploadFile({
               <Input
                 type="text"
                 value={title}
+                disabled={true} // for now detetermine title from file name
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Document title"
-                className="text-md"
+                className="text-md hidden"
               />
+              <div className="flex flex-col gap-2">
+                {/* <Label htmlFor="description">Description</Label> */}
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => {
+                    if (e.target.value.length > 100) {
+                      toast({
+                        title: "Error",
+                        description:
+                          "Description must be less than 100 characters",
+                      });
+                      return;
+                    }
+                    setDescription(e.target.value);
+                  }}
+                  placeholder="Document description"
+                  className="text-sm"
+                />
+              </div>
 
               <div
                 className={cn(
@@ -216,6 +230,7 @@ export default function UploadFile({
                   accept=".pdf"
                   onChange={handleFileChange}
                 />
+
                 {file ? (
                   <div className="text-center space-y-1.5">
                     <p className="font-medium text-sm">{file.name}</p>

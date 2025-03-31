@@ -1,16 +1,8 @@
 import { cn } from "@/lib/utils";
-import DocumentOptionsPopover from "../course/documents/DocumentOptionsPopover";
 import { GetDocument } from "@forum/shared";
 import { FileText } from "lucide-react";
 import PDFIcon from "../customIcons/PDFIcon";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
-import { Button } from "../ui/button";
+import Link from "next/link";
 
 const getFileIcon = (fileType: string, className?: string) => {
   switch (fileType) {
@@ -23,23 +15,18 @@ const getFileIcon = (fileType: string, className?: string) => {
 export default function DocumentRow({
   document,
   isSelected = false,
-  onClick,
   disabled = false,
-  setDocuments,
 }: {
   document: GetDocument;
   isSelected?: boolean;
-  onClick?: () => void;
   disabled?: boolean;
-  setDocuments: React.Dispatch<React.SetStateAction<GetDocument[]>>;
 }) {
   return (
-    <Button
+    <Link
+      href={`/forum/courses/${document.course_id}/resources/${document.id}`}
       tabIndex={0}
-      size={"sm"}
-      onClick={onClick}
       className={cn(
-        "text-left border transition-all py-8 duration-500 rounded-md shadow-xs hover:bg-primary/10  w-full relative overflow-hidden",
+        "text-left border transition-all py-2 duration-500 rounded-md shadow-xs hover:bg-primary/10  w-full relative overflow-hidden",
         "flex flex-col w-full items-center",
         isSelected
           ? "bg-primary-50 border-primary-200 shadow-xs shadow-primary-200"
@@ -83,6 +70,6 @@ export default function DocumentRow({
           <div className="w-1/2 h-full bg-linear-to-r from-transparent via-primary-500/10 to-transparent" />
         </div>
       )}
-    </Button>
+    </Link>
   );
 }

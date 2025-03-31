@@ -3,13 +3,8 @@ import IconFetcher from "@/lib/iconFetcher";
 import { HighlightedText } from "@/lib/utility/highlighter";
 import AiLoader from "./ai-loader";
 import AnimatedMarkdown from "../general/AnimatedMarkdown";
-import { useContext, useEffect, useRef } from "react";
-import {
-  ArrowRightCircleIcon,
-  MessageCircleQuestionIcon,
-  TrendingUpDown,
-  TrendingUpIcon,
-} from "lucide-react";
+import { useContext, useRef } from "react";
+import { ArrowRightCircleIcon, TrendingUpIcon } from "lucide-react";
 import { MessageBubbleIcon } from "../customIcons/message-bubble-icon";
 import { SourceIcon } from "../customIcons/source-icon";
 import { useRouter } from "next/navigation";
@@ -175,8 +170,6 @@ function TextSearchContent() {
         },
       }).then((res) => res.json()),
   });
-
-  console.log(analyticsData);
 
   const router = useRouter();
   if (!textSearchResponse) {
