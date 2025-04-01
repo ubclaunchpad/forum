@@ -42,6 +42,14 @@ function AISearchContent() {
   const searchStore = useSearchStore((state) => state);
   const followUpRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  useEffect(() => {
+    if (followUpRef.current) {
+      followUpRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [searchStore.thread.length, searchStore.loadingState]);
 
   if (searchStore.loadingState === "loading ai") {
     return <AiLoader />;
@@ -55,14 +63,7 @@ function AISearchContent() {
     );
   }
 
-  useEffect(() => {
-    if (followUpRef.current) {
-      followUpRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-      });
-    }
-  }, [searchStore.thread.length, searchStore.loadingState]);
+
 
   return (
     <div className="flex flex-col px-10 overflow-y-scroll w-full gap-4 py-4">
@@ -85,11 +86,12 @@ function AISearchContent() {
                   onClick={() => {
                     if (s.entity_type === "document") {
                       const id = s.entity_id;
+                      searchStore.setIsOpen(false);
                       router.push(getLink(s.entity_type, id, course.id), {
                         scroll: false,
                       });
-                      searchStore.setIsOpen(false);
                     } else {
+                      searchStore.setIsOpen(false);
                       const id = s.entity_id;
                       router.push(getLink(s.entity_type, id, course.id), {
                         scroll: false,
@@ -125,7 +127,7 @@ function AISearchContent() {
 
       <div
         className={cn(
-          "flex  max-w-xl  w-full justify-center  items-center transition-all ",
+          "flex   w-full justify-center  items-center transition-all ",
           searchStore.loadingState !== "idle" ? "opacity-0" : "opacity-100",
         )}
       >
@@ -255,10 +257,11 @@ function TextSearchContent() {
                 result.entity_type === "post"
               ) {
                 const id = result.entity_id;
+                searchStore.setIsOpen(false);
                 router.push(getLink(result.entity_type, id, course.id), {
                   scroll: false,
                 });
-                searchStore.setIsOpen(false);
+              
               } else {
                 alert("Post redirect not implemented yet");
               }
