@@ -18,10 +18,10 @@ import {
   BarChart2,
   Database,
   ExternalLink,
-  Menu, // Added for mobile menu toggle
+  Menu,
 } from "lucide-react";
 import HeroMouseEffect from "./landing/hero-mouse-hover"; // Assuming this component exists
-
+import Link from "next/link";
 import Image from "next/image";
 import {
   Accordion,
@@ -268,7 +268,7 @@ interface FaqItemProps {
 const FaqItem: React.FC<FaqItemProps> = ({ question, answer, value }) => {
   return (
     <AccordionItem value={value} className="border-none">
-      <AccordionTrigger className="flex items-center justify-between gap-4 py-3 text-left hover:no-underline">
+      <AccordionTrigger className="flex items-center justify-between gap-4 py-3 text-left hover:no-underline hover:cursor-pointer">
         <span className="text-md leading-10 tracking-[-0.6px] text-black flex-1">
           {question}
         </span>
@@ -349,7 +349,7 @@ export default function Home() {
               Structured Discussions, Smarter Insights — A Forum Built for
               Learning
             </h1>
-            <Button className="bg-[#2D7D85] hover:bg-[#25686e] text-white px-8 py-3 rounded-lg text-base font-medium shadow">
+            <Button className="bg-[#2D7D85] hover:bg-[#25686e] text-white px-8 py-3 rounded-lg text-base font-medium shadow hover:cursor-pointer">
               Get started
             </Button>
           </div>
@@ -374,8 +374,8 @@ export default function Home() {
                 onClick={() => setActiveTab("instructors")}
                 className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeTab === "instructors"
-                    ? "bg-white text-gray-900 shadow"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "bg-white text-gray-900 shadow hover:cursor-pointer"
+                    : "text-gray-600 hover:text-gray-900 hover:cursor-pointer"
                 }`}
               >
                 For instructors
@@ -384,8 +384,8 @@ export default function Home() {
                 onClick={() => setActiveTab("institutions")}
                 className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeTab === "institutions"
-                    ? "bg-white text-gray-900 shadow"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "bg-white text-gray-900 shadow hover:cursor-pointer"
+                    : "text-gray-600 hover:text-gray-900 hover:cursor-pointer"
                 }`}
               >
                 For institutions
@@ -394,8 +394,8 @@ export default function Home() {
                 onClick={() => setActiveTab("students")}
                 className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeTab === "students"
-                    ? "bg-white text-gray-900 shadow"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "bg-white text-gray-900 shadow hover:cursor-pointer"
+                    : "text-gray-600 hover:text-gray-900 hover:cursor-pointer"
                 }`}
               >
                 For students
@@ -436,7 +436,7 @@ export default function Home() {
           </h2>
           <Button
             variant="outline"
-            className="border-gray-300 text-gray-700 hover:bg-gray-100 mb-12 group"
+            className="border-gray-300 text-gray-700 hover:bg-gray-100 mb-12 group hover:cursor-pointer"
           >
             Learn more about privacy & security at ForumAI{" "}
             <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -617,16 +617,22 @@ export default function Home() {
               focused environment that supports deeper learning.
             </p>
             <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4">
-              <Button className="bg-[#2D7D85] hover:bg-[#25686e] text-white px-6 py-2.5 rounded-lg text-base font-medium shadow">
+              <Button className="bg-[#2D7D85] hover:bg-[#25686e] text-white px-6 py-2.5 rounded-lg text-base font-medium shadow hover:cursor-pointer">
                 Get started
               </Button>
-              <Button
-                variant="outline"
-                className="border-gray-300 text-gray-700 hover:bg-gray-100 px-6 py-2.5 rounded-lg text-base font-medium group"
+              <Link
+                href="https://www.youtube.com/watch?v=tnx8su8sOiU"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <PlayCircle className="mr-2 h-5 w-5 text-gray-500 group-hover:text-gray-700" />
-                View demo video
-              </Button>
+                <Button
+                  variant="outline"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-100 px-6 py-2.5 rounded-lg text-base font-medium group hover:cursor-pointer"
+                >
+                  <PlayCircle className="mr-2 h-5 w-5 text-gray-500 group-hover:text-gray-700" />
+                  View demo video
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
