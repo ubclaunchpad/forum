@@ -23,13 +23,22 @@ import {
 import HeroMouseEffect from "./landing/hero-mouse-hover"; // Assuming this component exists
 
 import Image from "next/image";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+// Assuming these icon components exist at the specified paths
+import { ArrowDownIcon } from "@/components/landing/ArrowDownIcon";
+import { SearchIcon } from "@/components/landing/SearchIcon";
 
 // Placeholder components for Header and Footer if they need specific structure for this page
 const LandingHeader = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-20 px-4 sm:px-6 lg:px-16 py-4">
+    <header className="sticky top-0 left-0 right-0 z-20 px-4 sm:px-6 lg:px-16 py-4 bg-white shadow-md">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center space-x-2">
@@ -219,60 +228,113 @@ const LandingFooter = () => (
   </footer>
 );
 
-// FAQ Item Component
-const FaqItem = ({
-  question,
-  answer,
-}: {
-  question: string;
-  answer: string;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
+// Define SearchBar component (assuming it's not imported from a separate file for now)
+interface SearchBarProps {
+  onSearch?: (query: string) => void;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const query = (form.elements.namedItem("search") as HTMLInputElement).value;
+    onSearch?.(query);
+  };
 
   return (
-    <div className="border-b border-gray-200 py-4">
-      <button
-        className="flex justify-between items-center w-full text-left"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span className="font-medium text-gray-800">{question}</span>
-        <ChevronDown
-          className={`h-5 w-5 text-gray-500 transform transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+    <form onSubmit={handleSubmit} className="w-full max-w-[1075px]">
+      <div className="flex w-full items-center gap-3 bg-white pr-4 pl-8 py-2 rounded-[45.744px] border-[1.525px] border-[#BDCFCC]">
+        <input
+          type="search"
+          name="search"
+          placeholder="Search for a question"
+          className="flex-1 text-base leading-6 text-[#262725] bg-transparent border-none outline-none placeholder:text-[#262725]"
         />
-      </button>
-      {isOpen && <p className="mt-2 text-sm text-gray-600">{answer}</p>}
-    </div>
+        <button
+          type="submit"
+          className="flex items-center justify-center"
+          aria-label="Search"
+        >
+          <SearchIcon className="w-[36.595px] h-[36.595px] flex-shrink-0 text-[#347370]" />
+        </button>
+      </div>
+    </form>
   );
 };
+
+// Define new FaqItem component
+interface FaqItemProps {
+  question: string;
+  answer?: string;
+  value: string; // Added value prop for AccordionItem
+}
+
+const FaqItem: React.FC<FaqItemProps> = ({ question, answer, value }) => {
+  return (
+    <AccordionItem value={value} className="border-none">
+      <AccordionTrigger className="flex items-center justify-between gap-4 py-3 text-left hover:no-underline">
+        <span className="text-md leading-10 tracking-[-0.6px] text-black flex-1">
+          {question}
+        </span>
+        <ArrowDownIcon className="w-[40px] h-[40px] flex-shrink-0 text-[#347370] transition-transform duration-200 group-data-[state=open]:rotate-180" />
+      </AccordionTrigger>
+      {answer && (
+        <AccordionContent className="text-md text-gray-700 pb-4">
+          {answer}
+        </AccordionContent>
+      )}
+    </AccordionItem>
+  );
+};
+
+// Define FAQ data
+const FAQ_ITEMS = [
+  {
+    id: "what-is",
+    question: "What is ForumAI?",
+    answer:
+      "ForumAI is an innovative platform that combines artificial intelligence with academic discussions to enhance learning and collaboration.",
+  },
+  {
+    id: "how-works",
+    question: "How does the AI work?",
+    answer:
+      "Our AI system analyzes discussions, provides relevant resources, and helps facilitate meaningful academic conversations while maintaining educational integrity.",
+  },
+  {
+    id: "who-can-use",
+    question: "Who can use ForumAI?",
+    answer:
+      "ForumAI is designed for students, educators, and academic institutions looking to enhance their learning and teaching experience through AI-assisted discussions.",
+  },
+  {
+    id: "academic-integrity",
+    question: "How does ForumAI ensure academic integrity?",
+    answer:
+      "We implement strict guidelines and AI monitoring to prevent misuse while promoting original thinking and proper academic citation practices.",
+  },
+  {
+    id: "organization",
+    question: "How are discussions and resources organized?",
+    answer:
+      "Content is organized by topics, subjects, and relevance, making it easy to find and participate in meaningful academic discussions.",
+  },
+  {
+    id: "security",
+    question: "Is ForumAI secure?",
+    answer:
+      "Yes, we implement industry-standard security measures to protect user data and maintain privacy in all academic discussions.",
+  },
+];
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("instructors");
 
-  const faqData = [
-    {
-      question: "What is ForumAI?",
-      answer: "ForumAI is an AI-native educational platform...",
-    },
-    {
-      question: "How does the AI work?",
-      answer: "It uses advanced Retrieval Augmented Generation...",
-    },
-    {
-      question: "Who can use ForumAI?",
-      answer: "Students, instructors, and institutions...",
-    },
-    {
-      question: "How does ForumAI ensure academic integrity?",
-      answer: "Through various features tailored to course content...",
-    },
-    {
-      question: "How are discussions and resources organized?",
-      answer: "Content is structured for easy access and AI processing...",
-    },
-    { question: "Is ForumAI secure?", answer: "Yes, we prioritize data..." },
-  ];
+  // Search handler function
+  const handleSearch = (query: string) => {
+    console.log("Searching for:", query);
+    // Implement search functionality here
+  };
 
   return (
     <div className="w-full bg-[#F9F9F7] text-gray-800">
@@ -443,9 +505,9 @@ export default function Home() {
           <h2 className="text-3xl font-bold mb-12 text-gray-900">
             ForumAI Helps You Strike the Right Balance
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left items-start">
             {/* Existing Q&A */}
-            <div className="border-2 border-gray-400 rounded-lg p-6 bg-white">
+            <div className="border-2 border-gray-400 rounded-lg p-6 bg-white mt-12">
               <h3 className="font-semibold text-lg mb-4 text-gray-800">
                 Existing Q&A Platforms
               </h3>
@@ -468,8 +530,8 @@ export default function Home() {
             </div>
 
             {/* ForumAI */}
-            <div className="border-2 border-[#2D7D85] rounded-lg p-6 bg-white shadow-xl ring-1 ring-[#2D7D85]/10">
-              <h3 className="font-semibold text-lg mb-4 text-[#2D7D85] flex items-center">
+            <div className="border-2 border-[#2D7D85] rounded-lg p-6 bg-white shadow-2xl ring-1 ring-[#2D7D85]/10">
+              <h3 className="font-semibold text-xl mb-4 text-[#2D7D85] flex items-center">
                 <div className="w-3 h-3 rounded-full bg-[#2D7D85] mr-2"></div>
                 ForumAI
               </h3>
@@ -482,7 +544,7 @@ export default function Home() {
                 ].map((item, idx) => (
                   <li
                     key={idx}
-                    className="flex items-start text-sm text-gray-700"
+                    className="flex items-start text-[15px] text-gray-700"
                   >
                     <CheckCircle2 className="w-4 h-4 mr-2 mt-0.5 text-[#2D7D85] flex-shrink-0" />
                     {item}
@@ -492,7 +554,7 @@ export default function Home() {
             </div>
 
             {/* Existing AI Tools */}
-            <div className="border-2 border-gray-400 rounded-lg p-6 bg-white">
+            <div className="border-2 border-gray-400 rounded-lg p-6 bg-white mt-12">
               <h3 className="font-semibold text-lg mb-4 text-gray-800">
                 Existing AI Tools
               </h3>
@@ -519,7 +581,7 @@ export default function Home() {
 
       {/* Smarter Way Section */}
       <section className="py-16 lg:py-24 px-4 sm:px-6 lg:px-16 bg-white">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 lg:gap-16">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12 lg:gap-24">
           {/* Image Placeholder */}
           <div className="md:w-1/2 w-full flex justify-center">
             <div className="w-64 h-64 sm:w-80 sm:h-80 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
@@ -527,7 +589,7 @@ export default function Home() {
             </div>
           </div>
           {/* Text Content */}
-          <div className="md:w-1/2 text-center md:text-left">
+          <div className="md:w-3/4 text-center md:text-left">
             <h2 className="text-3xl font-bold mb-4 text-gray-900">
               A smarter way to connect, learn, and share ideas in the classroom.
             </h2>
@@ -552,37 +614,40 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {/* Updated FAQ Section */}
       <section className="py-16 lg:py-24 px-4 sm:px-6 lg:px-16 bg-white">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Left Column */}
-          <div>
-            <h2 className="text-3xl font-bold mb-3 text-gray-900">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Everything you need to know about our platform. Can't find what
-              you're looking for? Search for a query below!
-            </p>
-            <div className="relative">
-              <Input
-                type="search"
-                placeholder="Search for a question"
-                className="pl-10 pr-4 py-2 w-full border-gray-300 rounded-lg focus:ring-[#2D7D85] focus:border-[#2D7D85]"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row gap-10 lg:gap-16 mb-12">
+            <div className="md:w-1/3 text-center md:text-left">
+              <h2 className="text-3xl md:text-[40px] font-bold md:leading-[48px] mb-3 text-black">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-lg md:text-xl text-gray-600 pt-4">
+                Everything you need to know about our platform. Can't find what
+                you're looking for? Search for a query below!
+              </p>
+            </div>
+
+            <div className="md:w-2/3">
+              <Accordion
+                type="single"
+                collapsible
+                className="flex flex-col gap-2"
+              >
+                {FAQ_ITEMS.map((item) => (
+                  <FaqItem
+                    key={item.id}
+                    value={item.id}
+                    question={item.question}
+                    answer={item.answer}
+                  />
+                ))}
+              </Accordion>
             </div>
           </div>
 
-          {/* Right Column (Accordion) */}
-          <div>
-            {faqData.map((item, index) => (
-              <FaqItem
-                key={index}
-                question={item.question}
-                answer={item.answer}
-              />
-            ))}
+          <div className="flex justify-center">
+            <SearchBar onSearch={handleSearch} />
           </div>
         </div>
       </section>
