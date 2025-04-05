@@ -42,9 +42,7 @@ const LandingHeader = () => {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-[#2D7D85] rounded-full flex items-center justify-center text-white font-bold">
-            F
-          </div>
+          <Image src="/icon.svg" alt="ForumAI Logo" width={32} height={32} />
           <span className="text-xl font-bold text-gray-800">ForumAI</span>
         </div>
 
@@ -142,13 +140,11 @@ const LandingFooter = () => (
       {/* Logo & Copyright */}
       <div className="col-span-2 md:col-span-1">
         <div className="flex items-center space-x-2 mb-4">
-          <div className="w-8 h-8 bg-[#2D7D85] rounded-full flex items-center justify-center text-white font-bold">
-            F
-          </div>
+          <Image src="/icon.svg" alt="ForumAI Logo" width={32} height={32} />
           <span className="text-xl font-bold text-gray-800">ForumAI</span>
         </div>
         <p className="text-xs text-gray-500">
-          Copyright © 2024 ForumAI. <br />
+          Copyright © 2025 ForumAI. <br />
           All rights reserved.
         </p>
       </div>
@@ -503,7 +499,7 @@ export default function Home() {
             ].map((feature, index) => (
               <div key={index}>
                 <div
-                  className={`w-full h-40 rounded-lg mb-4 flex items-center justify-center ${feature.imgPlaceholder}`}
+                  className={`w-full h-40 rounded-lg mb-4 flex items-center justify-center`}
                 >
                   {feature.icon}
                   {/* Placeholder for actual illustration */}
