@@ -78,7 +78,7 @@ const LandingHeader = () => {
             variant="outline"
             className="text-sm border-gray-300 hover:bg-gray-100"
           >
-            Log in
+            <Link href="/auth/signin">Log in</Link>
           </Button>
         </nav>
 
@@ -105,13 +105,13 @@ const LandingHeader = () => {
               About
             </a>
             <a
-              href="#"
+              href="/privacy"
               className="text-sm font-medium text-gray-600 hover:text-gray-900"
             >
               Privacy & Security
             </a>
             <a
-              href="#"
+              href="mailto:forumai.platform@gmail.com"
               className="text-sm font-medium text-gray-600 hover:text-gray-900"
             >
               Contact
@@ -124,9 +124,14 @@ const LandingHeader = () => {
             >
               View on GitHub <ExternalLink className="ml-1 h-4 w-4" />
             </a>
-            <Button variant="outline" className="w-full justify-center">
-              Log in
-            </Button>
+            <Link href="/auth/signin" passHref>
+              <Button
+                variant="outline"
+                className="w-full justify-center hover:cursor-pointer"
+              >
+                Log in
+              </Button>
+            </Link>
           </nav>
         </div>
       )}
@@ -350,7 +355,7 @@ export default function Home() {
               Learning
             </h1>
             <Button className="bg-[#2D7D85] hover:bg-[#25686e] text-white px-8 py-3 rounded-lg text-base font-medium shadow hover:cursor-pointer">
-              Get started
+              <Link href="/auth/signin">Get started</Link>
             </Button>
           </div>
           <div className="relative z-10 flex flex-col items-center space-y-4">
@@ -438,8 +443,10 @@ export default function Home() {
             variant="outline"
             className="border-gray-300 text-gray-700 hover:bg-gray-100 mb-12 group hover:cursor-pointer"
           >
-            Learn more about privacy & security at ForumAI{" "}
-            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            <Link href="/privacy" className="flex items-center">
+              Learn more about privacy & security at ForumAI{" "}
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </Button>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 text-left">
@@ -618,7 +625,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4">
               <Button className="bg-[#2D7D85] hover:bg-[#25686e] text-white px-6 py-2.5 rounded-lg text-base font-medium shadow hover:cursor-pointer">
-                Get started
+                <Link href="/auth/signin">Get started</Link>
               </Button>
               <Link
                 href="https://www.youtube.com/watch?v=tnx8su8sOiU"
