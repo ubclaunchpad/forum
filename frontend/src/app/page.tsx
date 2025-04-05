@@ -1,273 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
-import { Button } from "@/components/ui/landing-button";
-import { Input } from "@/components/ui/input";
-import {
-  ChevronDown,
-  ChevronRight,
-  Search,
-  CheckCircle2,
-  XCircle,
-  PlayCircle,
-  ArrowRight,
-  Plus,
-  Users,
-  GraduationCap,
-  Lock,
-  BarChart2,
-  Database,
-  ExternalLink,
-  Menu,
-} from "lucide-react";
-import HeroMouseEffect from "./landing/hero-mouse-hover"; // Assuming this component exists
 import Link from "next/link";
 import Image from "next/image";
+import React, { useState } from "react";
+import HeroMouseEffect from "./landing/hero-mouse-hover";
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-// Assuming these icon components exist at the specified paths
 import { ArrowDownIcon } from "@/components/landing/ArrowDownIcon";
-import { SearchIcon } from "@/components/landing/SearchIcon";
+import { Button } from "@/components/ui/landing-button";
+import LandingHeader from "@/components/landing/LandingHeader";
+import LandingFooter from "@/components/landing/LandingFooter";
+import SearchBar from "@/components/landing/SearchBar";
 
-// Placeholder components for Header and Footer if they need specific structure for this page
-const LandingHeader = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  return (
-    <header className="sticky top-0 left-0 right-0 z-20 px-4 sm:px-6 lg:px-16 py-4 bg-white shadow-md">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <Image src="/icon.svg" alt="ForumAI Logo" width={32} height={32} />
-          <span className="text-xl font-bold text-gray-800">ForumAI</span>
-        </div>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
-          <a
-            href="#"
-            className="text-sm font-medium text-gray-600 hover:text-gray-900"
-          >
-            About
-          </a>
-          <a
-            href="#"
-            className="text-sm font-medium text-gray-600 hover:text-gray-900"
-          >
-            Privacy & Security
-          </a>
-          <a
-            href="#"
-            className="text-sm font-medium text-gray-600 hover:text-gray-900"
-          >
-            Contact
-          </a>
-          <a
-            href="https://github.com/ubclaunchpad/forum"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center text-sm font-medium text-gray-600 hover:text-gray-900"
-          >
-            View on GitHub <ExternalLink className="ml-1 h-4 w-4" />
-          </a>
-          <Button
-            variant="outline"
-            className="text-sm border-gray-300 hover:bg-gray-100"
-          >
-            <Link href="/auth/signin">Log in</Link>
-          </Button>
-        </nav>
-
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-lg p-4 z-30">
-          <nav className="flex flex-col space-y-4">
-            <a
-              href="#"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
-            >
-              About
-            </a>
-            <a
-              href="/privacy"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
-            >
-              Privacy & Security
-            </a>
-            <a
-              href="mailto:forumai.platform@gmail.com"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
-            >
-              Contact
-            </a>
-            <a
-              href="https://github.com/ubclaunchpad/forum"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center text-sm font-medium text-gray-600 hover:text-gray-900"
-            >
-              View on GitHub <ExternalLink className="ml-1 h-4 w-4" />
-            </a>
-            <Link href="/auth/signin" passHref>
-              <Button
-                variant="outline"
-                className="w-full justify-center hover:cursor-pointer"
-              >
-                Log in
-              </Button>
-            </Link>
-          </nav>
-        </div>
-      )}
-    </header>
-  );
-};
-
-const LandingFooter = () => (
-  <footer className="bg-[#F9F9F7] py-12 px-4 sm:px-6 lg:px-16">
-    <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-8">
-      {/* Logo & Copyright */}
-      <div className="col-span-2 md:col-span-1">
-        <div className="flex items-center space-x-2 mb-4">
-          <Image src="/icon.svg" alt="ForumAI Logo" width={32} height={32} />
-          <span className="text-xl font-bold text-gray-800">ForumAI</span>
-        </div>
-        <p className="text-xs text-gray-500">
-          Copyright © 2025 ForumAI. <br />
-          All rights reserved.
-        </p>
-      </div>
-
-      {/* Link Columns */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Product</h3>
-        <ul className="space-y-2">
-          <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
-              Features
-            </a>
-          </li>
-          <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
-              Request a demo
-            </a>
-          </li>
-          <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
-              Status page
-            </a>
-          </li>
-        </ul>
-      </div>
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Resources</h3>
-        <ul className="space-y-2">
-          <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
-              Documentation
-            </a>
-          </li>
-          <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
-              GitHub
-            </a>
-          </li>
-        </ul>
-      </div>
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Learn</h3>
-        <ul className="space-y-2">
-          <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
-              About us
-            </a>
-          </li>
-          <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
-              FAQ
-            </a>
-          </li>
-          <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
-              Contact
-            </a>
-          </li>
-        </ul>
-      </div>
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Legal</h3>
-        <ul className="space-y-2">
-          <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
-              Privacy policy
-            </a>
-          </li>
-          <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
-              Terms of service
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </footer>
-);
-
-// Define SearchBar component (assuming it's not imported from a separate file for now)
-interface SearchBarProps {
-  onSearch?: (query: string) => void;
-}
-
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const form = e.target as HTMLFormElement;
-    const query = (form.elements.namedItem("search") as HTMLInputElement).value;
-    onSearch?.(query);
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="w-full max-w-[1075px]">
-      <div className="flex w-full items-center gap-3 bg-white pr-4 pl-8 py-2 rounded-[45.744px] border-[1.525px] border-[#BDCFCC]">
-        <input
-          type="search"
-          name="search"
-          placeholder="Search for a question"
-          className="flex-1 text-base leading-6 text-[#262725] bg-transparent border-none outline-none placeholder:text-[#262725]"
-        />
-        <button
-          type="submit"
-          className="flex items-center justify-center"
-          aria-label="Search"
-        >
-          <SearchIcon className="w-[36.595px] h-[36.595px] flex-shrink-0 text-[#347370]" />
-        </button>
-      </div>
-    </form>
-  );
-};
+import { CheckCircle2, XCircle, PlayCircle, ArrowRight } from "lucide-react";
 
 // Define new FaqItem component
 interface FaqItemProps {
   question: string;
   answer?: string;
-  value: string; // Added value prop for AccordionItem
+  value: string;
 }
 
 const FaqItem: React.FC<FaqItemProps> = ({ question, answer, value }) => {
@@ -358,11 +114,12 @@ export default function Home() {
               <Link href="/auth/signin">Get started</Link>
             </Button>
           </div>
+          {/* Right Content */}
           <div className="relative z-10 flex flex-col items-center space-y-4">
             <Image
               src="/hero_image.svg"
               alt="ForumAI Demo"
-              width={400}
+              width={500}
               height={200}
             />
           </div>
