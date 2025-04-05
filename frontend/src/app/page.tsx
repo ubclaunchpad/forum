@@ -357,20 +357,13 @@ export default function Home() {
               Get started
             </Button>
           </div>
-          {/* Right Content (Image Placeholder & Text) */}
           <div className="relative z-10 flex flex-col items-center space-y-4">
-            {/* Placeholder for the image stack */}
-            <div className="w-64 h-40 sm:w-80 sm:h-52 md:w-96 md:h-60 bg-gray-200 rounded-lg shadow-lg flex items-center justify-center text-gray-500">
-              <Image
-                src="/hero_cards.png"
-                alt="ForumAI Demo"
-                width={300}
-                height={200}
-              />
-            </div>
-            <div className="bg-gray-100/80 backdrop-blur-sm border border-gray-200 rounded-full px-6 py-3 text-sm text-gray-700 shadow-sm max-w-xs text-center">
-              What should I explain more in the next class?
-            </div>
+            <Image
+              src="/hero_image.svg"
+              alt="ForumAI Demo"
+              width={400}
+              height={200}
+            />
           </div>
         </div>
       </section>
@@ -428,11 +421,13 @@ export default function Home() {
               </p>
             </div>
             {/* Image Placeholder */}
-            <div className="lg:w-2/3 w-full">
-              <div className="aspect-video bg-gray-200 rounded-lg shadow-lg flex items-center justify-center text-gray-500">
-                [Dashboard Image Placeholder]
-              </div>
-            </div>
+            <Image
+              src="/insights.svg"
+              alt="ForumAI Demo"
+              width={900}
+              height={500}
+              className="lg:w-[900px] lg:h-[500px] rounded-lg flex items-center justify-center text-gray-500"
+            />
           </div>
         </div>
       </section>
@@ -451,42 +446,66 @@ export default function Home() {
             <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Button>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-left">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 text-left">
             {[
               {
-                icon: Users,
+                icon: (
+                  <Image
+                    src="/rbac.svg"
+                    alt="Role-based access controls"
+                    width={300}
+                    height={200}
+                  />
+                ),
                 title: "Role-based access controls",
                 description:
                   "Sophisticated access controls allow you to control the experience for student, staff and instructors.",
-                imgPlaceholder: "bg-blue-100",
               },
               {
-                icon: GraduationCap,
+                icon: (
+                  <Image
+                    src="/bac.svg"
+                    alt="Built for academic integrity"
+                    width={300}
+                    height={200}
+                  />
+                ),
                 title: "Built for academic integrity",
                 description:
                   "AI tailored to your specific course content and teaching style.",
-                imgPlaceholder: "bg-green-100",
               },
               {
-                icon: BarChart2,
+                icon: (
+                  <Image
+                    src="/ai.svg"
+                    alt="Analytics & Insights"
+                    width={300}
+                    height={200}
+                  />
+                ),
                 title: "Analytics & Insights",
                 description:
                   "See how your students are learning and gain valuable insights to enhance engagement and performance.",
-                imgPlaceholder: "bg-pink-100",
               },
               {
-                icon: Lock,
+                icon: (
+                  <Image
+                    src="/priv.svg"
+                    alt="Your course content, your data"
+                    width={300}
+                    height={200}
+                  />
+                ),
                 title: "Your course content, your data",
                 description:
                   "Your data only lives within your course and ForumAI does not use it.",
-                imgPlaceholder: "bg-teal-100",
               },
             ].map((feature, index) => (
               <div key={index}>
                 <div
                   className={`w-full h-40 rounded-lg mb-4 flex items-center justify-center ${feature.imgPlaceholder}`}
                 >
-                  <feature.icon className="w-16 h-16 text-gray-600 opacity-50" />
+                  {feature.icon}
                   {/* Placeholder for actual illustration */}
                 </div>
                 <h3 className="font-semibold text-lg mb-1 text-gray-900">
@@ -584,9 +603,12 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12 lg:gap-24">
           {/* Image Placeholder */}
           <div className="md:w-1/2 w-full flex justify-center">
-            <div className="w-64 h-64 sm:w-80 sm:h-80 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
-              [Illustration Placeholder]
-            </div>
+            <Image
+              src="/speech.svg"
+              alt="ForumAI Demo"
+              width={300}
+              height={200}
+            />
           </div>
           {/* Text Content */}
           <div className="md:w-3/4 text-center md:text-left">
