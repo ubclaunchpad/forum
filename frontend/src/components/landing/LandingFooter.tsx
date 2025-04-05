@@ -31,7 +31,12 @@ const LandingFooter = () => (
             </a>
           </li>
           <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+            <a
+              href="https://forumai.statuspage.io/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
               Status page
             </a>
           </li>
@@ -46,7 +51,12 @@ const LandingFooter = () => (
             </a>
           </li>
           <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+            <a
+              href="https://github.com/ubclaunchpad/forum"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
               GitHub
             </a>
           </li>
@@ -66,7 +76,10 @@ const LandingFooter = () => (
             </a>
           </li>
           <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+            <a
+              href="mailto:forumai.platform@gmail.com"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
               Contact
             </a>
           </li>
@@ -76,12 +89,18 @@ const LandingFooter = () => (
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Legal</h3>
         <ul className="space-y-2">
           <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+            <a
+              href="/privacy"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
               Privacy policy
             </a>
           </li>
           <li>
-            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+            <a
+              href="/terms"
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
               Terms of service
             </a>
           </li>
