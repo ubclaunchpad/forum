@@ -13,26 +13,38 @@ const LandingHeader = () => {
         {/* Logo */}
         <div className="flex items-center space-x-2">
           <Image src="/icon.svg" alt="ForumAI Logo" width={32} height={32} />
-          <span className="text-xl font-bold text-gray-800">ForumAI</span>
+          <span
+            className="text-xl font-bold text-gray-800 leading-tight"
+            style={{
+              color: "#347370",
+              fontFeatureSettings: "'liga' off, 'clig' off",
+              fontFamily: "Quicksand, sans-serif",
+            }}
+          >
+            ForumAI
+          </span>
         </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
           <a
             href="#"
-            className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            className="text-sm font-semibold"
+            style={{ fontFamily: "Quicksand, sans-serif", color: "#347370" }}
           >
             About
           </a>
           <a
-            href="#"
-            className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            href="/privacy"
+            className="text-sm font-semibold"
+            style={{ fontFamily: "Quicksand, sans-serif", color: "#347370" }}
           >
             Privacy & Security
           </a>
           <a
-            href="#"
-            className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            href="mailto:forumai.platform@gmail.com"
+            className="text-sm font-semibold"
+            style={{ fontFamily: "Quicksand, sans-serif", color: "#347370" }}
           >
             Contact
           </a>
@@ -40,7 +52,8 @@ const LandingHeader = () => {
             href="https://github.com/ubclaunchpad/forum"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center text-sm font-medium text-gray-600 hover:text-gray-900"
+            className="flex items-center text-sm font-semibold"
+            style={{ fontFamily: "Quicksand, sans-serif", color: "#347370" }}
           >
             View on GitHub <ExternalLink className="ml-1 h-4 w-4" />
           </a>
@@ -70,19 +83,22 @@ const LandingHeader = () => {
           <nav className="flex flex-col space-y-4">
             <a
               href="#"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="text-sm font-semibold"
+              style={{ fontFamily: "Quicksand, sans-serif", color: "#347370" }}
             >
               About
             </a>
             <a
               href="/privacy"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="text-sm font-semibold"
+              style={{ fontFamily: "Quicksand, sans-serif", color: "#347370" }}
             >
               Privacy & Security
             </a>
             <a
               href="mailto:forumai.platform@gmail.com"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="text-sm font-semibold"
+              style={{ fontFamily: "Quicksand, sans-serif", color: "#347370" }}
             >
               Contact
             </a>
@@ -90,7 +106,8 @@ const LandingHeader = () => {
               href="https://github.com/ubclaunchpad/forum"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="flex items-center text-sm font-semibold"
+              style={{ fontFamily: "Quicksand, sans-serif", color: "#347370" }}
             >
               View on GitHub <ExternalLink className="ml-1 h-4 w-4" />
             </a>
