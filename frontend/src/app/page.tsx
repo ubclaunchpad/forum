@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/landing-button";
 import { Input } from "@/components/ui/input";
 import {
   ChevronDown,
@@ -347,14 +347,14 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-row">
           {/* Left Content */}
           <div className="relative z-10 flex flex-col items-center lg:items-start text-center lg:text-left max-w-xl lg:max-w-2xl space-y-6 mb-12 lg:mb-0">
-            <div className="inline-block rounded-full px-4 py-1 text-sm bg-gray-100 border border-gray-300 text-gray-700 shadow-sm">
+            <div className="inline-block rounded-full px-6 py-2 text-md bg-gray-100 border border-gray-300 text-gray-700 shadow-sm">
               AI-Native, Open Source Educational Platform
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#347370] leading-tight">
               Structured Discussions, Smarter Insights — A Forum Built for
               Learning
             </h1>
-            <Button className="bg-[#2D7D85] hover:bg-[#25686e] text-white px-8 py-3 rounded-lg text-base font-medium shadow hover:cursor-pointer">
+            <Button className="bg-[#2D7D85] hover:bg-[#25686e] rounded-4xl text-white px-12 py-6 text-base font-medium shadow hover:cursor-pointer text-md">
               <Link href="/auth/signin">Get started</Link>
             </Button>
           </div>
@@ -374,10 +374,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           {/* Tabs */}
           <div className="flex justify-center mb-12">
-            <div className="flex space-x-2 bg-gray-100 p-1 rounded-full">
+            <div className="flex space-x-2 bg-gray-100 p-2 rounded-full">
               <button
                 onClick={() => setActiveTab("instructors")}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`px-6 py-2 rounded-full text-md font-medium transition-colors ${
                   activeTab === "instructors"
                     ? "bg-white text-gray-900 shadow hover:cursor-pointer"
                     : "text-gray-600 hover:text-gray-900 hover:cursor-pointer"
@@ -387,7 +387,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setActiveTab("institutions")}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`px-6 py-2 rounded-full text-md font-medium transition-colors ${
                   activeTab === "institutions"
                     ? "bg-white text-gray-900 shadow hover:cursor-pointer"
                     : "text-gray-600 hover:text-gray-900 hover:cursor-pointer"
@@ -397,7 +397,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setActiveTab("students")}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`px-6 py-2 rounded-full text-md font-medium transition-colors ${
                   activeTab === "students"
                     ? "bg-white text-gray-900 shadow hover:cursor-pointer"
                     : "text-gray-600 hover:text-gray-900 hover:cursor-pointer"
@@ -618,13 +618,13 @@ export default function Home() {
             <h2 className="text-3xl font-bold mb-4 text-gray-900">
               A smarter way to connect, learn, and share ideas in the classroom.
             </h2>
-            <p className="text-gray-600 leading-relaxed mb-6">
+            <p className="text-gray-600 leading-relaxed mb-6 text-lg">
               ForumAI is built to organize course materials and discussions
               within the teaching environment to create a well-structured,
               focused environment that supports deeper learning.
             </p>
             <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4">
-              <Button className="bg-[#2D7D85] hover:bg-[#25686e] text-white px-6 py-2.5 rounded-lg text-base font-medium shadow hover:cursor-pointer">
+              <Button className="bg-[#2D7D85] hover:bg-[#25686e] text-white px-6 py-2.5 rounded-lg text-base font-medium shadow hover:cursor-pointer text-md">
                 <Link href="/auth/signin">Get started</Link>
               </Button>
               <Link
@@ -634,9 +634,9 @@ export default function Home() {
               >
                 <Button
                   variant="outline"
-                  className="border-gray-300 text-gray-700 hover:bg-gray-100 px-6 py-2.5 rounded-lg text-base font-medium group hover:cursor-pointer"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-100 px-6 py-2.5 rounded-lg text-base font-medium group hover:cursor-pointer text-md"
                 >
-                  <PlayCircle className="mr-2 h-5 w-5 text-gray-500 group-hover:text-gray-700" />
+                  <PlayCircle className="mr-2 h-6 w-6 text-gray-500 group-hover:text-gray-700" />
                   View demo video
                 </Button>
               </Link>
