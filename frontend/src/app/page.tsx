@@ -1,286 +1,593 @@
 "use client";
 
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
-  FileText,
-  MessageSquare,
-  Github,
-  Lock,
-  Code,
-  Cpu,
   ChevronDown,
+  ChevronRight,
+  Search,
+  CheckCircle2,
+  XCircle,
+  PlayCircle,
+  ArrowRight,
+  Plus,
+  Users,
+  GraduationCap,
+  Lock,
+  BarChart2,
+  Database,
+  ExternalLink,
+  Menu, // Added for mobile menu toggle
 } from "lucide-react";
-import { Header } from "./landing/header";
-import { Footer } from "./landing/footer";
-import HeroMouseEffect from "./landing/hero-mouse-hover";
+import HeroMouseEffect from "./landing/hero-mouse-hover"; // Assuming this component exists
+
+import Image from "next/image";
+
+// Placeholder components for Header and Footer if they need specific structure for this page
+const LandingHeader = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  return (
+    <header className="absolute top-0 left-0 right-0 z-20 px-4 sm:px-6 lg:px-16 py-4">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        {/* Logo */}
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-[#2D7D85] rounded-full flex items-center justify-center text-white font-bold">
+            F
+          </div>
+          <span className="text-xl font-bold text-gray-800">ForumAI</span>
+        </div>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-6">
+          <a
+            href="#"
+            className="text-sm font-medium text-gray-600 hover:text-gray-900"
+          >
+            About
+          </a>
+          <a
+            href="#"
+            className="text-sm font-medium text-gray-600 hover:text-gray-900"
+          >
+            Privacy & Security
+          </a>
+          <a
+            href="#"
+            className="text-sm font-medium text-gray-600 hover:text-gray-900"
+          >
+            Contact
+          </a>
+          <a
+            href="https://github.com/ubclaunchpad/forum"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center text-sm font-medium text-gray-600 hover:text-gray-900"
+          >
+            View on GitHub <ExternalLink className="ml-1 h-4 w-4" />
+          </a>
+          <Button
+            variant="outline"
+            className="text-sm border-gray-300 hover:bg-gray-100"
+          >
+            Log in
+          </Button>
+        </nav>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-lg p-4 z-30">
+          <nav className="flex flex-col space-y-4">
+            <a
+              href="#"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
+              About
+            </a>
+            <a
+              href="#"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
+              Privacy & Security
+            </a>
+            <a
+              href="#"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
+              Contact
+            </a>
+            <a
+              href="https://github.com/ubclaunchpad/forum"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
+              View on GitHub <ExternalLink className="ml-1 h-4 w-4" />
+            </a>
+            <Button variant="outline" className="w-full justify-center">
+              Log in
+            </Button>
+          </nav>
+        </div>
+      )}
+    </header>
+  );
+};
+
+const LandingFooter = () => (
+  <footer className="bg-[#F9F9F7] py-12 px-4 sm:px-6 lg:px-16">
+    <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-8">
+      {/* Logo & Copyright */}
+      <div className="col-span-2 md:col-span-1">
+        <div className="flex items-center space-x-2 mb-4">
+          <div className="w-8 h-8 bg-[#2D7D85] rounded-full flex items-center justify-center text-white font-bold">
+            F
+          </div>
+          <span className="text-xl font-bold text-gray-800">ForumAI</span>
+        </div>
+        <p className="text-xs text-gray-500">
+          Copyright © 2024 ForumAI. <br />
+          All rights reserved.
+        </p>
+      </div>
+
+      {/* Link Columns */}
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">Product</h3>
+        <ul className="space-y-2">
+          <li>
+            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+              Features
+            </a>
+          </li>
+          <li>
+            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+              Request a demo
+            </a>
+          </li>
+          <li>
+            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+              Status page
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">Resources</h3>
+        <ul className="space-y-2">
+          <li>
+            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+              Documentation
+            </a>
+          </li>
+          <li>
+            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+              GitHub
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">Learn</h3>
+        <ul className="space-y-2">
+          <li>
+            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+              About us
+            </a>
+          </li>
+          <li>
+            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+              FAQ
+            </a>
+          </li>
+          <li>
+            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+              Contact
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">Legal</h3>
+        <ul className="space-y-2">
+          <li>
+            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+              Privacy policy
+            </a>
+          </li>
+          <li>
+            <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+              Terms of service
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+);
+
+// FAQ Item Component
+const FaqItem = ({
+  question,
+  answer,
+}: {
+  question: string;
+  answer: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="border-b border-gray-200 py-4">
+      <button
+        className="flex justify-between items-center w-full text-left"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className="font-medium text-gray-800">{question}</span>
+        <ChevronDown
+          className={`h-5 w-5 text-gray-500 transform transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+      {isOpen && <p className="mt-2 text-sm text-gray-600">{answer}</p>}
+    </div>
+  );
+};
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState("instructors");
+
+  const faqData = [
+    {
+      question: "What is ForumAI?",
+      answer: "ForumAI is an AI-native educational platform...",
+    },
+    {
+      question: "How does the AI work?",
+      answer: "It uses advanced Retrieval Augmented Generation...",
+    },
+    {
+      question: "Who can use ForumAI?",
+      answer: "Students, instructors, and institutions...",
+    },
+    {
+      question: "How does ForumAI ensure academic integrity?",
+      answer: "Through various features tailored to course content...",
+    },
+    {
+      question: "How are discussions and resources organized?",
+      answer: "Content is structured for easy access and AI processing...",
+    },
+    { question: "Is ForumAI secure?", answer: "Yes, we prioritize data..." },
+  ];
+
   return (
-    <div className="w-full bg-primary-200 dark:bg-gray-900">
-      <Header />
-      <section className="relative flex flex-col items-center justify-center space-y-6 min-h-screen py-24 px-4 text-center md:py-32 lg:py-48 bg-linear-to-b from-primary-200 to-gray-100 dark:from-gray-800 dark:to-gray-900">
-        <HeroMouseEffect />
-        <div className="relative z-10 space-y-4">
-          <div className="inline-block rounded-full px-3 py-1 text-xs sm:text-sm border border-gray-700 bg-gray-800 text-white">
-            AI-Native, Open Source Educational Platform
+    <div className="w-full bg-[#F9F9F7] text-gray-800">
+      <LandingHeader />
+
+      {/* Hero Section */}
+      <section className="relative flex flex-col lg:flex-row items-center justify-between min-h-screen pt-24 pb-12 lg:pt-32 px-4 sm:px-6 overflow-hidden">
+        <HeroMouseEffect /> {/* Include the mouse effect */}
+        <div className="max-w-7xl mx-auto flex flex-row">
+          {/* Left Content */}
+          <div className="relative z-10 flex flex-col items-center lg:items-start text-center lg:text-left max-w-xl lg:max-w-2xl space-y-6 mb-12 lg:mb-0">
+            <div className="inline-block rounded-full px-4 py-1 text-sm bg-gray-100 border border-gray-300 text-gray-700 shadow-sm">
+              AI-Native, Open Source Educational Platform
+            </div>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
+              Structured Discussions, Smarter Insights — A Forum Built for
+              Learning
+            </h1>
+            <Button className="bg-[#2D7D85] hover:bg-[#25686e] text-white px-8 py-3 rounded-lg text-base font-medium shadow">
+              Get started
+            </Button>
           </div>
-          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-primary-950 dark:text-gray-100">
-            Forum AI
-          </h1>
-          <p className="mx-auto max-w-[700px] text-md text-primary-900 sm:text-lg md:text-xl dark:text-gray-300">
-            Revolutionize document interaction and student engagement with
-            advanced AI-powered Retrieval Augmented Generation.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 sm:flex-row relative z-10">
-          <Button
-            size="lg"
-            className="h-10 px-6 sm:h-11 sm:px-8 bg-primary-600 hover:bg-primary-700 text-white rounded-lg"
-            onClick={() =>
-              window.open(
-                "https://forumai.me/auth/signin",
-                "_blank",
-                "noopener,noreferrer",
-              )
-            }
-          >
-            Get Started
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="h-10 px-6 sm:h-11 sm:px-8 border-primary-600 text-gray-200 bg-gray-800 hover:bg-gray-700 hover:cursor-pointer rounded-lg"
-            onClick={() =>
-              window.open(
-                "https://github.com/ubclaunchpad/forum",
-                "_blank",
-                "noopener,noreferrer",
-              )
-            }
-          >
-            View on GitHub
-          </Button>
-        </div>
-        <div className="mt-12 animate-bounce relative z-10">
-          <ChevronDown className="h-6 w-6 text-gray-300 dark:text-gray-500" />
+          {/* Right Content (Image Placeholder & Text) */}
+          <div className="relative z-10 flex flex-col items-center space-y-4">
+            {/* Placeholder for the image stack */}
+            <div className="w-64 h-40 sm:w-80 sm:h-52 md:w-96 md:h-60 bg-gray-200 rounded-lg shadow-lg flex items-center justify-center text-gray-500">
+              <Image
+                src="/hero_cards.png"
+                alt="ForumAI Demo"
+                width={300}
+                height={200}
+              />
+            </div>
+            <div className="bg-gray-100/80 backdrop-blur-sm border border-gray-200 rounded-full px-6 py-3 text-sm text-gray-700 shadow-sm max-w-xs text-center">
+              What should I explain more in the next class?
+            </div>
+          </div>
         </div>
       </section>
 
-      <div className="flex flex-col bg-gray-100 dark:bg-gray-800">
-        {/* How It Works Section */}
-        <section
-          id="how-it-works"
-          className="border-b border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 md:px-0"
-        >
-          <div className="container mx-auto space-y-6 py-12 md:py-24">
-            <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-              <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-primary-800 dark:text-gray-100">
-                How Forum AI Works
+      {/* Streamline Section */}
+      <section className="py-16 lg:py-24 px-4 sm:px-6 lg:px-16 bg-white">
+        <div className="max-w-6xl mx-auto">
+          {/* Tabs */}
+          <div className="flex justify-center mb-12">
+            <div className="flex space-x-2 bg-gray-100 p-1 rounded-full">
+              <button
+                onClick={() => setActiveTab("instructors")}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === "instructors"
+                    ? "bg-white text-gray-900 shadow"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                For instructors
+              </button>
+              <button
+                onClick={() => setActiveTab("institutions")}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === "institutions"
+                    ? "bg-white text-gray-900 shadow"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                For institutions
+              </button>
+              <button
+                onClick={() => setActiveTab("students")}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                  activeTab === "students"
+                    ? "bg-white text-gray-900 shadow"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                For students
+              </button>
+            </div>
+          </div>
+
+          {/* Content based on tab */}
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+            {/* Text Content (Example for Instructors) */}
+            <div className="lg:w-1/3 text-center lg:text-left">
+              <h2 className="text-3xl font-bold mb-4 text-gray-900">
+                Streamline, Organize, and Take Control
               </h2>
-              <p className="max-w-[85%] text-sm text-primary-800 dark:text-gray-300 sm:text-base">
-                Experience the seamless integration of AI in your document
-                interactions
+              <p className="text-gray-600 leading-relaxed">
+                Stay in control of course materials while AI-driven search and
+                smart organization reduces duplicate posts, streamlines
+                discussions, and surfaces key insights.
               </p>
             </div>
-            <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] lg:grid-cols-3">
-              {[
-                {
-                  title: "Upload & Post Creation",
-                  description:
-                    "Users upload documents and create discussion posts, all centrally stored for AI access.",
-                },
-                {
-                  title: "Query Processing",
-                  description:
-                    "AI engine scans, aggregates, and synthesizes information from relevant content.",
-                },
-                {
-                  title: "Response Delivery",
-                  description:
-                    "Comprehensive answers are generated and displayed securely and privately.",
-                },
-              ].map((step, index) => (
-                <Card
-                  key={index}
-                  className="group relative overflow-hidden border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-6 transition-all hover:border-primary-800 hover:bg-primary-100 dark:hover:border-primary-600 dark:hover:bg-gray-700 hover:shadow-md"
-                >
-                  <div className="space-y-2">
-                    <h3 className="font-bold text-primary-800 dark:text-gray-100">
-                      {`Step ${index + 1}: ${step.title}`}
-                    </h3>
-                    <p className="text-sm text-primary-600 dark:text-gray-300">
-                      {step.description}
-                    </p>
-                  </div>
-                </Card>
-              ))}
-            </div>
-            {/* RAG Process Visualization */}
-            <div className="mx-auto mt-12 max-w-[64rem] rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-6">
-              <h3 className="text-center text-lg font-bold mb-4 text-primary-800 dark:text-gray-100">
-                RAG Process Visualization
-              </h3>
-              <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-md flex items-center justify-center">
-                <p className="text-primary-800 dark:text-gray-100">
-                  Interactive RAG Process Graphic
-                </p>
+            {/* Image Placeholder */}
+            <div className="lg:w-2/3 w-full">
+              <div className="aspect-video bg-gray-200 rounded-lg shadow-lg flex items-center justify-center text-gray-500">
+                [Dashboard Image Placeholder]
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Features Section */}
-        <section
-          id="features"
-          className="container mx-auto space-y-6 py-12 md:py-24 px-4 md:px-0"
-        >
-          <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-primary-800 dark:text-gray-100">
-              Key Features
-            </h2>
-            <p className="max-w-[85%] text-sm text-primary-600 dark:text-gray-300 sm:text-base">
-              Discover the power of AI-native document and community interaction
-            </p>
-          </div>
-          <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
+      {/* Built for Institutions Section */}
+      <section className="py-16 lg:py-24 px-4 sm:px-6 lg:px-16 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4 text-gray-900">
+            Built for Institutions, Secured for Learning
+          </h2>
+          <Button
+            variant="outline"
+            className="border-gray-300 text-gray-700 hover:bg-gray-100 mb-12 group"
+          >
+            Learn more about privacy & security at ForumAI{" "}
+            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          </Button>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-left">
             {[
               {
-                icon: FileText,
-                title: "Document & Post Upload",
+                icon: Users,
+                title: "Role-based access controls",
                 description:
-                  "Seamlessly upload documents and create posts for AI analysis",
+                  "Sophisticated access controls allow you to control the experience for student, staff and instructors.",
+                imgPlaceholder: "bg-blue-100",
               },
               {
-                icon: Cpu,
-                title: "Advanced RAG",
+                icon: GraduationCap,
+                title: "Built for academic integrity",
                 description:
-                  "Leverage cutting-edge Retrieval Augmented Generation for accurate responses",
+                  "AI tailored to your specific course content and teaching style.",
+                imgPlaceholder: "bg-green-100",
               },
               {
-                icon: Github,
-                title: "Open-Source & Customizable",
+                icon: BarChart2,
+                title: "Analytics & Insights",
                 description:
-                  "Modify and adapt the platform to fit your specific needs",
+                  "See how your students are learning and gain valuable insights to enhance engagement and performance.",
+                imgPlaceholder: "bg-pink-100",
               },
               {
                 icon: Lock,
-                title: "Privacy & Security",
-                description: "Ensure your data remains private and secure",
-              },
-              {
-                icon: Code,
-                title: "AI-Native Architecture",
-                description: "Built from the ground up with AI at its core",
-              },
-              {
-                icon: MessageSquare,
-                title: "Community Engagement",
+                title: "Your course content, your data",
                 description:
-                  "Foster discussions and knowledge sharing within your community",
+                  "Your data only lives within your course and ForumAI does not use it.",
+                imgPlaceholder: "bg-teal-100",
               },
             ].map((feature, index) => (
-              <Card
-                key={index}
-                className="group relative overflow-hidden border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-6 transition-all hover:border-primary-800 hover:bg-primary-100 dark:hover:border-primary-600 dark:hover:bg-gray-700 hover:shadow-md"
-              >
-                <div className="flex flex-col items-center space-y-4">
-                  <feature.icon className="h-12 w-12 text-primary-600 dark:text-gray-300" />
-                  <div className="space-y-2 text-center">
-                    <h3 className="font-bold text-primary-800 dark:text-gray-100">
-                      {feature.title}
-                    </h3>
-                    <p className="text-sm text-primary-600 dark:text-gray-300">
-                      {feature.description}
-                    </p>
-                  </div>
+              <div key={index}>
+                <div
+                  className={`w-full h-40 rounded-lg mb-4 flex items-center justify-center ${feature.imgPlaceholder}`}
+                >
+                  <feature.icon className="w-16 h-16 text-gray-600 opacity-50" />
+                  {/* Placeholder for actual illustration */}
                 </div>
-              </Card>
+                <h3 className="font-semibold text-lg mb-1 text-gray-900">
+                  {feature.title}
+                </h3>
+                <p className="text-sm text-gray-600">{feature.description}</p>
+              </div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Open Source Section */}
-        <section className="border-t border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 px-4 md:px-0">
-          <div className="container mx-auto space-y-6 py-12 md:py-24">
-            <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-              <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-primary-800 dark:text-gray-100">
-                Open Source
-              </h2>
-              <p className="max-w-[85%] text-sm text-primary-600 dark:text-gray-300 sm:text-base">
-                Join our community and contribute to the future of AI-powered
-                forums
-              </p>
+      {/* Comparison Section */}
+      <section className="py-16 lg:py-24 px-4 sm:px-6 lg:px-16 bg-white">
+        <div className="max-w-6xl mx-auto text-left">
+          <h2 className="text-3xl font-bold mb-12 text-gray-900">
+            ForumAI Helps You Strike the Right Balance
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+            {/* Existing Q&A */}
+            <div className="border-2 border-gray-400 rounded-lg p-6 bg-white">
+              <h3 className="font-semibold text-lg mb-4 text-gray-800">
+                Existing Q&A Platforms
+              </h3>
+              <ul className="space-y-3">
+                {[
+                  "Content is scattered and unorganized",
+                  "Help responses are often delayed and lack promptness",
+                  "Poorly collaborative; lacks features fostering working hours",
+                  "Lacks structure handling grades, resulting in huge scope; Lacks performance or sentiment",
+                ].map((item, idx) => (
+                  <li
+                    key={idx}
+                    className="flex items-start text-sm text-gray-600"
+                  >
+                    <XCircle className="w-4 h-4 mr-2 mt-0.5 text-red-500 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
-              {[
-                {
-                  icon: Github,
-                  title: "GitHub Repository",
-                  description:
-                    "Access and contribute to our open source codebase",
-                },
-                {
-                  icon: Code,
-                  title: "Customization",
-                  description: "Tailor the platform to your specific needs",
-                },
-                {
-                  icon: MessageSquare,
-                  title: "Community Support",
-                  description: "Engage with developers and users in our forums",
-                },
-              ].map((feature, index) => (
-                <Card
-                  key={index}
-                  className="group relative overflow-hidden border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-6 transition-all hover:border-primary-800 hover:bg-primary-100 dark:hover:border-primary-600 dark:hover:bg-gray-700 hover:shadow-md"
-                >
-                  <div className="flex flex-col items-center space-y-4">
-                    <feature.icon className="h-12 w-12 text-primary-600 dark:text-gray-300" />
-                    <div className="space-y-2 text-center">
-                      <h3 className="font-bold text-primary-800 dark:text-gray-100">
-                        {feature.title}
-                      </h3>
-                      <p className="text-sm text-primary-600 dark:text-gray-300">
-                        {feature.description}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
+
+            {/* ForumAI */}
+            <div className="border-2 border-[#2D7D85] rounded-lg p-6 bg-white shadow-xl ring-1 ring-[#2D7D85]/10">
+              <h3 className="font-semibold text-lg mb-4 text-[#2D7D85] flex items-center">
+                <div className="w-3 h-3 rounded-full bg-[#2D7D85] mr-2"></div>
+                ForumAI
+              </h3>
+              <ul className="space-y-3">
+                {[
+                  "AI-powered answers for fast, accurate, and context-rich actions",
+                  "Seamlessly integrates peer and instructor-driven insights with AI assistance and summarization, academically sound support",
+                  "Supports both individual and collaborative Q&A, dynamically leveraging class resources and existing insights to address repeat questions",
+                  "Custom course insights for tracking class performance and sentiment",
+                ].map((item, idx) => (
+                  <li
+                    key={idx}
+                    className="flex items-start text-sm text-gray-700"
+                  >
+                    <CheckCircle2 className="w-4 h-4 mr-2 mt-0.5 text-[#2D7D85] flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Existing AI Tools */}
+            <div className="border-2 border-gray-400 rounded-lg p-6 bg-white">
+              <h3 className="font-semibold text-lg mb-4 text-gray-800">
+                Existing AI Tools
+              </h3>
+              <ul className="space-y-3">
+                {[
+                  "Sole reliance on AI capabilities; lacks context",
+                  "General purpose; not tuned to general course info and materials",
+                  "Used by students, lacks features for managing collaboration",
+                  "Not tightly integrated; few capabilities controlling",
+                ].map((item, idx) => (
+                  <li
+                    key={idx}
+                    className="flex items-start text-sm text-gray-600"
+                  >
+                    <XCircle className="w-4 h-4 mr-2 mt-0.5 text-red-500 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* CTA Section */}
-        <section className="border-t border-gray-300 dark:border-gray-700">
-          <div className="container mx-auto space-y-6 py-12 md:py-24 px-4 md:px-0">
-            <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-              <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl text-primary-800 dark:text-gray-100">
-                Ready to Revolutionize Your Forums?
-              </h2>
-              <p className="max-w-[85%] text-sm text-primary-600 dark:text-gray-300 sm:text-base">
-                Join the growing community of developers, students and educators
-                using Forum AI
-              </p>
+      {/* Smarter Way Section */}
+      <section className="py-16 lg:py-24 px-4 sm:px-6 lg:px-16 bg-white">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 lg:gap-16">
+          {/* Image Placeholder */}
+          <div className="md:w-1/2 w-full flex justify-center">
+            <div className="w-64 h-64 sm:w-80 sm:h-80 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
+              [Illustration Placeholder]
+            </div>
+          </div>
+          {/* Text Content */}
+          <div className="md:w-1/2 text-center md:text-left">
+            <h2 className="text-3xl font-bold mb-4 text-gray-900">
+              A smarter way to connect, learn, and share ideas in the classroom.
+            </h2>
+            <p className="text-gray-600 leading-relaxed mb-6">
+              ForumAI is built to organize course materials and discussions
+              within the teaching environment to create a well-structured,
+              focused environment that supports deeper learning.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4">
+              <Button className="bg-[#2D7D85] hover:bg-[#25686e] text-white px-6 py-2.5 rounded-lg text-base font-medium shadow">
+                Get started
+              </Button>
               <Button
-                size="lg"
-                className="h-10 px-8 sm:h-11 bg-primary-800 hover:bg-primary-700 text-white rounded-lg"
-                onClick={() =>
-                  window.open(
-                    "https://forumai.me/auth/signin",
-                    "_blank",
-                    "noopener,noreferrer",
-                  )
-                }
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:bg-gray-100 px-6 py-2.5 rounded-lg text-base font-medium group"
               >
-                Get Started with Forum AI
+                <PlayCircle className="mr-2 h-5 w-5 text-gray-500 group-hover:text-gray-700" />
+                View demo video
               </Button>
             </div>
           </div>
-        </section>
-      </div>
-      <Footer />
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 lg:py-24 px-4 sm:px-6 lg:px-16 bg-white">
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+          {/* Left Column */}
+          <div>
+            <h2 className="text-3xl font-bold mb-3 text-gray-900">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Everything you need to know about our platform. Can't find what
+              you're looking for? Search for a query below!
+            </p>
+            <div className="relative">
+              <Input
+                type="search"
+                placeholder="Search for a question"
+                className="pl-10 pr-4 py-2 w-full border-gray-300 rounded-lg focus:ring-[#2D7D85] focus:border-[#2D7D85]"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            </div>
+          </div>
+
+          {/* Right Column (Accordion) */}
+          <div>
+            {faqData.map((item, index) => (
+              <FaqItem
+                key={index}
+                question={item.question}
+                answer={item.answer}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <LandingFooter />
     </div>
   );
 }
