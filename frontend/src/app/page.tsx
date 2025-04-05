@@ -100,7 +100,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative flex flex-col lg:flex-row items-center justify-between min-h-screen pt-24 pb-12 lg:pt-32 px-4 sm:px-6 overflow-hidden">
         <HeroMouseEffect /> {/* Include the mouse effect */}
-        <div className="max-w-7xl mx-auto flex flex-row">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row">
           {/* Left Content */}
           <div className="relative z-10 flex flex-col items-center lg:items-start text-center lg:text-left max-w-xl lg:max-w-2xl space-y-6 mb-12 lg:mb-0">
             <div className="inline-block rounded-full px-6 py-2 text-md bg-gray-100 border border-gray-300 text-gray-700 shadow-sm">
@@ -263,7 +263,7 @@ export default function Home() {
             ].map((feature, index) => (
               <div key={index}>
                 <div
-                  className={`w-full h-40 rounded-lg mb-4 flex items-center justify-center`}
+                  className={`w-full h-40 rounded-lg mb-8 xl:mb-4 flex items-center justify-center`}
                 >
                   {feature.icon}
                   {/* Placeholder for actual illustration */}
